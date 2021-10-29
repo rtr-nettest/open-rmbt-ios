@@ -38,39 +38,11 @@ public class RMBTConfig {
     
     // Control server base URL used per default
     
-    #if DEBUG
-    // Control server base URL used per default
-    
-//    var RMBT_URL_HOST: String { return "https://dev3new.netztest.at" }
-////    var RMBT_URL_HOST: String { return "https://rtr-api-dev.nettest.org" }
-//    // Control server base URL used when user has enabled the "IPv4-Only" setting
-//    var RMBT_IPV4_URL_HOST: String { return "https://dev.netztest.at" }
-//    // Ditto for the (debug) "IPv6-Only" setting
-//    var RMBT_IPV6_URL_HOST: String { return "https://dev.netztest.at" }
-    
-    
-//    // Control server base URL used per default
-//    var RMBT_URL_HOST: String { return "https://api-dev.nettest.org" }
-//    // Control server base URL used when user has enabled the "IPv4-Only" setting
-//    var RMBT_IPV4_URL_HOST: String { return "https://rtr-api-devv4.nettest.org" }
-//    // Ditto for the (debug) "IPv6-Only" setting
-//    var RMBT_IPV6_URL_HOST: String { return "https://rtr-api-devv6.nettest.org" }
-
-    var RMBT_URL_HOST: String { return "https://c01.netztest.at" }
+    var RMBT_URL_HOST: String { return "https://example.org:8080" }
     // Control server base URL used when user has enabled the "IPv4-Only" setting
-    var RMBT_IPV4_URL_HOST: String { return "https://c01v4.netztest.at" }
+    var RMBT_IPV4_URL_HOST: String { return "https://example.org:8080" }
     // Ditto for the (debug) "IPv6-Only" setting
-    var RMBT_IPV6_URL_HOST: String { return "https://c01v6.netztest.at" }
-    
-    #else
-    // Control server base URL used per default
-    var RMBT_URL_HOST: String { return "https://c01.netztest.at" }
-    // Control server base URL used when user has enabled the "IPv4-Only" setting
-    var RMBT_IPV4_URL_HOST: String { return "https://c01v4.netztest.at" }
-    // Ditto for the (debug) "IPv6-Only" setting
-    var RMBT_IPV6_URL_HOST: String { return "https://c01v6.netztest.at" }
-    #endif
-    
+    var RMBT_IPV6_URL_HOST: String { return "https://example.org:8080" }
     var RMBT_CONTROL_SERVER_PATH: String { return "/RMBTControlServer" }
     var RMBT_MAP_SERVER_PATH: String { return "/RMBTMapServer" }
     
