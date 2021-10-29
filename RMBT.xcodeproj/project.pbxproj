@@ -1506,8 +1506,8 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = C7DE149E173E8F610079477A /* Build configuration list for PBXNativeTarget "RMBT" */;
 			buildPhases = (
-				E9F686BF2726E52800708290 /* Update Configurations */,
 				D2C080EC48316E5A53399219 /* [CP] Check Pods Manifest.lock */,
+				E9F686BF2726E52800708290 /* Update Configurations */,
 				C7DE1474173E8F610079477A /* Sources */,
 				C7DE1475173E8F610079477A /* Frameworks */,
 				C7DE1476173E8F610079477A /* Resources */,

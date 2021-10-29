@@ -119,19 +119,15 @@ final class RMBTHistoryIndex2ViewController: UIViewController {
         
         if (firstAppearance) {
             firstAppearance = false
-            self.refresh()
-            self.refreshFilters()
-        } else {
-            if let selectedIndexPath = self.tableView.indexPathForSelectedRow {
-                self.tableView.deselectRow(at: selectedIndexPath, animated: true)
-            } else if showingLastTestResult {
-                // Note: This shouldn't be necessary once we have info required for index view in the
-                // test result object. See -displayTestResult.
-                showingLastTestResult = false
-                self.refresh()
-                self.refreshFilters()
-            }
+        } else if let selectedIndexPath = self.tableView.indexPathForSelectedRow {
+            self.tableView.deselectRow(at: selectedIndexPath, animated: true)
+        } else if showingLastTestResult {
+            // Note: This shouldn't be necessary once we have info required for index view in the
+            // test result object. See -displayTestResult.
+            showingLastTestResult = false
         }
+        self.refresh()
+        self.refreshFilters()
     }
     
     override func awakeFromNib() {
