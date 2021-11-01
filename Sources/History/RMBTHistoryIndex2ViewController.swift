@@ -38,7 +38,6 @@ final class RMBTHistoryIndex2ViewController: UIViewController {
         view.onFilterChanged = { [weak self] filters in
             guard let self = self else { return }
             self.activeFilters = filters
-            self.changedFilters()
         }
         return view
     }()
