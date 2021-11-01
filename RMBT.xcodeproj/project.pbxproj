@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		36A9DF3F272C4E190099A57C /* UILabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36A9DF3E272C4E190099A57C /* UILabel.swift */; };
 		C573F2A5175281D300C728FC /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C573F2A4175281D300C728FC /* MapKit.framework */; };
 		C573F2B1175294A500C728FC /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C573F2B0175294A500C728FC /* CoreLocation.framework */; };
 		C59D7B471764E6CF003E9702 /* RMBTHelpers.m in Sources */ = {isa = PBXBuildFile; fileRef = C59D7B461764E6CF003E9702 /* RMBTHelpers.m */; };
@@ -284,6 +285,7 @@
 /* Begin PBXFileReference section */
 		1F9C078F216F751C00F1FC10 /* RMBT.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RMBT.entitlements; sourceTree = "<group>"; };
 		32DE166B881B73366FE005F9 /* Pods_RMBT.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RMBT.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		36A9DF3E272C4E190099A57C /* UILabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UILabel.swift; sourceTree = "<group>"; };
 		89CA21386C488DD817CA1DC2 /* Pods-RMBT.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RMBT.debug.xcconfig"; path = "Pods/Target Support Files/Pods-RMBT/Pods-RMBT.debug.xcconfig"; sourceTree = "<group>"; };
 		C573F2A4175281D300C728FC /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
 		C573F2B0175294A500C728FC /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
@@ -1186,6 +1188,7 @@
 				E9C4BA2627140B8E00D6FAE8 /* CLLocation+Additions.swift */,
 				E9B51CC527240B84006ED0C7 /* UIApplication+Additions.swift */,
 				E9C13F8027298B3C00DA60D4 /* UIAlertController+Additions.swift */,
+				36A9DF3E272C4E190099A57C /* UILabel.swift */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -1845,6 +1848,7 @@
 				C774EE7A1792F73D00D623A3 /* RMBTLocationTracker.m in Sources */,
 				E9E993CD26EA617200E7EED6 /* RMBTOpenDataResponse.swift in Sources */,
 				C7DF2BB617D91AE400A0E76B /* RMBTNews.m in Sources */,
+				36A9DF3F272C4E190099A57C /* UILabel.swift in Sources */,
 				E9881C82270C1190008EFDF6 /* RMBTLoaderView.swift in Sources */,
 				C72A27A417E1ECD400EC98B3 /* RMBTSSLHelper.m in Sources */,
 				E9400F0426BAD0CE0067273A /* BasicRequestBuilder_iOS.swift in Sources */,
