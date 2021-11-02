@@ -37,7 +37,17 @@ final class RMBTHistoryIndex2ViewController: UIViewController {
         view.translatesAutoresizingMaskIntoConstraints = false
         view.onFilterChanged = { [weak self] filters in
             guard let self = self else { return }
-            self.activeFilters = filters // TODO: Make sure that there is at least one filter for each key
+            var validFilters: [String:[String]] = [:]
+            
+            for filter in self.allFilters {
+                if let filtersByKey = filters[filter.key], filtersByKey.count > 0 {
+                    validFilters[filter.key] = filtersByKey
+                } else {
+                    validFilters[filter.key] = filter.value
+                }
+            }
+            
+            self.activeFilters = validFilters
         }
         return view
     }()
