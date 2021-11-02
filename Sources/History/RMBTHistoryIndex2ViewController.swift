@@ -37,7 +37,7 @@ final class RMBTHistoryIndex2ViewController: UIViewController {
         view.translatesAutoresizingMaskIntoConstraints = false
         view.onFilterChanged = { [weak self] filters in
             guard let self = self else { return }
-            self.activeFilters = filters
+            self.activeFilters = filters // TODO: Make sure that there is at least one filter for each key
         }
         return view
     }()
@@ -182,17 +182,25 @@ final class RMBTHistoryIndex2ViewController: UIViewController {
     }
     
     private func changedFilters() {
+        var activeFilters: [String: [String]] = [:]
+        for filter in self.activeFilters {
+            if filter.value.count != self.allFilters[filter.key]?.count {
+                activeFilters[filter.key] = filter.value
+            }
+        }
+        filterView.activeFilters = activeFilters
         updateFilterViewPosition()
-        filterView.activeFilters = self.activeFilters
         refresh()
     }
     
     private func updateFilterViewPosition() {
         var isShow = false
-        for filters in activeFilters {
-            if filters.value.count > 0 {
-                isShow = true
-                break
+        if (filterView.activeFilters != allFilters) {
+            for filters in filterView.activeFilters {
+                if filters.value.count > 0 {
+                    isShow = true
+                    break
+                }
             }
         }
         
@@ -250,6 +258,7 @@ final class RMBTHistoryIndex2ViewController: UIViewController {
         RMBTControlServer.shared.ensureClientUuid { uuid in
             RMBTControlServer.shared.getSettings {
                 self.allFilters = RMBTControlServer.shared.historyFilters ?? [:]
+                self.activeFilters = self.activeFilters.count > 0 ? self.activeFilters : self.allFilters
             } error: { error in
                 Log.logger.error(error)
             }

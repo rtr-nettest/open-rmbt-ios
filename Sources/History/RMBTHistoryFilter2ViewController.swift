@@ -78,7 +78,7 @@ final class RMBTHistoryFilter2ViewController: UIViewController {
             vc.key = key
             vc.onComplete = { [weak self] key, filters in
                 guard let self = self else { return }
-                self.activeFilters[key] = filters
+                self.activeFilters[key] = filters.count == 0 ? self.allFilters[key] : filters
                 self.onFilterChanged(self.activeFilters)
                 self.tableView.reloadData()
             }
