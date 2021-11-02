@@ -20,7 +20,7 @@ final class RMBTHistoryIndex2ViewController: UIViewController {
         case kSyncSheetEnterCodeButtonIndex = 2
     }
     
-    private let kBatchSize = 25
+    private let kBatchSize = 100
 
     @IBOutlet weak var headerView: UIView!
     
@@ -126,17 +126,20 @@ final class RMBTHistoryIndex2ViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        if (firstAppearance) {
-            firstAppearance = false
-        } else if let selectedIndexPath = self.tableView.indexPathForSelectedRow {
-            self.tableView.deselectRow(at: selectedIndexPath, animated: true)
-        } else if showingLastTestResult {
-            // Note: This shouldn't be necessary once we have info required for index view in the
-            // test result object. See -displayTestResult.
-            showingLastTestResult = false
+        if let selectedIndexPath = tableView.indexPathForSelectedRow {
+            tableView.deselectRow(at: selectedIndexPath, animated: true)
+        } else {
+            if firstAppearance {
+                firstAppearance = false
+            }
+            if showingLastTestResult {
+                // Note: This shouldn't be necessary once we have info required for index view in the
+                // test result object. See -displayTestResult.
+                showingLastTestResult = false
+            }
+            loading = true // to avoid duplicate calls to getNextBatch()
+            refreshFilters()
         }
-        self.refresh()
-        self.refreshFilters()
     }
     
     override func awakeFromNib() {

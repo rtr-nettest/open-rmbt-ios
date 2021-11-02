@@ -47,8 +47,8 @@ public class HistoryWithFiltersRequest: BasicRequest {
     override public func mapping(map: Map) {
         super.mapping(map: map)
         
-        resultOffset <- map["offset"]
-        resultLimit <- map["pageSize"]
+        resultOffset <- map["result_offset"]
+        resultLimit <- map["result_limit"]
         networks <- map["network_types"]
         devices <- map["devices"]
     }
