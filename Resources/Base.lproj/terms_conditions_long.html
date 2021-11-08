@@ -4,8 +4,29 @@
     <meta charset="UTF-8">
     <title>Terms</title>
     <style>
+        body {
+            font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+            font-weight: 300;
+            font-size: 13px;
+            padding: 6px 6px 6px 6px;
+            color: #333;
+        }
+
+        h1, h2, h3, b {
+            font-family: "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+        }
+
+        i {
+            font-family: "HelveticaNeue-LightItalic", "Helvetica Neue Light Italic", Helvetica, Arial, "Lucida Grande", sans-serif;
+        }
+
         h1 {
             font-size: 120%;
+        }
+
+        h1.top {
+            text-align: center;
+            font-size: 140%;
         }
 
         h2 {
@@ -16,25 +37,28 @@
             font-size: 100%;
         }
 
-
         a {
             word-break: break-word;
         }
 
         a:link {
-            color: #bbd8ff
+            color: #00abe7
         }
 
         a:visited {
-            color: #bbd8ff
+            color: #00abe7
         }
 
         a:hover {
-            color: #bbd8ff
+            color: #00abe7
         }
 
         a:active {
-            color: #bbd8ff
+            color: #00abe7
+        }
+
+        b {
+            font-weight: 600
         }
 
         p {
@@ -48,25 +72,24 @@
         }
     </style>
 </head>
-<body style="color: white; font-size: 80%; background-color: #104967;">
+<body>
 <h1>1. Privacy Policy</h1>
 <p>The RTR-NetTest app can be used only after explicit consent to RTR’s Privacy Policy and Terms of Use for the
     RTR-NetTest. Note that the IP address is transferred, among others also to third countries (thus outside of the EU
-    and the EEA) for which neither an adequacy decision nor appropriate safeguards exist. For further details see items
-    1.2.1.3. and 1.2.2.3.</p>
+    and the EEA) for which neither an adequacy decision nor appropriate safeguards exist. For further details see item
+    1.2.1.3.</p>
 <h2>1.1. General </h2>
 <p>RTR offers users the opportunity to use the RTR-NetTest. Under 14 years can use the RTR-NetTest with the consent of
-    their legal guardian. RTR’s legal authorisation to offer the RTR-NetTest is enshrined in&nbsp;<a
-            href="https://www.rtr.at/en/tk/TKG2003" title="Link to TKG 2003" target="_blank" rel="noopener noreferrer"
-            class="external-link">Art. &nbsp;17 Par.&nbsp;4 and Par.&nbsp;5 Telecommunications Act 2003</a> as well as <a href="https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=celex:32015R2120"
-                                                                                                                     title="Link to TSM Regulation" target="_blank"
-                                                                                                                     class="external-link">Art 5 Par. 1 Regulation (EU) 2015/2120 ("TSM regulation")</a>. To fulfil this duty and ensure users with the greatest
+    their legal guardian. RTR’s legal authorisation to offer the RTR-NetTest is enshrined in <a
+            href="https://www.rtr.at/TKG2021" target="_blank" rel="noopener noreferrer">Art&nbsp;46 Par&nbsp;5 and Par&nbsp;6 and Art&nbsp;48 Telecommunications Act&nbsp;2021</a> as well as <a href="https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=celex:32015R2120"
+                                                            title="Link to TSM Regulation" target="_blank"
+                                                            class="external-link">Art 5 Par. 1 Regulation (EU) 2015/2120 ("TSM regulation")</a>.
+    To fulfil this duty and ensure users with the greatest
     possible transparency and information – while respecting their privacy – the RTR-NetTest is based on the open source
     and open data principle.</p>
-<p>The RTR-NetTest comprises two independent test sets: the first is a test developed by RTR (= RTR Multithreaded
-    Broadband Test, hereafter the <strong>RMB-Test</strong>); the second is an <strong>optional</strong>, more
-    comprehensive test (= Network Diagnostic Tool test of the M-Lab research platform, <strong>NDT-Test</strong>).</p>
-<h2>1.2. Processing of data by the RMB-Test and by the optional NDT-Test</h2>
+<p>The RTR-NetTest comprises a test developed by RTR (= RTR Multithreaded Broadband Test, hereafter the
+    <strong>RMB-Test</strong>).</p>
+<h2>1.2. Processing of data by the RMB-Test </h2>
 <h3>1.2.1. RMB-Test</h3>
 <h4><strong>1.2.1.1. What data are processed?</strong></h4>
 <p>The following data are processed as part of the <strong>RMB-Test</strong>:</p>
@@ -148,45 +171,6 @@
     to Art 45 General Data Protection Regulation (GDPR). Regarding Quad9 neither an adequacy decisions nor appropriate
     safeguards according to Art 46 GDPR exist. A possible risk of such a transfer is that the IP address of the user is
     transferred to Quad9 and thus conclusions on the executing of the RTR-NetTest may be drawn.</p>
-<h3>1.2.2. Optional NDT-Test</h3>
-<p>The NDT-Test is only run if, after accepting the privacy policy and terms of use of the RTR-NetTest, the checkbox “I
-    wish to run the optional, more comprehensive NDT-Test“ is selected. The user explicitly accepts that for the
-    NDT-Test the <strong>IP address </strong><strong>is</strong> <strong>processed and transferred to a third country as
-        well that the IP address is published</strong>.</p>
-<h4><strong>1.2.2.1. What data are processed?</strong></h4>
-<p>The following data are processed as part of the <strong>NDT-Test</strong>:</p>
-<ul>
-    <li>speed of data connection in both directions (downlink/uplink);</li>
-    <li>TCP/IP protocol parameters (e.g. TCP receive window);</li>
-    <li>proportion of IP packet losses, connection errors (e.g. half duplex);</li>
-    <li>latency/jitter of data connection (ping);</li>
-    <li>test parameters (test method, test server, test configuration);</li>
-    <li>operating system (name/version) and processor architecture;</li>
-    <li>Java runtime environment (name/version);</li>
-    <li>IP version;</li>
-    <li>IP address (local/public);</li>
-    <li>host name of computer;</li>
-    <li>NAT and firewall status and data connection parameters;</li>
-    <li>test time;</li>
-    <li>test data transmitted.</li>
-</ul>
-<h4><strong>1.2.2.2. Processing of personal data and the purposes for processing of personal data </strong></h4>
-<p>The following personal data is processed with explicit consent of the user in the course of the NDT-Test: the
-    <strong>IP address</strong>.</p>
-<p>Purposes for processing this personal data: technical implementation of the NDT-Test and data evaluation for a broad
-    public.</p>
-<h4><strong>1.2.2.3. Transferring of personal data</strong></h4>
-<p>For the before mentioned purposes the IP address is transferred to the M-Lab research platform (<a
-            href="http://www.measurementlab.net/" title="Link to M-Lab" target="_blank" rel="noopener noreferrer">www.measurementlab.net</a>)
-    in a third country. This means that this data is permanently stored by M-Lab, published as open data and made freely
-    accessible to the general public for information, use, dissemination and other applications under M-Lab-Open Data.
-    The privacy policy of M-Lab can be found under <a href="https://www.measurementlab.net/privacy" target="_blank"
-                                                      rel="noopener noreferrer">https://www.measurementlab.net/privacy</a>.
-</p>
-<p>Regarding M-Lab neither an adequacy decisions nor appropriate safeguards according to Art 46 GDPR exist. A possible
-    risk of such a transfer is that the IP address of the user is transferred to M-Lab and published. Thus conclusions
-    on the executing of the NDT-Test may be drawn. Eventually test results of the NDT-Test could be interlinked with the
-    respective RMB-Tests and hence more information may be gained.</p>
 <h2>1.3. Duration of storage of personal data </h2>
 <p>The <strong>IP address</strong>, the <strong>WLAN network ID (SSID)</strong> and <strong>numerical WLAN ID
         (BSSID)</strong> are stored by RTR for a maximum period of six months. In any case the <strong>Client
@@ -198,7 +182,7 @@
     <li>information;</li>
     <li>erasure, thus to withdraw her or his acceptance to the processing of her or his personal data at any time;</li>
     <li>lodging a complaint with the supervision authority (<a href="https://www.dsb.gv.at" target="_blank"
-                                                               rel="noopener noreferrer" class="external-link">https://www.dsb.gv.at</a>);
+                                                               rel="noopener noreferrer">https://www.dsb.gv.at</a>);
     </li>
     <li>rectification;</li>
     <li>restriction;</li>
@@ -208,24 +192,23 @@
 <p>Questions regarding the processing of personal data and data protection in connection with the RTR-NetTest can be
     send to:</p>
 <ul>
-    <li>E-Mail: <a href="mailto:netztest@rtr.at">netztest@rtr.at</a></li>
-    <li>Data protection officers of the RTR-GmbH: E-Mail: <a href="mailto:dsba@rtr.at">dsba@rtr.at</a></li>
+    <li>E-Mail: <a href="mailto:netztest@rtr.at">netztest@rtr.at</a> &nbsp;</li>
+    <li>Data protection officers of the RTR-GmbH: E-Mail: <a href="mailto:dsba@rtr.at">dsba@rtr.at</a> &nbsp;</li>
     <li>Address: Rundfunk und Telekom Regulierungs-GmbH (RTR-GmbH), RTR-NetTest, Mariahilfer Straße 77-79, 1060 Vienna,
         Austria
     </li>
 </ul>
 
-
 <h1>2. Terms of Use</h1>
 <p>Users use the browser version and app of the RTR-NetTest at their own risk. Please send any comments on correction of
     inaccurate content, graphics etc. by e-mail to <a href="mailto:netztest@rtr.at">netztest@rtr.at</a>.&nbsp; Under 14
     years can use the RTR-NetTest with the consent of their legal guardian.</p>
-<p>To comply with the legal authorisation enshrined in <a href="https://www.rtr.at/en/tk/TKG2003"
-                                                          title="Link to TKG 2003" target="_blank"
-                                                          rel="noopener noreferrer">Art. 17 Par. 4 and Par. 5 TKG
-        2003</a> as well as <a href="https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=celex:32015R2120"
-                               title="Link to TSM Regulation" target="_blank"
-                               class="external-link">Art 5 Par. 1 Regulation (EU) 2015/2120 ("TSM regulation")</a>
+<p>To comply with the legal authorisation enshrined in <a href="https://www.ris.bka.gv.at/GeltendeFassung.wxe?Abfrage=Bundesnormen&amp;Gesetzesnummer=20011678"
+                                                          title="Link to TKG 2021" target="_blank"
+                                                          rel="noopener noreferrer">Art&nbsp;46 Par&nbsp;5 and Par&nbsp;6 and Art&nbsp;48 TKG 2021</a>
+    as well as <a href="https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=celex:32015R2120"
+                  title="Link to TSM Regulation" target="_blank"
+                  class="external-link">Art 5 Par. 1 Regulation (EU) 2015/2120 ("TSM regulation")</a>
     and ensure users with the greatest possible transparency and information – while respecting their
     privacy – the RTR-NetTest is based on the open source and open data principle.</p>
 <p>According to the open source principle, this means that the source code of the RTR-NetTest software is publicly
@@ -257,6 +240,6 @@
     provisions applicable in the individual case, liability shall be limited to gross negligence and malicious
     intent.</p>
 
-<p>Version 2018-12-10</p>
+<p>Version 2021-11-01</p>
 </body>
 </html>
