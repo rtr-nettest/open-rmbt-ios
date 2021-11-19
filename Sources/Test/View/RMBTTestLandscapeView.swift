@@ -12,7 +12,7 @@ class RMBTTestLandscapeView: RMBTTestPortraitView {
     @objc override func updateDetailInfoView() {
         UIView.animate(withDuration: 0.3) {
             let height: CGFloat = self.isLoopMode ? 165 : (165 + 48)
-            self.detailInfoHeightConstraint.constant = height
+            self.detailInfoHeightConstraint?.constant = height
             self.bottomSpeedConstraint.constant = 0
             self.layoutIfNeeded()
         }

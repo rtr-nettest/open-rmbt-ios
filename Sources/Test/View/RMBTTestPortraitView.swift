@@ -74,7 +74,7 @@ class RMBTTestPortraitView: UIView, XibLoadable {
     @IBOutlet weak var speedGraphBottomConstraint: NSLayoutConstraint!
     @IBOutlet weak var progressGaugeTopConstraint: NSLayoutConstraint!
     @IBOutlet weak var footerBottomConstraint: NSLayoutConstraint!
-    @IBOutlet weak var detailInfoHeightConstraint: NSLayoutConstraint!
+    @IBOutlet var detailInfoHeightConstraint: NSLayoutConstraint?
     
     // Views
     lazy var speedGaugeView: RMBTGaugeView = {
@@ -283,13 +283,13 @@ class RMBTTestPortraitView: UIView, XibLoadable {
         if (isInfoCollapsed) {
             UIView.animate(withDuration: 0.3) {
                 let height: CGFloat = self.isQOSState ? 267 : 195
-                self.detailInfoHeightConstraint.constant = height
+                self.detailInfoHeightConstraint?.constant = height
                 self.bottomSpeedConstraint.constant = 0
                 self.layoutIfNeeded()
             }
         } else {
             UIView.animate(withDuration: 0.3) {
-                let offset = self.detailInfoHeightConstraint.constant
+                let offset = self.detailInfoHeightConstraint?.constant ?? 0
                 self.bottomSpeedConstraint.constant = -(offset + self.safeAreaInsets.bottom)
                 self.layoutIfNeeded()
             }
