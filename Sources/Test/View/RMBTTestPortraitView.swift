@@ -218,17 +218,24 @@ class RMBTTestPortraitView: UIView, XibLoadable {
     
     @objc func showQoSUI(_ state: Bool) {
         self.speedGraphView.isHidden = state
-    //    _speedGaugeView.hidden = state;
-        self.speedLabel.isHidden = state;
-        self.speedSuffixLabel.isHidden = state;
-        self.arrowImageView.isHidden = state;
-        self.qosProgressView.isHidden = !state;
+    //    _speedGaugeView.hidden = state
+        self.speedLabel.isHidden = state
+        self.speedSuffixLabel.isHidden = state
+        self.speedGaugeView.value = 0.0
+        self.speedSuffixLabel.isHidden = state
+        self.arrowImageView.isHidden = state
+        self.qosProgressView.isHidden = !state
     }
     
     @objc func showWaitingUI() {
         self.loopModeWaitingView.isHidden = false
         self.speedGraphView.isHidden = true
         self.qosProgressView.isHidden = true
+        self.speedGaugeView.value = 0.0
+        self.progressGaugeView.value = 0.0
+        self.speedLabel.text = "--"
+        self.progressLabel.text = "--"
+        self.speedSuffixLabel.isHidden = true
     }
     
     func setQosView(_ view: UIView) {
