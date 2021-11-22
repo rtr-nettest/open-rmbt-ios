@@ -17,6 +17,11 @@
 
 #import <UIKit/UIKit.h>
 
+@class RMBTSettingsViewController;
+@protocol RMBTSettingsViewControllerDelegate <NSObject>
+- (void)settingsDidChangedIn:(RMBTSettingsViewController *)viewController;
+@end
+
 @interface RMBTSettingsViewController : UITableViewController
 @property (weak, nonatomic) IBOutlet UISwitch *forceIPv4Switch;
 @property (weak, nonatomic) IBOutlet UISwitch *skipQoSSwitch;
@@ -35,6 +40,8 @@
 @property (weak, nonatomic) IBOutlet UISwitch *debugLoggingEnabledSwitch;
 @property (weak, nonatomic) IBOutlet UITextField *debugLoggingHostnameTextField;
 @property (weak, nonatomic) IBOutlet UITextField *debugLoggingPortTextField;
+
+@property (weak, nonatomic) id<RMBTSettingsViewControllerDelegate> delegate;
 
 - (IBAction)declineLoopModeConfirmation:(UIStoryboardSegue*)segue;
 - (IBAction)acceptLoopModeConfirmation:(UIStoryboardSegue*)segue;

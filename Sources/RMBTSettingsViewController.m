@@ -18,23 +18,51 @@
 #import "RMBTSettingsViewController.h"
 #import "UIView+RMBTSubviews.h"
 #import "RMBT-Swift.h"
+#import <MessageUI/MFMailComposeViewController.h>
 
 typedef NS_ENUM(NSInteger, RMBTSettingsSection) {
     RMBTSettingsSectionGeneral = 0,
     RMBTSettingsSectionLoop,
+    RMBTSettingsSectionContacts,
+    RMBTSettingsSectionInfo,
+    RMBTSettingsSectionSupport,
     RMBTSettingsSectionDebug,
     RMBTSettingsSectionDebugCustomControlServer,
     RMBTSettingsSectionDebugLogging
 };
+
+@interface RMBTSettingsViewController()<MFMailComposeViewControllerDelegate> {
+    NSString* _uuid;
+}
+
+@property (weak, nonatomic) IBOutlet UILabel *uuidLabel;
+@property (weak, nonatomic) IBOutlet UILabel *testCounterLabel;
+@property (weak, nonatomic) IBOutlet UILabel *buildDetailsLabel;
+
+@end
 
 @implementation RMBTSettingsViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    self.navigationItem.leftBarButtonItem = self.closeBarButtonItem;
+    
+    self.buildDetailsLabel.lineBreakMode = NSLineBreakByCharWrapping;
+    self.buildDetailsLabel.text = [NSString stringWithFormat:@"%@(%@) %@\n(%@)",
+                                   [[NSBundle mainBundle] infoDictionary]
+                                    [@"CFBundleShortVersionString"],
+                                   [[NSBundle mainBundle] infoDictionary]
+                                    [@"CFBundleVersion"],
+                                   RMBTBuildInfoString(),
+                                   RMBTBuildDateString()];
+
+    self.uuidLabel.lineBreakMode = NSLineBreakByCharWrapping;
+    self.uuidLabel.numberOfLines = 0;
+    
     UITapGestureRecognizer *tapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapHandler:)];
     tapGestureRecognizer.numberOfTapsRequired = 10;
-    [self.navigationController.navigationBar addGestureRecognizer:tapGestureRecognizer];
+    [self.buildDetailsLabel addGestureRecognizer:tapGestureRecognizer];
     
     RMBTSettings *settings = [RMBTSettings sharedSettings];
 
@@ -131,12 +159,24 @@ typedef NS_ENUM(NSInteger, RMBTSettingsSection) {
                 numeric:YES];
 }
 
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    // Refresh test counter and uuid labels:
+    self.testCounterLabel.text = [NSString stringWithFormat:@"%lu",(unsigned long)[RMBTSettings sharedSettings].testCounter];
+
+    _uuid = [RMBTControlServer sharedControlServer].uuid;
+    if (_uuid) {
+        self.uuidLabel.text = [NSString stringWithFormat:@"U%@",_uuid];
+    }
+}
 - (void)viewWillDisappear:(BOOL)animated {
+    [self.delegate settingsDidChangedIn:self];
     [[RMBTControlServer sharedControlServer] updateWithCurrentSettingsWithSuccess:^{
         
     } error:^(NSError * error) {
         
     }];
+    [super viewWillDisappear:animated];
 }
 
 #pragma mark - Two-way binding helpers
@@ -174,7 +214,7 @@ typedef NS_ENUM(NSInteger, RMBTSettingsSection) {
 #pragma mark - Table view
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    NSInteger lastSectionIndex = [RMBTSettings sharedSettings].debugUnlocked ? RMBTSettingsSectionDebugLogging : RMBTSettingsSectionLoop;
+    NSInteger lastSectionIndex = [RMBTSettings sharedSettings].debugUnlocked ? RMBTSettingsSectionDebugLogging : RMBTSettingsSectionSupport;
     return lastSectionIndex + 1;
 }
 
@@ -192,11 +232,26 @@ typedef NS_ENUM(NSInteger, RMBTSettingsSection) {
     }
 }
 
+- (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section {
+    NSString *title = [self tableView:tableView titleForHeaderInSection:section];
+    CGFloat height = [self tableView:tableView heightForHeaderInSection:section];
+    UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, tableView.bounds.size.width, height)];
+    view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    view.backgroundColor = UIColor.clearColor;
+    
+    UILabel *label = [[RMBTTitleSectionLabel alloc] initWithText:title];
+    label.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    label.frame = CGRectMake(20, 0, view.bounds.size.width - 40, height);
+    [view addSubview:label];
+    
+    return view;
+}
+
 - (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
     if (section == RMBTSettingsSectionLoop && ![RMBTSettings sharedSettings].expertMode) {
         return CGFLOAT_MIN;
     } else {
-        return [super tableView:tableView heightForHeaderInSection:section];
+        return 48;
     }
 }
 
@@ -217,6 +272,37 @@ typedef NS_ENUM(NSInteger, RMBTSettingsSection) {
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    if (indexPath.section == RMBTSettingsSectionContacts) {
+        switch (indexPath.row) {
+            case 0:
+                [self presentModalBrowserWithURLString:RMBT_PROJECT_URL];
+                break;
+            case 1: {
+                if ([MFMailComposeViewController canSendMail]) {
+                    MFMailComposeViewController *mailVC = [[MFMailComposeViewController alloc] init];
+                    [mailVC setToRecipients:@[RMBT_PROJECT_EMAIL]];
+                    mailVC.mailComposeDelegate = self;
+                    [self presentViewController:mailVC animated:YES completion:^{}];
+                }
+                break;
+            }
+            case 2:
+                [self presentModalBrowserWithURLString:RMBT_PRIVACY_TOS_URL];
+                break;
+            default:
+                NSAssert(false, @"Invalid row");
+        }
+    } else if (indexPath.section == RMBTSettingsSectionSupport) {
+        switch (indexPath.row) {
+            case 0:
+                [self presentModalBrowserWithURLString:RMBT_DEVELOPER_URL];
+                break;
+            case 1:
+                [self presentModalBrowserWithURLString:RMBT_REPO_URL];
+                break;
+        }
+    }
+    
     UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
     [cell.contentView rmbt_enumerateSubviewsOfType:[UITextField class] usingBlock:^(UIView *f) {
         UITextField* tf = (UITextField*)f;
@@ -224,6 +310,32 @@ typedef NS_ENUM(NSInteger, RMBTSettingsSection) {
             [tf becomeFirstResponder];
         }
     }];
+    
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+}
+
+#pragma mark - Tableview actions (copying UUID)
+
+// Show "Copy" action for cell showing client UUID
+- (BOOL)tableView:(UITableView *)tableView shouldShowMenuForRowAtIndexPath:(NSIndexPath *)indexPath {
+    if (indexPath.section == RMBTSettingsSectionInfo && indexPath.row == 0 && _uuid) {
+        return YES;
+    } else {
+        return NO;
+    }
+}
+
+// As client UUID is the only cell we can perform action for, we allow "copy" here
+- (BOOL)tableView:(UITableView *)tableView canPerformAction:(SEL)action forRowAtIndexPath:(NSIndexPath *)indexPath withSender:(id)sender {
+    return (action == @selector(copy:));
+}
+
+// ..and we copy the UUID value to pastboard in case "copy" action is performed
+- (void)tableView:(UITableView *)tableView performAction:(SEL)action forRowAtIndexPath:(NSIndexPath *)indexPath withSender:(id)sender {
+    if (action == @selector(copy:)) {
+        // Copy UUID to pasteboard
+        [[UIPasteboard generalPasteboard] setString:_uuid];
+    }
 }
 
 - (void)refreshSection:(RMBTSettingsSection)section {
@@ -251,8 +363,11 @@ typedef NS_ENUM(NSInteger, RMBTSettingsSection) {
 - (IBAction)acceptLoopModeConfirmation:(UIStoryboardSegue*)segue {
     [RMBTSettings sharedSettings].loopMode = YES;
     [self refreshSection:RMBTSettingsSectionLoop];
-    [segue.sourceViewController dismissViewControllerAnimated:YES completion:nil];
 }
 
-
+- (void)mailComposeController:(MFMailComposeViewController*)controller
+          didFinishWithResult:(MFMailComposeResult)result
+                        error:(NSError*)error {
+    [self dismissViewControllerAnimated:YES completion:^{}];
+}
 @end

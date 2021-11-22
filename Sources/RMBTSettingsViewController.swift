@@ -18,4 +18,17 @@ extension RMBTSettingsViewController {
             }
         }, textFieldConfiguration: nil)
     }
+    
+    @objc var closeBarButtonItem: UIBarButtonItem {
+        let closeBarButtonItem = UIBarButtonItem(image: .closeImage, style: .done, target: self, action: #selector(closeButtonClick(_:)))
+        return closeBarButtonItem
+    }
+    
+    @objc func closeButtonClick(_ sender: Any) {
+        self.dismiss(animated: true)
+    }
+}
+
+private extension UIImage {
+    static let closeImage = UIImage(named: "black_close_button")
 }

@@ -62,7 +62,6 @@
 		C774EE7A1792F73D00D623A3 /* RMBTLocationTracker.m in Sources */ = {isa = PBXBuildFile; fileRef = C774EE791792F73D00D623A3 /* RMBTLocationTracker.m */; };
 		C774EE7F1793676700D623A3 /* RMBTHistoryIndexViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C774EE7E1793676700D623A3 /* RMBTHistoryIndexViewController.m */; };
 		C774EE8317936AF700D623A3 /* RMBTHistoryResult.m in Sources */ = {isa = PBXBuildFile; fileRef = C774EE8217936AF700D623A3 /* RMBTHistoryResult.m */; };
-		C7770889179987B700BB478B /* RMBTInfoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C7770888179987B700BB478B /* RMBTInfoViewController.m */; };
 		C777D97D1DD8AA8700D1C824 /* RMBTQoSTestRunner.m in Sources */ = {isa = PBXBuildFile; fileRef = C777D97C1DD8AA8700D1C824 /* RMBTQoSTestRunner.m */; };
 		C777D9801DD8AEC000D1C824 /* RMBTQoSTest.m in Sources */ = {isa = PBXBuildFile; fileRef = C777D97F1DD8AEC000D1C824 /* RMBTQoSTest.m */; };
 		C777D9831DD8AED000D1C824 /* RMBTQoSDNSTest.m in Sources */ = {isa = PBXBuildFile; fileRef = C777D9821DD8AED000D1C824 /* RMBTQoSDNSTest.m */; };
@@ -222,6 +221,7 @@
 		E9824442272FC31600081732 /* RMBTLoopModeSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9824441272FC31600081732 /* RMBTLoopModeSettingsViewController.swift */; };
 		E98244442730F54700081732 /* RMBTLoopModeWaitingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E98244432730F54700081732 /* RMBTLoopModeWaitingViewController.swift */; };
 		E982444627317FDD00081732 /* RMBTLoopModeCompleteViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E982444527317FDD00081732 /* RMBTLoopModeCompleteViewController.swift */; };
+		E98244AB274B66BF00243D13 /* RMBTTitleSectionLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E98244AA274B66BF00243D13 /* RMBTTitleSectionLabel.swift */; };
 		E9881C82270C1190008EFDF6 /* RMBTLoaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9881C81270C1190008EFDF6 /* RMBTLoaderView.swift */; };
 		E98B7B1926CB769E0063F44F /* RMBTAppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E98B7B1826CB769E0063F44F /* RMBTAppDelegate.swift */; };
 		E9968A2624FD762A0042159C /* WKWebView+RMBTConfiguration.m in Sources */ = {isa = PBXBuildFile; fileRef = E9968A2524FD762A0042159C /* WKWebView+RMBTConfiguration.m */; };
@@ -389,8 +389,6 @@
 		C774EE7E1793676700D623A3 /* RMBTHistoryIndexViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RMBTHistoryIndexViewController.m; sourceTree = "<group>"; };
 		C774EE8117936AF700D623A3 /* RMBTHistoryResult.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RMBTHistoryResult.h; sourceTree = "<group>"; };
 		C774EE8217936AF700D623A3 /* RMBTHistoryResult.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RMBTHistoryResult.m; sourceTree = "<group>"; };
-		C7770887179987B700BB478B /* RMBTInfoViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RMBTInfoViewController.h; sourceTree = "<group>"; };
-		C7770888179987B700BB478B /* RMBTInfoViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RMBTInfoViewController.m; sourceTree = "<group>"; };
 		C777D97B1DD8AA8700D1C824 /* RMBTQoSTestRunner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RMBTQoSTestRunner.h; sourceTree = "<group>"; };
 		C777D97C1DD8AA8700D1C824 /* RMBTQoSTestRunner.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RMBTQoSTestRunner.m; sourceTree = "<group>"; };
 		C777D97E1DD8AEC000D1C824 /* RMBTQoSTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RMBTQoSTest.h; sourceTree = "<group>"; };
@@ -586,6 +584,7 @@
 		E9824441272FC31600081732 /* RMBTLoopModeSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTLoopModeSettingsViewController.swift; sourceTree = "<group>"; };
 		E98244432730F54700081732 /* RMBTLoopModeWaitingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTLoopModeWaitingViewController.swift; sourceTree = "<group>"; };
 		E982444527317FDD00081732 /* RMBTLoopModeCompleteViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTLoopModeCompleteViewController.swift; sourceTree = "<group>"; };
+		E98244AA274B66BF00243D13 /* RMBTTitleSectionLabel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RMBTTitleSectionLabel.swift; sourceTree = "<group>"; };
 		E9881C81270C1190008EFDF6 /* RMBTLoaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTLoaderView.swift; sourceTree = "<group>"; };
 		E98B7B1826CB769E0063F44F /* RMBTAppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTAppDelegate.swift; sourceTree = "<group>"; };
 		E9968A2424FD762A0042159C /* WKWebView+RMBTConfiguration.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "WKWebView+RMBTConfiguration.h"; sourceTree = "<group>"; };
@@ -885,8 +884,6 @@
 		C7770886179987A000BB478B /* Info */ = {
 			isa = PBXGroup;
 			children = (
-				C7770887179987B700BB478B /* RMBTInfoViewController.h */,
-				C7770888179987B700BB478B /* RMBTInfoViewController.m */,
 				C75FF5C617B15DA600A58056 /* RMBTInfoTextViewController.h */,
 				C75FF5C717B15DA600A58056 /* RMBTInfoTextViewController.m */,
 			);
@@ -1209,6 +1206,7 @@
 				E9C13F8027298B3C00DA60D4 /* UIAlertController+Additions.swift */,
 				36A9DF3E272C4E190099A57C /* UILabel.swift */,
 				E9E9E8FA273CDECB005EB393 /* RMBTGraphLabel.swift */,
+				E98244AA274B66BF00243D13 /* RMBTTitleSectionLabel.swift */,
 				E9E9E9002742685E005EB393 /* UIView+XibLoadable.swift */,
 			);
 			path = Common;
@@ -1889,6 +1887,7 @@
 				E9400F2D26BE8CC50067273A /* TelephonyInfo.swift in Sources */,
 				36B75A1D27393229006F4CB3 /* RMBTHistorySyncModalState.swift in Sources */,
 				C774EE7A1792F73D00D623A3 /* RMBTLocationTracker.m in Sources */,
+				E98244AB274B66BF00243D13 /* RMBTTitleSectionLabel.swift in Sources */,
 				E9E993CD26EA617200E7EED6 /* RMBTOpenDataResponse.swift in Sources */,
 				C7DF2BB617D91AE400A0E76B /* RMBTNews.m in Sources */,
 				36A9DF3F272C4E190099A57C /* UILabel.swift in Sources */,
@@ -1914,7 +1913,6 @@
 				E9E9940526ECCF7400E7EED6 /* RMBTSettings2ViewController.swift in Sources */,
 				E9400F0A26BADB3C0067273A /* Responses.swift in Sources */,
 				C737AEE91E7D7C53007962EB /* RMBTQoSControlConnection.m in Sources */,
-				C7770889179987B700BB478B /* RMBTInfoViewController.m in Sources */,
 				E93FB10326F4BA7A00DD24CD /* RMBTLoopInfo.swift in Sources */,
 				E95954A026E4F218004EA6D9 /* RMBTHistoryFilterView.swift in Sources */,
 				E9400F1826BE72070067273A /* MapMeasurementResponse.swift in Sources */,

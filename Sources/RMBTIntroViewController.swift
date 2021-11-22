@@ -418,7 +418,17 @@ class RMBTIntroViewController: UIViewController {
             vc.loopModeHandler = { [weak self] loopModeInfo in
                 self?.startTest(with: loopModeInfo)
             }
+        } else if segue.identifier == showSettingsSegue,
+          let navigationController = segue.destination as? UINavigationController,
+          let vc = navigationController.topViewController as? RMBTSettingsViewController {
+            vc.delegate = self
         }
+    }
+}
+
+extension RMBTIntroViewController: RMBTSettingsViewControllerDelegate {
+    func settingsDidChanged(in viewController: RMBTSettingsViewController!) {
+        currentView.updateLoopModeUI()
     }
 }
 

@@ -137,7 +137,8 @@ extension RMBTControlServer {
 
         if (RMBTSettings.shared.debugUnlocked && RMBTSettings.shared.debugControlServerCustomizationEnabled) {
             let scheme = RMBTSettings.shared.debugControlServerUseSSL ? "https" : "http"
-            var hostname = RMBTSettings.shared.debugControlServerHostname ?? ""
+            let url = URL(string: RMBTConfig.shared.RMBT_CONTROL_SERVER_URL)
+            var hostname = RMBTSettings.shared.debugControlServerHostname ?? url?.host ?? ""
             if (RMBTSettings.shared.debugControlServerPort != 0 && RMBTSettings.shared.debugControlServerPort != 80) {
                 hostname = hostname.appending(":\(RMBTSettings.shared.debugControlServerPort)")
             }
