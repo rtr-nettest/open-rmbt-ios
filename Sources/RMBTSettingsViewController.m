@@ -38,6 +38,7 @@ typedef NS_ENUM(NSInteger, RMBTSettingsSection) {
 @property (weak, nonatomic) IBOutlet UILabel *uuidLabel;
 @property (weak, nonatomic) IBOutlet UILabel *testCounterLabel;
 @property (weak, nonatomic) IBOutlet UILabel *buildDetailsLabel;
+@property (weak, nonatomic) IBOutlet UILabel *developerNameLabel;
 
 @end
 
@@ -46,8 +47,10 @@ typedef NS_ENUM(NSInteger, RMBTSettingsSection) {
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    self.title = NSLocalizedString(@"preferences_general_settings", @"");
     self.navigationItem.leftBarButtonItem = self.closeBarButtonItem;
     
+    self.developerNameLabel.text = RMBT_DEVELOPER_NAME;
     self.buildDetailsLabel.lineBreakMode = NSLineBreakByCharWrapping;
     self.buildDetailsLabel.text = [NSString stringWithFormat:@"%@(%@) %@\n(%@)",
                                    [[NSBundle mainBundle] infoDictionary]
@@ -259,6 +262,26 @@ typedef NS_ENUM(NSInteger, RMBTSettingsSection) {
     if (section == RMBTSettingsSectionLoop && ![RMBTSettings sharedSettings].expertMode) {
         return nil;
     } else {
+        switch (section) {
+            case RMBTSettingsSectionGeneral:
+                return NSLocalizedString(@"preferences_general_settings", @"");
+            case RMBTSettingsSectionLoop:
+                return NSLocalizedString(@"preferences_loop_mode", @"");
+            case RMBTSettingsSectionContacts:
+                return NSLocalizedString(@"preferences_contact", @"");
+            case RMBTSettingsSectionInfo:
+                return NSLocalizedString(@"preferences_additional_Information", @"");
+            case RMBTSettingsSectionSupport:
+                return NSLocalizedString(@"preferences_about", @"");
+            case RMBTSettingsSectionDebug:
+                return NSLocalizedString(@"preferences_debug_options", @"");
+            case RMBTSettingsSectionDebugCustomControlServer:
+                return NSLocalizedString(@"preferences_developer_control_server", @"");
+            case RMBTSettingsSectionDebugLogging:
+                return NSLocalizedString(@"preferences_developer_logging", @"");
+            default:
+                break;
+        }
         return [super tableView:tableView titleForHeaderInSection:section];
     }
 }
@@ -267,6 +290,9 @@ typedef NS_ENUM(NSInteger, RMBTSettingsSection) {
     if (section == RMBTSettingsSectionLoop && ![RMBTSettings sharedSettings].expertMode) {
         return nil;
     } else {
+        if (section == RMBTSettingsSectionDebugLogging) {
+            return NSLocalizedString(@"preferences_developer_logging_summary", @"");
+        }
         return [super tableView:tableView titleForFooterInSection:section];
     }
 }

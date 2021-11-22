@@ -306,6 +306,7 @@ final class RMBTTestViewController: RMBTBaseTestViewController {
     }
     
     @objc func startTest() {
+        UIApplication.shared.isIdleTimerDisabled = true
         self.loopModeInfo?.increment()
         
         self.state = .test
@@ -596,9 +597,11 @@ extension RMBTTestViewController: RMBTBaseTestViewControllerSubclass {
                 self.status = .nextTest
                 startWaitingNextTest()
             } else {
+                UIApplication.shared.isIdleTimerDisabled = false
                 self.performSegue(withIdentifier: actionsSegue, sender: self)
             }
         } else {
+            UIApplication.shared.isIdleTimerDisabled = false
             self.delegate?.testViewController(self, didFinishWithTest: result)
         }
     }

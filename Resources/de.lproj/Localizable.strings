@@ -341,3 +341,38 @@
 "measurement_qos_http_proxy" = "Unveränderter Inhalt";
 "measurement_qos_traceroute_masked" = "Traceroute";
 "measurement_qos_voip" = "VoIP";
+
+"preferences_general_settings" = "Allgemeine Einstellungen";
+"preferences_ipv4_only" = "Nur IPv4";
+"preferences_skip_qos" = "QoS überspringen";
+"preferences_expert_mode" = "Expertenmodus";
+"preferences_loop_mode" = "Wiederholungsmodus";
+"preferences_loop_mode_enabled" = "Ermöglicht";
+"preferences_loop_mode_summary" = "Neuer Test nach Wartezeit oder Zurücklegen der Distanz. Max. 2 Tage";
+"preferences_loop_mode_min_delay" = "Wartezeit (in Minuten)";
+"preferences_loop_mode_max_movement" = "Distanz (in Metern)";
+"preferences_contact" = "Kontakt";
+"preferences_go_to_website" = "Website besuchen";
+"preferences_contact_us" = "E-Mail schreiben";
+"preferences_data_protection" = "Datenschutzerklärung und Nutzungsbedingungen";
+"preferences_additional_Information" = "Weitere Informationen";
+"preferences_client_uuid" = "Client UUID";
+"preferences_test_cases" = "Durchgeführte Tests";
+"preferences_version" = "Version";
+"preferences_about" = "Über die App";
+"preferences_developed_by" = "Entwickelt von";
+"preferences_source_code" = "Source Code";
+
+"preferences_debug_options" = "Debug-Optionen";
+"preferences_ipv6_only" = "Nur IPv6";
+
+"preferences_developer_control_server" = "Control-Server";
+"preferences_override_control_server_host" = "Control Host";
+"preferences_override_control_server_port" = "Control Port";
+"preferences_override_control_server_ssl" = "Control SSL";
+
+"preferences_developer_logging" = "Protokollierung";
+"preferences_developer_logging_summary" = "Protokollnachrichten werden per UDP an das ausgewählte Ziel gesendet.";
+"preferences_developer_loggind_host" = "Protokollierung Host";
+"preferences_developer_loggind_port" = "Protokollierung Port";
+

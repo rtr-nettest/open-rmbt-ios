@@ -342,3 +342,36 @@
 "measurement_qos_traceroute_masked" = "Traceroute";
 "measurement_qos_voip" = "VoIP";
 
+"preferences_general_settings" = "General settings";
+"preferences_ipv4_only" = "IPv4 only";
+"preferences_skip_qos" = "Skip QoS";
+"preferences_expert_mode" = "Expert mode";
+"preferences_loop_mode" = "Loop mode";
+"preferences_loop_mode_enabled" = "Enabled";
+"preferences_loop_mode_summary" = "New test after waiting time or covering the distance. Max. 2 days";
+"preferences_loop_mode_min_delay" = "Waiting time (in minutes)";
+"preferences_loop_mode_max_movement" = "Distance (in meters)";
+"preferences_contact" = "Contact";
+"preferences_go_to_website" = "Go to website";
+"preferences_contact_us" = "Contact us";
+"preferences_data_protection" = "Privacy policy and terms of use";
+"preferences_additional_Information" = "Additional information";
+"preferences_client_uuid" = "Client UUID";
+"preferences_test_cases" = "Number of tests performed";
+"preferences_version" = "Version";
+"preferences_about" = "About";
+"preferences_developed_by" = "Developed by";
+"preferences_source_code" = "Source code";
+
+"preferences_debug_options" = "Debug Options";
+"preferences_ipv4_only" = "IPv6 Only";
+
+"preferences_developer_control_server" = "Control server";
+"preferences_override_control_server_host" = "Control host";
+"preferences_override_control_server_port" = "Control port";
+"preferences_override_control_server_ssl" = "Control SSL";
+
+"preferences_developer_logging" = "Logging";
+"preferences_developer_logging_summary" = "Log messages will be sent to the selected destination via UDP.";
+"preferences_developer_loggind_host" = "Control host";
+"preferences_developer_loggind_port" = "Control port";
