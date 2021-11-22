@@ -214,6 +214,7 @@
 		E95954B126E614F7004EA6D9 /* RMBTHistoryFiltersOptionsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E95954B026E614F6004EA6D9 /* RMBTHistoryFiltersOptionsViewController.swift */; };
 		E95954B426E62E34004EA6D9 /* RMBTHistoryViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E95954B226E62E34004EA6D9 /* RMBTHistoryViewCell.swift */; };
 		E95954B526E62E34004EA6D9 /* RMBTHistoryViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = E95954B326E62E34004EA6D9 /* RMBTHistoryViewCell.xib */; };
+		E96792B5274BC6E00091C4A7 /* RMBTLoopModeSettingsValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E96792B4274BC6E00091C4A7 /* RMBTLoopModeSettingsValidator.swift */; };
 		E9789EEE24D74434007253EB /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E9789EED24D74434007253EB /* WebKit.framework */; };
 		E981D280271E892400CD970A /* RMBTLocationPopupViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E981D27F271E892400CD970A /* RMBTLocationPopupViewController.swift */; };
 		E981D283271E8B9500CD970A /* RMBTLocationPopupCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E981D281271E8B9400CD970A /* RMBTLocationPopupCollectionView.swift */; };
@@ -577,6 +578,7 @@
 		E95954B026E614F6004EA6D9 /* RMBTHistoryFiltersOptionsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RMBTHistoryFiltersOptionsViewController.swift; sourceTree = "<group>"; };
 		E95954B226E62E34004EA6D9 /* RMBTHistoryViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTHistoryViewCell.swift; sourceTree = "<group>"; };
 		E95954B326E62E34004EA6D9 /* RMBTHistoryViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = RMBTHistoryViewCell.xib; sourceTree = "<group>"; };
+		E96792B4274BC6E00091C4A7 /* RMBTLoopModeSettingsValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTLoopModeSettingsValidator.swift; sourceTree = "<group>"; };
 		E9789EED24D74434007253EB /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		E981D27F271E892400CD970A /* RMBTLocationPopupViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RMBTLocationPopupViewController.swift; sourceTree = "<group>"; };
 		E981D281271E8B9400CD970A /* RMBTLocationPopupCollectionView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RMBTLocationPopupCollectionView.swift; sourceTree = "<group>"; };
@@ -1208,6 +1210,7 @@
 				E9E9E8FA273CDECB005EB393 /* RMBTGraphLabel.swift */,
 				E98244AA274B66BF00243D13 /* RMBTTitleSectionLabel.swift */,
 				E9E9E9002742685E005EB393 /* UIView+XibLoadable.swift */,
+				E96792B4274BC6E00091C4A7 /* RMBTLoopModeSettingsValidator.swift */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -1876,6 +1879,7 @@
 				E91316BD26ADD4DE00368DCD /* RMBTGradientView.swift in Sources */,
 				E9E993CA26EA538700E7EED6 /* RMBTHistoryGraphCell.swift in Sources */,
 				C774EE7717920C9C00D623A3 /* RMBTConnectivity.m in Sources */,
+				E96792B5274BC6E00091C4A7 /* RMBTLoopModeSettingsValidator.swift in Sources */,
 				C70AFDEB1F2E06E40064D631 /* RMBTMapOptionsTypesViewController.m in Sources */,
 				E9400F0826BAD10C0067273A /* AbstractBasicRequestBuilder.swift in Sources */,
 				E9400F1D26BE87450067273A /* ObjectMapperHelper.swift in Sources */,

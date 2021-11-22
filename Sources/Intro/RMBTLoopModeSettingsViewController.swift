@@ -75,8 +75,7 @@ final class RMBTLoopModeSettingsViewController: UIViewController {
     }
     
     private func validate() -> Bool {
-        if self.loopModeInfo.total > RMBTConfig.shared.RMBT_TEST_LOOPMODE_MAX_COUNT ||
-            self.loopModeInfo.total < RMBTConfig.shared.RMBT_TEST_LOOPMODE_MIN_COUNT {
+        if RMBTLoopModeSettingsValidator.validateCountTest(for: loopModeInfo) {
             let text = String(format: .pleaseEnterValueBetween, RMBTConfig.shared.RMBT_TEST_LOOPMODE_MIN_COUNT, RMBTConfig.shared.RMBT_TEST_LOOPMODE_MAX_COUNT)
             UIAlertController.presentAlert(title: .invalideCount,
                                            text: text, {_ in
@@ -85,9 +84,7 @@ final class RMBTLoopModeSettingsViewController: UIViewController {
             return false
         }
         
-        if self.loopModeInfo.waitMinutes < RMBTConfig.shared.RMBT_TEST_LOOPMODE_MIN_DELAY_MINS ||
-            self.loopModeInfo.waitMinutes >
-            RMBTConfig.shared.RMBT_TEST_LOOPMODE_MAX_DELAY_MINS {
+        if RMBTLoopModeSettingsValidator.validateDuration(for: loopModeInfo) {
             let text = String(format: .pleaseEnterValueBetween, RMBTConfig.shared.RMBT_TEST_LOOPMODE_MIN_DELAY_MINS, RMBTConfig.shared.RMBT_TEST_LOOPMODE_MAX_DELAY_MINS)
             UIAlertController.presentAlert(title: .invalideMinutes, text: text, { _ in
                 self.minutesTextField.becomeFirstResponder()
@@ -95,8 +92,7 @@ final class RMBTLoopModeSettingsViewController: UIViewController {
             return false
         }
         
-        if self.loopModeInfo.waitMeters < RMBTConfig.shared.RMBT_TEST_LOOPMODE_MIN_MOVEMENT_M ||
-            self.loopModeInfo.waitMeters > RMBTConfig.shared.RMBT_TEST_LOOPMODE_MAX_MOVEMENT_M {
+        if RMBTLoopModeSettingsValidator.validateDistance(for: loopModeInfo) {
             let text = String(format: .pleaseEnterValueBetween, RMBTConfig.shared.RMBT_TEST_LOOPMODE_MIN_MOVEMENT_M, RMBTConfig.shared.RMBT_TEST_LOOPMODE_MAX_MOVEMENT_M)
             UIAlertController.presentAlert(title: .invalideDistance, text: text, { _ in
                 self.minutesTextField.becomeFirstResponder()
