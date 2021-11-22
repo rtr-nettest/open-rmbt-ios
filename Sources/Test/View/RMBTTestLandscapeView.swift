@@ -9,6 +9,7 @@
 import UIKit
 
 class RMBTTestLandscapeView: RMBTTestPortraitView {
+    @IBOutlet weak var rootWaitingView: UIScrollView!
     @objc override func updateDetailInfoView() {
         UIView.animate(withDuration: 0.3) {
             let height: CGFloat = self.isLoopMode ? 165 : (165 + 48)
@@ -21,5 +22,15 @@ class RMBTTestLandscapeView: RMBTTestPortraitView {
     override func updateGaugesPosition() {
         self.progressGaugeView.frame = self.progressGaugePlaceholderView.frame
         self.speedGaugeView.frame = self.speedGaugePlaceholderView.frame
+    }
+    
+    override func clearValues() {
+        self.rootWaitingView.isHidden = true
+        super.clearValues()
+    }
+    
+    @objc override func showWaitingUI() {
+        rootWaitingView.isHidden = false
+        super.showWaitingUI()
     }
 }

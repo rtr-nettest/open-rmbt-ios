@@ -75,7 +75,7 @@ final class RMBTLoopModeSettingsViewController: UIViewController {
     }
     
     private func validate() -> Bool {
-        if RMBTLoopModeSettingsValidator.validateCountTest(for: loopModeInfo) {
+        if !RMBTLoopModeSettingsValidator.validateCountTest(for: loopModeInfo) {
             let text = String(format: .pleaseEnterValueBetween, RMBTConfig.shared.RMBT_TEST_LOOPMODE_MIN_COUNT, RMBTConfig.shared.RMBT_TEST_LOOPMODE_MAX_COUNT)
             UIAlertController.presentAlert(title: .invalideCount,
                                            text: text, {_ in
@@ -84,7 +84,7 @@ final class RMBTLoopModeSettingsViewController: UIViewController {
             return false
         }
         
-        if RMBTLoopModeSettingsValidator.validateDuration(for: loopModeInfo) {
+        if !RMBTLoopModeSettingsValidator.validateDuration(for: loopModeInfo) {
             let text = String(format: .pleaseEnterValueBetween, RMBTConfig.shared.RMBT_TEST_LOOPMODE_MIN_DELAY_MINS, RMBTConfig.shared.RMBT_TEST_LOOPMODE_MAX_DELAY_MINS)
             UIAlertController.presentAlert(title: .invalideMinutes, text: text, { _ in
                 self.minutesTextField.becomeFirstResponder()
@@ -92,7 +92,7 @@ final class RMBTLoopModeSettingsViewController: UIViewController {
             return false
         }
         
-        if RMBTLoopModeSettingsValidator.validateDistance(for: loopModeInfo) {
+        if !RMBTLoopModeSettingsValidator.validateDistance(for: loopModeInfo) {
             let text = String(format: .pleaseEnterValueBetween, RMBTConfig.shared.RMBT_TEST_LOOPMODE_MIN_MOVEMENT_M, RMBTConfig.shared.RMBT_TEST_LOOPMODE_MAX_MOVEMENT_M)
             UIAlertController.presentAlert(title: .invalideDistance, text: text, { _ in
                 self.minutesTextField.becomeFirstResponder()
