@@ -181,6 +181,7 @@ extension RMBTHistorySyncModalViewController {
                     self.enterCodeConfirmButtonLandscape.isHidden = false
                 }
                 self.enterCodeConfirmButton.layer.opacity = 0.0
+                self.syncCodeTextField.placeholderLabel.isHidden = false
                 self.syncCodeTextField.placeholderLabel.textAlignment = .left
                 self.syncCodeTextField.errorLabel.textAlignment = .left
                 self.syncCodeTextField.textAlignment = .left

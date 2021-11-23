@@ -51,6 +51,8 @@ class RMBTMaterialTextField: UITextField {
         super.layoutSubviews()
         bottomBorder.frame = CGRect(x: 0.0, y: frame.height - 2, width: frame.width, height: 2.0)
         layer.addSublayer(bottomBorder)
+        addSubview(errorLabel)
+        addSubview(placeholderLabel)
     }
     
     func setState(_ state: RMBTMaterialTextFieldState) {
@@ -73,7 +75,6 @@ class RMBTMaterialTextField: UITextField {
         errorLabel.font = floatingLabelFont
         errorLabel.numberOfLines = 0
         errorLabel.textAlignment = .center
-        addSubview(errorLabel)
     }
     
     private func setPlaceholderLabel() {
@@ -83,7 +84,6 @@ class RMBTMaterialTextField: UITextField {
         placeholderLabel.text = placeholder
         placeholderLabel.textAlignment = .center
         placeholderText = placeholder
-        addSubview(placeholderLabel)
     }
 }
 
