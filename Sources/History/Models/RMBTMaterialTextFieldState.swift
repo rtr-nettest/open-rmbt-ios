@@ -53,14 +53,14 @@ class RMBTMaterialTextFieldStateError: RMBTMaterialTextFieldState {
     }
     
     override var errorLabelFrame: CGRect {
-        return CGRect(x: 0, y: frame.height + 2, width: frame.width, height: floatingLabelHeight)
+        return CGRect(x: 0, y: frame.height + 2, width: frame.width, height: floatingLabelHeight * 1.5)
     }
 }
 
 // MARK: Colors
 
 private extension UIColor {
-    static let defaultColor = UIColor(red: 0, green: 0, blue: 0.0980392, alpha: 0.22)
+    static let defaultColor = UIColor(red: 0.75, green: 0.75, blue: 0.79, alpha: 1)
     static let focusColor = UIColor(named: "greenButtonBackground")
     static let errorColor = UIColor.red
 }

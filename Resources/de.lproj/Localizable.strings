@@ -321,7 +321,7 @@
 "history.sync-modal-description.request-code" = "Bitte geben Sie den unten angezeigten Code auf dem anderen Gerät ein, um die Ergebnisse zu synchronisieren.";
 "history.sync-modal-description.sync-success" = "Die Synchronisierung war erfolgreich.";
 "The code must consist of twelve characters" = "Der Code muss aus zwölf Zeichen bestehen";
-"The devices are already synchronized..." = "Die Geräte sind bereits synchronisiert...";
+"The devices are already synchronized with each other." = "Die Geräte sind bereits synchronisiert.";
 "The code you entered does not exist." = "Der eingegebene Code existiert nicht.";
 
 /* Test */

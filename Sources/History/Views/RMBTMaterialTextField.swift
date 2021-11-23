@@ -53,6 +53,15 @@ class RMBTMaterialTextField: UITextField {
         layer.addSublayer(bottomBorder)
     }
     
+    func setState(_ state: RMBTMaterialTextFieldState) {
+        bottomBorder.backgroundColor = state.placeholderColor.cgColor
+        errorLabel.textColor = state.placeholderColor
+        placeholderLabel.textColor = state.placeholderColor
+        tintColor = state.placeholderColor
+        errorLabel.frame = state.errorLabelFrame
+        placeholderLabel.frame = state.placeholderLabelFrame
+    }
+    
     private func setBorder() {
         borderStyle = .none
         bottomBorder = CALayer()
@@ -75,15 +84,6 @@ class RMBTMaterialTextField: UITextField {
         placeholderLabel.textAlignment = .center
         placeholderText = placeholder
         addSubview(placeholderLabel)
-    }
-    
-    private func setState(_ state: RMBTMaterialTextFieldState) {
-        bottomBorder.backgroundColor = state.placeholderColor.cgColor
-        errorLabel.textColor = state.placeholderColor
-        placeholderLabel.textColor = state.placeholderColor
-        tintColor = state.placeholderColor
-        errorLabel.frame = state.errorLabelFrame
-        placeholderLabel.frame = state.placeholderLabelFrame
     }
 }
 

@@ -43,15 +43,12 @@ class RMBTHistorySyncModalViewController: UIViewController {
     private var isLandscape: Bool {
         return view.frame.width > view.frame.height
     }
-    private var isPlaceholderOverlappingWithDescription: Bool {
-        return view.frame.height < 667.0
-    }
     var onSyncSuccess: (() -> Void)?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         backgroundView.backgroundColor = .black.withAlphaComponent(0.0)
-        syncCodeTextField.placeholderLabel.isHidden = isPlaceholderOverlappingWithDescription
+        syncCodeTextField.placeholderLabel.isHidden = isPlaceholderOverlappingWithDescription(height: view.frame.height)
         NSLayoutConstraint.activate([enterCodeViewBottomConstraint])
         setState(RMBTHistorySyncModalState())
         setActionHandlers()
@@ -61,7 +58,9 @@ class RMBTHistorySyncModalViewController: UIViewController {
     
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
-        self.view.endEditing(true)
+        view.endEditing(true)
+        syncCodeTextField.setState(RMBTMaterialTextFieldState(frame: syncCodeTextField.frame))
+        syncCodeTextField.placeholderLabel.isHidden = isPlaceholderOverlappingWithDescription(height: size.height)
     }
     
     private func setState(_ state: RMBTHistorySyncModalState) {
@@ -91,6 +90,10 @@ class RMBTHistorySyncModalViewController: UIViewController {
         requestCodeButton.setTitle(.requestCodeButton, for: .normal)
         syncCodeTextField.placeholder = .code
         syncResultCloseButton.setTitle(.closeButton, for: .normal)
+    }
+    
+    private func isPlaceholderOverlappingWithDescription(height: CGFloat) -> Bool {
+        return height < 667.0
     }
 }
 
@@ -145,7 +148,7 @@ extension RMBTHistorySyncModalViewController {
         }
         RMBTControlServer.shared.syncWithCode(code, success: { response in
             if response.sync.count > 0, response.sync[0].success == false {
-                let errorMsg = response.sync[0].messageText
+                let errorMsg = NSLocalizedString(response.sync[0].messageText ?? "", comment: "")
                 self.setState(RMBTHistorySyncModalStateSyncError(errorMsg))
                 return
             }
@@ -184,7 +187,7 @@ extension RMBTHistorySyncModalViewController {
             } else {
                 self.syncImageView.layer.opacity = 1.0
                 self.dialogTitle.layer.opacity = 1.0
-                self.dialogDescription.layer.opacity = isCodeViewHiddenByKeyboard && self.isPlaceholderOverlappingWithDescription ? 0.0 : 1.0
+                self.dialogDescription.layer.opacity = isCodeViewHiddenByKeyboard && self.isPlaceholderOverlappingWithDescription(height: self.view.frame.height) ? 0.0 : 1.0
                 NSLayoutConstraint.activate([ self.enterCodeViewBottomConstraint ])
                 NSLayoutConstraint.deactivate([ self.enterCodeViewTopConstraint ])
                 if !self.enterCodeConfirmButtonLandscape.isHidden {
