@@ -201,7 +201,7 @@ extension RMBTHistoryResult2ViewController: UITableViewDelegate, UITableViewData
         case .speedGraphs:
             return 178
         case .title(_):
-            return 68
+            return 60
         case .netInfo:
             return CGFloat(60 + (historyResult?.netItems.count ?? 0) * 24)
         case .qoe:

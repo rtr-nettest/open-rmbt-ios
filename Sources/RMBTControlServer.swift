@@ -345,7 +345,7 @@ extension RMBTControlServer {
     
     @objc(getHistoryOpenDataResultWithUUID:success:error:) func getHistoryOpenDataResult(with uuid: String, success: @escaping (_ response: RMBTOpenDataResponse) -> Void, error: @escaping RMBTErrorBlock) {
         ensureClientUuid(success: { _ in
-            let path = "/v2/opentests/\(uuid)"
+            let path = "/opentests/\(uuid)"
             self.request(.get, path: path, requestObject: nil, success: success, error: { resultError in
                 error(resultError, nil)
             })
