@@ -2327,7 +2327,7 @@
             </objects>
             <point key="canvasLocation" x="2579.7101449275365" y="123.21428571428571"/>
         </scene>
-        <!--Test Result-->
+        <!--History Result2 View Controller-->
         <scene sceneID="CYt-FM-X7D">
             <objects>
                 <viewController storyboardIdentifier="result2_vc" id="M3M-qi-uGh" customClass="RMBTHistoryResult2ViewController" customModule="RMBT" customModuleProvider="target" sceneMemberID="viewController">
@@ -2355,8 +2355,8 @@
                             <constraint firstItem="4W3-Sd-aEj" firstAttribute="centerY" secondItem="HpZ-sC-ftM" secondAttribute="centerY" id="xn8-nl-Xn7"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" title="Test Result" id="2HI-Aa-9Bt">
-                        <barButtonItem key="rightBarButtonItem" enabled="NO" systemItem="action" id="WHM-w7-cuV">
+                    <navigationItem key="navigationItem" id="2HI-Aa-9Bt">
+                        <barButtonItem key="rightBarButtonItem" enabled="NO" image="share_black_36dp" id="WHM-w7-cuV">
                             <connections>
                                 <action selector="share:" destination="M3M-qi-uGh" id="Da8-Lq-94E"/>
                             </connections>
@@ -2655,7 +2655,7 @@
                     <navigationItem key="navigationItem" id="3F7-bM-HO4">
                         <barButtonItem key="rightBarButtonItem" style="plain" id="ukd-lk-huW">
                             <view key="customView" contentMode="scaleToFill" id="glt-5O-65X">
-                                <rect key="frame" x="358" y="5.6666666666666679" width="50" height="33"/>
+                                <rect key="frame" x="358" y="6" width="50" height="33"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <subviews>
                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="b8J-nS-rYd">
@@ -4519,7 +4519,7 @@
         <segue reference="4du-Fo-Tld"/>
         <segue reference="3cZ-Ly-KeA"/>
         <segue reference="D1Q-Jj-2ny"/>
-        <segue reference="QyZ-Pd-mkQ"/>
+        <segue reference="J7M-Lp-xOC"/>
         <segue reference="H4o-V3-BZ7"/>
     </inferredMetricsTieBreakers>
     <color key="tintColor" red="0.0" green="0.6705882352941176" blue="0.90588235294117647" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -4547,6 +4547,7 @@
         <image name="map_type_satellite" width="40" height="40"/>
         <image name="map_type_standard" width="40" height="40"/>
         <image name="my_location_btn" width="66" height="66"/>
+        <image name="share_black_36dp" width="27" height="27"/>
         <image name="sync_image" width="109" height="74"/>
         <image name="tab_history" width="24" height="24"/>
         <image name="tab_info" width="26" height="26"/>

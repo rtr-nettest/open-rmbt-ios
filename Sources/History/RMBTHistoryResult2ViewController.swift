@@ -80,12 +80,12 @@ final class RMBTHistoryResult2ViewController: UIViewController {
             historyResult.qosResults?.count ?? 0 > 0 {
             sections.append(.title(NSLocalizedString("Weitere Details", comment: "")))
             
-            if historyResult.qoeClassificationItems?.count ?? 0 > 0 {
-                sections.append(.qoe)
-            }
-            
             if historyResult.netItems?.count ?? 0 > 0 {
                 sections.append(.netInfo)
+            }
+
+            if historyResult.qoeClassificationItems?.count ?? 0 > 0 {
+                sections.append(.qoe)
             }
             
             if historyResult.qosResults?.count ?? 0 > 0 {
@@ -136,12 +136,12 @@ final class RMBTHistoryResult2ViewController: UIViewController {
             
             self.sections.append(.title(NSLocalizedString("Weitere Details", comment: "")))
             
-            if historyResult.qoeClassificationItems.count > 0 {
-                self.sections.append(.qoe)
-            }
-            
             if historyResult.netItems.count > 0 {
                 self.sections.append(.netInfo)
+            }
+            
+            if historyResult.qoeClassificationItems.count > 0 {
+                self.sections.append(.qoe)
             }
             
             if historyResult.qosResults?.count ?? 0 > 0 {
@@ -197,15 +197,15 @@ extension RMBTHistoryResult2ViewController: UITableViewDelegate, UITableViewData
         case .network:
             return 73
         case .basicInfo:
-            return 61
+            return 36
         case .speedGraphs:
             return 178
         case .title(_):
-            return 48
+            return 68
+        case .netInfo:
+            return CGFloat(60 + (historyResult?.netItems.count ?? 0) * 24)
         case .qoe:
             return CGFloat(48 + (historyResult?.qoeClassificationItems.count ?? 0) * 48)
-        case .netInfo:
-            return CGFloat(48 + (historyResult?.netItems.count ?? 0) * 48)
         case .qos:
             return CGFloat(48 + (historyResult?.qosResults.count ?? 0) * 48)
         }

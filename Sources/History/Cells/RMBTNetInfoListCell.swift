@@ -47,7 +47,7 @@ extension RMBTNetInfoListCell: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 48
+        return 24
     }
     
 }

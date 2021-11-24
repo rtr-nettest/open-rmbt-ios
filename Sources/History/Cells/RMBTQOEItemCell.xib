@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="19455" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19454"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -23,20 +23,20 @@
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="yco-3Z-JH0">
-                        <rect key="frame" x="16" y="12" width="24" height="24"/>
+                        <rect key="frame" x="20" y="12" width="24" height="24"/>
                         <constraints>
                             <constraint firstAttribute="width" constant="24" id="6cn-H5-wiJ"/>
                             <constraint firstAttribute="height" constant="24" id="Btf-wo-h4B"/>
                         </constraints>
                     </imageView>
                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Videos" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="AXm-Vs-G1K">
-                        <rect key="frame" x="56" y="16" width="157" height="16.5"/>
+                        <rect key="frame" x="60" y="16" width="153" height="16.5"/>
                         <fontDescription key="fontDescription" name="Roboto-Regular" family="Roboto" pointSize="14"/>
                         <nil key="textColor"/>
                         <nil key="highlightedColor"/>
                     </label>
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="tNS-Bt-DNu">
-                        <rect key="frame" x="56" y="47" width="244" height="1"/>
+                        <rect key="frame" x="20" y="47" width="280" height="1"/>
                         <color key="backgroundColor" red="0.93333333333333335" green="0.93333333333333335" blue="0.93333333333333335" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstAttribute="height" constant="1" id="Jcg-X5-D1j"/>
@@ -53,7 +53,7 @@
                 </subviews>
                 <constraints>
                     <constraint firstItem="AXm-Vs-G1K" firstAttribute="leading" secondItem="yco-3Z-JH0" secondAttribute="trailing" constant="16" id="K6C-DO-ui1"/>
-                    <constraint firstItem="tNS-Bt-DNu" firstAttribute="leading" secondItem="AXm-Vs-G1K" secondAttribute="leading" id="RyI-55-Okn"/>
+                    <constraint firstItem="tNS-Bt-DNu" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="20" id="RyI-55-Okn"/>
                     <constraint firstItem="b1x-i6-Vez" firstAttribute="leading" secondItem="AXm-Vs-G1K" secondAttribute="trailing" constant="5" id="UQs-HM-8qT"/>
                     <constraint firstAttribute="bottom" secondItem="tNS-Bt-DNu" secondAttribute="bottom" id="Yxf-7o-zSA"/>
                 </constraints>
@@ -63,7 +63,7 @@
                 <constraint firstItem="b1x-i6-Vez" firstAttribute="centerY" secondItem="njF-e1-oar" secondAttribute="centerY" id="Hjb-8v-TMy"/>
                 <constraint firstItem="yco-3Z-JH0" firstAttribute="centerY" secondItem="njF-e1-oar" secondAttribute="centerY" id="gg8-b0-Et5"/>
                 <constraint firstItem="AXm-Vs-G1K" firstAttribute="centerY" secondItem="njF-e1-oar" secondAttribute="centerY" id="kO5-oX-q08"/>
-                <constraint firstItem="yco-3Z-JH0" firstAttribute="leading" secondItem="njF-e1-oar" secondAttribute="leading" constant="16" id="nJ4-oD-1lB"/>
+                <constraint firstItem="yco-3Z-JH0" firstAttribute="leading" secondItem="njF-e1-oar" secondAttribute="leading" constant="20" id="nJ4-oD-1lB"/>
                 <constraint firstItem="njF-e1-oar" firstAttribute="trailing" secondItem="b1x-i6-Vez" secondAttribute="trailing" constant="20" id="oJs-GB-nJR"/>
                 <constraint firstItem="njF-e1-oar" firstAttribute="trailing" secondItem="tNS-Bt-DNu" secondAttribute="trailing" constant="20" id="zww-1m-tp2"/>
             </constraints>

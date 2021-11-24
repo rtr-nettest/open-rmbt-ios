@@ -205,7 +205,7 @@
             _dataState = RMBTHistoryResultDataStateBasic;
             dispatch_group_leave(allDone);
         } error:^(NSError *error) {
-            RMBTLog(@"Error fetching test results: %@. Info: %@", error);
+            NSLog(@"Error fetching test results: %@", error);
             dispatch_group_leave(allDone);
         }];
 

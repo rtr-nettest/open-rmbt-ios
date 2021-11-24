@@ -303,6 +303,7 @@ final class RMBTHistoryIndex2ViewController: UIViewController {
         } else if segue.identifier == "show_result",
             let rvc = segue.destination as? RMBTHistoryResult2ViewController {
             rvc.historyResult = sender as? RMBTHistoryResult
+            navigationItem.backBarButtonItem = UIBarButtonItem()
         } else if segue.identifier == "show_sync_modal", let vc = segue.destination as? RMBTHistorySyncModalViewController {
             vc.onSyncSuccess = { [weak self] in
                 self?.refresh()

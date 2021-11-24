@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="19455" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19454"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -24,10 +24,10 @@
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Hpr-gg-QUG">
-                        <rect key="frame" x="0.0" y="0.0" width="320" height="48"/>
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="56"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Qualität" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="v4T-j8-exT">
-                                <rect key="frame" x="20" y="14.5" width="280" height="19"/>
+                                <rect key="frame" x="20" y="18.5" width="280" height="19"/>
                                 <fontDescription key="fontDescription" name="Roboto-Medium" family="Roboto" pointSize="16"/>
                                 <color key="textColor" red="0.25882352941176467" green="0.25882352941176467" blue="0.25882352941176467" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
@@ -37,12 +37,12 @@
                         <constraints>
                             <constraint firstItem="v4T-j8-exT" firstAttribute="centerY" secondItem="Hpr-gg-QUG" secondAttribute="centerY" id="ThT-cE-v6d"/>
                             <constraint firstAttribute="trailing" secondItem="v4T-j8-exT" secondAttribute="trailing" constant="20" id="ob0-0p-gjn"/>
-                            <constraint firstAttribute="height" constant="48" id="zPy-7R-dMq"/>
+                            <constraint firstAttribute="height" constant="56" id="zPy-7R-dMq"/>
                             <constraint firstItem="v4T-j8-exT" firstAttribute="leading" secondItem="Hpr-gg-QUG" secondAttribute="leading" constant="20" id="zfh-fq-hXc"/>
                         </constraints>
                     </view>
                     <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" scrollEnabled="NO" style="plain" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="MmO-GP-sh1">
-                        <rect key="frame" x="0.0" y="48" width="320" height="113"/>
+                        <rect key="frame" x="0.0" y="56" width="320" height="105"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <connections>
                             <outlet property="dataSource" destination="KGk-i7-Jjw" id="7f7-fb-1l9"/>

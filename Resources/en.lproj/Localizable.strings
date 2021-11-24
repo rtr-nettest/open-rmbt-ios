@@ -227,9 +227,9 @@
 "video_telephony" = "Video telephony";
 "video_conferencing" = "Video conferencing";
 "cloud" = "Cloud";
-"video_uhd" = "Videos UHD";
-"video_sd" = "Videos SD";
-"video_hd" = "Videos HD";
+"video_uhd" = "Video UHD";
+"video_sd" = "Video SD";
+"video_hd" = "Video HD";
 "voip" = "VoIP";
 "streaming_audio_streaming" = "Audio streaming";
 "web" = "Web";

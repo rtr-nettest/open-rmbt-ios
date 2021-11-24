@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="19455" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19454"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -25,13 +25,6 @@
                 <rect key="frame" x="0.0" y="0.0" width="320" height="61"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="8fY-NH-jPh">
-                        <rect key="frame" x="0.0" y="60" width="320" height="1"/>
-                        <color key="backgroundColor" red="0.93333333330000001" green="0.93333333330000001" blue="0.93333333330000001" alpha="1" colorSpace="calibratedRGB"/>
-                        <constraints>
-                            <constraint firstAttribute="height" constant="1" id="MXG-JH-q7R"/>
-                        </constraints>
-                    </view>
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="k1g-LU-5x6">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="61"/>
                         <subviews>
@@ -183,13 +176,10 @@
                     </view>
                 </subviews>
                 <constraints>
-                    <constraint firstAttribute="trailing" secondItem="8fY-NH-jPh" secondAttribute="trailing" id="A9S-7y-XsG"/>
                     <constraint firstItem="k1g-LU-5x6" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="Dbj-hp-496"/>
                     <constraint firstAttribute="trailing" secondItem="k1g-LU-5x6" secondAttribute="trailing" id="Png-nW-nuY"/>
                     <constraint firstItem="k1g-LU-5x6" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="a1Z-8D-RIv"/>
-                    <constraint firstAttribute="bottom" secondItem="8fY-NH-jPh" secondAttribute="bottom" id="oDb-cJ-iNN"/>
                     <constraint firstAttribute="bottom" secondItem="k1g-LU-5x6" secondAttribute="bottom" id="qfP-2f-JXD"/>
-                    <constraint firstItem="8fY-NH-jPh" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="vgZ-4B-37a"/>
                 </constraints>
             </tableViewCellContentView>
             <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
