@@ -259,7 +259,7 @@ extension RMBTHistoryResult2ViewController: UITableViewDelegate, UITableViewData
             return qoeCell
         case .netInfo:
             let netInfoCell = tableView.dequeueReusableCell(withIdentifier: RMBTNetInfoListCell.ID, for: indexPath) as! RMBTNetInfoListCell
-            netInfoCell.title = NSLocalizedString("Netz", comment: "")
+            netInfoCell.title = NSLocalizedString("Network", comment: "")
             netInfoCell.items = historyResult.netItems as? [RMBTHistoryResultItem] ?? []
             netInfoCell.selectionStyle = .none
             return netInfoCell

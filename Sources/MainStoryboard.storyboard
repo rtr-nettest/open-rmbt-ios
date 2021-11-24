@@ -316,7 +316,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <view key="tableFooterView" opaque="NO" contentMode="scaleToFill" id="dol-gh-wV2">
-                            <rect key="frame" x="0.0" y="1562.6666641235352" width="428" height="122"/>
+                            <rect key="frame" x="0.0" y="1606.3333301544189" width="428" height="122"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             <subviews>
                                 <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="logo" translatesAutoresizingMaskIntoConstraints="NO" id="DIM-Jn-St1">
@@ -1806,12 +1806,20 @@
                                     <constraint firstItem="n61-gb-2Ck" firstAttribute="top" secondItem="Ypo-A8-6b0" secondAttribute="top" id="uXr-NY-OgA"/>
                                 </constraints>
                             </view>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="AbN-XQ-62a">
+                                <rect key="frame" x="0.0" y="88" width="428" height="1"/>
+                                <color key="backgroundColor" systemColor="opaqueSeparatorColor"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="1" id="uNa-4z-Vfk"/>
+                                </constraints>
+                            </view>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="ptw-wJ-JYW"/>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="xpL-iM-3xa" firstAttribute="centerY" secondItem="ptw-wJ-JYW" secondAttribute="centerY" id="0DA-bu-GqU"/>
                             <constraint firstItem="ptw-wJ-JYW" firstAttribute="trailing" secondItem="LSP-H4-Kuk" secondAttribute="trailing" id="69P-1e-P4S"/>
+                            <constraint firstAttribute="trailing" secondItem="AbN-XQ-62a" secondAttribute="trailing" id="6Ol-zR-rrz"/>
                             <constraint firstItem="ptw-wJ-JYW" firstAttribute="trailing" secondItem="Ypo-A8-6b0" secondAttribute="trailing" id="IpB-Ef-9TS"/>
                             <constraint firstItem="ptw-wJ-JYW" firstAttribute="trailing" secondItem="xpL-iM-3xa" secondAttribute="trailing" constant="46" id="Jz5-19-JMG"/>
                             <constraint firstItem="LSP-H4-Kuk" firstAttribute="top" secondItem="ptw-wJ-JYW" secondAttribute="top" constant="-88" id="VHb-L5-AKq"/>
@@ -1819,10 +1827,12 @@
                             <constraint firstAttribute="bottom" secondItem="w3E-7f-XML" secondAttribute="bottom" id="WhY-Rh-MPK"/>
                             <constraint firstItem="w3E-7f-XML" firstAttribute="top" secondItem="Ypo-A8-6b0" secondAttribute="bottom" id="bXI-xO-VX0"/>
                             <constraint firstItem="Ypo-A8-6b0" firstAttribute="leading" secondItem="ptw-wJ-JYW" secondAttribute="leading" id="ceF-Zl-2yQ"/>
+                            <constraint firstItem="AbN-XQ-62a" firstAttribute="leading" secondItem="Jcd-o0-68v" secondAttribute="leading" id="cqS-rV-SSL"/>
                             <constraint firstItem="WmF-xe-ryW" firstAttribute="centerX" secondItem="ptw-wJ-JYW" secondAttribute="centerX" id="lMl-gF-coN"/>
                             <constraint firstItem="w3E-7f-XML" firstAttribute="trailing" secondItem="ptw-wJ-JYW" secondAttribute="trailing" id="pvh-OL-aXg"/>
                             <constraint firstItem="LSP-H4-Kuk" firstAttribute="leading" secondItem="ptw-wJ-JYW" secondAttribute="leading" id="qVg-go-mMt"/>
                             <constraint firstItem="w3E-7f-XML" firstAttribute="leading" secondItem="ptw-wJ-JYW" secondAttribute="leading" id="tSq-0u-uv6"/>
+                            <constraint firstItem="AbN-XQ-62a" firstAttribute="top" secondItem="Ypo-A8-6b0" secondAttribute="top" id="yn0-e7-EQ1"/>
                             <constraint firstItem="WmF-xe-ryW" firstAttribute="centerY" secondItem="ptw-wJ-JYW" secondAttribute="centerY" id="yzF-Uo-bkI"/>
                             <constraint firstItem="xpL-iM-3xa" firstAttribute="leading" secondItem="ptw-wJ-JYW" secondAttribute="leading" constant="46" id="z9l-jL-jNb"/>
                         </constraints>
@@ -2655,7 +2665,7 @@
                     <navigationItem key="navigationItem" id="3F7-bM-HO4">
                         <barButtonItem key="rightBarButtonItem" style="plain" id="ukd-lk-huW">
                             <view key="customView" contentMode="scaleToFill" id="glt-5O-65X">
-                                <rect key="frame" x="358" y="6" width="50" height="33"/>
+                                <rect key="frame" x="358" y="5.6666666666666679" width="50" height="33"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <subviews>
                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="b8J-nS-rYd">
@@ -4568,6 +4578,9 @@
         </systemColor>
         <systemColor name="groupTableViewBackgroundColor">
             <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+        <systemColor name="opaqueSeparatorColor">
+            <color red="0.77647058823529413" green="0.77647058823529413" blue="0.78431372549019607" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>

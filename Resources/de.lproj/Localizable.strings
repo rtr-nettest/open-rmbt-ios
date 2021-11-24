@@ -19,7 +19,13 @@
 "Measurement" = "Messung";
 
 /* History result section title */
+"Weitere Details" = "Weitere Details";
+
+/* History result section title */
 "Network" = "Netz";
+
+/* History result section title */
+"Qualität" = "Qualität";
 
 /* Sync success button */
 "Reload" = "Neu laden";

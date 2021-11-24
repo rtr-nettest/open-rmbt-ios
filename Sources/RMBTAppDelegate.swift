@@ -89,7 +89,7 @@ final class RMBTAppDelegate: UIResponder, UIApplicationDelegate {
         // Background color
         if #available(iOS 13.0, *) {
             let navigationBarAppearance = UINavigationBarAppearance()
-            navigationBarAppearance.configureWithDefaultBackground()
+            navigationBarAppearance.configureWithTransparentBackground()
             navigationBarAppearance.backgroundColor = .white
             navigationBarAppearance.titleTextAttributes = [
                 .foregroundColor: UIColor(red: 66.0/255.0, green: 66.0/255.0, blue: 66.0/255.0, alpha: 1.0),
