@@ -180,10 +180,13 @@
             <connections>
                 <outlet property="bottomBorder" destination="quv-Dm-Jxc" id="box-PT-uC0"/>
                 <outlet property="dateLabel" destination="rg5-kl-dG4" id="bIj-JE-seT"/>
+                <outlet property="downloadSpeedIcon" destination="RJd-BQ-uhu" id="qNR-5z-ZrV"/>
                 <outlet property="downloadSpeedLabel" destination="quA-3S-NeC" id="XnS-NF-Nuq"/>
                 <outlet property="leftPaddingConstraint" destination="AWK-MX-lI5" id="0Az-KZ-vnK"/>
+                <outlet property="pingIcon" destination="h6v-bI-u6p" id="cVO-2L-2HO"/>
                 <outlet property="pingLabel" destination="i0c-xx-B2W" id="x0t-D7-Bgn"/>
                 <outlet property="typeImageView" destination="wUV-aK-ziW" id="umi-ew-x5p"/>
+                <outlet property="uploadSpeedIcon" destination="alv-zC-L1V" id="Qtf-qh-E4C"/>
                 <outlet property="uploadSpeedLabel" destination="O8d-VY-jSy" id="T3l-h1-DhE"/>
             </connections>
             <point key="canvasLocation" x="394" y="456"/>

@@ -110,6 +110,10 @@
         _coordinate = kCLLocationCoordinate2DInvalid;
 
         _dataState = RMBTHistoryResultDataStateIndex;
+        
+        _downloadSpeedClass = (NSNumber*)response[@"speed_download_classification"];
+        _uploadSpeedClass = (NSNumber*)response[@"speed_upload_classification"];
+        _pingClass = (NSNumber*)response[@"ping_classification"];
     }
     return self;
 }

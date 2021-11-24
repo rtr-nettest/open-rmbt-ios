@@ -231,8 +231,11 @@ extension RMBTHistoryResult2ViewController: UITableViewDelegate, UITableViewData
         case .basicInfo:
             let networkCell = tableView.dequeueReusableCell(withIdentifier: RMBTHistoryBasicInfoCell.ID, for: indexPath) as! RMBTHistoryBasicInfoCell
             networkCell.pingValue = historyResult.shortestPingMillisString
+            networkCell.pingIcon.tintColor = .byResultClass(historyResult.pingClass as? Int)
             networkCell.downloadValue = historyResult.downloadSpeedMbpsString
+            networkCell.downIcon.tintColor = .byResultClass(historyResult.downloadSpeedClass as? Int)
             networkCell.uploadValue = historyResult.uploadSpeedMbpsString
+            networkCell.upIcon.tintColor = .byResultClass(historyResult.uploadSpeedClass as? Int)
             networkCell.selectionStyle = .none
             return networkCell
         case .speedGraphs:

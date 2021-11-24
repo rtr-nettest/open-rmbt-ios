@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		361443482732793E00D0FC26 /* RMBTHistorySyncModalViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 361443472732793D00D0FC26 /* RMBTHistorySyncModalViewController.swift */; };
+		36933A73274E68B4009A52BE /* UIColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36933A72274E68B4009A52BE /* UIColor.swift */; };
 		36A9DF3F272C4E190099A57C /* UILabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36A9DF3E272C4E190099A57C /* UILabel.swift */; };
 		36B75A1D27393229006F4CB3 /* RMBTHistorySyncModalState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36B75A1C27393229006F4CB3 /* RMBTHistorySyncModalState.swift */; };
 		36B75A1F2739395D006F4CB3 /* RMBTMaterialTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36B75A1E2739395D006F4CB3 /* RMBTMaterialTextField.swift */; };
@@ -302,6 +303,7 @@
 		1F9C078F216F751C00F1FC10 /* RMBT.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RMBT.entitlements; sourceTree = "<group>"; };
 		32DE166B881B73366FE005F9 /* Pods_RMBT.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RMBT.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		361443472732793D00D0FC26 /* RMBTHistorySyncModalViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTHistorySyncModalViewController.swift; sourceTree = "<group>"; };
+		36933A72274E68B4009A52BE /* UIColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIColor.swift; sourceTree = "<group>"; };
 		36A9DF3E272C4E190099A57C /* UILabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UILabel.swift; sourceTree = "<group>"; };
 		36B75A1C27393229006F4CB3 /* RMBTHistorySyncModalState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTHistorySyncModalState.swift; sourceTree = "<group>"; };
 		36B75A1E2739395D006F4CB3 /* RMBTMaterialTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTMaterialTextField.swift; sourceTree = "<group>"; };
@@ -1217,6 +1219,7 @@
 				E98244AA274B66BF00243D13 /* RMBTTitleSectionLabel.swift */,
 				E9E9E9002742685E005EB393 /* UIView+XibLoadable.swift */,
 				E96792B4274BC6E00091C4A7 /* RMBTLoopModeSettingsValidator.swift */,
+				36933A72274E68B4009A52BE /* UIColor.swift */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -1852,6 +1855,7 @@
 				E91316B426ADB1E000368DCD /* RMBTStatsViewController.swift in Sources */,
 				E982444627317FDD00081732 /* RMBTLoopModeCompleteViewController.swift in Sources */,
 				E9E993D826EB185300E7EED6 /* RMBTQOEItemCell.swift in Sources */,
+				36933A73274E68B4009A52BE /* UIColor.swift in Sources */,
 				E9400EFA26BA758F0067273A /* OperatorsResponse.swift in Sources */,
 				E9E993FA26EC8F8F00E7EED6 /* RMBTHistoryQoSGroupViewController.swift in Sources */,
 				E9400F2326BE8C690067273A /* SpeedMeasurementJPLResult.swift in Sources */,

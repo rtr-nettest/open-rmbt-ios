@@ -17,8 +17,11 @@ import UIKit
     @IBOutlet weak var dateLabel: UILabel!
     
     @IBOutlet weak var downloadSpeedLabel: UILabel!
+    @IBOutlet weak var downloadSpeedIcon: UIImageView!
     @IBOutlet weak var uploadSpeedLabel: UILabel!
+    @IBOutlet weak var uploadSpeedIcon: UIImageView!
     @IBOutlet weak var pingLabel: UILabel!
+    @IBOutlet weak var pingIcon: UIImageView!
     @IBOutlet weak var leftPaddingConstraint: NSLayoutConstraint?
     @IBOutlet weak var bottomBorder: UIView!
 }
