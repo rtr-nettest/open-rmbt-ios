@@ -26,10 +26,12 @@ public class MeasurementServerInfoRequest: BasicRequest {
 public class HistoryWithQOSRequest: BasicRequest {
 
     var testUUID: String?
+    var clientUUID: String?
     
     override public func mapping(map: Map) {
         super.mapping(map: map)
         testUUID <- map["test_uuid"]
+        clientUUID <- map["client_uuid"]
     }
 }
 ///

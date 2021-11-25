@@ -232,6 +232,11 @@
             for (NSDictionary *r in responseDictionary) {
                 [self->_fullDetailsItems addObject:[[RMBTHistoryResultItem alloc] initWithResponse:r]];
             }
+            [self->_fullDetailsItems sortUsingComparator:^NSComparisonResult(id  _Nonnull obj1, id  _Nonnull obj2) {
+                RMBTHistoryResultItem *item1 = (RMBTHistoryResultItem*) obj1;
+                RMBTHistoryResultItem *item2 = (RMBTHistoryResultItem*) obj2;
+                return [item1.title localizedCaseInsensitiveCompare:item2.title];
+            }];
             self->_dataState = RMBTHistoryResultDataStateFull;
             success();
         } error:^(NSError *error) {

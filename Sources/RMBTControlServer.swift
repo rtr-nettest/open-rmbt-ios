@@ -328,11 +328,12 @@ extension RMBTControlServer {
     @objc(getFullDetailsHistoryResultWithUUID:success:error:) func getFullDetailsHistoryResultWithUUID(uuid: String, success: @escaping (_ response: FullMapMeasurementResponse) -> Void, error errorCallback: @escaping ErrorCallback) {
         let key = "/testresultdetail"
         
-        ensureClientUuid(success: { theUuid in
+        ensureClientUuid(success: { clientUuid in
             
             let r = HistoryWithQOSRequest()
             BasicRequestBuilder.addBasicRequestValues(r)
             r.testUUID = uuid
+            r.clientUUID = clientUuid
             
             self.request(.post, path: key, requestObject: r, success: success, error: errorCallback)
             
@@ -355,12 +356,13 @@ extension RMBTControlServer {
     }
     
     @objc(getHistoryQoSResultWithUUID:success:error:) func getHistoryQOSResultWithUUID(testUuid: String, success: @escaping (_ response: QosMeasurementResultResponse) -> Void, error failure: @escaping ErrorCallback) {
-        ensureClientUuid(success: { _ in
+        ensureClientUuid(success: { clientUuid in
             
             let r = HistoryWithQOSRequest()
             r.testUUID = testUuid
+            r.clientUUID = clientUuid
 
-            self.request(.post, path: "/qosTestResult", requestObject: r, success: success, error: failure)
+            self.request(.post, path: "/qosTestResult?api=2", requestObject: r, success: success, error: failure)
             
         }, error: failure)
         

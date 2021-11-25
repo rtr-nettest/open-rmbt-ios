@@ -20,6 +20,7 @@ final class RMBTHistoryResult2ViewController: UIViewController {
         case qoe
         case netInfo
         case qos
+        case testDetails
     }
     
     @IBOutlet private weak var tableView: UITableView!
@@ -46,6 +47,7 @@ final class RMBTHistoryResult2ViewController: UIViewController {
         self.tableView.register(UINib(nibName: RMBTQOEListCell.ID, bundle: nil), forCellReuseIdentifier: RMBTQOEListCell.ID)
         self.tableView.register(UINib(nibName: RMBTNetInfoListCell.ID, bundle: nil), forCellReuseIdentifier: RMBTNetInfoListCell.ID)
         self.tableView.register(UINib(nibName: RMBTQOSListCell.ID, bundle: nil), forCellReuseIdentifier: RMBTQOSListCell.ID)
+        self.tableView.register(UINib(nibName: RMBTTestDetailTitleCell.ID, bundle: nil), forCellReuseIdentifier: RMBTTestDetailTitleCell.ID)
         
         self.tableView.contentInset = UIEdgeInsets(top: 20, left: 0, bottom: 20, right: 0)
         
@@ -91,6 +93,10 @@ final class RMBTHistoryResult2ViewController: UIViewController {
             if historyResult.qosResults?.count ?? 0 > 0 {
                 sections.append(.qos)
             }
+        }
+        
+        if historyResult.fullDetailsItems?.count ?? 0 > 0 {
+            sections.append(.testDetails)
         }
         
         self.sections = sections
@@ -148,6 +154,10 @@ final class RMBTHistoryResult2ViewController: UIViewController {
                 self.sections.append(.qos)
             }
             
+            historyResult.ensureFullDetails { [weak self] in
+                self?.prepareSections()
+            }
+            
             self.loadingIndicatorView.stopAnimating()
             self.shareButton.isEnabled = true
             self.prepareSections()
@@ -179,6 +189,10 @@ final class RMBTHistoryResult2ViewController: UIViewController {
         if segue.identifier == "show_qos_group",
            let vc = segue.destination as? RMBTHistoryQoSGroupViewController {
             vc.result = sender as? RMBTHistoryQoSGroupResult
+        } else if segue.identifier == "show_test_details", let vc = segue.destination as? RMBTHistoryTestDetailsViewController, let historyResult = historyResult, let testDetails = historyResult.fullDetailsItems as? [RMBTHistoryResultItem] {
+            vc.testDetails = testDetails
+            vc.navigationItem.backBarButtonItem = UIBarButtonItem()
+            vc.title = title
         }
     }
 }
@@ -205,9 +219,11 @@ extension RMBTHistoryResult2ViewController: UITableViewDelegate, UITableViewData
         case .netInfo:
             return CGFloat(60 + (historyResult?.netItems.count ?? 0) * 24)
         case .qoe:
-            return CGFloat(48 + (historyResult?.qoeClassificationItems.count ?? 0) * 48)
+            return CGFloat(60 + (historyResult?.qoeClassificationItems.count ?? 0) * 48)
         case .qos:
-            return CGFloat(48 + (historyResult?.qosResults.count ?? 0) * 48)
+            return CGFloat(60 + (historyResult?.qosResults.count ?? 0) * 48)
+        case .testDetails:
+            return 48
         }
     }
     
@@ -272,6 +288,21 @@ extension RMBTHistoryResult2ViewController: UITableViewDelegate, UITableViewData
                 self?.showQosGroup(item)
             }
             return qosCell
+        case .testDetails:
+            let cell = tableView.dequeueReusableCell(withIdentifier: RMBTTestDetailTitleCell.ID, for: indexPath)
+            cell.accessoryType = .disclosureIndicator
+            return cell
+        }
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let section = sections[indexPath.row]
+        switch(section) {
+        case .testDetails:
+            tableView.deselectRow(at: indexPath, animated: true)
+            performSegue(withIdentifier: "show_test_details", sender: nil)
+        default:
+            return
         }
     }
    

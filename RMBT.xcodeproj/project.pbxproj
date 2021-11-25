@@ -9,6 +9,11 @@
 /* Begin PBXBuildFile section */
 		361443482732793E00D0FC26 /* RMBTHistorySyncModalViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 361443472732793D00D0FC26 /* RMBTHistorySyncModalViewController.swift */; };
 		36933A73274E68B4009A52BE /* UIColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36933A72274E68B4009A52BE /* UIColor.swift */; };
+		36933A75274FBF00009A52BE /* RMBTTestDetailCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36933A74274FBF00009A52BE /* RMBTTestDetailCell.swift */; };
+		36933A77274FCA96009A52BE /* RMBTHistoryTestDetailsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36933A76274FCA96009A52BE /* RMBTHistoryTestDetailsViewController.swift */; };
+		36933A79274FD72B009A52BE /* RMBTTestDetailCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 36933A78274FD72B009A52BE /* RMBTTestDetailCell.xib */; };
+		36933A7B274FE1E0009A52BE /* RMBTTestDetailTitleCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36933A7A274FE1E0009A52BE /* RMBTTestDetailTitleCell.swift */; };
+		36933A7D274FE220009A52BE /* RMBTTestDetailTitleCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 36933A7C274FE220009A52BE /* RMBTTestDetailTitleCell.xib */; };
 		36A9DF3F272C4E190099A57C /* UILabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36A9DF3E272C4E190099A57C /* UILabel.swift */; };
 		36B75A1D27393229006F4CB3 /* RMBTHistorySyncModalState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36B75A1C27393229006F4CB3 /* RMBTHistorySyncModalState.swift */; };
 		36B75A1F2739395D006F4CB3 /* RMBTMaterialTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36B75A1E2739395D006F4CB3 /* RMBTMaterialTextField.swift */; };
@@ -304,6 +309,11 @@
 		32DE166B881B73366FE005F9 /* Pods_RMBT.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RMBT.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		361443472732793D00D0FC26 /* RMBTHistorySyncModalViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTHistorySyncModalViewController.swift; sourceTree = "<group>"; };
 		36933A72274E68B4009A52BE /* UIColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIColor.swift; sourceTree = "<group>"; };
+		36933A74274FBF00009A52BE /* RMBTTestDetailCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTTestDetailCell.swift; sourceTree = "<group>"; };
+		36933A76274FCA96009A52BE /* RMBTHistoryTestDetailsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTHistoryTestDetailsViewController.swift; sourceTree = "<group>"; };
+		36933A78274FD72B009A52BE /* RMBTTestDetailCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = RMBTTestDetailCell.xib; sourceTree = "<group>"; };
+		36933A7A274FE1E0009A52BE /* RMBTTestDetailTitleCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTTestDetailTitleCell.swift; sourceTree = "<group>"; };
+		36933A7C274FE220009A52BE /* RMBTTestDetailTitleCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = RMBTTestDetailTitleCell.xib; sourceTree = "<group>"; };
 		36A9DF3E272C4E190099A57C /* UILabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UILabel.swift; sourceTree = "<group>"; };
 		36B75A1C27393229006F4CB3 /* RMBTHistorySyncModalState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTHistorySyncModalState.swift; sourceTree = "<group>"; };
 		36B75A1E2739395D006F4CB3 /* RMBTMaterialTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTMaterialTextField.swift; sourceTree = "<group>"; };
@@ -1373,6 +1383,7 @@
 				E9E993FF26EC9CB100E7EED6 /* RMBTHistoryQoSSingleViewController.swift */,
 				E93FB0F626F39E0200DD24CD /* RMBTHistoryQoSSingleResultViewController.swift */,
 				361443472732793D00D0FC26 /* RMBTHistorySyncModalViewController.swift */,
+				36933A76274FCA96009A52BE /* RMBTHistoryTestDetailsViewController.swift */,
 			);
 			path = History;
 			sourceTree = "<group>";
@@ -1418,6 +1429,10 @@
 				E9E993FC26EC951200E7EED6 /* RMBTHistoryQoSGroupResultCell.xib */,
 				36B75A26273EA096006F4CB3 /* RMBTHistoryLoopCell.xib */,
 				36B75A28273EA73C006F4CB3 /* RMBTHistoryLoopCell.swift */,
+				36933A74274FBF00009A52BE /* RMBTTestDetailCell.swift */,
+				36933A78274FD72B009A52BE /* RMBTTestDetailCell.xib */,
+				36933A7A274FE1E0009A52BE /* RMBTTestDetailTitleCell.swift */,
+				36933A7C274FE220009A52BE /* RMBTTestDetailTitleCell.xib */,
 			);
 			path = Cells;
 			sourceTree = "<group>";
@@ -1638,6 +1653,7 @@
 				E959549C26E4F17E004EA6D9 /* Roboto-Thin.ttf in Resources */,
 				E959547D26E3B5DF004EA6D9 /* RMBTHistoryLoadingCell.xib in Resources */,
 				E9E993E826EB27BD00E7EED6 /* RMBTQOSListCell.xib in Resources */,
+				36933A79274FD72B009A52BE /* RMBTTestDetailCell.xib in Resources */,
 				C7228DEC17FC199F00FB984D /* RMBTMapCalloutView.xib in Resources */,
 				E9E993BF26EA3DD600E7EED6 /* RMBTHistoryNetworkCell.xib in Resources */,
 				E9E9E90527429B90005EB393 /* RMBTTestLandscapeView.xib in Resources */,
@@ -1668,6 +1684,7 @@
 				E9E993E926EB27BD00E7EED6 /* RMBTQOSItemCell.xib in Resources */,
 				E959549826E4F17D004EA6D9 /* Roboto-Italic.ttf in Resources */,
 				E9E9940A26ECDAD100E7EED6 /* RMBTSwitcherCell.xib in Resources */,
+				36933A7D274FE220009A52BE /* RMBTTestDetailTitleCell.xib in Resources */,
 				E959549626E4F17D004EA6D9 /* Roboto-BoldItalic.ttf in Resources */,
 				E946B94026D28BA20006E1F1 /* RMBTMapOptionsCell.xib in Resources */,
 				E946B95826D6736F0006E1F1 /* RMBTMapOptionsTypeCell.xib in Resources */,
@@ -1875,6 +1892,7 @@
 				E99765B926FD885E009A1A4C /* UIFont+Roboto.swift in Sources */,
 				C7228DEF17FC1ADF00FB984D /* RMBTHistoryResultItemCell.m in Sources */,
 				E91316B026AD95B300368DCD /* RMBTTOS.swift in Sources */,
+				36933A7B274FE1E0009A52BE /* RMBTTestDetailTitleCell.swift in Sources */,
 				E9400F3726BE8D4C0067273A /* SpeedMeasurementSubmitResponse.swift in Sources */,
 				E9400F0626BAD0F40067273A /* UIDeviceHardware.swift in Sources */,
 				E93FB10726F4BCE000DD24CD /* RMBTTestParams.swift in Sources */,
@@ -1909,6 +1927,7 @@
 				C774EE7A1792F73D00D623A3 /* RMBTLocationTracker.m in Sources */,
 				E98244AB274B66BF00243D13 /* RMBTTitleSectionLabel.swift in Sources */,
 				E9E993CD26EA617200E7EED6 /* RMBTOpenDataResponse.swift in Sources */,
+				36933A77274FCA96009A52BE /* RMBTHistoryTestDetailsViewController.swift in Sources */,
 				C7DF2BB617D91AE400A0E76B /* RMBTNews.m in Sources */,
 				36A9DF3F272C4E190099A57C /* UILabel.swift in Sources */,
 				E9881C82270C1190008EFDF6 /* RMBTLoaderView.swift in Sources */,
@@ -1998,6 +2017,7 @@
 				C7A4B75A17B43C8400176B92 /* RMBTMapMeasurement.m in Sources */,
 				E9B51CC627240B84006ED0C7 /* UIApplication+Additions.swift in Sources */,
 				E930769926CE247F0046A17B /* RMBTMap2ViewController.swift in Sources */,
+				36933A75274FBF00009A52BE /* RMBTTestDetailCell.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
