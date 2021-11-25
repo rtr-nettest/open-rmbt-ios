@@ -27,6 +27,9 @@
 /* History result section title */
 "Qualität" = "Quality";
 
+/* History result section title */
+"Test details" = "Test details";
+
 /* Sync success button */
 "Reload" = "Reload";
 
