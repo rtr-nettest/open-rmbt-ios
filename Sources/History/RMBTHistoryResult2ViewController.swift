@@ -38,7 +38,7 @@ final class RMBTHistoryResult2ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        self.title = self.historyResult?.timeString
+        self.title = self.historyResult?.timeStringIn24hFormat
         
         self.tableView.register(UINib(nibName: RMBTHistoryMapCell.ID, bundle: nil), forCellReuseIdentifier: RMBTHistoryMapCell.ID)
         self.tableView.register(UINib(nibName: RMBTHistoryNetworkCell.ID, bundle: nil), forCellReuseIdentifier: RMBTHistoryNetworkCell.ID)
@@ -124,7 +124,7 @@ final class RMBTHistoryResult2ViewController: UIViewController {
                 return
             }
             
-            self.title = historyResult.timeString
+            self.title = historyResult.timeStringIn24hFormat
             
             var items: [Any] = []
             

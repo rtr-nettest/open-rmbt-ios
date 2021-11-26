@@ -344,7 +344,7 @@ extension RMBTHistoryIndex2ViewController: UITableViewDataSource, UITableViewDel
             return nil
         }
         let header = tableView.dequeueReusableHeaderFooterView(withIdentifier: RMBTHistoryLoopCell.ID) as! RMBTHistoryLoopCell
-        header.dateLabel.text = testResults[section].timeString
+        header.dateLabel.text = testResults[section].timeStringIn24hFormat
         let networkTypeIcon = RMBTNetworkTypeConstants.networkTypeDictionary[testResults[section].networkTypeServerDescription]?.icon
         header.typeImageView.image = networkTypeIcon
         header.onExpand = { [unowned self] in
@@ -390,7 +390,7 @@ extension RMBTHistoryIndex2ViewController: UITableViewDataSource, UITableViewDel
 
             let networTypeIcon = RMBTNetworkTypeConstants.networkTypeDictionary[testResult.networkTypeServerDescription]?.icon
             cell.typeImageView.image = networTypeIcon
-            cell.dateLabel.text = testResult.timeString
+            cell.dateLabel.text = testResult.timeStringIn24hFormat
             cell.downloadSpeedLabel.text = testResult.downloadSpeedMbpsString
             cell.downloadSpeedIcon.tintColor = .byResultClass(testResult.downloadSpeedClass)
             cell.uploadSpeedLabel.text = testResult.uploadSpeedMbpsString

@@ -14,6 +14,7 @@
 		36933A79274FD72B009A52BE /* RMBTTestDetailCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 36933A78274FD72B009A52BE /* RMBTTestDetailCell.xib */; };
 		36933A7B274FE1E0009A52BE /* RMBTTestDetailTitleCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36933A7A274FE1E0009A52BE /* RMBTTestDetailTitleCell.swift */; };
 		36933A7D274FE220009A52BE /* RMBTTestDetailTitleCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 36933A7C274FE220009A52BE /* RMBTTestDetailTitleCell.xib */; };
+		36933A7F275138E5009A52BE /* RMBTHistoryResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36933A7E275138E5009A52BE /* RMBTHistoryResult.swift */; };
 		36A9DF3F272C4E190099A57C /* UILabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36A9DF3E272C4E190099A57C /* UILabel.swift */; };
 		36B75A1D27393229006F4CB3 /* RMBTHistorySyncModalState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36B75A1C27393229006F4CB3 /* RMBTHistorySyncModalState.swift */; };
 		36B75A1F2739395D006F4CB3 /* RMBTMaterialTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36B75A1E2739395D006F4CB3 /* RMBTMaterialTextField.swift */; };
@@ -314,6 +315,7 @@
 		36933A78274FD72B009A52BE /* RMBTTestDetailCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = RMBTTestDetailCell.xib; sourceTree = "<group>"; };
 		36933A7A274FE1E0009A52BE /* RMBTTestDetailTitleCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTTestDetailTitleCell.swift; sourceTree = "<group>"; };
 		36933A7C274FE220009A52BE /* RMBTTestDetailTitleCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = RMBTTestDetailTitleCell.xib; sourceTree = "<group>"; };
+		36933A7E275138E5009A52BE /* RMBTHistoryResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTHistoryResult.swift; sourceTree = "<group>"; };
 		36A9DF3E272C4E190099A57C /* UILabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UILabel.swift; sourceTree = "<group>"; };
 		36B75A1C27393229006F4CB3 /* RMBTHistorySyncModalState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTHistorySyncModalState.swift; sourceTree = "<group>"; };
 		36B75A1E2739395D006F4CB3 /* RMBTMaterialTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTMaterialTextField.swift; sourceTree = "<group>"; };
@@ -1230,6 +1232,7 @@
 				E9E9E9002742685E005EB393 /* UIView+XibLoadable.swift */,
 				E96792B4274BC6E00091C4A7 /* RMBTLoopModeSettingsValidator.swift */,
 				36933A72274E68B4009A52BE /* UIColor.swift */,
+				36933A7E275138E5009A52BE /* RMBTHistoryResult.swift */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -1868,6 +1871,7 @@
 				E959547F26E3B74B004EA6D9 /* RMBTHistoryIndexCell.swift in Sources */,
 				C7ECD97A174ED9AE000DF966 /* UIView+Position.m in Sources */,
 				E9400EFC26BA78FD0067273A /* Requests.swift in Sources */,
+				36933A7F275138E5009A52BE /* RMBTHistoryResult.swift in Sources */,
 				E9400F0226BACF340067273A /* ServerHelper.swift in Sources */,
 				E91316B426ADB1E000368DCD /* RMBTStatsViewController.swift in Sources */,
 				E982444627317FDD00081732 /* RMBTLoopModeCompleteViewController.swift in Sources */,
