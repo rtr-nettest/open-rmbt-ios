@@ -111,9 +111,9 @@
 
         _dataState = RMBTHistoryResultDataStateIndex;
         
-        _downloadSpeedClass = (NSNumber*)response[@"speed_download_classification"];
-        _uploadSpeedClass = (NSNumber*)response[@"speed_upload_classification"];
-        _pingClass = (NSNumber*)response[@"ping_classification"];
+        _downloadSpeedClass = [((NSNumber *) response[@"speed_download_classification"]) integerValue];
+        _uploadSpeedClass = [((NSNumber *) response[@"speed_upload_classification"]) integerValue];
+        _pingClass = [((NSNumber *) response[@"ping_classification"]) integerValue];
     }
     return self;
 }
@@ -189,12 +189,20 @@
             
             _netItems = [NSMutableArray array];
             for (NSDictionary *r in response[@"net"]) {
-                [_netItems addObject:[[RMBTHistoryResultItem alloc] initWithResponse:r]];
+                [self->_netItems addObject:[[RMBTHistoryResultItem alloc] initWithResponse:r]];
             }
 
-            _measurementItems = [NSMutableArray array];
+            self->_measurementItems = [NSMutableArray array];
             for (NSDictionary *r in response[@"measurement"]) {
-                [_measurementItems addObject:[[RMBTHistoryResultItem alloc] initWithResponse:r]];
+                RMBTHistoryResultItem *item = [[RMBTHistoryResultItem alloc] initWithResponse:r];
+                if ([item.title isEqualToString:@"Download"]) {
+                    self->_downloadSpeedClass = item.classification;
+                } else if ([item.title isEqualToString:@"Upload"]) {
+                    self->_uploadSpeedClass = item.classification;
+                } else if ([item.title isEqualToString:@"Ping"]) {
+                    self->_pingClass = item.classification;
+                }
+                [self->_measurementItems addObject:item];
             }
 
             _qoeClassificationItems = [NSMutableArray array];
