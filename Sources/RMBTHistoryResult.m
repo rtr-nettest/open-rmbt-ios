@@ -187,9 +187,12 @@
                 }
             }
             
-            _netItems = [NSMutableArray array];
+            self->_netItems = [NSMutableArray array];
             for (NSDictionary *r in response[@"net"]) {
-                [self->_netItems addObject:[[RMBTHistoryResultItem alloc] initWithResponse:r]];
+                RMBTHistoryResultItem *item = [[RMBTHistoryResultItem alloc] initWithResponse:r];
+                if ([item.title isEqualToString:@"Connection"]) {
+                    [self->_netItems addObject:item];
+                }
             }
 
             self->_measurementItems = [NSMutableArray array];

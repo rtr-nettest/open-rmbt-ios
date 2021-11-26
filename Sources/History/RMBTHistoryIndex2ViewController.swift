@@ -169,6 +169,7 @@ final class RMBTHistoryIndex2ViewController: UIViewController {
         
         let resultVC = self.storyboard?.instantiateViewController(withIdentifier: "result2_vc") as! RMBTHistoryResult2ViewController
         resultVC.historyResult = result
+        resultVC.isShowingLastResult = showingLastTestResult
         
         self.navigationController?.pushViewController(resultVC, animated: false)
     }

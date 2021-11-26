@@ -31,6 +31,7 @@ final class RMBTHistoryResult2ViewController: UIViewController {
     private var measurementItems: [Any] = []
     
     public var historyResult: RMBTHistoryResult?
+    public var isShowingLastResult = false
     
     private var sections: [Section] = []
     
@@ -53,6 +54,13 @@ final class RMBTHistoryResult2ViewController: UIViewController {
         
         self.fetchHistoryResultInformation()
         self.prepareSections()
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        if isShowingLastResult, let tabCtrl = tabBarController {
+            tabCtrl.selectedIndex = 0
+        }
     }
     
     private func prepareSections() {
