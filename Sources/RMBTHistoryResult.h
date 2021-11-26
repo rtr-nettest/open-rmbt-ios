@@ -28,7 +28,7 @@
 @property (nonatomic, readonly) NSInteger classification;
 @property (nonatomic, readonly) BOOL hasDetails;
 - (instancetype)initWithResponse:(NSDictionary*)response;
-- (instancetype)initWithTitle:(NSString*)title value:(NSString*)value classification:(NSUInteger)classification hasDetails:(BOOL)hasDetails;
+- (instancetype)initWithTitle:(NSString*)title value:(NSString*)value classification:(NSInteger)classification hasDetails:(BOOL)hasDetails;
 
 //Get classification from percent
 + (NSInteger)classification:(double)percent;

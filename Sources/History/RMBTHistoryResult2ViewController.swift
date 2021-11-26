@@ -50,7 +50,7 @@ final class RMBTHistoryResult2ViewController: UIViewController {
         self.tableView.register(UINib(nibName: RMBTQOSListCell.ID, bundle: nil), forCellReuseIdentifier: RMBTQOSListCell.ID)
         self.tableView.register(UINib(nibName: RMBTTestDetailTitleCell.ID, bundle: nil), forCellReuseIdentifier: RMBTTestDetailTitleCell.ID)
         
-        self.tableView.contentInset = UIEdgeInsets(top: 20, left: 0, bottom: 20, right: 0)
+        self.tableView.contentInset = UIEdgeInsets(top: 20, left: 0, bottom: 10, right: 0)
         
         self.fetchHistoryResultInformation()
         self.prepareSections()
@@ -58,8 +58,12 @@ final class RMBTHistoryResult2ViewController: UIViewController {
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        if isShowingLastResult, let tabCtrl = tabBarController {
+        if isMovingFromParent, isShowingLastResult, let tabCtrl = tabBarController {
             tabCtrl.selectedIndex = 0
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else {return}
+                self.navigationController?.popToRootViewController(animated: false)
+            }
         }
     }
     
@@ -120,11 +124,12 @@ final class RMBTHistoryResult2ViewController: UIViewController {
                 return
             }
             
+            self.title = historyResult.timeString
+            
             var items: [Any] = []
             
             for item in historyResult.measurementItems ?? [] {
                 items.append(item)
-                
             }
             
             // Add a summary "Quality tests 100% (90/90)" row
@@ -248,7 +253,9 @@ extension RMBTHistoryResult2ViewController: UITableViewDelegate, UITableViewData
             return mapCell
         case .network:
             let networkCell = tableView.dequeueReusableCell(withIdentifier: RMBTHistoryNetworkCell.ID, for: indexPath) as! RMBTHistoryNetworkCell
-            networkCell.networkName = (historyResult.netItems[0] as? RMBTHistoryResultItem)?.value
+            networkCell.networkName = (historyResult.netItems as? [RMBTHistoryResultItem])?.first(where: { item in
+                item.title == "WLAN SSID" || item.title == NSLocalizedString("history.result.operator", comment: "");
+            })?.value
             networkCell.networkType = historyResult.networkTypeServerDescription
             networkCell.selectionStyle = .none
             return networkCell

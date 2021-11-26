@@ -21,7 +21,13 @@
 @implementation RMBTHistoryResultItem
 - (instancetype)initWithResponse:(NSDictionary*)response {
     if (self = [super init]) {
-        _title = response[@"title"];
+        if ( [response[@"title"] isEqualToString:@"Connection"] ) {
+            _title = NSLocalizedString(@"history.result.connection", comment: "");
+        } else if ( [response[@"title"] isEqualToString:@"Operator"] ) {
+            _title = NSLocalizedString(@"history.result.operator", comment: "");
+        } else {
+            _title = response[@"title"];
+        }
         _value = [response[@"value"] description];
         NSParameterAssert(_title);
         NSParameterAssert(_value);
@@ -33,7 +39,7 @@
     return self;
 }
 
-- (instancetype)initWithTitle:(NSString*)title value:(NSString*)value classification:(NSUInteger)classification hasDetails:(BOOL)hasDetails {
+- (instancetype)initWithTitle:(NSString*)title value:(NSString*)value classification:(NSInteger)classification hasDetails:(BOOL)hasDetails {
     if (self = [super init]) {
         _title = title;
         _value = value;
@@ -168,13 +174,16 @@
         [[RMBTControlServer sharedControlServer] getHistoryResultWithUUID:self.uuid fullDetails:NO success:^(HistoryMeasurementResponse *r) {
             NSDictionary *response = [r.measurements.firstObject json];
             if (response[@"network_type"]) {
-                _networkType = RMBTNetworkTypeMake([response[@"network_type"] integerValue]);
+                self->_networkType = RMBTNetworkTypeMake([response[@"network_type"] integerValue]);
             }
+            if (response[@"network_info"] && response[@"network_info"][@"network_type_label"]) {
+                self->_networkTypeServerDescription = response[@"network_info"][@"network_type_label"];
+            }
+            self->_timeString = response[@"time_string"];
+            self->_openTestUuid = response[@"open_test_uuid"];
 
-            _openTestUuid = response[@"open_test_uuid"];
-
-            _shareURL = nil;
-            _shareText = response[@"share_text"];
+            self->_shareURL = nil;
+            self->_shareText = response[@"share_text"];
             if (_shareText) {
                 NSDataDetector *linkDetector = [NSDataDetector dataDetectorWithTypes:NSTextCheckingTypeLink error:nil];
                 NSArray *matches = [linkDetector matchesInString:_shareText options:0 range:NSMakeRange(0, [_shareText length])];
@@ -190,9 +199,7 @@
             self->_netItems = [NSMutableArray array];
             for (NSDictionary *r in response[@"net"]) {
                 RMBTHistoryResultItem *item = [[RMBTHistoryResultItem alloc] initWithResponse:r];
-                if ([item.title isEqualToString:@"Connection"]) {
-                    [self->_netItems addObject:item];
-                }
+                [self->_netItems addObject:item];
             }
 
             self->_measurementItems = [NSMutableArray array];

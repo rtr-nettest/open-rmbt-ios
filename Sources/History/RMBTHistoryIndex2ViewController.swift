@@ -171,7 +171,8 @@ final class RMBTHistoryIndex2ViewController: UIViewController {
         resultVC.historyResult = result
         resultVC.isShowingLastResult = showingLastTestResult
         
-        self.navigationController?.pushViewController(resultVC, animated: false)
+        navigationItem.backBarButtonItem = UIBarButtonItem()
+        navigationController?.pushViewController(resultVC, animated: false)
     }
     
     @objc private func refreshFromTableView(_ sender: Any) {

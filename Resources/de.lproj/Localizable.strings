@@ -332,6 +332,8 @@
 "The code must consist of twelve characters" = "Der Code muss aus zwölf Zeichen bestehen";
 "The devices are already synchronized with each other." = "Die Geräte sind bereits synchronisiert.";
 "The code you entered does not exist." = "Der eingegebene Code existiert nicht.";
+"history.result.connection" = "Zugang";
+"history.result.operator" = "Betreiber";
 
 /* Test */
 "test.network.label" = "Netzwerk";

@@ -332,6 +332,8 @@
 "The code must consist of twelve characters" = "The code must consist of twelve characters";
 "The devices are already synchronized with each other." = "The devices are already synchronized.";
 "The code you entered does not exist." = "The code you entered does not exist.";
+"history.result.connection" = "Type";
+"history.result.operator" = "Operator";
 
 /* Test */
 "test.network.label" = "Network";
