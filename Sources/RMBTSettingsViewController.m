@@ -119,7 +119,7 @@ typedef NS_ENUM(NSInteger, RMBTSettingsSection) {
       toSettingsKeyPath:@keypath(settings, loopModeEveryMinutes)
                 numeric:YES
                     min:settings.debugUnlocked ? 1 : RMBT_TEST_LOOPMODE_MIN_DELAY_MINS
-                    max:RMBT_TEST_LOOPMODE_MAX_DELAY_MINS
+                    max:RMBT_TEST_LOOPMODE_MAX_DELAY_MINS 
     ];
 
     [self bindTextField:self.loopModeDistanceTextField
@@ -159,15 +159,22 @@ typedef NS_ENUM(NSInteger, RMBTSettingsSection) {
    toSettingsKeyPath:@keypath(settings, debugLoggingEnabled)
             onToggle:^(BOOL value) {
                 [self refreshSection:RMBTSettingsSectionDebugLogging];
+        [self updateLogging];
     }];
 
     [self bindTextField:self.debugLoggingHostnameTextField
       toSettingsKeyPath:@keypath(settings, debugLoggingHostname)
-                numeric:NO];
+                numeric:NO
+              onChanged:^(NSString *value) {
+        [self updateLogging];
+    }];
 
     [self bindTextField:self.debugLoggingPortTextField
       toSettingsKeyPath:@keypath(settings, debugLoggingPort)
-                numeric:YES];
+                numeric:YES
+              onChanged:^(NSString *value) {
+        [self updateLogging];
+    }];
 }
 
 - (void)updateLocationState:(id)sender {
@@ -216,11 +223,19 @@ typedef NS_ENUM(NSInteger, RMBTSettingsSection) {
     } forControlEvents:UIControlEventValueChanged];
 }
 
+- (void)bindTextField:(UITextField*)aTextField toSettingsKeyPath:(NSString*)keyPath numeric:(BOOL)numeric onChanged:(void(^)(NSString *value))onChanged {
+    [self bindTextField:aTextField toSettingsKeyPath:keyPath numeric:numeric min:NSIntegerMin max:NSIntegerMax onChanged:onChanged];
+}
+
 - (void)bindTextField:(UITextField*)aTextField toSettingsKeyPath:(NSString*)keyPath numeric:(BOOL)numeric {
-    [self bindTextField:aTextField toSettingsKeyPath:keyPath numeric:numeric min:NSIntegerMin max:NSIntegerMax];
+    [self bindTextField:aTextField toSettingsKeyPath:keyPath numeric:numeric min:NSIntegerMin max:NSIntegerMax onChanged:nil];
 }
 
 - (void)bindTextField:(UITextField*)aTextField toSettingsKeyPath:(NSString*)keyPath numeric:(BOOL)numeric min:(NSInteger)min max:(NSInteger)max {
+    [self bindTextField:aTextField toSettingsKeyPath:keyPath numeric:numeric min:min max:max onChanged:nil];
+}
+
+- (void)bindTextField:(UITextField*)aTextField toSettingsKeyPath:(NSString*)keyPath numeric:(BOOL)numeric min:(NSInteger)min max:(NSInteger)max  onChanged:(void(^)(NSString *value))onChanged {
     id value = [[RMBTSettings sharedSettings] valueForKey:keyPath];
     NSString *stringValue = numeric ? [value stringValue] : value;
     if (numeric && [stringValue isEqualToString:@"0"]) stringValue = nil;
@@ -235,6 +250,9 @@ typedef NS_ENUM(NSInteger, RMBTSettingsSection) {
         }
         id newValue = numeric ? [NSNumber numberWithInteger:[sender.text integerValue]] : sender.text;
         [[RMBTSettings sharedSettings] setValue:newValue forKey:keyPath];
+        if (onChanged) {
+            onChanged(newValue);
+        }
     } forControlEvents:UIControlEventEditingDidEnd];
 }
 
