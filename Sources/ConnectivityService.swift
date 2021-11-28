@@ -180,6 +180,7 @@ extension ConnectivityService {
             // for (var ptr = ifaddr; ptr != nil; ptr = ptr.memory.ifa_next) {
                 let flags = Int32((ptr?.pointee.ifa_flags)!)
                 var addr = ptr?.pointee.ifa_addr.pointee
+                let ifa_addr = ptr?.pointee.ifa_addr
 
                 // Check for running IPv4, IPv6 interfaces. Skip the loopback interface.
                 if (flags & (IFF_UP|IFF_RUNNING|IFF_LOOPBACK)) == (IFF_UP|IFF_RUNNING) {
@@ -187,7 +188,8 @@ extension ConnectivityService {
 
                         // Convert interface address to a human readable string:
                         var hostname = [CChar](repeating: 0, count: Int(NI_MAXHOST))
-                        if getnameinfo(&addr!, socklen_t((addr?.sa_len)!), &hostname, socklen_t(hostname.count), nil, socklen_t(0), NI_NUMERICHOST) == 0 {
+                        if getnameinfo(&addr!, socklen_t((addr?.sa_len)!), &hostname, socklen_t(hostname.count), nil, socklen_t(0), NI_NUMERICHOST) == 0,
+                            getnameinfo(ifa_addr!, socklen_t((addr?.sa_len)!), &hostname, socklen_t(hostname.count), nil, socklen_t(0), NI_NUMERICHOST) == 0 {
                             if let address = String(validatingUTF8: hostname) {
 
                                 if addr?.sa_family == UInt8(AF_INET) {
@@ -200,7 +202,7 @@ extension ConnectivityService {
                                 if addr?.sa_family == UInt8(AF_INET6) {
                                     if self.connectivityInfo.ipv6.internalIp != address {
                                         self.connectivityInfo.ipv6.internalIp = address
-                                        self.connectivityInfo.ipv6.externalIp = address
+//                                        self.connectivityInfo.ipv6.externalIp = address
                                         Log.logger.debug("local ipv6 address from getifaddrs: \(address)")
                                     }
                                 }

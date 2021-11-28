@@ -337,6 +337,7 @@
 
 "preferences_general_settings" = "General settings";
 "preferences_advanced_settings" = "Advanced settings";
+"preferences_location" = "Location";
 "preferences_ipv4_only" = "IPv4 only";
 "preferences_skip_qos" = "Skip QoS";
 "preferences_expert_mode" = "Expert mode";

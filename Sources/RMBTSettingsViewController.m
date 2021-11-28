@@ -41,10 +41,15 @@ typedef NS_ENUM(NSInteger, RMBTSettingsSection) {
 @property (weak, nonatomic) IBOutlet UILabel *developerNameLabel;
 
 @property (strong, nonatomic) NSMutableArray *advancedSettings;
+@property (weak, nonatomic) IBOutlet UISwitch *locationSwitcher;
 
 @end
 
 @implementation RMBTSettingsViewController
+
+- (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -65,6 +70,10 @@ typedef NS_ENUM(NSInteger, RMBTSettingsSection) {
 
     self.uuidLabel.lineBreakMode = NSLineBreakByCharWrapping;
     self.uuidLabel.numberOfLines = 0;
+    
+    [self updateLocationState: self];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateLocationState:) name:UIApplicationDidBecomeActiveNotification object:nil];
+    
     
     UITapGestureRecognizer *tapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapHandler:)];
     tapGestureRecognizer.numberOfTapsRequired = 10;
@@ -159,6 +168,10 @@ typedef NS_ENUM(NSInteger, RMBTSettingsSection) {
     [self bindTextField:self.debugLoggingPortTextField
       toSettingsKeyPath:@keypath(settings, debugLoggingPort)
                 numeric:YES];
+}
+
+- (void)updateLocationState:(id)sender {
+    [self.locationSwitcher setOn:[RMBTLocationTracker isAuthorized] animated:NO];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -306,7 +319,16 @@ typedef NS_ENUM(NSInteger, RMBTSettingsSection) {
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    if (indexPath.section == RMBTSettingsSectionContacts) {
+    if (indexPath.section == RMBTSettingsSectionGeneral) {
+        switch (indexPath.row) {
+            case 1:
+                [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString] options:@{} completionHandler:nil];
+                break;
+                
+            default:
+                break;
+        }
+    } else if (indexPath.section == RMBTSettingsSectionContacts) {
         switch (indexPath.row) {
             case 0:
                 [self presentModalBrowserWithURLString:RMBT_PROJECT_URL];
