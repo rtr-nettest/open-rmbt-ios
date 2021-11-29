@@ -27,6 +27,10 @@ extension RMBTSettingsViewController {
     @objc func closeButtonClick(_ sender: Any) {
         self.dismiss(animated: true)
     }
+    
+    @objc func updateLogging() {
+        LogConfig.enableLogging = RMBTSettings.shared.debugLoggingEnabled
+    }
 }
 
 private extension UIImage {

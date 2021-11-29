@@ -19,6 +19,9 @@ import XCGLogger
 
 ///
 class LogConfig {
+    
+    private static let udpIdentifier = "logging.destination"
+    
     /// setup logging system
     class func initLoggingFramework() {
         Log.logger.add(destination: ConsoleDestination(identifier: "RMBTClient.log"))
@@ -43,8 +46,28 @@ class LogConfig {
         
         let destination = FileDestination(owner: Log.logger, writeToFile: logFilePath, shouldAppend: true)
         Log.logger.add(destination: destination)
+
+        self.addUDPLogging()
     }
 
+    @objc static var enableLogging: Bool = false {
+        didSet {
+            Log.logger.remove(destinationWithIdentifier: LogConfig.udpIdentifier)
+            if enableLogging {
+                LogConfig.addUDPLogging()
+            }
+        }
+    }
+    
+    private class func addUDPLogging() {
+        guard RMBTSettings.shared.debugLoggingEnabled else { return }
+        
+        let port = RMBTSettings.shared.debugLoggingPort
+        if let host = RMBTSettings.shared.debugLoggingHostname {
+            let udpDestination = UDPDestination(owner: Log.logger, identifier: LogConfig.udpIdentifier, host: host, port: port)
+            Log.logger.add(destination: udpDestination)
+        }
+    }
     ///
     class func getCurrentLogFilePath() -> String {
         return getLogFolderPath() + "/" + getCurrentLogFileName()

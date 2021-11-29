@@ -81,11 +81,18 @@ typedef NS_ENUM(long, RMBTQoSControlConnectionTag) {
 }
 
 - (void)socket:(GCDAsyncSocket *)sock didConnectToHost:(NSString *)host port:(uint16_t)port {
-    [sock startTLS:nil];
+    NSDictionary *dictionary = @{GCDAsyncSocketManuallyEvaluateTrust: @(YES)};
+    [sock startTLS:dictionary];
 }
+
 
 - (BOOL)socketShouldManuallyEvaluateTrust:(GCDAsyncSocket *)sock {
     return YES;
+}
+
+- (void)socket:(GCDAsyncSocket *)sock didReceiveTrust:(SecTrustRef)trust
+    completionHandler:(void (^)(BOOL shouldTrustPeer))completionHandler {
+    completionHandler(YES);
 }
 
 - (BOOL)socket:(GCDAsyncSocket *)sock shouldTrustPeer:(SecTrustRef)trust {

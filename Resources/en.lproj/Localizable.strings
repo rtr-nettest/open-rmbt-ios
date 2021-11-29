@@ -357,6 +357,8 @@
 "measurement_qos_voip" = "VoIP";
 
 "preferences_general_settings" = "General settings";
+"preferences_advanced_settings" = "Advanced settings";
+"preferences_location" = "Location";
 "preferences_ipv4_only" = "IPv4 only";
 "preferences_skip_qos" = "Skip QoS";
 "preferences_expert_mode" = "Expert mode";
@@ -378,7 +380,7 @@
 "preferences_source_code" = "Source code";
 
 "preferences_debug_options" = "Debug Options";
-"preferences_ipv4_only" = "IPv6 Only";
+"preferences_ipv6_only" = "IPv6 Only";
 
 "preferences_developer_control_server" = "Control server";
 "preferences_override_control_server_host" = "Control host";

@@ -488,6 +488,19 @@ final class RMBTTestViewController: RMBTBaseTestViewController {
         }
     }
 
+    private func goToWaitingState() {
+        guard let loopModeInfo = loopModeInfo else { return }
+
+        if !loopModeInfo.isFinished {
+            self.state = .waiting
+            self.currentView.showWaitingUI()
+            self.status = .nextTest
+            startWaitingNextTest()
+        } else {
+            UIApplication.shared.isIdleTimerDisabled = false
+            self.performSegue(withIdentifier: actionsSegue, sender: self)
+        }
+    }
 }
 
 extension RMBTTestViewController: UIViewControllerTransitioningDelegate {
@@ -590,16 +603,8 @@ extension RMBTTestViewController: RMBTBaseTestViewControllerSubclass {
     func onTestCompleted(with result: RMBTHistoryResult!, qos qosPerformed: Bool) {
         self.qosCounterText = self.qosProgressViewController.progressString()
         self.hideAlert()
-        if let loopModeInfo = self.loopModeInfo {
-            if !loopModeInfo.isFinished {
-                self.state = .waiting
-                self.currentView.showWaitingUI()
-                self.status = .nextTest
-                startWaitingNextTest()
-            } else {
-                UIApplication.shared.isIdleTimerDisabled = false
-                self.performSegue(withIdentifier: actionsSegue, sender: self)
-            }
+        if self.loopModeInfo != nil {
+            self.goToWaitingState()
         } else {
             UIApplication.shared.isIdleTimerDisabled = false
             self.delegate?.testViewController(self, didFinishWithTest: result)
@@ -607,6 +612,10 @@ extension RMBTTestViewController: RMBTBaseTestViewControllerSubclass {
     }
     
     func onTestCancelled(with reason: RMBTTestRunnerCancelReason) {
+        guard loopModeInfo == nil || reason == .userRequested else {
+            self.goToWaitingState()
+            return
+        }
         switch(reason) {
         case .userRequested:
             self.dismiss(animated: true, completion: nil)
@@ -650,6 +659,7 @@ extension RMBTTestViewController: RMBTBaseTestViewControllerSubclass {
             } otherHandler: { [weak self] in
                 self?.startTest()
             }
+        @unknown default: break
         }
     }
 }

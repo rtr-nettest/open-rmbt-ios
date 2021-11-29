@@ -224,6 +224,7 @@
 		E95954B126E614F7004EA6D9 /* RMBTHistoryFiltersOptionsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E95954B026E614F6004EA6D9 /* RMBTHistoryFiltersOptionsViewController.swift */; };
 		E95954B426E62E34004EA6D9 /* RMBTHistoryViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E95954B226E62E34004EA6D9 /* RMBTHistoryViewCell.swift */; };
 		E95954B526E62E34004EA6D9 /* RMBTHistoryViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = E95954B326E62E34004EA6D9 /* RMBTHistoryViewCell.xib */; };
+		E95B4974275396CA0093068F /* UDPDestination.swift in Sources */ = {isa = PBXBuildFile; fileRef = E95B4973275396CA0093068F /* UDPDestination.swift */; };
 		E96792B5274BC6E00091C4A7 /* RMBTLoopModeSettingsValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E96792B4274BC6E00091C4A7 /* RMBTLoopModeSettingsValidator.swift */; };
 		E9789EEE24D74434007253EB /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E9789EED24D74434007253EB /* WebKit.framework */; };
 		E981D280271E892400CD970A /* RMBTLocationPopupViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E981D27F271E892400CD970A /* RMBTLocationPopupViewController.swift */; };
@@ -598,6 +599,7 @@
 		E95954B026E614F6004EA6D9 /* RMBTHistoryFiltersOptionsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RMBTHistoryFiltersOptionsViewController.swift; sourceTree = "<group>"; };
 		E95954B226E62E34004EA6D9 /* RMBTHistoryViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTHistoryViewCell.swift; sourceTree = "<group>"; };
 		E95954B326E62E34004EA6D9 /* RMBTHistoryViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = RMBTHistoryViewCell.xib; sourceTree = "<group>"; };
+		E95B4973275396CA0093068F /* UDPDestination.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UDPDestination.swift; sourceTree = "<group>"; };
 		E96792B4274BC6E00091C4A7 /* RMBTLoopModeSettingsValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTLoopModeSettingsValidator.swift; sourceTree = "<group>"; };
 		E9789EED24D74434007253EB /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		E981D27F271E892400CD970A /* RMBTLocationPopupViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RMBTLocationPopupViewController.swift; sourceTree = "<group>"; };
@@ -971,6 +973,7 @@
 				E9400EE626BA6A9D0067273A /* SocketUtils.swift */,
 				E9400EE226BA32150067273A /* Log.swift */,
 				E9400EE326BA32150067273A /* LogConfig.swift */,
+				E95B4973275396CA0093068F /* UDPDestination.swift */,
 				E9400F0726BAD10C0067273A /* AbstractBasicRequestBuilder.swift */,
 				E9400F0526BAD0F40067273A /* UIDeviceHardware.swift */,
 				E9400F1C26BE87450067273A /* ObjectMapperHelper.swift */,
@@ -1910,6 +1913,7 @@
 				C79C94A617713106000CF5EE /* RMBTLogger.m in Sources */,
 				C76B8C87177709C800925BE1 /* RMBTThroughputHistory.m in Sources */,
 				E9E9E8FB273CDECB005EB393 /* RMBTGraphLabel.swift in Sources */,
+				E95B4974275396CA0093068F /* UDPDestination.swift in Sources */,
 				36B75A29273EA73C006F4CB3 /* RMBTHistoryLoopCell.swift in Sources */,
 				C71161651E3CFA4800D8CC0C /* RMBTProgress.m in Sources */,
 				E9E993E126EB24AE00E7EED6 /* RMBTNetInfoItemtCell.swift in Sources */,

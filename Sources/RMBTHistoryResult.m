@@ -223,6 +223,19 @@
             if (response[@"geo_lat"] && response[@"geo_long"]) {
                 _coordinate = CLLocationCoordinate2DMake([response[@"geo_lat"] doubleValue], [response[@"geo_long"] doubleValue]);
             }
+            
+            if (response[@"measurement_result"]) {
+                NSDictionary *measurementResult = response[@"measurement_result"];
+                if (measurementResult[@"download_kbit"]) {
+                    _downloadSpeedMbpsString = RMBTSpeedMbpsStringWithSuffix([measurementResult[@"download_kbit"] intValue], false);
+                }
+                if (measurementResult[@"upload_kbit"]) {
+                    _uploadSpeedMbpsString = RMBTSpeedMbpsStringWithSuffix([measurementResult[@"upload_kbit"] intValue], false);
+                }
+                if (measurementResult[@"ping_ms"]) {
+                    _shortestPingMillisString = [NSString stringWithFormat:@"%@", measurementResult[@"ping_ms"]];
+                }
+            }
 
             _dataState = RMBTHistoryResultDataStateBasic;
             dispatch_group_leave(allDone);

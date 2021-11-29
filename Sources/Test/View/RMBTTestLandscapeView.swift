@@ -29,6 +29,11 @@ class RMBTTestLandscapeView: RMBTTestPortraitView {
         super.clearValues()
     }
     
+    @objc override func showQoSUI(_ state: Bool) {
+        super.showQoSUI(state)
+        rootWaitingView.isHidden = true
+    }
+    
     @objc override func showWaitingUI() {
         rootWaitingView.isHidden = false
         super.showWaitingUI()

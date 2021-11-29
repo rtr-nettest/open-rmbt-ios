@@ -163,9 +163,10 @@
 
 - (NSUInteger)percentageForPhaseWithQos:(RMBTTestRunnerPhase)phase {
     switch (phase) {
-        case RMBTTestRunnerPhaseInit:    return 12 - 4 /* waiting phase, visualized as init */;
-        case RMBTTestRunnerPhaseLatency: return 13;
-        case RMBTTestRunnerPhaseDown:    return 25;
+        case RMBTTestRunnerPhaseWait:    return 4;
+        case RMBTTestRunnerPhaseInit:    return 11; /* waiting phase, visualized as init */;
+        case RMBTTestRunnerPhaseLatency: return 15;
+        case RMBTTestRunnerPhaseDown:    return 20;
         case RMBTTestRunnerPhaseUp:      return 25;
         case RMBTTestRunnerPhaseQoS:     return 25;
         default: return 0;
