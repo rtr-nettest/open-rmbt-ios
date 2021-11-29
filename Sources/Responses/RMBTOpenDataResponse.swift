@@ -13,6 +13,8 @@ import ObjectMapper
 
     var downloadSpeedCurve: [RMBTOpenDataSpeedCurveValue] = []
     var uploadSpeedCurve: [RMBTOpenDataSpeedCurveValue] = []
+    var signal: Int?
+    var signalClass: Int?
     
     @objc func json() -> [String: Any] {
         return self.toJSON()
@@ -21,6 +23,8 @@ import ObjectMapper
     public override func mapping(map: Map) {
         downloadSpeedCurve <- map["speed_curve.download"]
         uploadSpeedCurve <- map["speed_curve.upload"]
+        signal <- map["signal_strength"]
+        signalClass <- map["signal_classification"]
     }
 }
 

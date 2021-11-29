@@ -267,8 +267,10 @@
     NSParameterAssert(_openTestUuid);
     [[RMBTControlServer sharedControlServer] getHistoryOpenDataResultWithUUID:_openTestUuid success:^(RMBTOpenDataResponse *r) {
         NSDictionary *response = [r json];
-        _downloadGraph = [[RMBTHistorySpeedGraph alloc] initWithResponse:response[@"speed_curve"][@"download"]];
-        _uploadGraph = [[RMBTHistorySpeedGraph alloc] initWithResponse:response[@"speed_curve"][@"upload"]];
+        self->_downloadGraph = [[RMBTHistorySpeedGraph alloc] initWithResponse:response[@"speed_curve"][@"download"]];
+        self->_uploadGraph = [[RMBTHistorySpeedGraph alloc] initWithResponse:response[@"speed_curve"][@"upload"]];
+        self->_signal = (NSNumber *) response[@"signal_strength"];
+        self->_signalClass = [((NSNumber *) response[@"signal_classification"]) integerValue];
         success();
     } error:^(NSError *error, NSDictionary *info) {
         // TODO

@@ -12,6 +12,11 @@ final class RMBTHistoryBasicInfoCell: UITableViewCell {
 
     static let ID = "RMBTHistoryBasicInfoCell"
     
+    @IBOutlet weak var signalView: UIView!
+    @IBOutlet weak var signalTitleLabel: UILabel!
+    @IBOutlet weak var signalValueLabel: UILabel!
+    @IBOutlet weak var signalSubtitleLabel: UILabel!
+    @IBOutlet weak var signalIcon: UIImageView!
     @IBOutlet private weak var upSubtitleLabel: UILabel!
     @IBOutlet private weak var upValueLabel: UILabel!
     @IBOutlet private weak var upTitleLabel: UILabel!
@@ -40,6 +45,13 @@ final class RMBTHistoryBasicInfoCell: UITableViewCell {
     var uploadValue: String? {
         didSet {
             upValueLabel.text = uploadValue
+        }
+    }
+    
+    var signalValue: String? {
+        didSet {
+            signalValueLabel.text = signalValue
+            signalView.isHidden = signalValue == nil
         }
     }
     

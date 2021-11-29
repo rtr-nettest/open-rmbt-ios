@@ -267,6 +267,8 @@ extension RMBTHistoryResult2ViewController: UITableViewDelegate, UITableViewData
             networkCell.downIcon.tintColor = .byResultClass(historyResult.downloadSpeedClass)
             networkCell.uploadValue = historyResult.uploadSpeedMbpsString
             networkCell.upIcon.tintColor = .byResultClass(historyResult.uploadSpeedClass)
+            networkCell.signalValue = historyResult.signal?.stringValue
+            networkCell.signalIcon.tintColor = .byResultClass(historyResult.signalClass)
             networkCell.selectionStyle = .none
             return networkCell
         case .speedGraphs:
