@@ -51,6 +51,9 @@ class RMBTSettingsViewController: UITableViewController {
     @IBOutlet weak var buildDetailsLabel: UILabel!
     @IBOutlet weak var developerNameLabel: UILabel!
 
+    @IBOutlet weak var websiteURLLabel: UILabel!
+    @IBOutlet weak var emailAddressLabel: UILabel!
+
     weak var delegate: RMBTSettingsViewControllerDelegate?
 
     private let settings = RMBTSettings.shared
@@ -87,6 +90,9 @@ class RMBTSettingsViewController: UITableViewController {
 
         self.uuidLabel.lineBreakMode = NSLineBreakMode.byCharWrapping;
         self.uuidLabel.numberOfLines = 0
+
+        self.websiteURLLabel.text = RMBTConfig.RMBT_PROJECT_URL
+        self.emailAddressLabel.text = RMBTConfig.RMBT_PROJECT_EMAIL
         
         self.updateLocationState(self)
         
