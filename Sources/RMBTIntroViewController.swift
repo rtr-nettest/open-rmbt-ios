@@ -185,6 +185,7 @@ class RMBTIntroViewController: UIViewController {
         RMBTLocationTracker.shared.startAfterDeterminingAuthorizationStatus({
             self.connectivityTracker.forceUpdate()
         })
+        RMBTSettings.shared.activeMeasurementId = nil
     }
     
     override func viewWillDisappear(_ animated: Bool) {
