@@ -1356,6 +1356,7 @@
                         <outlet property="debugLoggingHostnameTextField" destination="l4T-hu-ebd" id="0SC-jy-0DG"/>
                         <outlet property="debugLoggingPortTextField" destination="ilL-IN-kyB" id="ty0-jr-WX8"/>
                         <outlet property="developerNameLabel" destination="yxV-am-V2Z" id="t4X-AC-pi3"/>
+                        <outlet property="emailAddressLabel" destination="0uP-so-rVW" id="XzF-X1-LSG"/>
                         <outlet property="expertModeSwitch" destination="NCH-ny-506" id="S6v-oA-q23"/>
                         <outlet property="forceIPv4Switch" destination="euJ-U0-xKW" id="x2J-1J-2X3"/>
                         <outlet property="loopModeDistanceTextField" destination="4mQ-38-Pj5" id="QDa-tE-wrw"/>
@@ -1365,6 +1366,7 @@
                         <outlet property="skipQoSSwitch" destination="sxX-hM-d7r" id="nxL-G9-1be"/>
                         <outlet property="testCounterLabel" destination="bHo-4I-hsC" id="5Gc-JE-x9W"/>
                         <outlet property="uuidLabel" destination="eRC-zf-VOk" id="nZs-Je-Adq"/>
+                        <outlet property="websiteURLLabel" destination="5cN-75-Gij" id="1Po-45-aEz"/>
                         <segue destination="Ate-cD-gDi" kind="modal" identifier="show_loop_mode_confirmation" modalPresentationStyle="fullScreen" modalTransitionStyle="coverVertical" id="4du-Fo-Tld"/>
                     </connections>
                 </tableViewController>
