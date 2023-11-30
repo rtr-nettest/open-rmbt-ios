@@ -24,31 +24,16 @@ public class RMBTConfig {
     var RMBT_USE_MAIN_LANGUAGE: Bool { return false }
     var RMBT_MAIN_LANGUAGE: String { return "en" }
     
-    let RMBT_DEFAULT_IS_CURRENT_COUNTRY: Bool = true
-    
-    var RMBT_CHECK_IPV4_URL: String {
-        return "\(RMBT_IPV4_URL_HOST)\(RMBT_CONTROL_SERVER_PATH)/ip"
-    }
-    
     var RMBT_CONTROL_SERVER_URL: String {
         return "\(RMBT_URL_HOST)\(RMBT_CONTROL_SERVER_PATH)"
     }
-    
-    var RMBT_MAP_SERVER_URL: String { return "\(RMBT_URL_HOST)\(RMBT_MAP_SERVER_PATH)" }
-
 
     var RMBT_URL_HOST: String { return "https://example.com" }
     // Control server base URL used when user has enabled the "IPv4-Only" setting
-    var RMBT_IPV4_URL_HOST: String { return "https://example.com" }
     // Ditto for the (debug) "IPv6-Only" setting
     var RMBT_IPV6_URL_HOST: String { return "https://example.com" }
 
     var RMBT_CONTROL_SERVER_PATH: String { return "/RMBTControlServer" }
-    var RMBT_MAP_SERVER_PATH: String { return "/RMBTMapServer" }
-
-    //Colors
-    static let darkColor = UIColor.rmbt_color(withRGBHex: 0xFFFFFF)
-    static let tintColor = UIColor.rmbt_color(withRGBHex: 0x424242)
     
     static let ACTIVATE_DEV_CODE = "88888888"
     static let DEACTIVATE_DEV_CODE = "00000000"
@@ -56,9 +41,6 @@ public class RMBTConfig {
     static let RMBT_TEST_LOOPMODE_MIN_COUNT = 1
     static let RMBT_TEST_LOOPMODE_DEFAULT_COUNT = 10
     static let RMBT_TEST_LOOPMODE_MAX_COUNT = 100
-
-    // Loop mode will stop automatically after this many seconds:
-    static let RMBT_TEST_LOOPMODE_MAX_DURATION_S = (48*60*60) // 48 hours
 
     // Minimum/maximum number of minutes that user can choose to wait before next test is started:
     static let RMBT_TEST_LOOPMODE_MIN_DELAY_MINS = 5
@@ -74,12 +56,9 @@ public class RMBTConfig {
     static let RMBT_PROJECT_URL = "https://example.com/"
     static let RMBT_PROJECT_EMAIL = "mail@example.com"
     static let RMBT_PRIVACY_TOS_URL = "https://example.com/$lang/tc_ios.html"
-    static let RMBT_ABOUT_URL = "https://example.com/$lang/"
 
     // Note: stats url can can be replaced with the /settings response from control server
     static let RMBT_STATS_URL = "https://example.com/$lang/Statistik#noMMenu"
-
-    static let RMBT_HELP_URL = "https://example.com/redirect/$lang/help"
 
     static let RMBT_REPO_URL = "https://github.com/rtr-nettest/open-rmbt-ios"
     static let RMBT_DEVELOPER_URL = "https://example.com/"
