@@ -12,7 +12,7 @@ xcuserdata
 .idea
 *.xcworkspace
 
-Configs/
+/Configs/
 Pods/
 Resources/RMBT-Info.plist
 Resources/Images.xcassets/AppIcon.appiconset/
