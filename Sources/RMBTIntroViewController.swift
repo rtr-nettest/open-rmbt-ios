@@ -380,8 +380,8 @@ class RMBTIntroViewController: UIViewController {
             }
         }
         
-        currentView.locationTintColor = CLLocationManager.authorizationStatus() != .denied ? .ipAvailable : .ipNotAvailable
-        
+        currentView.locationTintColor = !RMBTLocationTracker.shared.isLocationDenied ? .ipAvailable : .ipNotAvailable
+
         if let type = self.connectivity?.networkTypeDescription,
            let technology = RMBTNetworkTypeConstants.cellularCodeDescriptionDictionary[type] {
             currentView.networkMobileClassImage = technology.technologyIcon
