@@ -160,6 +160,14 @@ class RMBTIntroPortraitView: UIView, XibLoadable {
     }
     
     func networkAvailable(_ networkType: RMBTNetworkType, networkName: String?, networkDescription: String?) {
+        var networkName = networkName
+        var networkDescription = networkDescription
+
+        if networkType == .cellular {
+            networkName = networkDescription
+            networkDescription = nil
+        }
+
         self.loopIconImageView.isHidden = !RMBTSettings.shared.loopMode
         self.startTestButton.isHidden = false
         self.networkNameLabel.text = networkName
