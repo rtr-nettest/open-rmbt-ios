@@ -654,10 +654,6 @@ fileprivate func < <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
         if networkType == RMBTNetworkType.wifi.rawValue {
             networkName   <- map["wifi_ssid"]
             bssid   <- map["wifi_bssid"]
-        } else {
-            networkName   <- map["telephony_network_sim_operator_name"]
-            telephonyNetworkSimCountry   <- map["telephony_network_sim_country"]
-            telephonyNetworkSimOperator   <- map["telephony_network_sim_operator"]
         }
         #endif
     }
