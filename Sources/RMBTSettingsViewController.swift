@@ -509,7 +509,7 @@ class RMBTSettingsViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, performAction action: Selector, forRowAt indexPath: IndexPath, withSender sender: Any?) {
         if action == #selector(copy(_:)) {
             // Copy UUID to pasteboard
-            UIPasteboard.general.string = uuid
+            UIPasteboard.general.string = uuid.map { "U\($0)" } ?? "(UUID not available)"
         }
     }
 }
