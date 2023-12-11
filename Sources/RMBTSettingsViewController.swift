@@ -227,7 +227,7 @@ class RMBTSettingsViewController: UITableViewController {
         if settings.qosEnabled {
             self.generalSettings.append(IndexPath(row: 1, section: RMBTSettingsSection.general.rawValue))
         }
-        if !RMBTLocationTracker.isAuthorized() {
+        if !RMBTLocationTracker.shared.isAuthorized {
             self.generalSettings.append(IndexPath(row: 2, section: RMBTSettingsSection.general.rawValue))
         }
     }

@@ -1,4 +1,4 @@
-platform :ios, '15.0'
+platform :ios, '17.0'
 
 # ignore all warnings from all pods
 inhibit_all_warnings!
@@ -34,7 +34,7 @@ target 'RMBT' do
     installer.generated_projects.each do |project|
       project.targets.each do |target|
         target.build_configurations.each do |config|
-           config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
+           config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '17.0'
         end
       end
     end

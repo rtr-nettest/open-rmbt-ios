@@ -49,7 +49,7 @@ public extension Notification.Name {
     }
     
     open func startIfAuthorized() -> Bool {
-        let authorizationStatus = CLLocationManager.authorizationStatus()
+        let authorizationStatus = locationManager.authorizationStatus
 
         if authorizationStatus == .authorizedWhenInUse || authorizationStatus == .authorizedAlways {
             locationManager.startUpdatingLocation()
@@ -61,7 +61,7 @@ public extension Notification.Name {
     open func startAfterDeterminingAuthorizationStatus(_ callback: @escaping EmptyCallback) {
         if startIfAuthorized() {
             callback()
-        } else if CLLocationManager.authorizationStatus() == .notDetermined {
+        } else if locationManager.authorizationStatus == .notDetermined {
             // Not determined yet
             authorizationCallback = callback
 
@@ -77,10 +77,13 @@ public extension Notification.Name {
         _ = startIfAuthorized()
     }
     
-    @objc static func isAuthorized() -> Bool {
-        return CLLocationManager.authorizationStatus() == .authorizedAlways || CLLocationManager.authorizationStatus() == .authorizedWhenInUse
+    var isAuthorized: Bool {
+        locationManager.authorizationStatus == .authorizedAlways || locationManager.authorizationStatus == .authorizedWhenInUse
     }
-    
+
+    var isLocationDenied: Bool {
+        locationManager.authorizationStatus == .denied
+    }
 }
 
 extension RMBTLocationTracker: CLLocationManagerDelegate {

@@ -54,8 +54,6 @@ class RMBTConnectivity: NSObject {
     private(set) var timestamp: Date = Date()
 
     private(set) var cellularCode: Int?
-    private(set) var telephonyNetworkSimOperator: String?
-    private(set) var telephonyNetworkSimCountry: String?
     
     private(set) var bssid: String?
     
@@ -101,11 +99,6 @@ class RMBTConnectivity: NSObject {
             }
 
             result["network_type"] = cellularCode
-            
-            result["telephony_network_sim_operator_name"] = RMBTValueOrNull(networkName)
-            result["telephony_network_sim_country"] = RMBTValueOrNull(telephonyNetworkSimCountry)
-            result["telephony_network_sim_operator"] = RMBTValueOrNull(telephonyNetworkSimOperator)
-            
         }
         return result
     }
@@ -192,31 +185,14 @@ class RMBTConnectivity: NSObject {
     
     fileprivate func updateCellularInfo() {
         let netinfo = CTTelephonyNetworkInfo()
-        var carrier: CTCarrier?
         var radioAccessTechnology: String?
         
-        if #available(iOS 13.0, *) {
-            if let providers = netinfo.serviceSubscriberCellularProviders,
-               let dataIndetifier = netinfo.dataServiceIdentifier {
-                carrier = providers[dataIndetifier]
-                radioAccessTechnology = netinfo.serviceCurrentRadioAccessTechnology?[dataIndetifier]
-            }
-        } else {
-            carrier = netinfo.subscriberCellularProvider
-            if netinfo.responds(to: #selector(getter: CTTelephonyNetworkInfo.currentRadioAccessTechnology)) {
-                radioAccessTechnology = netinfo.currentRadioAccessTechnology
-            }
+        if let dataIndetifier = netinfo.dataServiceIdentifier {
+            radioAccessTechnology = netinfo.serviceCurrentRadioAccessTechnology?[dataIndetifier]
         }
-        if let carrier = carrier {
-            if carrier.carrierName == "Carrier" {
-                networkName = nil
-            } else {
-                networkName = carrier.carrierName
-            }
-            telephonyNetworkSimCountry = carrier.isoCountryCode
-            telephonyNetworkSimOperator = String(format:"%@-%@", carrier.mobileCountryCode ?? "null", carrier.mobileNetworkCode ?? "null")
-        }
-        
+
+        networkName = nil
+
         //Get access technology
         if let radioAccessTechnology = radioAccessTechnology {
             cellularCode = cellularCodeForCTValue(radioAccessTechnology)
@@ -279,11 +255,9 @@ class RMBTConnectivity: NSObject {
             CTRadioAccessTechnologyLTE:          13,
             CTRadioAccessTechnologyeHRPD:        14
         ]
-        
-        if #available(iOS 14.1, *) {
-            table[CTRadioAccessTechnologyNRNSA] = 41
-            table[CTRadioAccessTechnologyNR] = 20
-        }
+
+        table[CTRadioAccessTechnologyNRNSA] = 41
+        table[CTRadioAccessTechnologyNR] = 20
         return table
     }
 
@@ -309,11 +283,9 @@ class RMBTConnectivity: NSObject {
             CTRadioAccessTechnologyLTE:             "4G/LTE",
             CTRadioAccessTechnologyeHRPD:           "2G/HRPD",
         ]
-        
-        if #available(iOS 14.1, *) {
-            table[CTRadioAccessTechnologyNRNSA] = "5G/NRNSA"
-            table[CTRadioAccessTechnologyNR] = "5G/NR"
-        }
+
+        table[CTRadioAccessTechnologyNRNSA] = "5G/NRNSA"
+        table[CTRadioAccessTechnologyNR] = "5G/NR"
         
         return table
     }

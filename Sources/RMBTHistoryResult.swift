@@ -357,7 +357,7 @@ class RMBTHistoryResult: NSObject {
 extension RMBTHistoryResult {
     var timeStringIn24hFormat: String? {
         get {
-            let df = DateFormatter(withFormat: "dd.MM.yy, HH:mm:ss", locale: Locale.current.languageCode ?? "en_US")
+            let df = DateFormatter(withFormat: "dd.MM.yy, HH:mm:ss", locale: Locale.current.language.languageCode?.identifier ?? "en_US")
             
             return df.string(from: timestamp)
         }

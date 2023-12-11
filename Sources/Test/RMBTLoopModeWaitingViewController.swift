@@ -75,9 +75,9 @@ final class RMBTLoopModeWaitingViewController: UIViewController {
     
     private func initUI() {
         orLabel.text = .orTitle
-        locationWarningView.isHidden = RMBTLocationTracker.isAuthorized()
+        locationWarningView.isHidden = RMBTLocationTracker.shared.isAuthorized
         locationWarningTitleLabel.text = .locationWarning
-        if !RMBTLocationTracker.isAuthorized() {
+        if !RMBTLocationTracker.shared.isAuthorized {
             distanceValueLabel.text = ""
         }
         distanceTitleLabel.text = .distanceTitle

@@ -15,34 +15,34 @@ extension UserDefaults {
     }
     
     ///
-    open class func storeTOSVersion(lastAcceptedVersion: Int) {
+    public class func storeTOSVersion(lastAcceptedVersion: Int) {
         storeDataFor(key: Keys.TOSPreferenceKey.rawValue, obj: lastAcceptedVersion)
     }
     
     ///
-    open class func getTOSVersion() -> Int {
+    public class func getTOSVersion() -> Int {
         return UserDefaults.standard.integer(forKey: Keys.TOSPreferenceKey.rawValue)
     }
     
     ///
-    open class func storeLastNewsUidPreference(lastNewsUidPreference: Int) {
+    public class func storeLastNewsUidPreference(lastNewsUidPreference: Int) {
         storeDataFor(key: Keys.lastNewsUidPreferenceKey.rawValue, obj: lastNewsUidPreference)
     }
     
     ///
-    open class func lastNewsUidPreference() -> Int {
+    public class func lastNewsUidPreference() -> Int {
         return UserDefaults.standard.integer(forKey: Keys.lastNewsUidPreferenceKey.rawValue)
     }
     
     /// Generic function
-    open class func storeDataFor(key: String, obj: Any) {
+    public class func storeDataFor(key: String, obj: Any) {
     
         UserDefaults.standard.set(obj, forKey: key)
         UserDefaults.standard.synchronize()
     }
     
     ///
-    open class func getDataFor(key: String) -> Any? {
+    public class func getDataFor(key: String) -> Any? {
     
         guard let result = UserDefaults.standard.object(forKey: key) else {
             return nil
@@ -51,7 +51,7 @@ extension UserDefaults {
         return result
     }
     
-    open class func storeRequestUserAgent() {
+    public class func storeRequestUserAgent() {
     
         guard let info = Bundle.main.infoDictionary,
             let bundleName = (info["CFBundleName"] as? String)?.replacingOccurrences(of: " ", with: ""),
@@ -76,7 +76,7 @@ extension UserDefaults {
     }
     
     ///
-    open class func getRequestUserAgent() -> String? {
+    public class func getRequestUserAgent() -> String? {
         guard let user = UserDefaults.standard.string(forKey: "UserAgent") else {
             return nil
         }
@@ -84,14 +84,14 @@ extension UserDefaults {
         return user
     }
     
-    open class func clearStoredUUID(uuidKey: String?) {
+    public class func clearStoredUUID(uuidKey: String?) {
         if let uuidKey = uuidKey {
             UserDefaults.standard.removeObject(forKey: uuidKey)
             UserDefaults.standard.synchronize()
         }
     }
     ///
-    open class func storeNewUUID(uuidKey: String, uuid: String) {
+    public class func storeNewUUID(uuidKey: String, uuid: String) {
         if RMBTSettings.shared.isClientPersistent {
             storeDataFor(key: uuidKey, obj: uuid)
             Log.logger.debug("UUID: uuid is now: \(uuid) for key '\(uuidKey)'")
@@ -99,7 +99,7 @@ extension UserDefaults {
     }
     
     ///
-    open class func checkStoredUUID(uuidKey: String) -> String? {
+    public class func checkStoredUUID(uuidKey: String) -> String? {
         return UserDefaults.standard.object(forKey: uuidKey) as? String
     }
 }

@@ -46,7 +46,7 @@ class RMBTQoSHTTPTest: RMBTQoSTest {
                 let httpResponse = response as? HTTPURLResponse {
                 self.responseStatusCode = httpResponse.statusCode
                 self.responseExpectedContentLength = httpResponse.expectedContentLength
-                self.responseFingerprint = data?.MD5().hexString() ?? ""
+                self.responseFingerprint = data?.MD5HexString ?? ""
                 
                 var concatHeaders = ""
                 httpResponse.allHeaderFields.forEach { item in

@@ -55,8 +55,6 @@ class TelephonyInfo: Mappable {
     ///
     init(connectivity: RMBTConnectivity) {
         networkOperatorName = connectivity.networkName
-        networkSimOperator  = connectivity.telephonyNetworkSimOperator
-        networkSimCountry   = connectivity.telephonyNetworkSimCountry
     }
 
     ///
