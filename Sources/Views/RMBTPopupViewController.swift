@@ -120,6 +120,11 @@ class RMBTPopupViewController: UIViewController {
         self.infoTypeImageView?.image = info?.icon
         self.infoTypeImageView?.image = self.infoTypeImageView?.image?.withRenderingMode(.alwaysTemplate)
         self.infoTypeImageView?.tintColor = self.info?.tintColor
+
+        if self.info?.values.count == 0 {
+            infoTypeImageView?.isAccessibilityElement = true
+            infoTypeImageView?.accessibilityLabel = ipNotAvailableLabel?.text
+        }
         self.collectionView.reloadData()
     }
     
