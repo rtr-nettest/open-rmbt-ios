@@ -10,7 +10,7 @@ import Foundation
 import Alamofire
 
 public typealias IpResponseSuccessCallback = (_ ipResponse: IpResponse) -> Void
-public typealias ErrorCallback = (_ error: Error?) -> Void
+public typealias ErrorCallback = (_ error: Error) -> Void
 public typealias EmptyCallback = () -> Void
 
 public typealias HistoryFilterType = [String: [String]]
@@ -144,7 +144,10 @@ extension RMBTControlServer {
         }
     
     ///
-    @objc func updateWithCurrentSettings(success successCallback: @escaping EmptyCallback, error failure: @escaping ErrorCallback) {
+    @objc func updateWithCurrentSettings(
+        success successCallback: @escaping EmptyCallback,
+        error failure: @escaping (_ error: Error?) -> Void
+    ) {
 
         if (RMBTSettings.shared.debugUnlocked && RMBTSettings.shared.debugControlServerCustomizationEnabled) {
             let scheme = RMBTSettings.shared.debugControlServerUseSSL ? "https" : "http"
@@ -243,7 +246,7 @@ extension RMBTControlServer {
         }, error: error)
     }
     
-    @objc(getTestParamsWithRequest:success:error:) func getTestParams(with speedMeasurementRequest: SpeedMeasurementRequest_Old, success: @escaping RMBTSuccessBlock, error failure: @escaping ErrorCallback) {
+    @objc(getTestParamsWithRequest:success:error:) func getTestParams(with speedMeasurementRequest: SpeedMeasurementRequest_Old, success: @escaping RMBTSuccessBlock, error failure: @escaping (_ error: Error?) -> Void) {
         ensureClientUuid(success: { uuid in
             speedMeasurementRequest.uuid = uuid
             speedMeasurementRequest.ndt = false
@@ -430,12 +433,12 @@ extension RMBTControlServer {
         }, error: failure)
     }
     
-    func getIpv4( success successCallback: @escaping IpResponseSuccessCallback, error failure: @escaping ErrorCallback) {
+    func getIpv4( success successCallback: @escaping IpResponseSuccessCallback, error failure: @escaping (_ error: Error?) -> Void) {
         guard let url = self.checkIpv4 else { failure(nil); return }
         getIpVersion(baseUrl: url.absoluteString, success: successCallback, error: failure)
     }
     
-    func getIpv6( success successCallback: @escaping IpResponseSuccessCallback, error failure: @escaping ErrorCallback) {
+    func getIpv6( success successCallback: @escaping IpResponseSuccessCallback, error failure: @escaping (_ error: Error?) -> Void) {
         guard let url = self.checkIpv6 else { failure(nil); return }
         getIpVersion(baseUrl: url.absoluteString, success: successCallback, error: failure)
     }
