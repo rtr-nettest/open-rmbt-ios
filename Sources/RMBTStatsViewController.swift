@@ -20,13 +20,15 @@ class RMBTWebViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = .white
+        navigationController?.isNavigationBarHidden = true
 
         self.view.addSubview(webView)
         
         NSLayoutConstraint.activate([
             webView.leftAnchor.constraint(equalTo: self.view.leftAnchor),
             webView.rightAnchor.constraint(equalTo: self.view.rightAnchor),
-            webView.topAnchor.constraint(equalTo: self.view.topAnchor),
+            webView.topAnchor.constraint(equalTo: self.view.topAnchor, constant: 20),
             webView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor)
         ])
         
