@@ -66,9 +66,7 @@ class RMBTTestRunner: NSObject {
     
     private(set) var testParams: RMBTTestParams?
     private(set) var testResult: RMBTTestResult?
-    
-    private(set) var qosResults: [[String : Any]] = []
-    
+
     private var workersClientVersion: String?
     
     private var phase: RMBTTestRunnerPhase = .none {
@@ -205,25 +203,13 @@ class RMBTTestRunner: NSObject {
     }
     
     func startQoS() {
-        let willPerformed = RMBTTestRunner.willQoSPerformed()
-        if (!willPerformed) {
-            // Just for logs
-            if (!RMBTSettings.shared.qosEnabled) {
-                Log.logger.debug("Skipping QoS per user setting")
-            } else if ((RMBTSettings.shared.qosEnabled) && (RMBTSettings.shared.only2Hours) && (fabs(RMBTSettings.shared.previousLaunchQoSDate?.timeIntervalSinceNow ?? 0) > RMBTTestRunner.RMBTQosSkipTimeInterval)) {
-                Log.logger.debug("Skipping QoS per user setting. Previous qos was launched less 2 hours")
-            }
-            
-            self.submitResult()
+        if let token = testParams?.testToken {
+            RMBTSettings.shared.previousLaunchQoSDate = Date()
+            self.phase = .qos;
+            qosRunner = RMBTQoSTestRunner(delegate: self)
+            qosRunner?.start(with: token)
         } else {
-            if let token = testParams?.testToken {
-                RMBTSettings.shared.previousLaunchQoSDate = Date()
-                self.phase = .qos;
-                qosRunner = RMBTQoSTestRunner(delegate: self)
-                qosRunner?.start(with: token)
-            } else {
-                self.cancel(with: .errorFetchingTestingParams)
-            }
+            self.cancel(with: .errorFetchingTestingParams)
         }
     }
     
@@ -339,55 +325,45 @@ class RMBTTestRunner: NSObject {
         
         self.killTimer()
     }
-    
-    func submitResult() {
-        self.cleanup() // Stop observing now, test is finished
-        
+
+    private func finishTest() {
+        phase = .none
+        dead = true
+
+        RMBTSettings.shared.previousTestStatus = RMBTTestStatus.Ended.rawValue
+
+        let historyResult = RMBTHistoryResult(response: ["test_uuid": self.testParams?.testUUID ?? ""])
+        DispatchQueue.main.async {
+            self.delegate?.testRunnerDidCompleteWithResult(historyResult)
+        }
+    }
+
+    func submitTestResult(willContinueTest: Bool = true, onSuccess: @escaping () -> Void = { }) {
+        if !willContinueTest {
+            cleanup() // Stop observing now, test is finished
+        }
+
         workerQueue.async { [weak self] in
-            guard let self = self else { return }
-            self.phase = .submittingTestResult
+            guard let self else { return }
+
+            if !willContinueTest {
+                phase = .submittingTestResult
+            }
 
             if (self.dead) { return } // cancelled
-
-            let qosResult = self.qosResultDictionary()
-            let hasQos = (qosResult?.count ?? 0 > 0 && self.testParams?.resultQoSURLString != nil)
-            
-            let qosSem = DispatchSemaphore(value: 0)
-            
-            if (hasQos) {
-                let qosResultRequest = self.qosResultWithDictionary(qosResult ?? [:])
-                AbstractBasicRequestBuilder.addBasicRequestValues(qosResultRequest)
-                qosResultRequest.clientVersion = self.workersClientVersion
-                RMBTControlServer.shared.submitQOSResult(qosResultRequest, endpoint: self.testParams?.resultQoSURLString) { response in
-                    qosSem.signal()
-                } error: { error in
-                    qosSem.signal()
-                }
-            }
 
             let result = self.resultWithDictionary(self.resultDictionary())
             AbstractBasicRequestBuilder.addBasicRequestValues(result)
             result.clientVersion = self.workersClientVersion
-            
+
             RMBTControlServer.shared.submitResult(result, endpoint: nil) { [weak self] response in
                 self?.workerQueue.async {
-                    guard let self = self else { return }
-                    self.phase = .none
-                    self.dead = true
+                    guard let self else { return }
 
-                    RMBTSettings.shared.previousTestStatus = RMBTTestStatus.Ended.rawValue
-
-                    let historyResult = RMBTHistoryResult(response: ["test_uuid": self.testParams?.testUUID ?? ""])
-
-                    if (hasQos) {
-                        if qosSem.wait(timeout: .now() + RMBTConfig.RMBT_QOS_CC_TIMEOUT_S) == .timedOut {
-                            Log.logger.debug("Timed out waiting for QoS result submission")
-                        }
+                    if !willContinueTest {
+                        self.finishTest()
                     }
-                    
-                    DispatchQueue.main.async {
-                        self.delegate?.testRunnerDidCompleteWithResult(historyResult)
-                    }
+                    onSuccess()
                 }
             } error: { [weak self] error in
                 self?.workerQueue.async {
@@ -396,8 +372,40 @@ class RMBTTestRunner: NSObject {
             }
         }
     }
-    
-    func qosResultDictionary() -> [String: Any]? {
+
+    func submitQoSResult(_ qosResult: [[String : Any]]) {
+        cleanup() // Stop observing now, test is finished
+
+        workerQueue.async { [weak self] in
+            guard let self else { return }
+
+            let qosResult = qosResultDictionary(from: qosResult)
+            let hasQos = (qosResult?.count ?? 0 > 0 && self.testParams?.resultQoSURLString != nil)
+
+            guard hasQos else {
+                finishTest()
+                return
+            }
+
+            let qosResultRequest = QosMeasurementResultRequest(withJSON: qosResult ?? [:])
+            AbstractBasicRequestBuilder.addBasicRequestValues(qosResultRequest)
+            qosResultRequest.clientVersion = self.workersClientVersion
+
+            RMBTControlServer.shared.submitQOSResult(qosResultRequest, endpoint: testParams?.resultQoSURLString) { [weak self] response in
+                self?.workerQueue.async { [weak self] in
+                    guard let self else { return }
+
+                    finishTest()
+                }
+            } error: { [weak self] error in
+                self?.workerQueue.async {
+                    self?.cancel(with: .errorSubmittingTestResult)
+                }
+            }
+        }
+    }
+
+    private func qosResultDictionary(from qosResults: [[String : Any]]) -> [String: Any]? {
         if qosResults.count > 0 {
             return [
                 "test_token": testParams?.testToken ?? "",
@@ -406,10 +414,6 @@ class RMBTTestRunner: NSObject {
         } else {
             return nil
         }
-    }
-    
-    func qosResultWithDictionary(_ dictionary: [String: Any]) -> QosMeasurementResultRequest {
-        return QosMeasurementResultRequest(withJSON: dictionary)
     }
     
     func resultWithDictionary(_ dictionary: [String: Any]) -> SpeedMeasurementResult {
@@ -807,8 +811,20 @@ extension RMBTTestRunner: RMBTTestWorkerDelegate {
                     self.delegate?.testRunnerDidMeasureThroughputs(throughputs, in: .up)
                 }
             }
-            
-            self.startQoS()
+            if (!RMBTTestRunner.willQoSPerformed()) {
+                // Just for logs
+                if (!RMBTSettings.shared.qosEnabled) {
+                    Log.logger.debug("Skipping QoS per user setting")
+                } else if ((RMBTSettings.shared.qosEnabled) && (RMBTSettings.shared.only2Hours) && (fabs(RMBTSettings.shared.previousLaunchQoSDate?.timeIntervalSinceNow ?? 0) > RMBTTestRunner.RMBTQosSkipTimeInterval)) {
+                    Log.logger.debug("Skipping QoS per user setting. Previous qos was launched less 2 hours")
+                }
+
+                submitTestResult(willContinueTest: false)
+            } else {
+                submitTestResult { [weak self] in
+                    self?.startQoS()
+                }
+            }
         }
     }
     
@@ -867,8 +883,7 @@ extension RMBTTestRunner: RMBTQoSTestRunnerDelegate {
     
     func qosRunnerDidComplete(with results: [[String : Any]]) {
         Log.logger.debug("QoS finished.")
-        qosResults = results
         qosTestFinishedAtNanos = RMBTHelpers.RMBTCurrentNanos()
-        self.submitResult()
+        self.submitQoSResult(results)
     }
 }
