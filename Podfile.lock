@@ -44,7 +44,7 @@ PODS:
     - ObjcExceptionBridging
 
 DEPENDENCIES:
-  - Alamofire (= 5.0.0-rc.2)
+  - Alamofire
   - AlamofireObjectMapper
   - BCGenieEffect
   - BlocksKit/MessageUI (from `https://github.com/sglushchenko/BlocksKit`, branch `without_UIWebView`)
@@ -96,6 +96,6 @@ SPEC CHECKSUMS:
   TUSafariActivity: afc55a00965377939107ce4fdc7f951f62454546
   XCGLogger: 1943831ef907df55108b0b18657953f868de973b
 
-PODFILE CHECKSUM: 4a362117441daa37473e1e24abeb56bc7a221cbc
+PODFILE CHECKSUM: 9ab30efa7798a1a19278168e22ee7d8a7ffc99f3
 
-COCOAPODS: 1.11.3
+COCOAPODS: 1.14.3
