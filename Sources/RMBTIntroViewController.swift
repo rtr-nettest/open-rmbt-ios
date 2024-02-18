@@ -469,7 +469,7 @@ class RMBTIntroViewController: UIViewController {
         UserDefaults.markDidShowStartTestButtonPopup()
 
         let startButtonTipView = UIView.from(
-            TopPopoverView(text: "Press the button to start the test now!", backgroundColor: .white)
+            TopPopoverView(text: .startTestButtonTipText, backgroundColor: .white)
         )
         startButtonTipView.alpha = 0
         view.addSubview(startButtonTipView)
@@ -578,6 +578,7 @@ private extension String {
     static let locationAltitude = NSLocalizedString("location_dialog_label_altitude", comment: "");
     static let locationSpeed = NSLocalizedString("location_dialog_label_speed", comment: "");
     static let loopModeLabel = NSLocalizedString("title_loop_mode", comment: "")
+    static let startTestButtonTipText = NSLocalizedString("start_test_button_help_message", comment: "")
 }
 
 private extension UIImage {

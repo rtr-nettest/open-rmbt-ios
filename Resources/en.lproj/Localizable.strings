@@ -439,3 +439,5 @@
 
 "menu_button_statistics" = "Statistics";
 "text_ip_address_not_available" = "Address is not available";
+
+"start_test_button_help_message" = "Press the button to start the test now!";
