@@ -106,15 +106,15 @@
                     <nil key="highlightedColor"/>
                 </label>
                 <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="vNU-St-fgN">
-                    <rect key="frame" x="83.000000000000014" y="255.33333333333337" width="147.33333333333337" height="75"/>
+                    <rect key="frame" x="104.66666666666669" y="270.33333333333331" width="116" height="44.666666666666686"/>
                     <subviews>
-                        <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" animating="YES" style="medium" translatesAutoresizingMaskIntoConstraints="NO" id="owg-9B-OOh">
-                            <rect key="frame" x="0.0" y="27.333333333333343" width="20" height="20"/>
+                        <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" animating="YES" style="large" translatesAutoresizingMaskIntoConstraints="NO" id="owg-9B-OOh">
+                            <rect key="frame" x="0.0" y="4" width="37" height="37"/>
                             <color key="color" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         </activityIndicatorView>
                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="QoS" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="6kE-hk-ZNV">
-                            <rect key="frame" x="27.999999999999993" y="0.0" width="119.33333333333331" height="75"/>
-                            <fontDescription key="fontDescription" name="Roboto-Medium" family="Roboto" pointSize="64"/>
+                            <rect key="frame" x="44.999999999999986" y="0.0" width="71" height="44.666666666666664"/>
+                            <fontDescription key="fontDescription" name="Roboto-Medium" family="Roboto" pointSize="38"/>
                             <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             <nil key="highlightedColor"/>
                         </label>
@@ -485,7 +485,7 @@
                 <constraint firstItem="XLw-Xr-akL" firstAttribute="top" secondItem="LcP-0S-akf" secondAttribute="bottom" constant="17" id="JiO-IX-iSi"/>
                 <constraint firstItem="ZeX-b8-Y0I" firstAttribute="leading" secondItem="e5D-yU-MNC" secondAttribute="trailing" id="Jrh-et-N3K"/>
                 <constraint firstItem="ptR-ei-CQl" firstAttribute="firstBaseline" secondItem="oWL-Xy-LvL" secondAttribute="firstBaseline" id="KaJ-DX-Yx5"/>
-                <constraint firstItem="vNU-St-fgN" firstAttribute="centerX" secondItem="eJK-yj-IVB" secondAttribute="centerX" constant="24" id="LLb-CA-47g"/>
+                <constraint firstItem="vNU-St-fgN" firstAttribute="centerX" secondItem="eJK-yj-IVB" secondAttribute="centerX" constant="30" id="LLb-CA-47g"/>
                 <constraint firstItem="Keq-Rl-3So" firstAttribute="top" secondItem="e7e-0V-rYM" secondAttribute="top" constant="64" id="M1U-1l-eTY"/>
                 <constraint firstItem="JNo-0A-VNg" firstAttribute="firstBaseline" secondItem="e5D-yU-MNC" secondAttribute="firstBaseline" id="O4s-Aa-0R4"/>
                 <constraint firstItem="e5D-yU-MNC" firstAttribute="centerX" secondItem="eJK-yj-IVB" secondAttribute="centerX" constant="10" id="Pdd-AS-z7l"/>

@@ -105,15 +105,15 @@
                     <nil key="highlightedColor"/>
                 </label>
                 <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="PR6-3d-8vK">
-                    <rect key="frame" x="85.5" y="399.5" width="147.5" height="75"/>
+                    <rect key="frame" x="105.5" y="414.5" width="116" height="45"/>
                     <subviews>
-                        <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" animating="YES" style="medium" translatesAutoresizingMaskIntoConstraints="NO" id="43e-6e-tGj">
-                            <rect key="frame" x="0.0" y="27.5" width="20" height="20"/>
+                        <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" animating="YES" style="large" translatesAutoresizingMaskIntoConstraints="NO" id="43e-6e-tGj">
+                            <rect key="frame" x="0.0" y="4" width="37" height="37"/>
                             <color key="color" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         </activityIndicatorView>
                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="QoS" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="e76-bN-8pV">
-                            <rect key="frame" x="28" y="0.0" width="119.5" height="75"/>
-                            <fontDescription key="fontDescription" name="Roboto-Medium" family="Roboto" pointSize="64"/>
+                            <rect key="frame" x="45" y="0.0" width="71" height="45"/>
+                            <fontDescription key="fontDescription" name="Roboto-Medium" family="Roboto" pointSize="38"/>
                             <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             <nil key="highlightedColor"/>
                         </label>
@@ -496,7 +496,7 @@
                 <constraint firstItem="XLw-Xr-akL" firstAttribute="leading" secondItem="e7e-0V-rYM" secondAttribute="leading" id="eU1-Qf-Nb2"/>
                 <constraint firstItem="e5D-yU-MNC" firstAttribute="centerY" secondItem="eJK-yj-IVB" secondAttribute="centerY" id="edt-AG-HCH"/>
                 <constraint firstItem="OVe-gJ-LZa" firstAttribute="centerY" secondItem="oWL-Xy-LvL" secondAttribute="centerY" id="eeA-D4-GWA"/>
-                <constraint firstItem="PR6-3d-8vK" firstAttribute="centerX" secondItem="eJK-yj-IVB" secondAttribute="centerX" constant="24" id="ffz-79-kf9"/>
+                <constraint firstItem="PR6-3d-8vK" firstAttribute="centerX" secondItem="eJK-yj-IVB" secondAttribute="centerX" constant="28" id="ffz-79-kf9"/>
                 <constraint firstItem="cqL-FH-5V7" firstAttribute="leading" secondItem="e7e-0V-rYM" secondAttribute="leading" id="gAU-gx-ZwV"/>
                 <constraint firstItem="e7e-0V-rYM" firstAttribute="bottom" secondItem="cqL-FH-5V7" secondAttribute="bottom" id="hD0-fo-UxD"/>
                 <constraint firstItem="e7e-0V-rYM" firstAttribute="trailing" secondItem="iiz-Hc-GK4" secondAttribute="trailing" constant="20" id="nSE-WJ-oMg"/>
