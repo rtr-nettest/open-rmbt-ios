@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="19162" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="22505" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
-        <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19144"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22504"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -21,7 +20,7 @@
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="XIp-jw-uPg" customClass="RMBTGradientView" customModule="RMBT" customModuleProvider="target">
-                    <rect key="frame" x="0.0" y="453" width="414" height="320"/>
+                    <rect key="frame" x="0.0" y="455" width="414" height="318"/>
                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                     <userDefinedRuntimeAttributes>
                         <userDefinedRuntimeAttribute type="color" keyPath="fromColor">
@@ -36,16 +35,16 @@
                     <rect key="frame" x="0.0" y="590" width="414" height="119"/>
                     <subviews>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Tm1-V9-Jdu">
-                            <rect key="frame" x="0.0" y="39" width="414" height="41"/>
+                            <rect key="frame" x="0.0" y="39.5" width="414" height="40"/>
                             <subviews>
                                 <label opaque="NO" userInteractionEnabled="NO" alpha="0.94999998807907104" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="WiFi" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="tBf-ww-zlJ">
-                                    <rect key="frame" x="0.0" y="0.0" width="414" height="17"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="414" height="16.5"/>
                                     <fontDescription key="fontDescription" name="Roboto-Medium" family="Roboto" pointSize="14"/>
                                     <color key="textColor" red="1" green="1" blue="1" alpha="0.3985746007" colorSpace="custom" customColorSpace="calibratedRGB"/>
                                     <nil key="highlightedColor"/>
                                 </label>
                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="A1 Telekom Austria" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="flt-8F-Tyu">
-                                    <rect key="frame" x="0.0" y="17" width="414" height="24"/>
+                                    <rect key="frame" x="0.0" y="16.5" width="414" height="23.5"/>
                                     <fontDescription key="fontDescription" name="Roboto-Medium" family="Roboto" pointSize="20"/>
                                     <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="calibratedRGB"/>
                                     <nil key="highlightedColor"/>
@@ -155,17 +154,17 @@
                     </constraints>
                 </view>
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sg2-WZ-vVY">
-                    <rect key="frame" x="0.0" y="44" width="414" height="665"/>
+                    <rect key="frame" x="0.0" y="48" width="414" height="661"/>
                     <subviews>
                         <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Do7-jB-P7f">
-                            <rect key="frame" x="74" y="199.5" width="266" height="266"/>
+                            <rect key="frame" x="75" y="198.5" width="264" height="264"/>
                             <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                             <constraints>
                                 <constraint firstAttribute="width" secondItem="Do7-jB-P7f" secondAttribute="height" multiplier="1:1" id="rSJ-Ix-hRh"/>
                             </constraints>
                         </view>
                         <button opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="251" contentHorizontalAlignment="center" contentVerticalAlignment="center" adjustsImageWhenHighlighted="NO" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="sA0-B7-9PA">
-                            <rect key="frame" x="-46.5" y="79" width="507" height="507"/>
+                            <rect key="frame" x="-44.5" y="79" width="503" height="503"/>
                             <constraints>
                                 <constraint firstAttribute="width" secondItem="sA0-B7-9PA" secondAttribute="height" multiplier="1:1" id="n1Y-oY-fWP"/>
                             </constraints>
@@ -175,7 +174,7 @@
                             </connections>
                         </button>
                         <view hidden="YES" userInteractionEnabled="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="DB2-U6-fMn">
-                            <rect key="frame" x="154" y="279.5" width="106" height="106"/>
+                            <rect key="frame" x="154" y="277.5" width="106" height="106"/>
                             <subviews>
                                 <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="wifi_icon" translatesAutoresizingMaskIntoConstraints="NO" id="bWo-2a-PJc">
                                     <rect key="frame" x="0.0" y="0.0" width="106" height="106"/>
@@ -191,7 +190,7 @@
                             </constraints>
                         </view>
                         <view userInteractionEnabled="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="b2S-dN-C2P">
-                            <rect key="frame" x="165" y="264.5" width="84" height="106"/>
+                            <rect key="frame" x="165" y="262.5" width="84" height="106"/>
                             <subviews>
                                 <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="3g_icon" translatesAutoresizingMaskIntoConstraints="NO" id="MCl-Ue-4Yi">
                                     <rect key="frame" x="30" y="0.0" width="24" height="30"/>
@@ -212,7 +211,7 @@
                             </constraints>
                         </view>
                         <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="icon_loop_mode" translatesAutoresizingMaskIntoConstraints="NO" id="ba3-T5-wkc">
-                            <rect key="frame" x="260" y="199.5" width="80" height="75"/>
+                            <rect key="frame" x="260" y="198.5" width="79" height="75"/>
                         </imageView>
                     </subviews>
                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -235,7 +234,7 @@
                     </constraints>
                 </view>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="yVY-oh-ivi">
-                    <rect key="frame" x="365" y="59" width="44" height="44"/>
+                    <rect key="frame" x="365" y="63" width="44" height="44"/>
                     <constraints>
                         <constraint firstAttribute="width" constant="44" id="J5d-eC-Vy8"/>
                         <constraint firstAttribute="height" constant="44" id="YeH-dw-izH"/>
@@ -246,7 +245,7 @@
                     </connections>
                 </button>
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="e0b-d7-pEu">
-                    <rect key="frame" x="0.0" y="60" width="100" height="46"/>
+                    <rect key="frame" x="0.0" y="64" width="100" height="46"/>
                     <subviews>
                         <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="loop_mode_switcher_bg" translatesAutoresizingMaskIntoConstraints="NO" id="DPo-3B-TBA">
                             <rect key="frame" x="22" y="12" width="56" height="16"/>
@@ -277,7 +276,7 @@
                     </constraints>
                 </view>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="RTR-Netztest" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="7fs-mU-pVp">
-                    <rect key="frame" x="145.5" y="69" width="123.5" height="21"/>
+                    <rect key="frame" x="146.5" y="73" width="121" height="21"/>
                     <constraints>
                         <constraint firstAttribute="height" constant="21" id="Z8U-UC-IUt"/>
                     </constraints>
@@ -286,7 +285,7 @@
                     <nil key="highlightedColor"/>
                 </label>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Wiederholungsmodus" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="DFV-d5-0Od">
-                    <rect key="frame" x="138.5" y="98" width="137" height="15"/>
+                    <rect key="frame" x="138.5" y="102" width="137" height="15"/>
                     <constraints>
                         <constraint firstAttribute="height" constant="15" id="KwO-A6-yBY"/>
                     </constraints>
@@ -341,6 +340,7 @@
                 <outlet property="networkWifiView" destination="DB2-U6-fMn" id="gdU-do-8hF"/>
                 <outlet property="settingsButton" destination="yVY-oh-ivi" id="Urn-9D-M8v"/>
                 <outlet property="startTestButton" destination="sA0-B7-9PA" id="EcY-z7-Jjy"/>
+                <outlet property="startTestButtonCircleView" destination="Do7-jB-P7f" id="eBJ-NR-gVi"/>
                 <outlet property="trailingLoopModeSwitcherConstraint" destination="3ms-Fr-O2U" id="gij-ov-tuT"/>
                 <outlet property="wave2View" destination="wYn-sd-X0Q" id="uAE-ho-BYF"/>
                 <outlet property="waveView" destination="jLA-jn-XuN" id="2Qb-5R-ssm"/>

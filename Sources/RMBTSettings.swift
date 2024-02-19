@@ -146,7 +146,7 @@ import Foundation
 
         super.init()
 
-        UserDefaults.standard.register(defaults:
+        UserDefaults.appDefaults.register(defaults:
         [
             "loopModeEveryMeters": RMBTConfig.RMBT_TEST_LOOPMODE_DEFAULT_MOVEMENT_M,
             "loopModeEveryMinutes": RMBTConfig.RMBT_TEST_LOOPMODE_DEFAULT_DELAY_MINS,

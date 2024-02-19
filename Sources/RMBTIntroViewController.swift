@@ -61,6 +61,7 @@ class RMBTIntroViewController: UIViewController {
             self.loopModeSwitched(isOn)
         }
         view.startButtonHandler = {
+            UserDefaults.didTouchStartTestButton()
             self.startTest()
         }
         view.settingsButtonHandler = {
@@ -176,6 +177,13 @@ class RMBTIntroViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         self.updateStates()
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
+            self?.showStartTestButtonPopupIfNeeded()
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 6) { [weak self] in
+            self?.hideStartTestButtonPopup()
+        }
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -453,6 +461,45 @@ class RMBTIntroViewController: UIViewController {
             vc.delegate = self
         }
     }
+
+    private var startButtonTipView: UIView?
+
+    func showStartTestButtonPopupIfNeeded() {
+        guard UserDefaults.shouldShowStartTestButtonPopup() else { return }
+        UserDefaults.markDidShowStartTestButtonPopup()
+
+        let startButtonTipView = UIView.from(
+            TopPopoverView(text: .startTestButtonTipText, backgroundColor: .white)
+        )
+        startButtonTipView.alpha = 0
+        view.addSubview(startButtonTipView)
+
+        NSLayoutConstraint.activate([
+            startButtonTipView.bottomAnchor.constraint(equalTo: self.currentView.startTestButtonCircleView.topAnchor, constant: -8),
+            startButtonTipView.centerXAnchor.constraint(equalTo: self.currentView.startTestButtonCircleView.centerXAnchor, constant: 0)
+        ])
+
+        UIView.animate(withDuration: 0.5) {
+            startButtonTipView.alpha = 1
+        }
+        self.startButtonTipView = startButtonTipView
+    }
+
+    func hideStartTestButtonPopup(didTouchStartTestButton: Bool = false) {
+        if didTouchStartTestButton {
+            UserDefaults.didTouchStartTestButton()
+        }
+        UIView.animate(
+            withDuration: 0.5,
+            animations: {
+                self.startButtonTipView?.alpha = 0
+            },
+            completion: { _ in
+                self.startButtonTipView?.removeFromSuperview()
+                self.startButtonTipView = nil
+            }
+        )
+    }
 }
 
 extension RMBTIntroViewController: RMBTSettingsViewControllerDelegate {
@@ -531,6 +578,7 @@ private extension String {
     static let locationAltitude = NSLocalizedString("location_dialog_label_altitude", comment: "");
     static let locationSpeed = NSLocalizedString("location_dialog_label_speed", comment: "");
     static let loopModeLabel = NSLocalizedString("title_loop_mode", comment: "")
+    static let startTestButtonTipText = NSLocalizedString("start_test_button_help_message", comment: "")
 }
 
 private extension UIImage {

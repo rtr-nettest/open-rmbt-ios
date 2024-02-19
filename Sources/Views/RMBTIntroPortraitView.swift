@@ -29,7 +29,8 @@ class RMBTIntroPortraitView: UIView, XibLoadable {
     @IBOutlet private weak var logoLabel: UILabel!
     @IBOutlet private weak var settingsButton: UIButton!
     
-    @IBOutlet private weak var startTestButton: UIButton!
+    @IBOutlet weak var startTestButton: UIButton!
+    @IBOutlet weak var startTestButtonCircleView: UIView!
     @IBOutlet weak var loopModeSwitchButton: UIButton!
     @IBOutlet private weak var loopIconImageView: UIImageView!
     

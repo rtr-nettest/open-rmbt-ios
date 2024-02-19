@@ -440,3 +440,4 @@
 "menu_button_statistics" = "Statistik";
 
 "text_ip_address_not_available" = "Die Adresse nicht verfügbar";
+"start_test_button_help_message" = "Press the button to start the test now!";
