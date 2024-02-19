@@ -70,6 +70,7 @@ class RMBTTestPortraitView: UIView, XibLoadable {
     
     // QoS
     @IBOutlet weak var qosProgressView: UIView!
+    @IBOutlet weak var qosProgressLabelContainer: UIStackView!
 
     // Loop Mode Waiting
     @IBOutlet weak var loopModeWaitingView: UIView!
@@ -267,17 +268,18 @@ class RMBTTestPortraitView: UIView, XibLoadable {
         self.counterAnimationView.isAnimating = true
     }
     
-    @objc func showQoSUI(_ state: Bool) {
-        self.speedGraphView.isHidden = state
-        self.pingGraphView.isHidden = state
+    @objc func showQoSUI(_ shouldShowQoS: Bool) {
+        self.speedGraphView.isHidden = shouldShowQoS
+        self.pingGraphView.isHidden = shouldShowQoS
     //    _speedGaugeView.hidden = state
-        self.speedLabel.isHidden = state
-        self.speedSuffixLabel.isHidden = state
+        self.speedLabel.isHidden = shouldShowQoS
+        self.qosProgressLabelContainer.isHidden = !shouldShowQoS
+        self.speedSuffixLabel.isHidden = shouldShowQoS
         self.speedGaugeView.value = 0.0
-        self.speedSuffixLabel.isHidden = state
-        self.arrowImageView.isHidden = state
-        self.qosProgressView.isHidden = !state
-        if state == false {
+        self.speedSuffixLabel.isHidden = shouldShowQoS
+        self.arrowImageView.isHidden = shouldShowQoS
+        self.qosProgressView.isHidden = !shouldShowQoS
+        if shouldShowQoS == false {
             self.updatePhase()
         }
     }
@@ -290,6 +292,7 @@ class RMBTTestPortraitView: UIView, XibLoadable {
         self.speedGaugeView.value = 0.0
         self.progressGaugeView.value = 0.0
         self.speedLabel.text = "--"
+        self.qosProgressLabelContainer.isHidden = true
         self.progressLabel.text = "--"
         self.speedSuffixLabel.isHidden = true
     }
@@ -331,6 +334,7 @@ class RMBTTestPortraitView: UIView, XibLoadable {
 
         speedGaugeView.value = 0.0
         self.speedLabel.text = ""
+        self.qosProgressLabelContainer.isHidden = true
         self.speedSuffixLabel.isHidden = true
         self.speedGraphView.clear()
         self.pingGraphView.clear()
@@ -391,6 +395,7 @@ class RMBTTestPortraitView: UIView, XibLoadable {
             self.speedGraphView.isHidden = false
             self.speedGraphView.clear()
             self.speedLabel.text = ""
+            self.qosProgressLabelContainer.isHidden = true
             self.speedSuffixLabel.isHidden = true
             self.arrowImageView.image = UIImage(named: "upload_icon")
         } else {
@@ -409,7 +414,8 @@ class RMBTTestPortraitView: UIView, XibLoadable {
         
         self.progressGaugePlaceholderView.isHidden = true
         self.speedGaugePlaceholderView.isHidden = true
-        
+        self.qosProgressLabelContainer.isHidden = true
+
         self.updateDetailInfoView()
         
         self.infoTitleView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(infoViewTap)))
