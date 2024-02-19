@@ -387,7 +387,7 @@
 "preferences_location" = "Standortberechtigung erteilen";
 "preferences_location_summary" = "Derzeit hat die App keine Standortberechtigung, Sie können die Berechtigung mit diesem Link in den Systemeinstellungen erteilen";
 "preferences_ipv4_only" = "Nur IPv4";
-"preferences_skip_qos" = "QoS überspringen";
+"preferences_skip_qos" = "QoS Messung";
 "preferences_expert_mode" = "Expertenmodus";
 "preferences_loop_mode" = "Wiederholungsmodus";
 "preferences_loop_mode_enabled" = "Ermöglicht";
