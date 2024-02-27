@@ -36,37 +36,43 @@ import UIKit
         }).joined(separator: "-")
     }
     
-    // Pulled from the Android app
     private static func createPoints(from items: [[String: Any]]) -> [CGPoint] {
+        let dataItems = items.map(DataItem.init)
         var points: [CGPoint] = []
-        let maxTimeEntry = items.max(by: { a, b in
-            guard let timeA = a["time_elapsed"] as? Int, let timeB = b["time_elapsed"] as? Int else {
-                return false
+
+        let maxTimeEntry = dataItems.max { $0.timeElapsed < $1.timeElapsed }
+        if let maxTimeEntry {
+            let maxTime = maxTimeEntry.timeElapsed
+
+            if let firstItem = dataItems.first {
+                let firstItemProgress = (firstItem.timeElapsed / maxTime ) * 100
+
+                if (firstItemProgress > 0) {
+                    let firstItemYPos = RMBTHistorySpeedGraph.getYPos(bytesDiference: firstItem.bytesTotal, timeDifference: firstItem.timeElapsed)
+                    points.append(CGPoint(x: 0, y: firstItemYPos))
+                }
             }
-            return timeA < timeB
-        })
-        if let maxTimeEntry = maxTimeEntry {
-            let maxTime = Double(maxTimeEntry["time_elapsed"] as? Int ?? 0)
-            let firstItemProgress = ( Double(items.first?["time_elapsed"] as? Int ?? 0) / maxTime ) * 100
-            let firstItem = RMBTHistorySpeedGraph.getYPos(from: items.first!)
-            if (firstItemProgress > 0) {
-                points.append(
-                    CGPoint(x: 0, y: firstItem )
-                )
-            }
-            for item in items {
-                let x = Double(item["time_elapsed"] as? Int ?? 0) / maxTime
-                let y = RMBTHistorySpeedGraph.getYPos(from: item)
+
+            var previousTime: Double = 0
+            var previousData: Double = 0
+
+            for item in dataItems {
+                let dataDifference = item.bytesTotal - previousData;
+                let timeDifference = item.timeElapsed - previousTime;
+
+                let x = item.timeElapsed / maxTime
+                let y = RMBTHistorySpeedGraph.getYPos(bytesDiference: dataDifference, timeDifference: timeDifference)
                 points.append(CGPoint(x: x, y: y))
+
+                previousData = item.bytesTotal
+                previousTime = item.timeElapsed
             }
         }
         return points
     }
     
-    private static func getYPos(from speedItem: [String: Any]) -> Double {
-        let value = speedItem["bytes_total"] as? Double ?? 0
-        let time = Double(speedItem["time_elapsed"] as? Int ?? 1)
-        return toLog(value * 8000 / time)
+    private static func getYPos(bytesDiference: Double, timeDifference: Double) -> Double {
+        toLog(bytesDiference * 8000 / timeDifference)
     }
     
     private static func toLog(_ value: Double) -> Double {
@@ -74,5 +80,15 @@ import UIKit
             return 0
         }
         return (2 + log10(value / 1e7)) / 4
+    }
+}
+
+private struct DataItem {
+    let bytesTotal: Double
+    let timeElapsed: Double
+
+    init(jsonData: [String: Any]) {
+        bytesTotal = jsonData["bytes_total"] as? Double ?? 0
+        timeElapsed = Double(jsonData["time_elapsed"] as? Int ?? 1)
     }
 }
