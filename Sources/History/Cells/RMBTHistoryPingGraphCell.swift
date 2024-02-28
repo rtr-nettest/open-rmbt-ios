@@ -38,6 +38,7 @@ final class RMBTHistoryPingGraphCell: UICollectionViewCell {
         super.awakeFromNib()
         
         pingGraphView.clear()
+        pingGraphView.showBarChart = true
     }
 
 }

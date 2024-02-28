@@ -116,7 +116,13 @@ final private class RMBTPingContentGraphView: UIView {
             self.setNeedsDisplay()
         }
     }
-    
+
+    public var showBarChart: Bool = false {
+        didSet {
+            self.setNeedsDisplay()
+        }
+    }
+
     override func draw(_ rect: CGRect) {
         let context = UIGraphicsGetCurrentContext()
         context?.translateBy(x: 0, y: self.bounds.size.height)
@@ -169,7 +175,15 @@ final private class RMBTPingContentGraphView: UIView {
 //        }
         
         guard values.count > 0 else { return }
-        context?.addPath(self.line().cgPath)
+
+        if showBarChart {
+            for (index, value) in values.enumerated() {
+                let bezier = self.column(with: value.y, at: index, totalCount: values.count)
+                context?.addPath(bezier.cgPath)
+            }
+        } else {
+            context?.addPath(self.line().cgPath)
+        }
 
         context?.setFillColor(columnColor.cgColor)
         context?.fillPath()
@@ -244,7 +258,7 @@ final private class RMBTPingContentGraphView: UIView {
     
     // Create path for drawing value
     func column(with value: CGFloat, at index: Int, totalCount: Int) -> UIBezierPath {
-        let offset = 15.0
+        let offset = 2.0
         var width = (Double(self.frame.width) - (offset * Double(totalCount))) / Double(totalCount)
         if width > 20 {
             width = 20
@@ -279,6 +293,7 @@ final private class RMBTPingContentGraphView: UIView {
     
     private lazy var contentView: RMBTPingContentGraphView = {
         let view = RMBTPingContentGraphView()
+        view.showBarChart = self.showBarChart
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -338,7 +353,13 @@ final private class RMBTPingContentGraphView: UIView {
             contentView.columnColor = lineColor.withAlphaComponent(0.3)
         }
     }
-    
+
+    public var showBarChart: Bool = false {
+        didSet {
+            contentView.showBarChart = showBarChart
+        }
+    }
+
     @objc public func add(value: CGFloat, at timeInterval: TimeInterval) {
         let p = CGPoint(x: timeInterval, y: value)
         var chartPoints = self.chartPoints
