@@ -655,7 +655,7 @@ extension RMBTTestViewController: UIViewControllerTransitioningDelegate {
 
 extension RMBTTestViewController: RMBTBaseTestViewControllerSubclass {
     func onTestUpdatedConnectivity(_ connectivity: RMBTConnectivity) {
-        self.networkName = RMBTValueOrString(connectivity.networkName, "Unknown") as? String
+        self.networkName = connectivity.networkName
         self.networkType = RMBTValueOrString(connectivity.networkTypeDescription, "n/a") as? String ?? ""
         
         if (connectivity.networkType == .cellular) {

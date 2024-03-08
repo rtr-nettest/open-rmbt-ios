@@ -30,6 +30,7 @@ class RMBTTestPortraitView: UIView, XibLoadable {
     @IBOutlet weak var technologyTitleLabel: UILabel!
     @IBOutlet weak var technologyValueLabel: UILabel!
     @IBOutlet weak var networkTypeLabel: UILabel?
+    @IBOutlet weak var networkNameTitleLabel: UILabel!
     @IBOutlet weak var networkNameLabel: UILabel!
     @IBOutlet weak var networkTypeImageView: UIImageView!
     
@@ -97,6 +98,7 @@ class RMBTTestPortraitView: UIView, XibLoadable {
     var networkName: String? {
         didSet {
             self.networkNameLabel.text = networkName
+            self.networkNameTitleLabel.isHidden = (networkName?.isEmpty ?? true)
         }
     }
     

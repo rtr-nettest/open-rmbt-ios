@@ -531,6 +531,7 @@
                 <outlet property="loopModeWaitingView" destination="2WG-qA-mjh" id="CHB-9E-v5N"/>
                 <outlet property="networkMobileImageView" destination="Hbn-C8-ttA" id="Z2X-QW-1CG"/>
                 <outlet property="networkNameLabel" destination="aNh-rH-2Mj" id="kUV-gX-7kw"/>
+                <outlet property="networkNameTitleLabel" destination="81a-ky-7bD" id="r3D-m4-ovu"/>
                 <outlet property="networkTechnologyImageView" destination="pjb-pX-akO" id="FlS-6w-EL0"/>
                 <outlet property="networkTypeImageView" destination="0NP-Sa-HQI" id="3SQ-OI-V1a"/>
                 <outlet property="offsetGaugesConstraint" destination="JME-Ib-bNk" id="s8m-hD-bVx"/>
