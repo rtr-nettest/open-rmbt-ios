@@ -113,7 +113,7 @@
                             <color key="color" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         </activityIndicatorView>
                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="QoS" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="6kE-hk-ZNV">
-                            <rect key="frame" x="44.999999999999986" y="0.0" width="71" height="44.666666666666664"/>
+                            <rect key="frame" x="44.999999999999986" y="0.0" width="71.000000000000014" height="44.666666666666664"/>
                             <fontDescription key="fontDescription" name="Roboto-Medium" family="Roboto" pointSize="38"/>
                             <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             <nil key="highlightedColor"/>
@@ -536,6 +536,7 @@
                 <outlet property="loopModeWaitingView" destination="2WG-qA-mjh" id="CHB-9E-v5N"/>
                 <outlet property="networkMobileImageView" destination="aI8-eO-atQ" id="dd0-lZ-utB"/>
                 <outlet property="networkNameLabel" destination="aNh-rH-2Mj" id="kUV-gX-7kw"/>
+                <outlet property="networkNameTitleLabel" destination="81a-ky-7bD" id="7fX-xB-b7q"/>
                 <outlet property="networkTechnologyImageView" destination="apV-CG-0ul" id="Uan-9H-hk6"/>
                 <outlet property="networkTypeImageView" destination="0NP-Sa-HQI" id="3SQ-OI-V1a"/>
                 <outlet property="pingGraphView" destination="uSZ-4Y-LuH" id="ZtH-WZ-Vyo"/>
