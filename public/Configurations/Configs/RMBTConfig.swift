@@ -39,16 +39,16 @@ public class RMBTConfig {
     static let DEACTIVATE_DEV_CODE = "00000000"
     
     static let RMBT_TEST_LOOPMODE_MIN_COUNT = 1
-    static let RMBT_TEST_LOOPMODE_DEFAULT_COUNT = 10
-    static let RMBT_TEST_LOOPMODE_MAX_COUNT = 100
+    static let RMBT_TEST_LOOPMODE_DEFAULT_COUNT = 50
+    static let RMBT_TEST_LOOPMODE_MAX_COUNT = 500
 
     // Minimum/maximum number of minutes that user can choose to wait before next test is started:
     static let RMBT_TEST_LOOPMODE_MIN_DELAY_MINS = 5
-    static let RMBT_TEST_LOOPMODE_DEFAULT_DELAY_MINS = 10
+    static let RMBT_TEST_LOOPMODE_DEFAULT_DELAY_MINS = 15
     static let RMBT_TEST_LOOPMODE_MAX_DELAY_MINS = (24 * 60) // one day
 
     // ... meters user locations must change before next test is started:
-    static let RMBT_TEST_LOOPMODE_MIN_MOVEMENT_M = 50
+    static let RMBT_TEST_LOOPMODE_MIN_MOVEMENT_M = 25
     static let RMBT_TEST_LOOPMODE_DEFAULT_MOVEMENT_M = 250
     static let RMBT_TEST_LOOPMODE_MAX_MOVEMENT_M = 10000
     
