@@ -18,6 +18,7 @@ target 'RMBT' do
   
   pod 'libextobjc/EXTKeyPathCoding'
   pod 'TUSafariActivity'
+  pod 'KeychainAccess'
 
   
 #  if File.exist?(File.expand_path('../Vendor/CocoaAsyncSocket', __FILE__))

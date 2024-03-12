@@ -86,25 +86,6 @@ extension UserDefaults {
         
         return user
     }
-    
-    public class func clearStoredUUID(uuidKey: String?) {
-        if let uuidKey = uuidKey {
-            UserDefaults.appDefaults.removeObject(forKey: uuidKey)
-            UserDefaults.appDefaults.synchronize()
-        }
-    }
-    ///
-    public class func storeNewUUID(uuidKey: String, uuid: String) {
-        if RMBTSettings.shared.isClientPersistent {
-            storeDataFor(key: uuidKey, obj: uuid)
-            Log.logger.debug("UUID: uuid is now: \(uuid) for key '\(uuidKey)'")
-        }
-    }
-    
-    ///
-    public class func checkStoredUUID(uuidKey: String) -> String? {
-        return UserDefaults.appDefaults.object(forKey: uuidKey) as? String
-    }
 }
 
 extension UserDefaults {
