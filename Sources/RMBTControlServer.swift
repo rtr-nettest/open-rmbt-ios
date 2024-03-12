@@ -80,7 +80,7 @@ extension RMBTControlServer {
                     
                     // save uuid
                     if let uuidKey = self.uuidKey, let u = self.uuid {
-                        UserDefaults.storeNewUUID(uuidKey: uuidKey, uuid: u)
+                        KeychainHelper.storeNewUUID(uuidKey: uuidKey, uuid: u)
                     }
                     
                     // get history filters
@@ -168,7 +168,7 @@ extension RMBTControlServer {
 
         if self.uuid == nil,
             let key = uuidKey {
-            uuid = UserDefaults.checkStoredUUID(uuidKey: key)
+            uuid = KeychainHelper.checkStoredUUID(uuidKey: key)
         }
         
         Log.logger.info("Control Server base url = \(self.baseUrl)")
@@ -479,7 +479,7 @@ extension RMBTControlServer {
         baseUrl = RMBTConfig.shared.RMBT_CONTROL_SERVER_URL
         uuidKey = "\(storeUUIDKey)\(URL(string: baseUrl)!.host!)"
         
-        UserDefaults.clearStoredUUID(uuidKey: uuidKey)
+        KeychainHelper.clearStoredUUID(uuidKey: uuidKey)
         self.uuid = nil
     }
     
