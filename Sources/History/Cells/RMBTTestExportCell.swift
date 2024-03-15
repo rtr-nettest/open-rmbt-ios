@@ -42,6 +42,13 @@ class RMBTTestExportCell: UITableViewCell {
         }
     }
 
+    override func awakeFromNib() {
+        [pdfButton, xlsxButton, csvButton].forEach {
+            $0.isEnabled = true
+            $0.tintColor = .rmbt_color(withRGBHex: 0x78ED03)
+        }
+    }
+
     @IBAction func pdfButtonTouched(_ sender: UIButton) {
         guard let openTestUUID else {
             onFailure?(.missingOpenTestUUID)
