@@ -8,6 +8,10 @@
 
 import UIKit
 
+protocol TestExporting {
+    func exportPDF(openTestUUID: String) async throws -> URL
+}
+
 class RMBTTestExportCell: UITableViewCell {
     enum Failure: Error {
         case missingOpenTestUUID
@@ -21,11 +25,11 @@ class RMBTTestExportCell: UITableViewCell {
     @IBOutlet weak var csvButton: UIButton!
 
     private var openTestUUID: String?
-    private let exportService: TestExporting = TestExportServiceMock()
-    private var onExportedPDFFile: ((Data) -> Void)?
+    private let exportService: TestExporting = RMBTControlServer.shared
+    private var onExportedPDFFile: ((URL) -> Void)?
     private var onFailure: ((Failure) -> Void)?
 
-    func configure(with openTestUUID: String, onExportedPDFFile: ((Data) -> Void)?, onFailure: ((Failure) -> Void)?) {
+    func configure(with openTestUUID: String, onExportedPDFFile: ((URL) -> Void)?, onFailure: ((Failure) -> Void)?) {
         self.openTestUUID = openTestUUID
         self.onExportedPDFFile = onExportedPDFFile
         self.onFailure = onFailure
@@ -69,32 +73,8 @@ class RMBTTestExportCell: UITableViewCell {
     }
 }
 
-// MARK -
-
-protocol TestExporting {
-    func exportPDF(openTestUUID: String) async throws -> Data
-}
-
-final class TestExportService: TestExporting {
-    func exportPDF(openTestUUID: String) async throws -> Data {
-        .init()
-    }
-}
-
-final class TestExportServiceMock: TestExporting {
-    func exportPDF(openTestUUID: String) async throws -> Data {
-        let pdfPageFrame = await UIApplication.shared.keyWindow!.bounds
-        let pdfData = NSMutableData()
-        UIGraphicsBeginPDFContextToData(pdfData, pdfPageFrame, nil)
-        UIGraphicsBeginPDFPageWithInfo(pdfPageFrame, nil)
-        guard let pdfContext = UIGraphicsGetCurrentContext() else {
-            throw NSError(domain: "culd not create graphic context", code: 1)
-        }
-        await UIApplication.shared.keyWindow!.layer.render(in: pdfContext)
-        UIGraphicsEndPDFContext()
-
-        try await Task.sleep(for: .seconds(2))
-
-        return pdfData as Data
+extension RMBTControlServer: TestExporting {
+    func exportPDF(openTestUUID: String) async throws -> URL {
+        try await getTestExport(into: .pdf, openTestUUID: openTestUUID)
     }
 }

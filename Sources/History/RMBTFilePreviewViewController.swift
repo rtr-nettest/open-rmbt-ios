@@ -1,5 +1,5 @@
 //
-//  RMBTPDFViewController.swift
+//  RMBTFilePreviewViewController.swift
 //  RMBT
 //
 //  Created by Jiri Urbasek on 3/13/24.
@@ -43,5 +43,17 @@ final class FilePreviewService {
         } else {
             throw Failure.couldNotSaveFile
         }
+    }
+
+    func temporarilySave(fileURL: URL, withName fileName: String) throws -> URL {
+        let fileNameLocalPath = tmpDirectoryPath + fileName
+
+        do {
+            try? FileManager.default.removeItem(at: URL(fileURLWithPath: fileNameLocalPath))
+            try FileManager.default.copyItem(at: fileURL, to: URL(fileURLWithPath: fileNameLocalPath))
+        } catch {
+            print("\(error)")
+        }
+        return URL(fileURLWithPath: fileNameLocalPath)
     }
 }

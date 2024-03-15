@@ -474,7 +474,13 @@ extension RMBTControlServer {
             }
         }
     }
-    
+
+    func getTestExport(into format: TestExportFormat, openTestUUID: String) async throws -> URL {
+        try await URLSession.shared.download(
+            for: format.downloadRequest(baseURL: /*statsURL*/URL(string: "https://m-cloud.netztest.at/RMBTStatisticServer")!, openTestUUID: openTestUUID)
+        ).0
+    }
+
     func clearStoredUUID() {
         baseUrl = RMBTConfig.shared.RMBT_CONTROL_SERVER_URL
         uuidKey = "\(storeUUIDKey)\(URL(string: baseUrl)!.host!)"

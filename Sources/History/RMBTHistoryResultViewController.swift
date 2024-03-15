@@ -266,7 +266,7 @@ extension RMBTHistoryResultViewController: UITableViewDelegate, UITableViewDataS
         case .testDetails:
             return 48
         case .exportButtons:
-            return 60
+            return 48
         }
     }
     
@@ -358,13 +358,12 @@ extension RMBTHistoryResultViewController: UITableViewDelegate, UITableViewDataS
                         let pdfViewController = RMBTFilePreviewViewController()
                         let fileService = FilePreviewService()
                         if let fileURL = try? fileService.temporarilySave(
-                            pdfData: $0,
+                            fileURL: $0,
                             withName: (historyResult.timeStringIn24hFormat ?? testUUID) + ".pdf"
                         ) {
                             pdfViewController.configure(fileURLs: [fileURL])
+                            self?.navigationController?.present(pdfViewController, animated: true)
                         }
-
-                        self?.navigationController?.present(pdfViewController, animated: true)
                     },
                     onFailure: nil
                 )
