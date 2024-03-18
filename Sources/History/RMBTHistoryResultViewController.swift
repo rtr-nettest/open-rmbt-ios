@@ -352,18 +352,13 @@ extension RMBTHistoryResultViewController: UITableViewDelegate, UITableViewDataS
                 cell.configure(
                     with: testUUID,
                     onExportedPDFFile: { [weak self] in
-//                        let pdfViewController = RMBTPDFViewController()
-//                        pdfViewController.configure(pdfData: $0)
-
-                        let pdfViewController = RMBTFilePreviewViewController()
-                        let fileService = FilePreviewService()
-                        if let fileURL = try? fileService.temporarilySave(
-                            fileURL: $0,
-                            withName: (historyResult.timeStringIn24hFormat ?? testUUID) + ".pdf"
-                        ) {
-                            pdfViewController.configure(fileURLs: [fileURL])
-                            self?.navigationController?.present(pdfViewController, animated: true)
-                        }
+                        self?.openFile(url: $0, historyResult: historyResult, testUUID: testUUID, fileExtension: "pdf")
+                    },
+                    onExportedXSLXFile: { [weak self] in
+                        self?.openFile(url: $0, historyResult: historyResult, testUUID: testUUID, fileExtension: "xslx")
+                    },
+                    onExportedCSVFile: { [weak self] in
+                        self?.openFile(url: $0, historyResult: historyResult, testUUID: testUUID, fileExtension: "csv")
                     },
                     onFailure: nil
                 )
@@ -384,4 +379,20 @@ extension RMBTHistoryResultViewController: UITableViewDelegate, UITableViewDataS
         }
     }
    
+}
+
+private extension RMBTHistoryResultViewController {
+
+    func openFile(url: URL, historyResult: RMBTHistoryResult, testUUID: String, fileExtension: String) {
+        let pdfViewController = RMBTFilePreviewViewController()
+        let fileService = FilePreviewService()
+        if let fileURL = try? fileService.temporarilySave(
+            fileURL: url,
+            withName: (historyResult.timeStringIn24hFormat ?? testUUID) + "." + fileExtension
+        ) {
+            pdfViewController.configure(fileURLs: [fileURL])
+            navigationController?.present(pdfViewController, animated: true)
+        }
+    }
+
 }

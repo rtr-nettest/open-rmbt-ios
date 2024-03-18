@@ -10,6 +10,8 @@ import UIKit
 
 protocol TestExporting {
     func exportPDF(openTestUUID: String) async throws -> URL
+    func exportXSLX(openTestUUID: String) async throws -> URL
+    func exportCSV(openTestUUID: String) async throws -> URL
 }
 
 class RMBTTestExportCell: UITableViewCell {
@@ -27,11 +29,21 @@ class RMBTTestExportCell: UITableViewCell {
     private var openTestUUID: String?
     private let exportService: TestExporting = RMBTControlServer.shared
     private var onExportedPDFFile: ((URL) -> Void)?
+    private var onExportedXSLXFile: ((URL) -> Void)?
+    private var onExportedCSVFile: ((URL) -> Void)?
     private var onFailure: ((Failure) -> Void)?
 
-    func configure(with openTestUUID: String, onExportedPDFFile: ((URL) -> Void)?, onFailure: ((Failure) -> Void)?) {
+    func configure(
+        with openTestUUID: String,
+        onExportedPDFFile: @escaping ((URL) -> Void),
+        onExportedXSLXFile: @escaping  ((URL) -> Void),
+        onExportedCSVFile: @escaping ((URL) -> Void),
+        onFailure: ((Failure) -> Void)?
+    ) {
         self.openTestUUID = openTestUUID
         self.onExportedPDFFile = onExportedPDFFile
+        self.onExportedXSLXFile = onExportedXSLXFile
+        self.onExportedCSVFile = onExportedCSVFile
         self.onFailure = onFailure
     }
 
@@ -60,7 +72,7 @@ class RMBTTestExportCell: UITableViewCell {
             onFailure?(.missingOpenTestUUID)
             return
         }
-        let title = pdfButton.showActivity()
+        let title = sender.showActivity()
 
         Task { @MainActor in
             do {
@@ -69,14 +81,44 @@ class RMBTTestExportCell: UITableViewCell {
             } catch {
                 onFailure?(.exportError(error))
             }
-            pdfButton.hideActivity(title: title)
+            sender.hideActivity(title: title)
         }
     }
 
     @IBAction func xlsxButtonTouched(_ sender: UIButton) {
+        guard let openTestUUID else {
+            onFailure?(.missingOpenTestUUID)
+            return
+        }
+        let title = sender.showActivity()
+
+        Task { @MainActor in
+            do {
+                let pdf = try await exportService.exportXSLX(openTestUUID: openTestUUID)
+                onExportedXSLXFile?(pdf)
+            } catch {
+                onFailure?(.exportError(error))
+            }
+            sender.hideActivity(title: title)
+        }
     }
 
     @IBAction func csvButtonTouched(_ sender: UIButton) {
+        guard let openTestUUID else {
+            onFailure?(.missingOpenTestUUID)
+            return
+        }
+        let title = sender.showActivity()
+
+        Task { @MainActor in
+            do {
+                let pdf = try await exportService.exportCSV(openTestUUID: openTestUUID)
+                onExportedCSVFile?(pdf)
+            } catch {
+                onFailure?(.exportError(error))
+            }
+            sender.hideActivity(title: title)
+        }
     }
 }
 
@@ -98,5 +140,13 @@ private extension UIButton {
 extension RMBTControlServer: TestExporting {
     func exportPDF(openTestUUID: String) async throws -> URL {
         try await getTestExport(into: .pdf, openTestUUID: openTestUUID)
+    }
+
+    func exportXSLX(openTestUUID: String) async throws -> URL {
+        try await getTestExport(into: .xlsx, openTestUUID: openTestUUID)
+    }
+
+    func exportCSV(openTestUUID: String) async throws -> URL {
+        try await getTestExport(into: .csv, openTestUUID: openTestUUID)
     }
 }
