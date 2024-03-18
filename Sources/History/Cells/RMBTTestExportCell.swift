@@ -36,16 +36,22 @@ class RMBTTestExportCell: UITableViewCell {
     }
 
     override func prepareForReuse() {
-        [pdfButton, xlsxButton, csvButton].forEach {
-            $0.isEnabled = true
-            $0.tintColor = .rmbt_color(withRGBHex: 0x78ED03)
-        }
+        configureButtons()
     }
 
     override func awakeFromNib() {
-        [pdfButton, xlsxButton, csvButton].forEach {
-            $0.isEnabled = true
-            $0.tintColor = .rmbt_color(withRGBHex: 0x78ED03)
+        configureButtons()
+    }
+
+    private func configureButtons() {
+        [(pdfButton, "pdf"), (xlsxButton, "xlsx"), (csvButton, "csv")].forEach {
+            $0.0.configuration?.showsActivityIndicator = false
+            $0.0.configuration?.imagePadding = 4
+            $0.0.configuration?.contentInsets = .init(top: 4, leading: 8, bottom: 4, trailing: 8)
+            $0.0.tintColor = .rmbt_color(withRGBHex: 0x59b200)
+            $0.0.configuration?.title = $0.1.uppercased()
+            $0.0.configuration?.image = .init(named: "filetype-\($0.1)-icon")
+            $0.0.accessibilityLabel = NSLocalizedString("Export to", comment: "") + " \($0.1)" // TODO: localize
         }
     }
 
@@ -54,11 +60,7 @@ class RMBTTestExportCell: UITableViewCell {
             onFailure?(.missingOpenTestUUID)
             return
         }
-
-        var configuration = UIButton.Configuration.tinted()
-        configuration.showsActivityIndicator = true
-
-        pdfButton.configuration = configuration
+        let title = pdfButton.showActivity()
 
         Task { @MainActor in
             do {
@@ -67,9 +69,7 @@ class RMBTTestExportCell: UITableViewCell {
             } catch {
                 onFailure?(.exportError(error))
             }
-            configuration.showsActivityIndicator = false
-            configuration.title = "PDF"
-            pdfButton.configuration = configuration
+            pdfButton.hideActivity(title: title)
         }
     }
 
@@ -77,6 +77,21 @@ class RMBTTestExportCell: UITableViewCell {
     }
 
     @IBAction func csvButtonTouched(_ sender: UIButton) {
+    }
+}
+
+private extension UIButton {
+    func showActivity() -> String? {
+        configuration?.showsActivityIndicator = true
+        let title = configuration?.title
+        configuration?.title = nil
+
+        return title
+    }
+
+    func hideActivity(title: String?) {
+        configuration?.showsActivityIndicator = false
+        configuration?.title = title
     }
 }
 
