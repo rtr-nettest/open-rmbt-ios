@@ -242,14 +242,17 @@ public class SpeedMeasurementResultResponse: BasicResponse {
 
     open class NetworkInfo: Mappable {
         open var networkTypeLabel: String?
-        
         open var providerName: String?
-        
+        open var wifiSSID: String?
+        open var roamingTypeLabel: String?
+
         public required init?(map: Map) { }
         
         public func mapping(map: Map) {
             networkTypeLabel <- map["network_type_label"]
             providerName <- map["provider_name"]
+            wifiSSID <- map["wifi_ssid"]
+            roamingTypeLabel <- map["roaming_type_label"]
         }
     }
     ///
