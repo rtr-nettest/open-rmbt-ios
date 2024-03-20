@@ -278,9 +278,7 @@ extension RMBTHistoryResultViewController: UITableViewDelegate, UITableViewDataS
             return mapCell
         case .network:
             let networkCell = tableView.dequeueReusableCell(withIdentifier: RMBTHistoryNetworkCell.ID, for: indexPath) as! RMBTHistoryNetworkCell
-            networkCell.networkName = historyResult.netItems.first(where: { item in
-                item.title == "WLAN SSID" || item.title == NSLocalizedString("history.result.operator", comment: "");
-            })?.value
+            networkCell.networkName = historyResult.wlanSSID
             networkCell.networkType = historyResult.networkTypeServerDescription
             networkCell.selectionStyle = .none
             return networkCell

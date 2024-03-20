@@ -54,6 +54,7 @@ class RMBTHistoryResult: NSObject {
     private(set) var deviceModel: String?
     private(set) var coordinate: CLLocationCoordinate2D = kCLLocationCoordinate2DInvalid
     fileprivate(set) var networkTypeServerDescription: String = "" // "WLAN", "2G/3G" etc.
+    fileprivate(set) var wlanSSID: String?
 
     // Available in basic details
     private(set) var networkType: RMBTNetworkType = .unknown
@@ -161,25 +162,25 @@ class RMBTHistoryResult: NSObject {
                     allDone.leave()
                     return
                 }
-                if let networkTypeInt = response["network_type"] as? Int {
-                    self.networkType = RMBTNetworkType(rawValue: networkTypeInt) ?? .unknown
-                }
-                if let networkInfo = response["network_info"] as? [String: Any],
-                   let networkTypeLabel = networkInfo["network_type_label"] as? String {
-                    self.networkTypeServerDescription = networkTypeLabel
-                }
-                
-                self.timeString = response["time_string"] as? String
-                if let time = response["time"] as? Int {
+                // TODO: use `measurement` instead of `response`
+                let measurement = r.measurements?.first
+
+                self.networkType = measurement?.networkType.map { RMBTNetworkType(rawValue: $0) ?? .unknown } ?? .unknown
+                self.networkTypeServerDescription = measurement?.networkInfo?.networkTypeLabel ?? ""
+                self.wlanSSID = measurement?.networkInfo?.wifiSSID
+                self.timeString = measurement?.timeString
+
+                if let time = measurement?.time {
                     let t = Double(time) / 1000.0
                     self.timestamp = Date(timeIntervalSince1970: t)
                 } else {
                     assert(false, "can't parse time")
                 }
                 
-                self.openTestUuid = response["open_test_uuid"] as? String
+                self.openTestUuid = measurement?.openTestUuid
                 self.shareURL = nil;
-                self.shareText = response["share_text"] as? String
+                self.shareText = measurement?.shareText
+
                 if let shareText = self.shareText,
                    let linkDetector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue) {
                     
