@@ -153,8 +153,8 @@ final class RMBTTestViewController: RMBTBaseTestViewController {
         }
     }()
     
-    var delayForGraph: TimeInterval = 1.0
-    var delayForPingGraph: TimeInterval = 0.3
+    var delayForGraph: TimeInterval = 0.5
+    var delayForPingGraph: TimeInterval = 0.0
     var startSpeedPhaseDate: Date = Date()
 
     weak var graphTickTimer: Timer? {
@@ -733,6 +733,10 @@ extension RMBTTestViewController: RMBTBaseTestViewControllerSubclass {
         }
     }
     
+    func onTestCompletedLantencPhase() {
+        currentView.pingGraphView.isHidden = false
+    }
+
     func onTestMeasuredTroughputs(_ throughputs: [RMBTThroughput], in phase: RMBTTestRunnerPhase) {
         var kbps = 0
         var l: Double = 0.0
