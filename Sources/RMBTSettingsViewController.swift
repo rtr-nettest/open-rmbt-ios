@@ -393,10 +393,16 @@ class RMBTSettingsViewController: UITableViewController {
         view.backgroundColor = UIColor.clear
         
         let label = RMBTTitleSectionLabel(text: title)
-        label.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        label.frame = CGRect(x: 20, y: 0, width: view.bounds.size.width - 40, height: height)
+        label.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(label)
-        
+
+        let guide = view.safeAreaLayoutGuide
+        NSLayoutConstraint.activate([
+            label.leadingAnchor.constraint(equalTo: guide.leadingAnchor, constant: 20),
+            label.trailingAnchor.constraint(equalTo: guide.trailingAnchor, constant: 20),
+            label.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
+
         return view
     }
 
