@@ -41,6 +41,7 @@ protocol RMBTTestRunnerDelegate: AnyObject {
     /// progress from 0.0 to 1.0
     func testRunnerDidUpdateProgress(_ progress: Float, in phase: RMBTTestRunnerPhase)
     func testRunnerDidMeasurePings(_ pings: [Ping], in phase: RMBTTestRunnerPhase)
+    func testRunnerDidCompleteLatencyPhase()
     func testRunnerDidMeasureThroughputs(_ throughputs: [RMBTThroughput], in phase: RMBTTestRunnerPhase)
 
     /// These delegate methods will be called even before the test starts
@@ -686,8 +687,12 @@ extension RMBTTestRunner: RMBTTestWorkerDelegate {
         assert(phase == .latency, "Invalid state")
         assert(!dead, "Invalid state")
 
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            self.delegate?.testRunnerDidCompleteLatencyPhase()
+        }
+
         if (self.markWorkerAsFinished()) {
-            workerQueue.asyncAfter(deadline: .now() + 0.3) {
+            workerQueue.asyncAfter(deadline: .now() + 1.2) {
                 self.startPhase(.down, withAllWorkers: true, performingSelector: #selector(RMBTTestWorker.startDownlinkTest), expectedDuration: self.testParams?.testDuration ?? 0, completion: nil)
             }
         }

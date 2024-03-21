@@ -404,7 +404,7 @@ class RMBTTestPortraitView: UIView, XibLoadable {
             self.speedGraphView.isHidden = true
         }
         
-        self.pingGraphView.isHidden = phase != .latency
+        self.pingGraphView.isHidden = true
         self.updateDetailInfoView()
     }
     
@@ -428,6 +428,8 @@ class RMBTTestPortraitView: UIView, XibLoadable {
         self.infoView.layer.shadowRadius = 3
         
         self.networkMobileImageView.image = self.networkMobileImageView.image?.withRenderingMode(.alwaysTemplate)
+
+        pingGraphView.showBarChart = true
     }
     
     func updateGaugesPosition() {
