@@ -112,7 +112,7 @@ final class RMBTHistoryResultViewController: UIViewController {
         }
 
         if historyResult.openTestUuid != nil {
-            sections.append(.title(NSLocalizedString("Download", comment: "")))
+            sections.append(.title(NSLocalizedString("Download", comment: ""))) // TODO: Localize
             sections.append(.exportButtons)
         }
 
