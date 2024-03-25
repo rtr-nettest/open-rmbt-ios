@@ -16,11 +16,11 @@
                 <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <stackView opaque="NO" contentMode="scaleToFill" alignment="top" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="lq6-c3-G2x">
-                        <rect key="frame" x="16" y="2" width="284" height="38"/>
+                    <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" alignment="top" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="lq6-c3-G2x">
+                        <rect key="frame" x="16" y="2" width="286" height="38"/>
                         <subviews>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="4zh-wD-kl2">
-                                <rect key="frame" x="0.0" y="0.0" width="89.333333333333329" height="38"/>
+                                <rect key="frame" x="0.0" y="0.0" width="90" height="38"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="38" id="ywz-0y-NZz"/>
                                 </constraints>
@@ -30,9 +30,10 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bST-jB-ayB">
-                                <rect key="frame" x="97.333333333333343" y="0.0" width="89.333333333333343" height="38"/>
+                                <rect key="frame" x="98" y="0.0" width="90" height="38"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="38" id="BeD-yJ-vY8"/>
+                                    <constraint firstAttribute="width" constant="90" id="WBJ-FR-D4H"/>
                                 </constraints>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="tinted" image="filetype-xlsx-icon" title="XSLS"/>
@@ -41,7 +42,7 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="AXt-hT-nKz">
-                                <rect key="frame" x="194.66666666666666" y="0.0" width="89.333333333333343" height="38"/>
+                                <rect key="frame" x="196" y="0.0" width="90" height="38"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="38" id="IrC-oh-XSd"/>
                                 </constraints>
