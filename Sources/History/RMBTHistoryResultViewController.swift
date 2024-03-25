@@ -22,6 +22,7 @@ final class RMBTHistoryResultViewController: UIViewController {
         case netInfo
         case qos
         case testDetails
+        case exportButtons
     }
     
     @IBOutlet private weak var tableView: UITableView!
@@ -47,7 +48,8 @@ final class RMBTHistoryResultViewController: UIViewController {
         self.tableView.register(UINib(nibName: RMBTNetInfoListCell.ID, bundle: nil), forCellReuseIdentifier: RMBTNetInfoListCell.ID)
         self.tableView.register(UINib(nibName: RMBTQOSListCell.ID, bundle: nil), forCellReuseIdentifier: RMBTQOSListCell.ID)
         self.tableView.register(UINib(nibName: RMBTTestDetailTitleCell.ID, bundle: nil), forCellReuseIdentifier: RMBTTestDetailTitleCell.ID)
-        
+        self.tableView.register(UINib(nibName: RMBTTestExportCell.ID, bundle: nil), forCellReuseIdentifier: RMBTTestExportCell.ID)
+
         self.tableView.contentInset = UIEdgeInsets(top: 20, left: 0, bottom: 10, right: 0)
         
         self.fetchHistoryResultInformation()
@@ -108,7 +110,12 @@ final class RMBTHistoryResultViewController: UIViewController {
         if historyResult.fullDetailsItems?.count ?? 0 > 0 {
             sections.append(.testDetails)
         }
-        
+
+        if historyResult.openTestUuid != nil {
+            sections.append(.title(NSLocalizedString("Download", comment: ""))) // TODO: Localize
+            sections.append(.exportButtons)
+        }
+
         self.sections = sections
         self.tableView.reloadData()
     }
@@ -259,6 +266,8 @@ extension RMBTHistoryResultViewController: UITableViewDelegate, UITableViewDataS
             return CGFloat((historyResult?.qosResults?.count ?? 0) * 48)
         case .testDetails:
             return 48
+        case .exportButtons:
+            return 48
         }
     }
     
@@ -338,6 +347,25 @@ extension RMBTHistoryResultViewController: UITableViewDelegate, UITableViewDataS
             let cell = tableView.dequeueReusableCell(withIdentifier: RMBTTestDetailTitleCell.ID, for: indexPath)
             cell.accessoryType = .disclosureIndicator
             return cell
+        case .exportButtons:
+            let cell = tableView.dequeueReusableCell(withIdentifier: RMBTTestExportCell.ID, for: indexPath) as! RMBTTestExportCell
+            if let testUUID = historyResult.openTestUuid {
+                cell.configure(
+                    with: testUUID,
+                    onExportedPDFFile: { [weak self] in
+                        self?.openFile(url: $0, historyResult: historyResult, testUUID: testUUID, fileExtension: "pdf")
+                    },
+                    onExportedXLSXFile: { [weak self] in
+                        self?.openFile(url: $0, historyResult: historyResult, testUUID: testUUID, fileExtension: "xlsx")
+                    },
+                    onExportedCSVFile: { [weak self] in
+                        self?.openFile(url: $0, historyResult: historyResult, testUUID: testUUID, fileExtension: "csv")
+                    },
+                    onFailure: nil
+                )
+            }
+            return cell
+
         }
     }
     
@@ -352,4 +380,20 @@ extension RMBTHistoryResultViewController: UITableViewDelegate, UITableViewDataS
         }
     }
    
+}
+
+private extension RMBTHistoryResultViewController {
+
+    func openFile(url: URL, historyResult: RMBTHistoryResult, testUUID: String, fileExtension: String) {
+        let pdfViewController = RMBTFilePreviewViewController()
+        let fileService = FilePreviewService()
+        if let fileURL = try? fileService.temporarilySave(
+            fileURL: url,
+            withName: (historyResult.timeStringIn24hFormat ?? testUUID) + "." + fileExtension
+        ) {
+            pdfViewController.configure(fileURLs: [fileURL])
+            navigationController?.present(pdfViewController, animated: true)
+        }
+    }
+
 }
