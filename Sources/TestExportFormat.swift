@@ -33,7 +33,7 @@ extension TestExportFormat {
     private var format: String {
         switch self {
         case .pdf: ""
-        case .xlsx: "xslx"
+        case .xlsx: "xlsx"
         case .csv: "csv"
         }
     }

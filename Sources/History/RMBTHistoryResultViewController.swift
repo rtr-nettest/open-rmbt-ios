@@ -354,8 +354,8 @@ extension RMBTHistoryResultViewController: UITableViewDelegate, UITableViewDataS
                     onExportedPDFFile: { [weak self] in
                         self?.openFile(url: $0, historyResult: historyResult, testUUID: testUUID, fileExtension: "pdf")
                     },
-                    onExportedXSLXFile: { [weak self] in
-                        self?.openFile(url: $0, historyResult: historyResult, testUUID: testUUID, fileExtension: "xslx")
+                    onExportedXLSXFile: { [weak self] in
+                        self?.openFile(url: $0, historyResult: historyResult, testUUID: testUUID, fileExtension: "xlsx")
                     },
                     onExportedCSVFile: { [weak self] in
                         self?.openFile(url: $0, historyResult: historyResult, testUUID: testUUID, fileExtension: "csv")

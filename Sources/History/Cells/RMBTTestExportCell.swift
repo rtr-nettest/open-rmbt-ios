@@ -10,7 +10,7 @@ import UIKit
 
 protocol TestExporting {
     func exportPDF(openTestUUID: String) async throws -> URL
-    func exportXSLX(openTestUUID: String) async throws -> URL
+    func exportXLSX(openTestUUID: String) async throws -> URL
     func exportCSV(openTestUUID: String) async throws -> URL
 }
 
@@ -22,6 +22,8 @@ class RMBTTestExportCell: UITableViewCell {
 
     static let ID = "RMBTTestExportCell"
 
+    private let tint = UIColor(named: "tintColor")
+
     @IBOutlet weak var pdfButton: UIButton!
     @IBOutlet weak var xlsxButton: UIButton!
     @IBOutlet weak var csvButton: UIButton!
@@ -29,20 +31,20 @@ class RMBTTestExportCell: UITableViewCell {
     private var openTestUUID: String?
     private let exportService: TestExporting = RMBTControlServer.shared
     private var onExportedPDFFile: ((URL) -> Void)?
-    private var onExportedXSLXFile: ((URL) -> Void)?
+    private var onExportedXLSXFile: ((URL) -> Void)?
     private var onExportedCSVFile: ((URL) -> Void)?
     private var onFailure: ((Failure) -> Void)?
 
     func configure(
         with openTestUUID: String,
         onExportedPDFFile: @escaping ((URL) -> Void),
-        onExportedXSLXFile: @escaping  ((URL) -> Void),
+        onExportedXLSXFile: @escaping  ((URL) -> Void),
         onExportedCSVFile: @escaping ((URL) -> Void),
         onFailure: ((Failure) -> Void)?
     ) {
         self.openTestUUID = openTestUUID
         self.onExportedPDFFile = onExportedPDFFile
-        self.onExportedXSLXFile = onExportedXSLXFile
+        self.onExportedXLSXFile = onExportedXLSXFile
         self.onExportedCSVFile = onExportedCSVFile
         self.onFailure = onFailure
     }
@@ -57,10 +59,12 @@ class RMBTTestExportCell: UITableViewCell {
 
     private func configureButtons() {
         [(pdfButton, "pdf"), (xlsxButton, "xlsx"), (csvButton, "csv")].forEach {
+            $0.0.configuration?.background.backgroundColor = .clear
+            $0.0.configuration?.background.strokeColor = tint
+            $0.0.tintColor = tint
             $0.0.configuration?.showsActivityIndicator = false
             $0.0.configuration?.imagePadding = 4
             $0.0.configuration?.contentInsets = .init(top: 4, leading: 8, bottom: 4, trailing: 8)
-            $0.0.tintColor = .rmbt_color(withRGBHex: 0x59b200)
             $0.0.configuration?.title = $0.1.uppercased()
             $0.0.configuration?.image = .init(named: "filetype-\($0.1)-icon")
             $0.0.accessibilityLabel = NSLocalizedString("Export to", comment: "") + " \($0.1)" // TODO: localize
@@ -94,8 +98,8 @@ class RMBTTestExportCell: UITableViewCell {
 
         Task { @MainActor in
             do {
-                let pdf = try await exportService.exportXSLX(openTestUUID: openTestUUID)
-                onExportedXSLXFile?(pdf)
+                let pdf = try await exportService.exportXLSX(openTestUUID: openTestUUID)
+                onExportedXLSXFile?(pdf)
             } catch {
                 onFailure?(.exportError(error))
             }
@@ -142,7 +146,7 @@ extension RMBTControlServer: TestExporting {
         try await getTestExport(into: .pdf, openTestUUID: openTestUUID)
     }
 
-    func exportXSLX(openTestUUID: String) async throws -> URL {
+    func exportXLSX(openTestUUID: String) async throws -> URL {
         try await getTestExport(into: .xlsx, openTestUUID: openTestUUID)
     }
 

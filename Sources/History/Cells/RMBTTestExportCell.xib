@@ -29,7 +29,7 @@
                                     <action selector="pdfButtonTouched:" destination="KGk-i7-Jjw" eventType="touchUpInside" id="nRI-XT-9jV"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bST-jB-ayB">
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bST-jB-ayB">
                                 <rect key="frame" x="97.333333333333343" y="0.0" width="89.333333333333343" height="38"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="38" id="BeD-yJ-vY8"/>
@@ -40,7 +40,7 @@
                                     <action selector="xlsxButtonTouched:" destination="KGk-i7-Jjw" eventType="touchUpInside" id="4kL-xy-Cfh"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="AXt-hT-nKz">
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="AXt-hT-nKz">
                                 <rect key="frame" x="194.66666666666666" y="0.0" width="89.333333333333343" height="38"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="38" id="IrC-oh-XSd"/>
