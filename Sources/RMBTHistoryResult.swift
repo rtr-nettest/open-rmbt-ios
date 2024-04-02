@@ -28,6 +28,10 @@ class RMBTHistoryLoopResult: RMBTHistoryResult {
         }
         self.loopResults = loopResults
     }
+
+    var openTestUUIDs: [String] {
+        loopResults.compactMap(\.openTestUuid)
+    }
 }
 
 class RMBTHistoryResult: NSObject {

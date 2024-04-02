@@ -351,7 +351,7 @@ extension RMBTHistoryResultViewController: UITableViewDelegate, UITableViewDataS
             let cell = tableView.dequeueReusableCell(withIdentifier: RMBTTestExportCell.ID, for: indexPath) as! RMBTTestExportCell
             if let testUUID = historyResult.openTestUuid {
                 cell.configure(
-                    with: testUUID,
+                    with: [testUUID],
                     onExportedPDFFile: { [weak self] in
                         self?.openFile(url: $0, historyResult: historyResult, testUUID: testUUID, fileExtension: "pdf")
                     },
