@@ -67,7 +67,7 @@ class RMBTTestExportCell: UITableViewCell {
             $0.0.configuration?.contentInsets = .init(top: 4, leading: 8, bottom: 4, trailing: 8)
             $0.0.configuration?.title = $0.1.uppercased()
             $0.0.configuration?.image = .init(named: "filetype-\($0.1)-icon")
-            $0.0.accessibilityLabel = NSLocalizedString("Export to", comment: "") + " \($0.1)" // TODO: localize
+            $0.0.accessibilityLabel = NSLocalizedString("Export data", comment: "") + " \($0.1)"
         }
     }
 

@@ -442,3 +442,5 @@
 "text_ip_address_not_available" = "Die Adresse nicht verfügbar";
 "start_test_button_help_message" = "Drücken Sie den Knopf um den Test zu starten";
 "RTR-NetTest" = "RTR-Netztest";
+
+"Export data" = "Exportieren";

@@ -361,7 +361,7 @@ extension RMBTHistoryIndexViewController: UITableViewDataSource, UITableViewDele
         if section == testResults.count && !testResults.isEmpty {
             // last headere is "Download" section with export buttons
             let header = tableView.dequeueReusableCell(withIdentifier: RMBTHistoryTitleCell.ID) as! RMBTHistoryTitleCell
-            header.title = NSLocalizedString("Download", comment: "") // TODO: Localize
+            header.title = NSLocalizedString("Export data", comment: "")
             return header
         }
 
