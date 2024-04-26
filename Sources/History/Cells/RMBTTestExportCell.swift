@@ -9,9 +9,9 @@
 import UIKit
 
 protocol TestExporting {
-    func exportPDF(openTestUUID: String) async throws -> URL
-    func exportXLSX(openTestUUID: String) async throws -> URL
-    func exportCSV(openTestUUID: String) async throws -> URL
+    func exportPDF(openTestUUIDs: [String]) async throws -> URL
+    func exportXLSX(openTestUUIDs: [String]) async throws -> URL
+    func exportCSV(openTestUUIDs: [String]) async throws -> URL
 }
 
 class RMBTTestExportCell: UITableViewCell {
@@ -28,7 +28,7 @@ class RMBTTestExportCell: UITableViewCell {
     @IBOutlet weak var xlsxButton: UIButton!
     @IBOutlet weak var csvButton: UIButton!
 
-    private var openTestUUID: String?
+    private var openTestUUIDs: [String] = []
     private let exportService: TestExporting = RMBTControlServer.shared
     private var onExportedPDFFile: ((URL) -> Void)?
     private var onExportedXLSXFile: ((URL) -> Void)?
@@ -36,13 +36,13 @@ class RMBTTestExportCell: UITableViewCell {
     private var onFailure: ((Failure) -> Void)?
 
     func configure(
-        with openTestUUID: String,
+        with openTestUUIDs: [String],
         onExportedPDFFile: @escaping ((URL) -> Void),
         onExportedXLSXFile: @escaping  ((URL) -> Void),
         onExportedCSVFile: @escaping ((URL) -> Void),
         onFailure: ((Failure) -> Void)?
     ) {
-        self.openTestUUID = openTestUUID
+        self.openTestUUIDs = openTestUUIDs
         self.onExportedPDFFile = onExportedPDFFile
         self.onExportedXLSXFile = onExportedXLSXFile
         self.onExportedCSVFile = onExportedCSVFile
@@ -67,12 +67,12 @@ class RMBTTestExportCell: UITableViewCell {
             $0.0.configuration?.contentInsets = .init(top: 4, leading: 8, bottom: 4, trailing: 8)
             $0.0.configuration?.title = $0.1.uppercased()
             $0.0.configuration?.image = .init(named: "filetype-\($0.1)-icon")
-            $0.0.accessibilityLabel = NSLocalizedString("Export to", comment: "") + " \($0.1)" // TODO: localize
+            $0.0.accessibilityLabel = NSLocalizedString("Export data", comment: "") + " \($0.1)"
         }
     }
 
     @IBAction func pdfButtonTouched(_ sender: UIButton) {
-        guard let openTestUUID else {
+        guard !openTestUUIDs.isEmpty else {
             onFailure?(.missingOpenTestUUID)
             return
         }
@@ -80,7 +80,7 @@ class RMBTTestExportCell: UITableViewCell {
 
         Task { @MainActor in
             do {
-                let pdf = try await exportService.exportPDF(openTestUUID: openTestUUID)
+                let pdf = try await exportService.exportPDF(openTestUUIDs: openTestUUIDs)
                 onExportedPDFFile?(pdf)
             } catch {
                 onFailure?(.exportError(error))
@@ -90,7 +90,7 @@ class RMBTTestExportCell: UITableViewCell {
     }
 
     @IBAction func xlsxButtonTouched(_ sender: UIButton) {
-        guard let openTestUUID else {
+        guard !openTestUUIDs.isEmpty else {
             onFailure?(.missingOpenTestUUID)
             return
         }
@@ -98,7 +98,7 @@ class RMBTTestExportCell: UITableViewCell {
 
         Task { @MainActor in
             do {
-                let pdf = try await exportService.exportXLSX(openTestUUID: openTestUUID)
+                let pdf = try await exportService.exportXLSX(openTestUUIDs: openTestUUIDs)
                 onExportedXLSXFile?(pdf)
             } catch {
                 onFailure?(.exportError(error))
@@ -108,7 +108,7 @@ class RMBTTestExportCell: UITableViewCell {
     }
 
     @IBAction func csvButtonTouched(_ sender: UIButton) {
-        guard let openTestUUID else {
+        guard !openTestUUIDs.isEmpty else {
             onFailure?(.missingOpenTestUUID)
             return
         }
@@ -116,7 +116,7 @@ class RMBTTestExportCell: UITableViewCell {
 
         Task { @MainActor in
             do {
-                let pdf = try await exportService.exportCSV(openTestUUID: openTestUUID)
+                let pdf = try await exportService.exportCSV(openTestUUIDs: openTestUUIDs)
                 onExportedCSVFile?(pdf)
             } catch {
                 onFailure?(.exportError(error))
@@ -142,15 +142,15 @@ private extension UIButton {
 }
 
 extension RMBTControlServer: TestExporting {
-    func exportPDF(openTestUUID: String) async throws -> URL {
-        try await getTestExport(into: .pdf, openTestUUID: openTestUUID)
+    func exportPDF(openTestUUIDs: [String]) async throws -> URL {
+        try await getTestExport(into: .pdf, openTestUUIDs: openTestUUIDs)
     }
 
-    func exportXLSX(openTestUUID: String) async throws -> URL {
-        try await getTestExport(into: .xlsx, openTestUUID: openTestUUID)
+    func exportXLSX(openTestUUIDs: [String]) async throws -> URL {
+        try await getTestExport(into: .xlsx, openTestUUIDs: openTestUUIDs)
     }
 
-    func exportCSV(openTestUUID: String) async throws -> URL {
-        try await getTestExport(into: .csv, openTestUUID: openTestUUID)
+    func exportCSV(openTestUUIDs: [String]) async throws -> URL {
+        try await getTestExport(into: .csv, openTestUUIDs: openTestUUIDs)
     }
 }

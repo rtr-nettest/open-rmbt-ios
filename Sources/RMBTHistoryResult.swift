@@ -28,6 +28,10 @@ class RMBTHistoryLoopResult: RMBTHistoryResult {
         }
         self.loopResults = loopResults
     }
+
+    var openTestUUIDs: [String] {
+        loopResults.compactMap(\.openTestUuid)
+    }
 }
 
 class RMBTHistoryResult: NSObject {
@@ -73,6 +77,7 @@ class RMBTHistoryResult: NSObject {
         // it's a numeric code
         networkTypeServerDescription = response["network_type"] as? String ?? ""
         uuid = response["test_uuid"] as? String ?? ""
+        openTestUuid = response["open_test_uuid"] as? String
         loopUuid = response["loop_uuid"] as? String
         deviceModel = response["model"] as? String
         timeString = response["time_string"] as? String

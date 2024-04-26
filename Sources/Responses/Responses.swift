@@ -436,6 +436,7 @@ public class SettingsResponse: BasicResponse {
         class UrlSettings: Mappable {
             var opendataPrefix: String?
             var statistics: String?
+            var statisticsServer: String?
             var mapServer: String?
             
             ///
@@ -469,15 +470,12 @@ public class SettingsResponse: BasicResponse {
             func mapping(map: Map) {
                 opendataPrefix  <- map["open_data_prefix"]
                 statistics      <- map["statistics"]
+                statisticsServer <- map["url_statistic_server"]
                 mapServer      <- map["url_map_server"]
-                
-                
                 ipv4IpOnly     <- map["control_ipv4_only"]
                 ipv6IpOnly     <- map["control_ipv6_only"]
                 ipv4IpCheck     <- map["url_ipv4_check"]
                 ipv6IpCheck     <- map["url_ipv6_check"]
-                
-                
             }
         }
         

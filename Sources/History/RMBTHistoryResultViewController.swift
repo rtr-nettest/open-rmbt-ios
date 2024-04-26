@@ -112,7 +112,7 @@ final class RMBTHistoryResultViewController: UIViewController {
         }
 
         if historyResult.openTestUuid != nil {
-            sections.append(.title(NSLocalizedString("Download", comment: ""))) // TODO: Localize
+            sections.append(.title(NSLocalizedString("Export data", comment: "")))
             sections.append(.exportButtons)
         }
 
@@ -351,7 +351,7 @@ extension RMBTHistoryResultViewController: UITableViewDelegate, UITableViewDataS
             let cell = tableView.dequeueReusableCell(withIdentifier: RMBTTestExportCell.ID, for: indexPath) as! RMBTTestExportCell
             if let testUUID = historyResult.openTestUuid {
                 cell.configure(
-                    with: testUUID,
+                    with: [testUUID],
                     onExportedPDFFile: { [weak self] in
                         self?.openFile(url: $0, historyResult: historyResult, testUUID: testUUID, fileExtension: "pdf")
                     },
