@@ -22,15 +22,17 @@ extension TestExportFormat {
 
     func httpBody(openTestUUIDs: [String], maxResults: Int? = nil) -> Data? {
         let uuidList = openTestUUIDs.joined(separator: ",")
-        let maxResultsStr = maxResults.map { ",maxResults=\($0)" } ?? ""
+        let maxResultsStr = maxResults.map { "&maxResults=\($0)" } ?? ""
+        let httpBodyStr: String
 
-        return switch self {
-        case .pdf:
-            Data("open_test_uuid=\(uuidList)".utf8)
-
-        case .xlsx, .csv:
-            Data("open_test_uuid=\(uuidList)&format=\(format)\(maxResultsStr)".utf8)
+        httpBodyStr = switch self {
+        case .pdf: 
+            "open_test_uuid=\(uuidList)"
+        case .xlsx, .csv: 
+            "open_test_uuid=\(uuidList)&format=\(format)\(maxResultsStr)"
         }
+
+        return httpBodyStr.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed).map { Data($0.utf8) }
     }
 
     private var format: String {

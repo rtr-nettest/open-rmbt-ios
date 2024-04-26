@@ -349,7 +349,7 @@ extension RMBTHistoryIndexViewController: UITableViewDataSource, UITableViewDele
     
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         if section == testResults.count && !testResults.isEmpty {
-            return 44
+            return 56
         }
         guard section < testResults.count, testResults[section].loopResults.count > 1 else {
             return 0

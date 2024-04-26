@@ -25,7 +25,8 @@ public typealias HistoryFilterType = [String: [String]]
     
     public var statsURL: URL? = URL(string: RMBTHelpers.RMBTLocalize(urlString: RMBTConfig.RMBT_STATS_URL))
     public var mapServerURL: URL?
-    
+    public var statisticServerURL: URL?
+
     public lazy var termsAndConditions: SettingsResponse.Settings.TermsAndConditions = {
         let settings = SettingsResponse.Settings.TermsAndConditions()
         settings.url = RMBTHelpers.RMBTLocalize(urlString: RMBTConfig.RMBT_PRIVACY_TOS_URL)
@@ -99,7 +100,12 @@ extension RMBTControlServer {
                        let url = URL(string: statistics) {
                         self.statsURL = url
                     }
-                    
+
+                    if let statisticServer = set.urls?.statisticsServer,
+                       let url = URL(string: statisticServer) {
+                        self.statisticServerURL = url
+                    }
+
                     if let mapServer = set.urls?.mapServer,
                        let url = URL(string: mapServer) {
                         self.mapServerURL = url
@@ -478,9 +484,9 @@ extension RMBTControlServer {
     func getTestExport(into format: TestExportFormat, openTestUUIDs: [String]) async throws -> URL {
         try await URLSession.shared.download(
             for: format.downloadRequest(
-                baseURL: /*statsURL*/URL(string: "https://m01.netztest.at/RMBTStatisticServer")!,
+                baseURL: statisticServerURL ?? URL(string: "https://m01.netztest.at/RMBTStatisticServer")!,
                 openTestUUIDs: openTestUUIDs,
-                maxResults: min(openTestUUIDs.count, 500)
+                maxResults: openTestUUIDs.count > 1 ? min(openTestUUIDs.count, 500) : nil
             )
         ).0
     }
