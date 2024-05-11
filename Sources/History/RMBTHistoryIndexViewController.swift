@@ -155,16 +155,6 @@ final class RMBTHistoryIndexViewController: UIViewController {
     @IBAction func sync(_ sender: Any?) {
         performSegue(withIdentifier: "show_sync_modal", sender: self)
     }
-    
-    @IBAction func updateFilters(_ segue: UIStoryboardSegue) {
-        let filterVC = segue.source as? RMBTHistoryFilter2ViewController
-        activeFilters = filterVC?.activeFilters ?? [:]
-        self.refresh()
-    }
-
-    @IBAction func downloadButtonTouched(_ sender: Any?) {
-        performSegue(withIdentifier: "show_download_modal", sender: self)
-    }
 
     public func displayTestResult(_ result: RMBTHistoryResult) {
         self.navigationController?.popToRootViewController(animated: false)
