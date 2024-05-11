@@ -110,8 +110,6 @@ final class RMBTHistoryIndexViewController: UIViewController {
         self.tableView.register(UINib(nibName: RMBTHistoryIndexCell.ID, bundle: nil), forCellReuseIdentifier: RMBTHistoryIndexCell.ID)
         self.tableView.register(UINib(nibName: RMBTHistoryLoadingCell.ID, bundle: nil), forCellReuseIdentifier: RMBTHistoryLoadingCell.ID)
         self.tableView.register(UINib(nibName: RMBTHistoryLoopCell.ID, bundle: nil), forHeaderFooterViewReuseIdentifier: RMBTHistoryLoopCell.ID)
-        self.tableView.register(UINib(nibName: RMBTHistoryTitleCell.ID, bundle: nil), forCellReuseIdentifier: RMBTHistoryTitleCell.ID)
-        self.tableView.register(UINib(nibName: RMBTTestExportCell.ID, bundle: nil), forCellReuseIdentifier: RMBTTestExportCell.ID)
         self.tableView.refreshControl = UIRefreshControl()
         self.tableView.refreshControl?.addTarget(self, action: #selector(refreshFromTableView(_:)), for: .valueChanged)
         if #available(iOS 15.0, *) {
@@ -344,7 +342,7 @@ final class RMBTHistoryIndexViewController: UIViewController {
 
 extension RMBTHistoryIndexViewController: UITableViewDataSource, UITableViewDelegate {
     func numberOfSections(in tableView: UITableView) -> Int {
-        var result = testResults.count + 1
+        var result = testResults.count
         if (nextBatchIndex != NSNotFound) { result += 1 }
         return result
     }
@@ -357,9 +355,6 @@ extension RMBTHistoryIndexViewController: UITableViewDataSource, UITableViewDele
     }
     
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        if section == testResults.count && !testResults.isEmpty {
-            return 56
-        }
         guard section < testResults.count, testResults[section].loopResults.count > 1 else {
             return 0
         }
@@ -367,13 +362,6 @@ extension RMBTHistoryIndexViewController: UITableViewDataSource, UITableViewDele
     }
     
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        if section == testResults.count && !testResults.isEmpty {
-            // last headere is "Download" section with export buttons
-            let header = tableView.dequeueReusableCell(withIdentifier: RMBTHistoryTitleCell.ID) as! RMBTHistoryTitleCell
-            header.title = NSLocalizedString("Export data", comment: "")
-            return header
-        }
-
         guard section < testResults.count, testResults[section].loopResults.count > 1 else {
             return nil
         }
@@ -402,9 +390,6 @@ extension RMBTHistoryIndexViewController: UITableViewDataSource, UITableViewDele
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        if indexPath.section == testResults.count && !testResults.isEmpty {
-            return 44
-        }
         guard indexPath.section < testResults.count else {
             return 0
         }
@@ -416,23 +401,6 @@ extension RMBTHistoryIndexViewController: UITableViewDataSource, UITableViewDele
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if indexPath.section == testResults.count && !testResults.isEmpty {
-            let cell = tableView.dequeueReusableCell(withIdentifier: RMBTTestExportCell.ID, for: indexPath) as! RMBTTestExportCell
-            cell.configure(
-                with: testResults.flatMap(\.openTestUUIDs),
-                onExportedPDFFile: { [weak self] in
-                    self?.openFile(url: $0, asNamed: "all-tests", fileExtension: "pdf")
-                },
-                onExportedXLSXFile: { [weak self] in
-                    self?.openFile(url: $0, asNamed: "all-tests", fileExtension: "xlsx")
-                },
-                onExportedCSVFile: { [weak self] in
-                    self?.openFile(url: $0, asNamed: "all-tests", fileExtension: "csv")
-                },
-                onFailure: nil
-            )
-            return cell
-        }
         if (indexPath.section >= testResults.count) {
             // Loading cell
             let cell = tableView.dequeueReusableCell(withIdentifier: RMBTHistoryLoadingCell.ID, for: indexPath) as! RMBTHistoryLoadingCell
@@ -478,21 +446,6 @@ extension RMBTHistoryIndexViewController: UITableViewDataSource, UITableViewDele
         }
     }
 }
-
-private extension RMBTHistoryIndexViewController {
-    func openFile(url: URL, asNamed name: String, fileExtension: String) {
-        let pdfViewController = RMBTFilePreviewViewController()
-        let fileService = FilePreviewService()
-        if let fileURL = try? fileService.temporarilySave(
-            fileURL: url,
-            withName: name + "." + fileExtension
-        ) {
-            pdfViewController.configure(fileURLs: [fileURL])
-            navigationController?.present(pdfViewController, animated: true)
-        }
-    }
-}
-
 
 // MARK: Localizations
 
