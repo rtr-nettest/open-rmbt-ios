@@ -79,12 +79,6 @@ import ObjectMapper
 
         testUuid           <- map["test_uuid"]
         openTestUuid       <- map["open_test_uuid"]
-
-        if openTestUuid?.lengthOfBytes(using: .utf8) == 37 && (openTestUuid?.hasPrefix("O") ?? false) {
-            // server adds extraneous "O" at the beginning of the actual UUID 
-            openTestUuid?.removeFirst(1)
-        }
-
         time               <- (map["time"], UInt64NSNumberTransformOf)
         timeZone           <- map["time_zone"]
         timeString         <- map["time_string"]

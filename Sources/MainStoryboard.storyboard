@@ -199,7 +199,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <view key="tableFooterView" opaque="NO" contentMode="scaleToFill" id="dol-gh-wV2">
-                            <rect key="frame" x="0.0" y="1693.3333301544189" width="390" height="122"/>
+                            <rect key="frame" x="0.0" y="1788.6666622161865" width="390" height="122"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             <subviews>
                                 <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="logo" translatesAutoresizingMaskIntoConstraints="NO" id="DIM-Jn-St1">
@@ -1721,6 +1721,14 @@
                                     <action selector="sync:" destination="KpP-GQ-FkO" id="XSz-qa-QqI"/>
                                 </connections>
                             </barButtonItem>
+                            <barButtonItem image="history_download_icon" id="C4u-xe-fBa">
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="localizableAccessibilityLabel" value="Options"/>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <segue destination="jg2-il-7fn" kind="modal" identifier="show_download_modal" customClass="RMBTBottomPresentSegue" customModule="RMBT" customModuleProvider="target" id="N8k-QX-V1M"/>
+                                </connections>
+                            </barButtonItem>
                         </rightBarButtonItems>
                     </navigationItem>
                     <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" prompted="NO"/>
@@ -2165,7 +2173,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="pN4-jv-wgJ" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="3838" y="-1472"/>
+            <point key="canvasLocation" x="3826" y="-1455"/>
         </scene>
         <!--History Test Details View Controller-->
         <scene sceneID="mx0-nI-vBg">
@@ -3903,6 +3911,95 @@
             </objects>
             <point key="canvasLocation" x="-863.20000000000005" y="3649.9250374812596"/>
         </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="kag-Kg-dJc">
+            <objects>
+                <navigationController navigationBarHidden="YES" id="jg2-il-7fn" sceneMemberID="viewController">
+                    <nil key="simulatedTopBarMetrics"/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="WtG-1f-eVo">
+                        <rect key="frame" x="0.0" y="-10" width="0.0" height="0.0"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="Mfh-Qi-Shm" kind="relationship" relationship="rootViewController" id="JWO-Kh-56R"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="pvj-JQ-bku" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2511" y="-711"/>
+        </scene>
+        <!--History Download View Controller-->
+        <scene sceneID="WmM-cy-ChM">
+            <objects>
+                <viewController id="Mfh-Qi-Shm" customClass="RMBTHistoryDownloadViewController" customModule="RMBT" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="S5p-Np-LpS">
+                        <rect key="frame" x="0.0" y="0.0" width="390" height="834"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="P6Q-5X-ft4">
+                                <rect key="frame" x="0.0" y="48" width="390" height="786"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <connections>
+                                    <outlet property="dataSource" destination="Mfh-Qi-Shm" id="gSm-o6-Avm"/>
+                                    <outlet property="delegate" destination="Mfh-Qi-Shm" id="imI-GM-gOd"/>
+                                </connections>
+                            </tableView>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="PbI-Un-M5S">
+                                <rect key="frame" x="0.0" y="0.0" width="390" height="48"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Export data" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="slQ-j6-qKd">
+                                        <rect key="frame" x="20" y="14.666666666666664" width="82.333333333333329" height="19"/>
+                                        <fontDescription key="fontDescription" name="Roboto-Medium" family="Roboto" pointSize="16"/>
+                                        <color key="textColor" red="0.25882352939999997" green="0.25882352939999997" blue="0.25882352939999997" alpha="1" colorSpace="calibratedRGB"/>
+                                        <nil key="highlightedColor"/>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="localizableText" value="Export data"/>
+                                        </userDefinedRuntimeAttributes>
+                                    </label>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="uAa-Jj-U6S">
+                                        <rect key="frame" x="346" y="2" width="44" height="44"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="44" id="YOI-Ix-Ifl"/>
+                                            <constraint firstAttribute="height" constant="44" id="rWD-nR-g0F"/>
+                                        </constraints>
+                                        <state key="normal" image="default_close_button"/>
+                                        <connections>
+                                            <action selector="closeButtonClick:" destination="Mfh-Qi-Shm" eventType="touchUpInside" id="bZ3-gA-VJc"/>
+                                        </connections>
+                                    </button>
+                                </subviews>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <constraints>
+                                    <constraint firstItem="slQ-j6-qKd" firstAttribute="leading" secondItem="PbI-Un-M5S" secondAttribute="leading" constant="20" id="MFZ-cg-8VD"/>
+                                    <constraint firstAttribute="trailing" secondItem="uAa-Jj-U6S" secondAttribute="trailing" id="Mt3-g7-fJO"/>
+                                    <constraint firstAttribute="height" constant="48" id="bjB-kp-373"/>
+                                    <constraint firstItem="uAa-Jj-U6S" firstAttribute="centerY" secondItem="PbI-Un-M5S" secondAttribute="centerY" id="mWp-FP-ktV"/>
+                                    <constraint firstItem="slQ-j6-qKd" firstAttribute="centerY" secondItem="PbI-Un-M5S" secondAttribute="centerY" id="pzK-eM-aSN"/>
+                                </constraints>
+                            </view>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="8fp-Ij-cze"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="P6Q-5X-ft4" firstAttribute="top" secondItem="PbI-Un-M5S" secondAttribute="bottom" id="4PO-Cc-2t3"/>
+                            <constraint firstItem="PbI-Un-M5S" firstAttribute="top" secondItem="8fp-Ij-cze" secondAttribute="top" id="8Ir-Df-qgf"/>
+                            <constraint firstItem="8fp-Ij-cze" firstAttribute="bottom" secondItem="P6Q-5X-ft4" secondAttribute="bottom" id="C3j-2o-jtF"/>
+                            <constraint firstItem="PbI-Un-M5S" firstAttribute="leading" secondItem="S5p-Np-LpS" secondAttribute="leading" id="Ls4-nO-PnT"/>
+                            <constraint firstItem="P6Q-5X-ft4" firstAttribute="leading" secondItem="8fp-Ij-cze" secondAttribute="leading" id="d4i-ee-RcI"/>
+                            <constraint firstItem="8fp-Ij-cze" firstAttribute="trailing" secondItem="PbI-Un-M5S" secondAttribute="trailing" id="psN-BJ-lgP"/>
+                            <constraint firstItem="8fp-Ij-cze" firstAttribute="trailing" secondItem="P6Q-5X-ft4" secondAttribute="trailing" id="uCz-qe-6HG"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" id="1Vp-5d-IPP"/>
+                    <connections>
+                        <outlet property="tableView" destination="P6Q-5X-ft4" id="3WC-6n-kR5"/>
+                        <outlet property="titleLabel" destination="slQ-j6-qKd" id="yBa-yb-QCe"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="akT-nZ-Ryn" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="3805" y="-700"/>
+        </scene>
     </scenes>
     <inferredMetricsTieBreakers>
         <segue reference="4du-Fo-Tld"/>
@@ -3913,6 +4010,7 @@
         <image name="black_close_button" width="24" height="24"/>
         <image name="btn_scroll_down" width="66" height="66"/>
         <image name="default_close_button" width="28" height="28"/>
+        <image name="history_download_icon" width="24" height="24"/>
         <image name="history_filter_icon" width="24" height="24"/>
         <image name="history_sync_icon" width="24" height="24"/>
         <image name="ip_v4" width="45" height="24"/>
@@ -3951,7 +4049,7 @@
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="systemGray5Color">
-            <color red="0.8980392157" green="0.8980392157" blue="0.91764705879999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.89803921568627454" green="0.89803921568627454" blue="0.91764705882352937" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>

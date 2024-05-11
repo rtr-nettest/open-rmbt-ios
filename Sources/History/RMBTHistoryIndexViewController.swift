@@ -163,7 +163,11 @@ final class RMBTHistoryIndexViewController: UIViewController {
         activeFilters = filterVC?.activeFilters ?? [:]
         self.refresh()
     }
-    
+
+    @IBAction func downloadButtonTouched(_ sender: Any?) {
+        performSegue(withIdentifier: "show_download_modal", sender: self)
+    }
+
     public func displayTestResult(_ result: RMBTHistoryResult) {
         self.navigationController?.popToRootViewController(animated: false)
 
@@ -326,6 +330,11 @@ final class RMBTHistoryIndexViewController: UIViewController {
                 self?.refresh()
                 self?.refreshFilters()
             }
+        } else if 
+            segue.identifier == "show_download_modal",
+            let navController = segue.destination as? UINavigationController,
+            let vc = navController.visibleViewController as? RMBTHistoryDownloadViewController {
+            vc.openTestUUIDs = testResults.flatMap(\.openTestUUIDs)
         }
     }
     
