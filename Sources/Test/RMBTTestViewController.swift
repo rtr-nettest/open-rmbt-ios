@@ -751,11 +751,11 @@ extension RMBTTestViewController: RMBTBaseTestViewControllerSubclass {
             kbps = Int(t.kilobitsPerSecond())
             l = RMBTSpeedLogValue(Double(kbps))
         }
+        let averageKbps = (speedValues.reduce(0.0) { $0 + $1.kilobitsPerSecond() }) / Double(speedValues.count)
 
         if (throughputs.count > 0) {
-            // Use last values for momentary display (gauge and label)
             self.speedGauge = l
-            self.updateSpeedLabel(for: phase, withSpeed: UInt32(kbps), isFinal: false)
+            self.updateSpeedLabel(for: phase, withSpeed: UInt32(averageKbps), isFinal: false)
         }
     }
     
