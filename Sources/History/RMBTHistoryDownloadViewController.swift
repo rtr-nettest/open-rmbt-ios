@@ -21,8 +21,9 @@ final class RMBTHistoryDownloadViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        self.tableView.register(UINib(nibName: RMBTTestExportCell.ID, bundle: nil), forCellReuseIdentifier: RMBTTestExportCell.ID)
-        
+        tableView.register(UINib(nibName: RMBTTestExportCell.ID, bundle: nil), forCellReuseIdentifier: RMBTTestExportCell.ID)
+        tableView.allowsSelection = false
+
         tableView.tableFooterView = UIView()
         tableView.separatorStyle = .none
     }
@@ -45,7 +46,8 @@ extension RMBTHistoryDownloadViewController: UITableViewDelegate, UITableViewDat
         let cell = tableView.dequeueReusableCell(withIdentifier: RMBTTestExportCell.ID, for: indexPath) as! RMBTTestExportCell
         cell.configure(
             with: openTestUUIDs,
-            onExportedPDFFile: { [weak self] in
+            onExportedPDFFile: {
+                [weak self] in
                 self?.openFile(url: $0, asNamed: "all-tests", fileExtension: "pdf")
             },
             onExportedXLSXFile: { [weak self] in
@@ -54,7 +56,19 @@ extension RMBTHistoryDownloadViewController: UITableViewDelegate, UITableViewDat
             onExportedCSVFile: { [weak self] in
                 self?.openFile(url: $0, asNamed: "all-tests", fileExtension: "csv")
             },
-            onFailure: nil
+            onFailure: {
+                if case let RMBTTestExportCell.Failure.exportError(error) = $0 {
+                    UIAlertController.presentAlert(
+                        title: NSLocalizedString("Export data", comment: ""),
+                        text: error.localizedDescription,
+                        cancelTitle: NSLocalizedString("Dismiss", comment: ""),
+                        cancelAction: { _ in
+                             self.navigationController?.popViewController(animated: true)
+                        },
+                        otherAction: nil
+                    )
+                }
+            }
         )
         return cell
     }

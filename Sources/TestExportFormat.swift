@@ -21,12 +21,16 @@ extension TestExportFormat {
     }
 
     func httpBody(openTestUUIDs: [String], maxResults: Int? = nil) -> Data? {
-        let uuidList = openTestUUIDs.joined(separator: ",")
+        var downloadedUUIDs = openTestUUIDs
+        if let maxResults, maxResults < openTestUUIDs.count {
+            downloadedUUIDs = Array(downloadedUUIDs[0..<maxResults])
+        }
+        let uuidList = downloadedUUIDs.joined(separator: ",")
         let maxResultsStr = maxResults.map { "&maxResults=\($0)" } ?? ""
         let httpBodyStr: String
 
         httpBodyStr = switch self {
-        case .pdf: 
+        case .pdf:
             "open_test_uuid=\(uuidList)"
         case .xlsx, .csv: 
             "open_test_uuid=\(uuidList)&format=\(format)\(maxResultsStr)"
@@ -47,7 +51,7 @@ extension TestExportFormat {
         var request = URLRequest(url: baseURL.appending(path: urlPath))
         request.httpMethod = "POST"
         request.httpBody = httpBody(openTestUUIDs: openTestUUIDs, maxResults: maxResults)
-
+        
         return request
     }
 }

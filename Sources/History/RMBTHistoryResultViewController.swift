@@ -361,7 +361,19 @@ extension RMBTHistoryResultViewController: UITableViewDelegate, UITableViewDataS
                     onExportedCSVFile: { [weak self] in
                         self?.openFile(url: $0, historyResult: historyResult, testUUID: testUUID, fileExtension: "csv")
                     },
-                    onFailure: nil
+                    onFailure: {
+                        if case let RMBTTestExportCell.Failure.exportError(error) = $0 {
+                            UIAlertController.presentAlert(
+                                title: NSLocalizedString("Export data", comment: ""),
+                                text: error.localizedDescription,
+                                cancelTitle: NSLocalizedString("Dismiss", comment: ""),
+                                cancelAction: { _ in
+                                     self.navigationController?.popViewController(animated: true)
+                                },
+                                otherAction: nil
+                            )
+                        }
+                    }
                 )
             }
             return cell
