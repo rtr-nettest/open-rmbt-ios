@@ -11,13 +11,13 @@ import UIKit
 @objc class RMBTHistoryQoSSingleResult: NSObject {
 
     // Test summary, e.g. @"Target: ebay.de \nEntry: A\nResolver: Standard"
-    @objc private (set) var summary: String?
+    @objc private(set) var summary: String?
     
     // Details of the executed test
-    @objc private (set) var details: String?
-    @objc private (set) var isSuccessful: Bool = false
+    @objc private(set) var details: String?
+    @objc private(set) var isSuccessful: Bool = false
     
-    @objc private (set) var uid: NSNumber = NSNumber()
+    @objc private(set) var uid: NSNumber = NSNumber()
     @objc var statusDetails: String?
     
     @objc(initWithResponse:)

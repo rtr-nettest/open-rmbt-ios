@@ -8,7 +8,7 @@
 
 import UIKit
 
-class RMBTQoSHTTPTest: RMBTQoSTest {
+class RMBTQoSHTTPTest: RMBTQoSTest, @unchecked Sendable {
 
     private var url: String?
     private var range: String?

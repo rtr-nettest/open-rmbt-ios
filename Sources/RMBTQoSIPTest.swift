@@ -14,7 +14,7 @@ enum RMBTQoIPTestDirection: Int {
     case error
 }
 
-class RMBTQoSIPTest: RMBTQoSCCTest {
+class RMBTQoSIPTest: RMBTQoSCCTest, @unchecked Sendable {
 
     var direction: RMBTQoIPTestDirection = .error
     private(set) var outPort: UInt = 0

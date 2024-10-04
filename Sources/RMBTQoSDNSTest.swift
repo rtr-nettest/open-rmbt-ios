@@ -8,7 +8,7 @@
 
 import UIKit
 
-@objc class RMBTQoSDNSTest: RMBTQoSTest {
+@objc class RMBTQoSDNSTest: RMBTQoSTest, @unchecked Sendable {
 
     private var resolver: String?
     private var resultResolver: String?

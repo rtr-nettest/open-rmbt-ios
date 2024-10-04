@@ -418,7 +418,7 @@ extension RMBTTestWorker: GCDAsyncSocketDelegate {
     }
     
     /// We unify read and write callbacks for better state documentation
-    open func socketDidReadOrWriteData(_ data: Data!, withTag tagRaw: Int, read: Bool) {
+    public func socketDidReadOrWriteData(_ data: Data!, withTag tagRaw: Int, read: Bool) {
         let tag = RMBTTestTag(rawValue: tagRaw)!
 
         // Pretest

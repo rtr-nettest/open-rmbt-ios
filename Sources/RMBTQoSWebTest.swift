@@ -7,14 +7,14 @@
 //
 
 import UIKit
-import WebKit
+@preconcurrency import WebKit
 
 enum RMBTQosWebTestURLProtocolResultKeys: String {
     case status = "status"
     case rxBytes = "rx"
 }
 
-class RMBTQoSWebTest: RMBTQoSTest {    
+class RMBTQoSWebTest: RMBTQoSTest, @unchecked Sendable {    
     private var url: String?
     private var webView: WKWebView?
     private var requestCount: UInt = 0

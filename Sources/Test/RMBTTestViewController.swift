@@ -450,7 +450,7 @@ final class RMBTTestViewController: RMBTBaseTestViewController {
     
     // MARK: - Footer
     
-    @objc (displayText:forLabel:) func display(text: String, for label: UILabel) {
+    @objc(displayText:forLabel:) func display(text: String, for label: UILabel) {
         label.text = text
     }
     

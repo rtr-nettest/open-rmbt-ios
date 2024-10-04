@@ -8,7 +8,7 @@
 
 import UIKit
 
-@objc class RMBTQoSTracerouteTest: RMBTQoSTest {
+@objc class RMBTQoSTracerouteTest: RMBTQoSTest, @unchecked Sendable {
     private let kDefaultMaxHops: UInt = 30
     private let kStartPort: UInt = 32768 + 666
     private let kTimeout: UInt64 = 2 // timeout for each try (-w)

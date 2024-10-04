@@ -10,8 +10,8 @@ import UIKit
 
 @objc class RMBTHistorySpeedGraph: NSObject {
 
-    private (set) var throughputs: [RMBTThroughput] = []
-    private (set) var points: [CGPoint] = []
+    private(set) var throughputs: [RMBTThroughput] = []
+    private(set) var points: [CGPoint] = []
     
     @objc(initWithResponse:)
     init(with response: [[String: Any]]) {

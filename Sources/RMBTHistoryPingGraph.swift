@@ -27,7 +27,7 @@ class RMBTHistoryPing: NSObject, Mappable {
 @objc class RMBTHistoryPingGraph: NSObject, Mappable {
     var pings: [RMBTHistoryPing] = []
     
-    @objc (initWithPings:)
+    @objc(initWithPings:)
     init(with pings: [RMBTHistoryPing] = []) {
         self.pings = pings
     }
