@@ -131,6 +131,13 @@ final class RMBTAppDelegate: UIResponder, UIApplicationDelegate {
         
         // Text color
         RMBTNavigationBar.appearance().titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor(red: 66.0/255.0, green: 66.0/255.0, blue: 66.0/255.0, alpha: 1.0)]
+
+        let tabBar = (window?.rootViewController as? UITabBarController)?.tabBar
+
+        tabBar?.items?[0].title = NSLocalizedString("Home", comment: "")
+        tabBar?.items?[1].title = NSLocalizedString("History", comment: "")
+        tabBar?.items?[2].title = NSLocalizedString("Statistics", comment: "")
+        tabBar?.items?[3].title = NSLocalizedString("Map", comment: "")
     }
 }
 
