@@ -10,6 +10,9 @@ import Foundation
 import UIKit
 
 @objc class RMBTSpeedGraphView: UIView {
+    private let labelHeight = CGFloat(11)
+    private let labelWidth = CGFloat(30)
+
     private static let RMBTSpeedGraphViewContentFrame: CGRect = CGRect(x: 34.5, y: 32.5, width: 243.0,  height: 92.0)
     private static let RMBTSpeedGraphViewSeconds: TimeInterval = 8.0
     
@@ -23,7 +26,7 @@ import UIKit
     
     internal var graphRect: CGRect {
         var rect = self.bounds
-        rect.size.width -= 40
+        rect.size.width -= labelWidth + 5
         rect.size.height -= 18
         return rect
     }
@@ -53,11 +56,18 @@ import UIKit
     
     private var value1000TopConstraint: NSLayoutConstraint?
     private lazy var value1000Label: UILabel = {
-        let label = RMBTGraphLabel(text: "1000", textColor: labelsColor)
+        let label = RMBTGraphLabel(text: "1G", textColor: labelsColor)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
-    
+
+    private var value10000TopConstraint: NSLayoutConstraint?
+    private lazy var value10000Label: UILabel = {
+        let label = RMBTGraphLabel(text: "10G", textColor: labelsColor)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+
     
     private lazy var startIntervalLabel: UILabel = {
         let label = RMBTGraphLabel(text: "0s", textColor: labelsColor)
@@ -79,6 +89,7 @@ import UIKit
             value10Label.textColor = labelsColor
             value100Label.textColor = labelsColor
             value1000Label.textColor = labelsColor
+            value10000Label.textColor = labelsColor
             updateUI()
         }
     }
@@ -152,11 +163,12 @@ import UIKit
         
         self.addSubview(endIntervalLabel)
         NSLayoutConstraint.activate([
-            endIntervalLabel.rightAnchor.constraint(equalTo: self.rightAnchor, constant: -40),
+            endIntervalLabel.rightAnchor.constraint(equalTo: self.rightAnchor, constant: -labelWidth),
             endIntervalLabel.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: 0),
             endIntervalLabel.heightAnchor.constraint(equalToConstant: 11)
         ])
-        
+
+        self.value10000TopConstraint = addValueLabel(value10000Label)
         self.value1000TopConstraint = addValueLabel(value1000Label)
         self.value100TopConstraint = addValueLabel(value100Label)
         self.value10TopConstraint = addValueLabel(value10Label)
@@ -171,8 +183,8 @@ import UIKit
         NSLayoutConstraint.activate([
             label.rightAnchor.constraint(equalTo: self.rightAnchor, constant: 0),
             constraint,
-            label.heightAnchor.constraint(equalToConstant: 11),
-            label.widthAnchor.constraint(equalToConstant: 32)
+            label.heightAnchor.constraint(equalToConstant: labelHeight),
+            label.widthAnchor.constraint(equalToConstant: labelWidth)
         ])
         
         return constraint
@@ -211,12 +223,14 @@ import UIKit
         self.backgroundImage = self.markedBackgroundImage()
         backgroundLayer.contents = backgroundImage?.cgImage
         let size = self.graphRect.size
-        let countLines = 4
+        let countLines = GAUGE_PARTS
+        let topOffset = CGFloat(2)
         let offset = size.height / CGFloat(countLines)
-        value1000TopConstraint?.constant = 2 + offset * 0
-        value100TopConstraint?.constant = 2 + offset * 1
-        value10TopConstraint?.constant = 2 + offset * 2
-        value1TopConstraint?.constant = 2 + offset * 3
+        value10000TopConstraint?.constant = topOffset + offset * 0
+        value1000TopConstraint?.constant = topOffset + offset * 1
+        value100TopConstraint?.constant = topOffset + offset * 2
+        value10TopConstraint?.constant = topOffset + offset * 3
+        value1TopConstraint?.constant = topOffset + offset * 4
     }
     
     private func markedBackgroundImage() -> UIImage? {
@@ -226,7 +240,7 @@ import UIKit
 
         context?.setLineWidth(1 / UIScreen.main.scale)
         context?.setStrokeColor(graphLinesColor.cgColor)
-        let countLines = 4
+        let countLines = Int(GAUGE_PARTS.rounded())
         let offset = size.height / CGFloat(countLines)
         for i in 0..<countLines + 1 {
             context?.move(to: CGPoint(x: 0, y: size.height - offset * CGFloat(i)))

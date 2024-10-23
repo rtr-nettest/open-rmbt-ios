@@ -29,8 +29,7 @@ fileprivate func < <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
   }
 }
 
-
-let GAUGE_PARTS = 4.0
+let GAUGE_PARTS = 5.0
 let LOG10_MAX = log10(250.0)
 
 ///
