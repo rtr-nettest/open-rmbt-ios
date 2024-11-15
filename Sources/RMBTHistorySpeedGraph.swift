@@ -79,7 +79,7 @@ import UIKit
         if value < 1e5 {
             return 0
         }
-        return (2 + log10(value / 1e7)) / 4
+        return (2 + log10(value / 1e7)) / GAUGE_PARTS
     }
 }
 
