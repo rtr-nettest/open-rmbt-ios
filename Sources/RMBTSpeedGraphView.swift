@@ -11,7 +11,7 @@ import UIKit
 
 @objc class RMBTSpeedGraphView: UIView {
     private let labelHeight = CGFloat(11)
-    private let labelWidth = CGFloat(30)
+    private let labelWidth = CGFloat(32)
 
     private static let RMBTSpeedGraphViewContentFrame: CGRect = CGRect(x: 34.5, y: 32.5, width: 243.0,  height: 92.0)
     private static let RMBTSpeedGraphViewSeconds: TimeInterval = 8.0
@@ -35,21 +35,21 @@ import UIKit
     
     private var value1TopConstraint: NSLayoutConstraint?
     private lazy var value1Label: UILabel = {
-        let label = RMBTGraphLabel(text: "1", textColor: labelsColor)
+        let label = RMBTGraphLabel(text: "1M", textColor: labelsColor)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
     
     private var value10TopConstraint: NSLayoutConstraint?
     private lazy var value10Label: UILabel = {
-        let label = RMBTGraphLabel(text: "10", textColor: labelsColor)
+        let label = RMBTGraphLabel(text: "10M", textColor: labelsColor)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
     
     private var value100TopConstraint: NSLayoutConstraint?
     private lazy var value100Label: UILabel = {
-        let label = RMBTGraphLabel(text: "100", textColor: labelsColor)
+        let label = RMBTGraphLabel(text: "100M", textColor: labelsColor)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
