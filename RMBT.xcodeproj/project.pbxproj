@@ -24,6 +24,7 @@
 		36B75A212739692C006F4CB3 /* RMBTMaterialTextFieldState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36B75A202739692C006F4CB3 /* RMBTMaterialTextFieldState.swift */; };
 		36B75A27273EA096006F4CB3 /* RMBTHistoryLoopCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 36B75A26273EA096006F4CB3 /* RMBTHistoryLoopCell.xib */; };
 		36B75A29273EA73C006F4CB3 /* RMBTHistoryLoopCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36B75A28273EA73C006F4CB3 /* RMBTHistoryLoopCell.swift */; };
+		491471362D1062DD00885B82 /* SendCoverageResultRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 491471352D1062DD00885B82 /* SendCoverageResultRequest.swift */; };
 		49312C752BE91CC2001AA226 /* RMBTHistoryDownloadViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49312C742BE91CC2001AA226 /* RMBTHistoryDownloadViewController.swift */; };
 		494998E32B7E353C0067B3D8 /* TopPopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 494998E22B7E353C0067B3D8 /* TopPopoverView.swift */; };
 		495F7B9B2CF48FC4003750A3 /* NetworkCoverageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 495F7B9A2CF48FC4003750A3 /* NetworkCoverageView.swift */; };
@@ -327,6 +328,7 @@
 		36B75A202739692C006F4CB3 /* RMBTMaterialTextFieldState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTMaterialTextFieldState.swift; sourceTree = "<group>"; };
 		36B75A26273EA096006F4CB3 /* RMBTHistoryLoopCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = RMBTHistoryLoopCell.xib; sourceTree = "<group>"; };
 		36B75A28273EA73C006F4CB3 /* RMBTHistoryLoopCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTHistoryLoopCell.swift; sourceTree = "<group>"; };
+		491471352D1062DD00885B82 /* SendCoverageResultRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendCoverageResultRequest.swift; sourceTree = "<group>"; };
 		49312C742BE91CC2001AA226 /* RMBTHistoryDownloadViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTHistoryDownloadViewController.swift; sourceTree = "<group>"; };
 		494998E22B7E353C0067B3D8 /* TopPopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopPopoverView.swift; sourceTree = "<group>"; };
 		495F7B9A2CF48FC4003750A3 /* NetworkCoverageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkCoverageView.swift; sourceTree = "<group>"; };
@@ -660,6 +662,7 @@
 		495F7B992CF48FB0003750A3 /* NetworkCoverage */ = {
 			isa = PBXGroup;
 			children = (
+				491471352D1062DD00885B82 /* SendCoverageResultRequest.swift */,
 				495F7B9A2CF48FC4003750A3 /* NetworkCoverageView.swift */,
 				498EF3192D0B0CD7003A79EB /* NetworkCoverageViewModel.swift */,
 				498EF31D2D0B0D70003A79EB /* LocationArea.swift */,
@@ -1684,6 +1687,7 @@
 				E9400F0026BA79310067273A /* GeoLocation.swift in Sources */,
 				E9C4BA2727140B8F00D6FAE8 /* CLLocation+Additions.swift in Sources */,
 				E959547F26E3B74B004EA6D9 /* RMBTHistoryIndexCell.swift in Sources */,
+				491471362D1062DD00885B82 /* SendCoverageResultRequest.swift in Sources */,
 				E9400EFC26BA78FD0067273A /* Requests.swift in Sources */,
 				E9400F0226BACF340067273A /* ServerHelper.swift in Sources */,
 				E9AA0DED27639862003C71D7 /* RMBTQoSTCPTest.swift in Sources */,

@@ -156,9 +156,6 @@ struct NetworkCoverageView: View {
 
                 }
                 .padding()
-
-//                viewModel.locationsItems.last.map(NetworkCoverageInfoView.init)?
-//                    .mapOverlay()
             }
         }
     }
@@ -255,7 +252,8 @@ struct NetworkCoverageInfoView: View {
             distanceFromStart: "230 m",
             distanceFromPrevious: "25 m",
             technology: "LTE",
-            pings: [.init(interval: .milliseconds(123), error: nil)]
+            averagePing: "35 ms",
+            pings: [.interval(.milliseconds(123))]
         )
     )
 }

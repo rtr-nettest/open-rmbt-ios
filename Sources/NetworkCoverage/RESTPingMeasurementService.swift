@@ -15,9 +15,13 @@ struct RESTPingMeasurementService {
     func start() -> some PingsAsyncSequence {
         PingsSequence(
             urlSession: urlSession,
-            request: URLRequest(url: URL(string: RMBTConfig.shared.RMBT_CONTROL_SERVER_URL + "/ip")!, cachePolicy: .reloadIgnoringLocalAndRemoteCacheData),
+            request: URLRequest(url: pingURL, cachePolicy: .reloadIgnoringLocalAndRemoteCacheData),
             clock: clock,
             frequency: .milliseconds(500)
         )
+    }
+
+    private var pingURL: URL {
+        RMBTControlServer.shared.checkIpv4 ?? URL(string: RMBTConfig.shared.RMBT_CONTROL_SERVER_URL + "/ip")!
     }
 }

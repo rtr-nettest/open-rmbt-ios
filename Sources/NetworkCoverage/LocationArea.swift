@@ -15,8 +15,10 @@ struct LocationArea {
 
     let startingLocation: CLLocation
     let id: UUID = UUID()
+    let time: Date
 
-    init(startingLocation: CLLocation, technology: String?) {
+    init(startingLocation: CLLocation, technology: String?, dateNow: () -> Date = Date.init) {
+        time = dateNow()
         self.startingLocation = startingLocation
         self.locations = [startingLocation]
         self.pings = []
@@ -33,5 +35,22 @@ struct LocationArea {
 
     mutating func append(technology: String) {
         technologies.append(technology)
+    }
+}
+
+extension LocationArea {
+    var averagePing: Int? {
+        let pingsDurations = pings.compactMap(\.interval)
+        if pingsDurations.isEmpty { return nil }
+        return Int(pingsDurations.map(\.milliseconds).average)
+    }
+}
+
+extension PingResult {
+    var interval: Duration? {
+        switch self {
+        case .interval(let duration): duration
+        case .error: nil
+        }
     }
 }

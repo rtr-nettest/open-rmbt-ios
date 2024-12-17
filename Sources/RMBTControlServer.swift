@@ -419,7 +419,22 @@ extension RMBTControlServer {
             }
         }, error: failure)
     }
-    
+
+    func submitCoverageResult(
+        _ coverageRequest: SendCoverageResultRequest,
+        success: @escaping (_ response: CoverageMeasurementSubmitResponse) -> (),
+        error failure: @escaping ErrorCallback
+    ) {
+        ensureClientUuid(
+            success: { uuid in
+                coverageRequest.uuid = uuid
+                BasicRequestBuilder.addBasicRequestValues(coverageRequest)
+                self.request(.post, path: "/coverage", requestObject: coverageRequest, success: success, error: failure)
+            },
+            error: failure
+        )
+    }
+
     ///
     @objc(getSyncCode:error:) func getSyncCode(success: @escaping (_ response: GetSyncCodeResponse) -> (), error failure: @escaping ErrorCallback) {
         ensureClientUuid(success: { uuid in

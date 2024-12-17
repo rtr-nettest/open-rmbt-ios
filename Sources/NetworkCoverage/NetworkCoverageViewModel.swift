@@ -11,8 +11,6 @@ import CoreLocation
 import AsyncAlgorithms
 import CoreTelephony
 
-// MARK: -
-
 var backgroundActivity: CLBackgroundActivitySession?
 
 struct LocationCoverage {
@@ -24,6 +22,9 @@ struct LocationCoverage {
     let location: Location
 }
 
+protocol SendCoverageResultsService {
+    func send(areas: [LocationArea]) async throws
+}
 
 @Observable @MainActor class NetworkCoverageViewModel {
     struct LocationItem: Identifiable {
@@ -42,12 +43,12 @@ struct LocationCoverage {
         }
         var pingInfo: PingInfo {
             PingInfo(pings: pings
-                .map { $0.error.map { _  in "err" } ?? "\($0.interval.milliseconds) ms" }
+                .map(\.displayValue)
                 .joined(separator: ", ")
             )
         }
 
-        var averagePing: String { "\(Int(pings.map(\.interval).map(\.milliseconds).average)) ms" }
+        var averagePing: String
 
         var pings: [PingResult] = []
     }
@@ -76,42 +77,18 @@ struct LocationCoverage {
     var minimumLocationAccuracy: CLLocationDistance = 5
     private(set) var isStarted = false
     private(set) var errorMessage: String?
-    private(set) var locationsItems: [LocationItem] = [
-        .init(
-            id: "3",
-            coordinate: .init(latitude: 37.7777777777777777, longitude: -123.7777777777777777),
-            distanceFromStart: "230 m",
-            distanceFromPrevious: "25 m",
-            technology: "LTE",
-            pings: [.init(interval: .milliseconds(123), error: nil)]
-        ),
-        .init(
-            id: "2",
-            coordinate: .init(latitude: 37.777777, longitude: -123.777777),
-            distanceFromStart: "230 m",
-            distanceFromPrevious: "25 m",
-            technology: "LTE"
-        ),
-        .init(
-            id: "1",
-            coordinate: .init(latitude: 37.777777, longitude: -123.777777),
-            distanceFromStart: "230 m",
-            distanceFromPrevious: "25 m",
-            technology: "LTE"
-        ),
-        .init(
-            id: "0",
-            coordinate: .init(latitude: 37.777777, longitude: -123.777777),
-            distanceFromStart: "230 m",
-            distanceFromPrevious: "25 m",
-            technology: "LTE"
-        )
-    ]
+    private(set) var locationsItems: [LocationItem] = []
 
     private(set) var locations: [CLLocation] = []
     private(set) var locationAccuracy = "N/A"
     private(set) var latestPing = "N/A"
     private(set) var latestTechnology = "N/A"
+
+    private let sendResultsService: any SendCoverageResultsService
+
+    init(sendResultsService: any SendCoverageResultsService = RMBTControlServer.shared) {
+        self.sendResultsService = sendResultsService
+    }
 
     @MainActor
     private var locationAreas: [LocationArea] = [] {
@@ -132,6 +109,8 @@ struct LocationCoverage {
     private func start() async {
         guard !isStarted else { return }
         isStarted = true
+        locationAreas.removeAll()
+        locations.removeAll()
 
         backgroundActivity = CLBackgroundActivitySession()
 
@@ -144,7 +123,7 @@ struct LocationCoverage {
 
                 switch update {
                 case .ping(let pingUpdate):
-                    latestPing = pingUpdate.error != nil ? "err" : "\(pingUpdate.interval.milliseconds) ms"
+                    latestPing = pingUpdate.displayValue
 
                     if var currentArea = locationAreas.last {
                         currentArea.append(ping: pingUpdate)
@@ -173,7 +152,6 @@ struct LocationCoverage {
                     } else {
                         let newArea = LocationArea(startingLocation: locationUpdate, technology: latestTechnology)
                         locationAreas.append(newArea)
-//                        currentArea = newArea
                     }
                 }
             }
@@ -193,50 +171,28 @@ struct LocationCoverage {
         return radioAccessTechnology?.radioTechnologyDisplayValue
     }
 
-    private func stop() {
+    private func stop() async {
         isStarted = false
         locationAccuracy = "N/A"
         latestPing = "N/A"
         latestTechnology = "N/A"
+
+        if !locationAreas.isEmpty {
+            do {
+                try await sendResultsService.send(areas: locationAreas)
+            } catch {
+                // TODO: display error
+            }
+        }
     }
 
     func toggleMeasurement() async {
         if !isStarted {
             await start()
         } else {
-            stop()
+            await stop()
         }
     }
-
-//    private func processLocationUpdate(_ location: CLLocationUpdate.Updates.Element) {
-//        guard let location = location.location else { return }
-//
-//        let initialLocation = locations.first
-//        let previousLocation = locations.last
-//        let distanceFromPrevious = previousLocation?.distance(from: location)
-//
-//        if (distanceFromPrevious ?? 0) > 20 {
-//
-//        } else {
-//            
-//        }
-//
-//        locations.append(location)
-//
-//        let locationItem = LocationItem(
-//            id: "\(locations.count)",
-//            coordinate: location.coordinate,
-//            distanceFromStart: initialLocation.map { String(format: "%.1f m", $0.distance(from: location)) },
-//            distanceFromPrevious: previousLocation.map { String(format: "%.1f m", $0.distance(from: location)) },
-//            pings: []
-//        )
-//
-//        if locationsItems.isEmpty {
-//            locationsItems.append(locationItem)
-//        } else {
-//            locationsItems.insert(locationItem, at: 0)
-//        }
-//    }
 }
 
 extension NetworkCoverageViewModel.LocationItem {
@@ -251,6 +207,7 @@ extension NetworkCoverageViewModel.LocationItem {
             distanceFromStart: String(format: "%.1f m", startLocation.distance(from: location)),
             distanceFromPrevious: previousLocation.map { String(format: "%.1f m", $0.distance(from: location)) },
             technology: area.technologies.last ?? "N/A",
+            averagePing: area.averagePing.map { "\($0) ms" } ?? "err",
             pings: area.pings
         )
     }
@@ -258,6 +215,17 @@ extension NetworkCoverageViewModel.LocationItem {
 
 extension CLLocation: @retroactive Identifiable {
     public var id: String { "\(coordinate.latitude),\(coordinate.longitude)" }
+}
+
+extension PingResult {
+    var displayValue: String {
+        switch self {
+        case .interval(let duration):
+            "\(duration.milliseconds) ms"
+        case .error:
+            "err"
+        }
+    }
 }
 
 extension Array where Element: BinaryInteger {
