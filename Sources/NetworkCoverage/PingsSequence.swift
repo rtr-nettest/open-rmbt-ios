@@ -14,9 +14,9 @@ import Foundation
 
 @rethrows protocol PingsAsyncSequence: AsyncSequence where AsyncIterator: PingsAsyncIteratorProtocol { }
 
-enum PingResult {
+enum PingResult: Hashable {
     case interval(Duration)
-    case error(any Error)
+    case error
 }
 
 struct PingsSequence: PingsAsyncSequence {
@@ -49,7 +49,7 @@ struct PingsSequence: PingsAsyncSequence {
             } catch {
                return nil
             }
-            return capturedError.map { .error($0) } ?? .interval(elapsed)
+            return capturedError.map { _ in .error } ?? .interval(elapsed)
         }
     }
 

@@ -194,7 +194,7 @@ class RMBTConnectivity: NSObject {
         networkName = nil
 
         //Get access technology
-        if let radioAccessTechnology = radioAccessTechnology {
+        if let radioAccessTechnology {
             cellularCode = cellularCodeForCTValue(radioAccessTechnology)
             cellularCodeDescription = cellularCodeDescriptionForCTValue(radioAccessTechnology)
         }
@@ -234,8 +234,7 @@ class RMBTConnectivity: NSObject {
         }
     }
 
-    fileprivate func cellularCodeForCTValue(_ value: String?) -> Int? {
-        guard let value = value else { return nil }
+    fileprivate func cellularCodeForCTValue(_ value: String) -> Int? {
 
         return cellularCodeTable[value]
     }
@@ -261,12 +260,8 @@ class RMBTConnectivity: NSObject {
         return table
     }
 
-    fileprivate func cellularCodeDescriptionForCTValue(_ value: String!) -> String? {
-        if value == nil {
-            return nil
-        }
-
-        return cellularCodeDescriptionTable[value] ?? nil
+    fileprivate func cellularCodeDescriptionForCTValue(_ value: String) -> String? {
+        value.radioTechnologyCode
     }
 
     fileprivate var cellularCodeDescriptionTable: [String: String] {
@@ -292,7 +287,7 @@ class RMBTConnectivity: NSObject {
 }
 
 extension String {
-    var radioTechnologyDisplayValue: String? {
+    var radioTechnologyCode: String? {
         let table = [
             CTRadioAccessTechnologyGPRS: "2G/GSM",
             CTRadioAccessTechnologyEdge: "2G/EDGE",

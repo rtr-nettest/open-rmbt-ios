@@ -11,10 +11,11 @@ import CoreLocation
 import MapKit
 
 struct NetworkCoverageView: View {
-    @Bindable var viewModel = NetworkCoverageViewModel()
+    @Bindable var viewModel: NetworkCoverageViewModel
+    let presenter = NetworkCoverageViewPresenter(locale: .autoupdatingCurrent)
 
-    var body: some View {
-        map
+    init(areas: [LocationArea] = []) {
+        viewModel = NetworkCoverageViewModel(areas: areas)
     }
 
     @State private var position: MapCameraPosition = .userLocation(
@@ -23,24 +24,37 @@ struct NetworkCoverageView: View {
 
     @State private var showsSetings = false
     @State private var showsIndividualLocationUpdates = true
+    @State private var isDebugMode = true
 
-    var map: some View {
-        Map(position: $position) {
+    var body: some View {
+        Map(position: $position, selection: $viewModel.selectedArea) {
             UserAnnotation()
 
-            ForEach(viewModel.locationsItems) { location in
-                MapCircle(center: location.coordinate, radius: viewModel.fenceRadius)
-                    .foregroundStyle(.green.opacity(0.1))
-                    .stroke(.green.opacity(0.8), lineWidth: 1)
-                    .mapOverlayLevel(level: .aboveLabels)
+            ForEach(viewModel.locationAreas) { area in
+                let locationItem = presenter.locationItem(from: area, selectedArea: viewModel.selectedArea)
 
-                Annotation(coordinate: location.coordinate, content: {
-                    VStack(spacing: 16) {
-                        Text(location.technology)
-                        Text(location.averagePing)
-                    }
-                    .font(.caption)
-                }, label: { EmptyView() })
+                if isDebugMode {
+                    MapCircle(center: area.startingLocation.coordinate, radius: viewModel.fenceRadius)
+                        .foregroundStyle(locationItem.color.opacity(locationItem.isSelected ? 0.4 : 0.1))
+                        .stroke(
+                            locationItem.color.opacity(locationItem.isSelected ? 1 : 0.8),
+                            lineWidth: locationItem.isSelected ? 2 : 1
+                        )
+                        .mapOverlayLevel(level: .aboveLabels)
+                }
+
+                Annotation(
+                    coordinate: locationItem.coordinate,
+                    content: {
+                        VStack(spacing: 16) {
+                            Text(locationItem.technology)
+                            Text(locationItem.averagePing)
+                        }
+                        .font(.caption)
+                    },
+                    label: { EmptyView() }
+                )
+                .tag(area)
             }
 
             if showsIndividualLocationUpdates {
@@ -52,100 +66,29 @@ struct NetworkCoverageView: View {
                 }
             }
         }
+        .mapControls {
+            MapScaleView()
+            MapCompass()
+            MapUserLocationButton()
+        }
         .overlay() {
             VStack {
-                HStack {
-                    Spacer()
-                    VStack(alignment: .leading) {
-                        Text("Loc. accuracy")
-                            .font(.caption)
-                        Text(viewModel.locationAccuracy)
-                    }
-
-                    Spacer()
-
-                    VStack(alignment: .leading) {
-                        Text("Ping")
-                            .font(.caption)
-                        Text(viewModel.latestPing)
-                    }
-
-                    Spacer()
-
-                    VStack(alignment: .leading) {
-                        Text("Technology")
-                            .font(.caption)
-                        Text(viewModel.latestTechnology)
-                    }
-
-                    Spacer()
-
-                    verticalSeparator()
-                        .frame(height: 44)
-
-                    Spacer()
-
-                    Button(viewModel.isStarted ? "Stop" : "Start") {
-                        Task { await viewModel.toggleMeasurement() }
-                    }
-                    Spacer()
-                }
-                .frame(maxWidth: .infinity, alignment: .center)
-                .padding(12)
-                .mapOverlay()
-                .padding()
+                topBarView
+                    .padding(.leading, 8)
+                    .padding(.trailing, 56)
 
                 Spacer()
 
                 if showsSetings {
-                    VStack(spacing: 12) {
-                        HStack {
-                            Toggle("Show location updates", isOn: $showsIndividualLocationUpdates)
-                        }
-
-                        horizontalSeparator()
-
-                        VStack(alignment: .leading) {
-                            Text("Fence radius: **\(viewModel.fenceRadius, format: .number) m**")
-                            Slider(
-                                value: $viewModel.fenceRadius,
-                                in: 10...50,
-                                step: 1,
-                                label: { Text("\(viewModel.fenceRadius) m").font(.footnote) },
-                                minimumValueLabel: { Text("10 m").font(.footnote) },
-                                maximumValueLabel: { Text("50 m").font(.footnote) }
-                            )
-                        }
-
-                        horizontalSeparator()
-
-                        VStack(alignment: .leading) {
-                            Text("Accuracy: **\(viewModel.minimumLocationAccuracy, format: .number) m**")
-                            Slider(
-                                value: $viewModel.minimumLocationAccuracy,
-                                in: 3...20,
-                                step: 1,
-                                label: { Text("\(viewModel.minimumLocationAccuracy) m").font(.footnote) },
-                                minimumValueLabel: { Text("3 m").font(.footnote) },
-                                maximumValueLabel: { Text("20 m").font(.footnote) }
-                            )
-                        }
-                    }
-                    .padding()
-                    .mapOverlay()
-                    .padding()
+                    settingsView
+                        .padding(.horizontal, 16)
                 }
-                HStack(spacing: 8) {
-                    Spacer()
 
-                    if !position.followsUserLocation {
-                        Button(
-                            action: {
-                                position = .userLocation(fallback: .automatic)
-                            },
-                            label: { Image(systemName: "location.circle").padding() }
-                        )
-                        .mapOverlay()
+                HStack(alignment: .bottom, spacing: 8) {
+                    if let selectedItem = viewModel.selectedArea {
+                        selectedItemDetailView(selectedItem)
+                    } else {
+                        Spacer()
                     }
 
                     Button(
@@ -153,46 +96,9 @@ struct NetworkCoverageView: View {
                         label: { Image(systemName: "gearshape").padding() }
                     )
                     .mapOverlay()
-
                 }
                 .padding()
             }
-        }
-    }
-
-    var list: some View {
-        VStack {
-            List(viewModel.locationsItems) { item in
-                VStack {
-                    HStack {
-                        Text("Location")
-                        Spacer()
-                        Text("Distance")
-                    }
-                    .font(.caption)
-
-                    HStack {
-                        Text(item.coordinateString)
-                            .font(.subheadline)
-                            .foregroundColor(.primary)
-                            .multilineTextAlignment(.trailing)
-
-                        Spacer()
-                        VStack(alignment: .trailing) {
-                            Text("from start: **\(item.distanceFromStart ?? "n/a")**")
-                            Text("from previous: **\(item.distanceFromPrevious ?? "n/a")**")
-                        }
-                        .font(.subheadline)
-                    }
-
-                    Text(item.pingInfo.pings)
-                        .font(.footnote)
-                }
-            }
-            Button(viewModel.isStarted ? "Stop" : "Start") {
-                Task { await viewModel.toggleMeasurement() }
-            }
-            .padding()
         }
     }
 
@@ -207,53 +113,161 @@ struct NetworkCoverageView: View {
             .fill(Color.gray.opacity(0.2))
             .frame(maxWidth: 1, maxHeight: .infinity, alignment: .center)
     }
+
+    var settingsView: some View {
+        VStack(spacing: 12) {
+            HStack {
+                Toggle("Show location updates", isOn: $showsIndividualLocationUpdates)
+            }
+
+            horizontalSeparator()
+
+            VStack(alignment: .leading) {
+                Text("Fence radius: **\(viewModel.fenceRadius, format: .number) m**")
+                Slider(
+                    value: $viewModel.fenceRadius,
+                    in: 10...50,
+                    step: 1,
+                    label: { Text("\(viewModel.fenceRadius) m").font(.footnote) },
+                    minimumValueLabel: { Text("10 m").font(.footnote) },
+                    maximumValueLabel: { Text("50 m").font(.footnote) }
+                )
+            }
+
+            horizontalSeparator()
+
+            VStack(alignment: .leading) {
+                Text("Accuracy: **\(viewModel.minimumLocationAccuracy, format: .number) m**")
+                Slider(
+                    value: $viewModel.minimumLocationAccuracy,
+                    in: 3...20,
+                    step: 1,
+                    label: { Text("\(viewModel.minimumLocationAccuracy) m").font(.footnote) },
+                    minimumValueLabel: { Text("3 m").font(.footnote) },
+                    maximumValueLabel: { Text("20 m").font(.footnote) }
+                )
+            }
+        }
+        .padding()
+        .mapOverlay()
+    }
+
+    var topBarView: some View {
+        HStack {
+            Spacer()
+            VStack(alignment: .leading) {
+                Text("Loc. accuracy")
+                    .font(.caption)
+                Text(viewModel.locationAccuracy)
+            }
+
+            Spacer()
+
+            VStack(alignment: .leading) {
+                Text("Ping")
+                    .font(.caption)
+                Text(viewModel.latestPing)
+            }
+
+            Spacer()
+
+            VStack(alignment: .leading) {
+                Text("Technology")
+                    .font(.caption)
+                Text(viewModel.latestTechnology)
+            }
+
+            Spacer()
+
+            verticalSeparator()
+                .frame(height: 44)
+
+            Spacer()
+
+            Button(viewModel.isStarted ? "Stop" : "Start") {
+                Task { await viewModel.toggleMeasurement() }
+            }
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, alignment: .center)
+        .padding(12)
+        .mapOverlay()
+    }
+
+    @ViewBuilder
+    func selectedItemDetailView(_ selectedItem: LocationArea) -> some View {
+        let item = presenter.selectedItemDetail(from: selectedItem)
+
+        VStack(alignment: .leading) {
+            HStack(alignment: .bottom) {
+                Text("Date:")
+                    .font(.headline)
+                Text(item.date)
+            }
+            HStack(alignment: .bottom) {
+                Text("Technology:")
+                    .font(.headline)
+                Text(item.technology)
+                    .foregroundStyle(item.color)
+            }
+            HStack(alignment: .bottom) {
+                Text("Ping:")
+                    .font(.headline)
+                Text(item.averagePing)
+            }
+        }
+        .padding()
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .mapOverlay()
+    }
 }
 
 private extension View {
     func mapOverlay() -> some View {
-        background(Color.white.opacity(0.8))
+        background(Color.white.opacity(0.85))
         .cornerRadius(8)
     }
 }
-struct NetworkCoverageInfoView: View {
-    let item: NetworkCoverageViewModel.LocationItem
-
-    var body: some View {
-        VStack {
-            HStack {
-                Text(item.coordinateString)
-                    .font(.subheadline)
-                    .foregroundColor(.primary)
-                    .multilineTextAlignment(.trailing)
-
-                Spacer()
-                VStack(alignment: .trailing) {
-                    Text("Ping: **\(item.averagePing)**")
-                    Text("Technology: **\(item.technology)**")
-                }
-                .font(.subheadline)
-            }
-
-            Text(item.pingInfo.pings)
-                .font(.footnote)
-        }
-    }
-}
 
 #Preview {
-    NetworkCoverageView()
-}
-
-#Preview {
-    NetworkCoverageInfoView(
-        item: .init(
-            id: "0",
-            coordinate: .init(latitude: 37.777777, longitude: -123.777777),
-            distanceFromStart: "230 m",
-            distanceFromPrevious: "25 m",
-            technology: "LTE",
-            averagePing: "35 ms",
-            pings: [.interval(.milliseconds(123))]
-        )
+    NetworkCoverageView(
+        areas: [
+            .init(
+                startingLocation: CLLocation(
+                    latitude: 49.74805411063806,
+                    longitude: 13.37696845562318
+                ),
+                technology: "3G/HSDPA",
+                avgPing: .milliseconds(122),
+                dateNow: { .init(timeIntervalSince1970: 1734526653) }
+            ),
+            .init(
+                startingLocation: CLLocation(
+                    latitude: 49.747849194587204,
+                    longitude: 13.376917714305671
+                ),
+                technology: "4G/LTE",
+                avgPing: .milliseconds(84),
+                dateNow: { .init(timeIntervalSince1970: 1734526656) }
+            ),
+            .init(
+                startingLocation: CLLocation(
+                    latitude: 49.74741067132995,
+                    longitude: 13.376784518347213
+                ),
+                technology: "4G/LTE",
+                avgPing: .milliseconds(41),
+                dateNow: { .init(timeIntervalSince1970: 1734526659) }
+            ),
+            .init(
+                startingLocation: CLLocation(
+                    latitude: 49.74700902972835,
+                    longitude: 13.376651322388751
+                ),
+                technology: "5G/NRNSA",
+                avgPing: .milliseconds(26),
+                dateNow: { .init(timeIntervalSince1970: 1734526661) }
+            )
+        ]
     )
 }

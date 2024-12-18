@@ -8,7 +8,7 @@
 
 import CoreLocation
 
-struct LocationArea {
+struct LocationArea: Identifiable, Hashable {
     private(set) var locations: [CLLocation]
     private(set) var pings: [PingResult]
     private(set) var technologies: [String]
@@ -17,11 +17,11 @@ struct LocationArea {
     let id: UUID = UUID()
     let time: Date
 
-    init(startingLocation: CLLocation, technology: String?, dateNow: () -> Date = Date.init) {
+    init(startingLocation: CLLocation, technology: String?, avgPing: Duration? = nil, dateNow: () -> Date = Date.init) {
         time = dateNow()
         self.startingLocation = startingLocation
         self.locations = [startingLocation]
-        self.pings = []
+        self.pings = avgPing.map { [.interval($0)] } ?? []
         technologies = technology.map { [$0] } ?? []
     }
 
