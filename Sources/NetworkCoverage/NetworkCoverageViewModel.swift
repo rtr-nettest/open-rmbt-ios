@@ -44,7 +44,6 @@ protocol SendCoverageResultsService {
     private(set) var errorMessage: String?
 
     private(set) var locations: [CLLocation] = []
-    
     private(set) var locationAccuracy = "N/A"
     private(set) var latestPing = "N/A"
     private(set) var latestTechnology = "N/A"
@@ -79,7 +78,11 @@ protocol SendCoverageResultsService {
                 case .ping(let pingUpdate):
                     latestPing = pingUpdate.displayValue
 
-                    if var currentArea = locationAreas.last {
+                    if
+                        var currentArea = locationAreas.last,
+                        let lastLocation = locations.last,
+                        isLocationPreciseEnough(lastLocation)
+                    {
                         currentArea.append(ping: pingUpdate)
                         locationAreas[locationAreas.endIndex - 1] = currentArea
                     }
@@ -90,7 +93,7 @@ protocol SendCoverageResultsService {
                     let currentRadioTechnology = currentRadioTechnology()
                     latestTechnology = currentRadioTechnology?.0 ?? "N/A"
 
-                    guard locationUpdate.horizontalAccuracy <= minimumLocationAccuracy else {
+                    guard isLocationPreciseEnough(locationUpdate) else {
                         continue
                     }
 
@@ -152,6 +155,10 @@ protocol SendCoverageResultsService {
         } else {
             await stop()
         }
+    }
+
+    private func isLocationPreciseEnough(_ location: CLLocation) -> Bool {
+        location.horizontalAccuracy <= minimumLocationAccuracy
     }
 }
 
