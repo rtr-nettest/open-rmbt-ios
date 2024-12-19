@@ -143,6 +143,8 @@ final class RMBTAppDelegate: UIResponder, UIApplicationDelegate {
         tabBar?.items?[1].title = NSLocalizedString("History", comment: "")
         tabBar?.items?[2].title = NSLocalizedString("Statistics", comment: "")
         tabBar?.items?[3].title = NSLocalizedString("Map", comment: "")
+        tabBar?.items?[4].title = NSLocalizedString("Coverage", comment: "")
+        tabBar?.items?[4].image = UIImage(named: "tab_coverage")
     }
 }
 
