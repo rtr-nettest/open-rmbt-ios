@@ -23,10 +23,14 @@ struct NetworkCoverageView: View {
     )
 
     @State private var showsSetings = false
-    @State private var showsIndividualLocationUpdates = true
-    @State private var isDebugMode = true
+    @State private var isDebugMode = false
 
     var body: some View {
+        Circle()
+            .fill(Color.red)
+            .frame(width: 10, height: 10)
+
+
         Map(position: $position, selection: $viewModel.selectedArea) {
             UserAnnotation()
 
@@ -41,23 +45,40 @@ struct NetworkCoverageView: View {
                             lineWidth: locationItem.isSelected ? 2 : 1
                         )
                         .mapOverlayLevel(level: .aboveLabels)
-                }
 
-                Annotation(
-                    coordinate: locationItem.coordinate,
-                    content: {
-                        VStack(spacing: 16) {
-                            Text(locationItem.technology)
-                            Text(locationItem.averagePing)
-                        }
-                        .font(.caption)
-                    },
-                    label: { EmptyView() }
-                )
-                .tag(area)
+
+                    Annotation(
+                        coordinate: locationItem.coordinate,
+                        content: {
+                            VStack(spacing: 16) {
+                                Text(locationItem.technology)
+                                Text(locationItem.averagePing)
+                            }
+                            .font(.caption)
+                        },
+                        label: { EmptyView() }
+                    )
+                    .tag(area)
+                } else {
+                    Annotation(
+                        coordinate: locationItem.coordinate,
+                        content: {
+                            Circle()
+                                .fill(locationItem.color.opacity(locationItem.isSelected ? 1 : 0.6))
+                                .stroke(
+                                    locationItem.isSelected ? Color.black.opacity(0.6) :
+                                    locationItem.color,
+                                    lineWidth: locationItem.isSelected ? 2 : 1
+                                )
+                                .frame(width: 20, height: 20)
+                        },
+                        label: { EmptyView() }
+                    )
+                    .tag(area)
+                }
             }
 
-            if showsIndividualLocationUpdates {
+            if isDebugMode {
                 ForEach(viewModel.locations) { location in
                     MapCircle(center: location.coordinate, radius: location.horizontalAccuracy)
                         .foregroundStyle(.blue.opacity(0.2))
@@ -117,7 +138,7 @@ struct NetworkCoverageView: View {
     var settingsView: some View {
         VStack(spacing: 12) {
             HStack {
-                Toggle("Show location updates", isOn: $showsIndividualLocationUpdates)
+                Toggle("Debug mode", isOn: $isDebugMode)
             }
 
             horizontalSeparator()
