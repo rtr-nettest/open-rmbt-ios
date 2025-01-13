@@ -34,15 +34,17 @@ public class SendCoverageResultRequest: BasicRequest {
         private(set) var location: Location
         private(set) var avgPingMilliseconds: Int?
         private(set) var technology: String?
+        private(set) var technology_id: Int?
 
         init(area: LocationArea) {
-            timestamp = UInt64(area.time.timeIntervalSince1970)
+            timestamp = UInt64(area.time.timeIntervalSince1970 * 1_000_000) // microseconds
             location = .init(
                 latitude: area.startingLocation.coordinate.latitude,
                 longitude: area.startingLocation.coordinate.longitude
             )
             avgPingMilliseconds = area.averagePing
-            technology = area.technologies.last
+            technology = area.technologies.last?.radioTechnologyCode
+            technology_id = area.technologies.last?.radioTechnologyTypeID
         }
 
         required init?(map: Map) {
@@ -50,10 +52,11 @@ public class SendCoverageResultRequest: BasicRequest {
         }
 
         func mapping(map: Map) {
-            timestamp           <- map["timestamp"]
+            timestamp           <- map["timestamp_microseconds"]
             location            <- map["location"]
             avgPingMilliseconds <- map["avg_ping_ms"]
             technology          <- map["technology"]
+            technology_id       <- map["technology_id"]
         }
     }
 

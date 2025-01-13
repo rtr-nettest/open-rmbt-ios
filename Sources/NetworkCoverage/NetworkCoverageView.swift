@@ -30,7 +30,6 @@ struct NetworkCoverageView: View {
             .fill(Color.red)
             .frame(width: 10, height: 10)
 
-
         Map(position: $position, selection: $viewModel.selectedArea) {
             UserAnnotation()
 
@@ -195,7 +194,7 @@ struct NetworkCoverageView: View {
             VStack(alignment: .leading) {
                 Text("Technology")
                     .font(.caption)
-                Text(viewModel.latestTechnology)
+                Text(presenter.displayValue(forRadioTechnology: viewModel.latestTechnology))
             }
 
             Spacer()

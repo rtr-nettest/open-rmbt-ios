@@ -91,7 +91,7 @@ protocol SendCoverageResultsService {
                     locations.append(locationUpdate)
                     locationAccuracy = String(format: "%.2f", locationUpdate.horizontalAccuracy)
                     let currentRadioTechnology = currentRadioTechnology()
-                    latestTechnology = currentRadioTechnology?.0 ?? "N/A"
+                    latestTechnology = currentRadioTechnology ?? "N/A"
 
                     guard isLocationPreciseEnough(locationUpdate) else {
                         continue
@@ -100,15 +100,15 @@ protocol SendCoverageResultsService {
                     let currentArea = locationAreas.last
                     if var currentArea {
                         if currentArea.startingLocation.distance(from: locationUpdate) >= fenceRadius {
-                            let newArea = LocationArea(startingLocation: locationUpdate, technology: currentRadioTechnology?.0)
+                            let newArea = LocationArea(startingLocation: locationUpdate, technology: currentRadioTechnology)
                             locationAreas.append(newArea)
                         } else {
                             currentArea.append(location: locationUpdate)
-                            currentRadioTechnology.map { currentArea.append(technology: $0.0) }
+                            currentRadioTechnology.map { currentArea.append(technology: $0) }
                             locationAreas[locationAreas.endIndex - 1] = currentArea
                         }
                     } else {
-                        let newArea = LocationArea(startingLocation: locationUpdate, technology: currentRadioTechnology?.0)
+                        let newArea = LocationArea(startingLocation: locationUpdate, technology: currentRadioTechnology)
                         locationAreas.append(newArea)
                     }
                 }
@@ -118,20 +118,14 @@ protocol SendCoverageResultsService {
         }
     }
 
-    private func currentRadioTechnology() -> (String, RMBTNetworkTypeConstants.NetworkType)? {
+    private func currentRadioTechnology() -> String? {
         let netinfo = CTTelephonyNetworkInfo()
         var radioAccessTechnology: String?
 
         if let dataIndetifier = netinfo.dataServiceIdentifier {
             radioAccessTechnology = netinfo.serviceCurrentRadioAccessTechnology?[dataIndetifier]
         }
-        if
-            let technologyCode = radioAccessTechnology?.radioTechnologyCode,
-            let networkType = RMBTNetworkTypeConstants.cellularCodeDescriptionDictionary[technologyCode]
-        {
-            return (technologyCode, networkType)
-        }
-        return nil
+        return radioAccessTechnology
     }
 
     private func stop() async {

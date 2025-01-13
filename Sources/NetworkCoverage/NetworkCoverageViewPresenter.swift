@@ -43,6 +43,10 @@ struct NetworkCoverageViewPresenter {
         }()
     }
 
+    func displayValue(forRadioTechnology technology: String) -> String {
+        technology.radioTechnologyDisplayValue ?? technology
+    }
+
     func locationItem(from area: LocationArea, selectedArea: LocationArea?) -> LocationItem {
         .init(
             id: area.id,
@@ -93,11 +97,23 @@ extension LocationArea {
 
 extension String {
     var radioTechnologyDisplayValue: String? {
-        RMBTNetworkTypeConstants.cellularCodeDescriptionDictionary[self]?.radioTechnologyDisplayValue
+        if
+            let code = radioTechnologyCode,
+            let celularCodeDescription = RMBTNetworkTypeConstants.cellularCodeDescriptionDictionary[code] {
+            return celularCodeDescription.radioTechnologyDisplayValue
+        } else {
+            return nil
+        }
     }
 
     var radioTechnologyColorClassification: Int? {
-        RMBTNetworkTypeConstants.cellularCodeDescriptionDictionary[self]?.radioTechnologyColorClassification
+        if
+            let code = radioTechnologyCode,
+            let celularCodeDescription = RMBTNetworkTypeConstants.cellularCodeDescriptionDictionary[code] {
+            return celularCodeDescription.radioTechnologyColorClassification
+        } else {
+            return nil
+        }
     }
 }
 
