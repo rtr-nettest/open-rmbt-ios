@@ -111,11 +111,11 @@ struct NetworkCoverageView: View {
                         Spacer()
                     }
 
-                    Button(
-                        action: { showsSetings.toggle() },
-                        label: { Image(systemName: "gearshape").padding() }
-                    )
-                    .mapOverlay()
+//                    Button(
+//                        action: { showsSetings.toggle() },
+//                        label: { Image(systemName: "gearshape").padding() }
+//                    )
+//                    .mapOverlay()
                 }
                 .padding()
             }
