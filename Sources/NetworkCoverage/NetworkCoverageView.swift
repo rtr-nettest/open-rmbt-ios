@@ -23,7 +23,7 @@ struct NetworkCoverageView: View {
     )
 
     @State private var showsSetings = false
-    @State private var isDebugMode = false
+    @State private var isExpertMode = false
 
     var body: some View {
         Circle()
@@ -36,15 +36,13 @@ struct NetworkCoverageView: View {
             ForEach(viewModel.locationAreas) { area in
                 let locationItem = presenter.locationItem(from: area, selectedArea: viewModel.selectedArea)
 
-                if isDebugMode {
-                    MapCircle(center: area.startingLocation.coordinate, radius: viewModel.fenceRadius)
-                        .foregroundStyle(locationItem.color.opacity(locationItem.isSelected ? 0.4 : 0.1))
-                        .stroke(
-                            locationItem.color.opacity(locationItem.isSelected ? 1 : 0.8),
-                            lineWidth: locationItem.isSelected ? 2 : 1
-                        )
-                        .mapOverlayLevel(level: .aboveLabels)
 
+                if !isExpertMode && area == viewModel.currentArea {
+                    fenceCircle(locationItem: locationItem, area: area)
+                    fenceAnnotation(locationItem: locationItem, area: area)
+                }
+                if isExpertMode {
+                    fenceCircle(locationItem: locationItem, area: area)
 
                     Annotation(
                         coordinate: locationItem.coordinate,
@@ -59,25 +57,11 @@ struct NetworkCoverageView: View {
                     )
                     .tag(area)
                 } else {
-                    Annotation(
-                        coordinate: locationItem.coordinate,
-                        content: {
-                            Circle()
-                                .fill(locationItem.color.opacity(locationItem.isSelected ? 1 : 0.6))
-                                .stroke(
-                                    locationItem.isSelected ? Color.black.opacity(0.6) :
-                                    locationItem.color,
-                                    lineWidth: locationItem.isSelected ? 2 : 1
-                                )
-                                .frame(width: 20, height: 20)
-                        },
-                        label: { EmptyView() }
-                    )
-                    .tag(area)
+                    fenceAnnotation(locationItem: locationItem, area: area)
                 }
             }
 
-            if isDebugMode {
+            if isExpertMode {
                 ForEach(viewModel.locations) { location in
                     MapCircle(center: location.coordinate, radius: location.horizontalAccuracy)
                         .foregroundStyle(.blue.opacity(0.2))
@@ -111,15 +95,43 @@ struct NetworkCoverageView: View {
                         Spacer()
                     }
 
-//                    Button(
-//                        action: { showsSetings.toggle() },
-//                        label: { Image(systemName: "gearshape").padding() }
-//                    )
-//                    .mapOverlay()
+                    Button(
+                        action: { showsSetings.toggle() },
+                        label: { Image(systemName: "gearshape").padding() }
+                    )
+                    .mapOverlay()
                 }
                 .padding()
             }
         }
+    }
+
+    func fenceCircle(locationItem: LocationItem, area: LocationArea) -> some MapContent {
+        MapCircle(center: area.startingLocation.coordinate, radius: viewModel.fenceRadius)
+            .foregroundStyle(locationItem.color.opacity(locationItem.isSelected ? 0.4 : 0.1))
+            .stroke(
+                locationItem.color.opacity(locationItem.isSelected ? 1 : 0.8),
+                lineWidth: locationItem.isSelected ? 2 : 1
+            )
+            .mapOverlayLevel(level: .aboveLabels)
+    }
+
+    func fenceAnnotation(locationItem: LocationItem, area: LocationArea) -> some MapContent {
+        Annotation(
+            coordinate: locationItem.coordinate,
+            content: {
+                Circle()
+                    .fill(locationItem.color.opacity(locationItem.isSelected ? 1 : 0.6))
+                    .stroke(
+                        locationItem.isSelected ? Color.black.opacity(0.6) :
+                        locationItem.color,
+                        lineWidth: locationItem.isSelected ? 2 : 1
+                    )
+                    .frame(width: 20, height: 20)
+            },
+            label: { EmptyView() }
+        )
+        .tag(area)
     }
 
     func horizontalSeparator() -> some View {
@@ -137,7 +149,7 @@ struct NetworkCoverageView: View {
     var settingsView: some View {
         VStack(spacing: 12) {
             HStack {
-                Toggle("Debug mode", isOn: $isDebugMode)
+                Toggle("Experts details", isOn: $isExpertMode)
             }
 
             horizontalSeparator()
@@ -176,9 +188,9 @@ struct NetworkCoverageView: View {
         HStack {
             Spacer()
             VStack(alignment: .leading) {
-                Text("Loc. accuracy")
+                Text("Technology")
                     .font(.caption)
-                Text(viewModel.locationAccuracy)
+                Text(presenter.displayValue(forRadioTechnology: viewModel.latestTechnology))
             }
 
             Spacer()
@@ -192,9 +204,9 @@ struct NetworkCoverageView: View {
             Spacer()
 
             VStack(alignment: .leading) {
-                Text("Technology")
+                Text("Loc. accuracy")
                     .font(.caption)
-                Text(presenter.displayValue(forRadioTechnology: viewModel.latestTechnology))
+                Text(viewModel.locationAccuracy)
             }
 
             Spacer()

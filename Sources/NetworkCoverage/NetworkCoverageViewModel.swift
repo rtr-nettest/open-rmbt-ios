@@ -58,6 +58,7 @@ protocol SendCoverageResultsService {
     @MainActor
     private(set) var locationAreas: [LocationArea]
     var selectedArea: LocationArea?
+    var currentArea: LocationArea? { locationAreas.last }
 
     private func start() async {
         guard !isStarted else { return }
@@ -79,7 +80,7 @@ protocol SendCoverageResultsService {
                     latestPing = pingUpdate.displayValue
 
                     if
-                        var currentArea = locationAreas.last,
+                        var currentArea = currentArea,
                         let lastLocation = locations.last,
                         isLocationPreciseEnough(lastLocation)
                     {
@@ -89,7 +90,7 @@ protocol SendCoverageResultsService {
 
                 case .location(let locationUpdate):
                     locations.append(locationUpdate)
-                    locationAccuracy = String(format: "%.2f", locationUpdate.horizontalAccuracy)
+                    locationAccuracy = String(format: "%.2fm", locationUpdate.horizontalAccuracy)
                     let currentRadioTechnology = currentRadioTechnology()
                     latestTechnology = currentRadioTechnology ?? "N/A"
 
@@ -97,7 +98,7 @@ protocol SendCoverageResultsService {
                         continue
                     }
 
-                    let currentArea = locationAreas.last
+                    let currentArea = currentArea
                     if var currentArea {
                         if currentArea.startingLocation.distance(from: locationUpdate) >= fenceRadius {
                             let newArea = LocationArea(startingLocation: locationUpdate, technology: currentRadioTechnology)
