@@ -8,11 +8,11 @@
 
 import Foundation
 
-struct RESTPingMeasurementService {
+struct RESTPingMeasurementService: PingMeasurementService {
     let clock: any Clock<Duration>
     let urlSession: URLSession
 
-    func start() -> some PingsAsyncSequence {
+    func pings() -> PingsSequence {
         PingsSequence(
             urlSession: urlSession,
             request: URLRequest(url: pingURL, cachePolicy: .reloadIgnoringLocalAndRemoteCacheData),

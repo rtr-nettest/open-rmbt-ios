@@ -15,7 +15,15 @@ struct NetworkCoverageView: View {
     let presenter = NetworkCoverageViewPresenter(locale: .autoupdatingCurrent)
 
     init(areas: [LocationArea] = []) {
-        viewModel = NetworkCoverageViewModel(areas: areas)
+        viewModel = NetworkCoverageViewModel(
+            areas: areas,
+            pingMeasurementService: RESTPingMeasurementService(
+                clock: ContinuousClock(),
+                urlSession: URLSession(configuration: .ephemeral)
+            ),
+            locationUpdatesService: RealLocationUpdatesService(),
+            sendResultsService: RMBTControlServer.shared
+        )
     }
 
     @State private var position: MapCameraPosition = .userLocation(

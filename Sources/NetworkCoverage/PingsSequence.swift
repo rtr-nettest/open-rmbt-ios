@@ -10,9 +10,8 @@ import Foundation
 
 // https://itnext.io/mocking-asyncsequence-in-unit-tests-a4cb6a0d5e59
 
-@rethrows protocol PingsAsyncIteratorProtocol: AsyncIteratorProtocol where Element == PingResult { }
+//@rethrows protocol PingsAsyncIteratorProtocol: AsyncIteratorProtocol where Element == PingResult { }
 
-@rethrows protocol PingsAsyncSequence: AsyncSequence where AsyncIterator: PingsAsyncIteratorProtocol { }
 
 enum PingResult: Hashable {
     case interval(Duration)
@@ -25,7 +24,7 @@ struct PingsSequence: PingsAsyncSequence {
     let clock: any Clock<Duration>
     let frequency: Duration
 
-    struct AsyncIterator: PingsAsyncIteratorProtocol {
+    struct AsyncIterator: AsyncIteratorProtocol {
         let urlSession: URLSession
         let request: URLRequest
         let clock: any Clock<Duration>

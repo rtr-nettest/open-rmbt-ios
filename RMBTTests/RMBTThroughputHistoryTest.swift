@@ -22,8 +22,8 @@ class RMBTThroughputHistoryTest: XCTestCase {
         
         // Assert correct total throughput
         XCTAssertEqual(h.totalThroughput.endNanos, 1000)
-        XCTAssertTrue(h.totalThroughput.kilobitsPerSecond() == 10)
-        
+        XCTAssertEqual(h.totalThroughput.kilobitsPerSecond(), 10000000)
+
         // Assert correct period division
         XCTAssertEqual(h.periods.count, 4)
         

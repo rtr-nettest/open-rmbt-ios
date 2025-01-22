@@ -13,28 +13,42 @@ import CoreTelephony
 
 var backgroundActivity: CLBackgroundActivitySession?
 
+@rethrows private protocol UpdateAsyncIteratorProtocol: AsyncIteratorProtocol where Element == NetworkCoverageViewModel.Update { }
+@rethrows private protocol UpdateAsyncSequence: AsyncSequence where Element == NetworkCoverageViewModel.Update { }
+
+extension AsyncMerge2Sequence: AsynchronousSequence where Element == NetworkCoverageViewModel.Update {}
+
+@rethrows protocol PingsAsyncSequence: AsyncSequence where Element == PingResult { }
+protocol PingMeasurementService<Sequence> {
+    associatedtype Sequence: PingsAsyncSequence
+
+    func pings() -> Sequence
+}
+
+@rethrows protocol LocationsAsyncSequence: AsyncSequence where Element == CLLocation { }
+protocol LocationUpdatesService<Sequence> {
+    associatedtype Sequence: LocationsAsyncSequence
+
+    func locations() -> Sequence
+}
+
+extension AsyncCompactMapSequence: LocationsAsyncSequence where Element == CLLocation {}
+
+struct RealLocationUpdatesService: LocationUpdatesService {
+    func locations() -> some LocationsAsyncSequence {
+        CLLocationUpdate.liveUpdates(.fitness).compactMap(\.location)
+    }
+}
+
 protocol SendCoverageResultsService {
     func send(areas: [LocationArea]) async throws
 }
 
 @Observable @MainActor class NetworkCoverageViewModel {
-    private enum Update {
+    enum Update {
         case ping(PingResult)
         case location(CLLocation)
-
-        init?(locationUpdate: CLLocationUpdate.Updates.Element) {
-            if let location = locationUpdate.location {
-                self = .location(location)
-            } else {
-                return nil
-            }
-        }
     }
-
-    private let pingMeasurementService = RESTPingMeasurementService(
-        clock: ContinuousClock(),
-        urlSession: URLSession(configuration: .ephemeral)
-    )
 
     private var initialLocation: CLLocation?
 
@@ -49,10 +63,21 @@ protocol SendCoverageResultsService {
     private(set) var latestTechnology = "N/A"
 
     private let sendResultsService: any SendCoverageResultsService
+    private let updates: any AsynchronousSequence<Update>
 
-    init(areas: [LocationArea] = [], sendResultsService: any SendCoverageResultsService = RMBTControlServer.shared) {
+    init(
+        areas: [LocationArea] = [],
+        pingMeasurementService: some PingMeasurementService,
+        locationUpdatesService: some LocationUpdatesService,
+        sendResultsService: some SendCoverageResultsService
+    ) {
         self.locationAreas = areas
         self.sendResultsService = sendResultsService
+
+        updates = merge(
+            pingMeasurementService.pings().map(Update.ping),
+            locationUpdatesService.locations().map(Update.location)
+        )
     }
 
     @MainActor
@@ -60,19 +85,9 @@ protocol SendCoverageResultsService {
     var selectedArea: LocationArea?
     var currentArea: LocationArea? { locationAreas.last }
 
-    private func start() async {
-        guard !isStarted else { return }
-        isStarted = true
-        locationAreas.removeAll()
-        locations.removeAll()
-
-        backgroundActivity = CLBackgroundActivitySession()
-
-        let pingsSequence = pingMeasurementService.start().map(Update.ping)
-        let locationsSequece = CLLocationUpdate.liveUpdates(.fitness).compactMap(Update.init(locationUpdate:))
-
+    func iterate(_ sequence: some AsynchronousSequence<NetworkCoverageViewModel.Update>) async {
         do {
-            for try await update in merge(pingsSequence, locationsSequece) {
+            for try await update in sequence {
                 guard isStarted else { break }
 
                 switch update {
@@ -117,6 +132,17 @@ protocol SendCoverageResultsService {
         } catch {
             errorMessage = "There were some errors"
         }
+    }
+
+    private func start() async {
+        guard !isStarted else { return }
+        isStarted = true
+        locationAreas.removeAll()
+        locations.removeAll()
+
+        backgroundActivity = CLBackgroundActivitySession()
+
+        await iterate(updates)
     }
 
     private func currentRadioTechnology() -> String? {
