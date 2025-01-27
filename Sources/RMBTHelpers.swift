@@ -166,11 +166,11 @@ class RMBTHelpers: NSObject {
     }
     
     static func RMBTUpClassification(with speed: Double) -> Int {
-        if speed >= 10000 {
+        if speed >= 50000 {
             return 4
-        } else if speed >= 1000 {
+        } else if speed >= 5000 {
             return 3
-        } else if speed >= 500 {
+        } else if speed >= 2500 {
             return 2
         } else {
             return 1
@@ -178,11 +178,11 @@ class RMBTHelpers: NSObject {
     }
     
     static func RMBTDownClassification(with speed: Double) -> Int {
-        if speed >= 30000 {
+        if speed >= 100000 {
             return 4
-        } else if speed >= 2000 {
-            return 3
         } else if speed >= 1000 {
+            return 3
+        } else if speed >= 5000 {
             return 2
         } else {
             return 1
