@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="19455" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
-        <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19454"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -37,7 +36,7 @@
                                         <color key="textColor" red="0.25882352939999997" green="0.25882352939999997" blue="0.25882352939999997" alpha="0.60332514969999995" colorSpace="custom" customColorSpace="sRGB"/>
                                         <nil key="highlightedColor"/>
                                     </label>
-                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="download_icon_colored" translatesAutoresizingMaskIntoConstraints="NO" id="mTr-jT-ikU">
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="down-0" translatesAutoresizingMaskIntoConstraints="NO" id="mTr-jT-ikU">
                                         <rect key="frame" x="0.0" y="45" width="16" height="16"/>
                                         <constraints>
                                             <constraint firstAttribute="width" constant="16" id="AJs-qi-LuM"/>
@@ -81,7 +80,7 @@
                                         <color key="textColor" red="0.25882352939999997" green="0.25882352939999997" blue="0.25882352939999997" alpha="0.60332514969999995" colorSpace="custom" customColorSpace="sRGB"/>
                                         <nil key="highlightedColor"/>
                                     </label>
-                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="upload_icon_colored" translatesAutoresizingMaskIntoConstraints="NO" id="Fjy-Vt-qby">
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="up-0" translatesAutoresizingMaskIntoConstraints="NO" id="Fjy-Vt-qby">
                                         <rect key="frame" x="0.0" y="45" width="16" height="16"/>
                                         <constraints>
                                             <constraint firstAttribute="width" constant="16" id="Cjs-XZ-7Lk"/>
@@ -125,7 +124,7 @@
                                         <color key="textColor" red="0.25882352939999997" green="0.25882352939999997" blue="0.25882352939999997" alpha="0.60332514969999995" colorSpace="custom" customColorSpace="sRGB"/>
                                         <nil key="highlightedColor"/>
                                     </label>
-                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ping_icon" translatesAutoresizingMaskIntoConstraints="NO" id="yqK-ag-JdU">
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ping-0" translatesAutoresizingMaskIntoConstraints="NO" id="yqK-ag-JdU">
                                         <rect key="frame" x="0.0" y="45" width="16" height="16"/>
                                         <constraints>
                                             <constraint firstAttribute="width" constant="16" id="CML-PU-LPu"/>
@@ -238,9 +237,9 @@
         </tableViewCell>
     </objects>
     <resources>
-        <image name="download_icon_colored" width="16" height="16"/>
-        <image name="ping_icon" width="16" height="16"/>
+        <image name="down-0" width="33" height="33"/>
+        <image name="ping-0" width="33" height="33"/>
         <image name="signal" width="12" height="12"/>
-        <image name="upload_icon_colored" width="16" height="16"/>
+        <image name="up-0" width="33" height="33"/>
     </resources>
 </document>

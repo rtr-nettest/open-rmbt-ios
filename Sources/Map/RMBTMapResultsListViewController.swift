@@ -75,10 +75,10 @@ extension RMBTMapResultsListViewController: UICollectionViewDelegate, UICollecti
             cell.pingValueLabel.text = "--"
         }
         
-        cell.pingImageView.tintColor = .byResultClass(measurement.result?.pingClassification)
-        cell.downloadImageView.tintColor = .byResultClass(measurement.result?.downloadClassification)
-        cell.uploadImageView.tintColor = .byResultClass(measurement.result?.uploadClassification)
-        
+        cell.pingImageView.image = .pingIconByResultClass(measurement.result?.pingClassification)
+        cell.downloadImageView.image = .downloadIconByResultClass(measurement.result?.downloadClassification)
+        cell.uploadImageView.image = .uploadIconByResultClass(measurement.result?.uploadClassification)
+
         cell.networkDetailList = measurement.networkDetailList ?? []
         
         cell.onCloseHandler = self.onCloseHandler

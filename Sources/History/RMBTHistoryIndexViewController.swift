@@ -404,11 +404,11 @@ extension RMBTHistoryIndexViewController: UITableViewDataSource, UITableViewDele
             cell.typeImageView.image = networTypeIcon
             cell.dateLabel.text = testResult.timeStringIn24hFormat
             cell.downloadSpeedLabel.text = testResult.downloadSpeedMbpsString
-            cell.downloadSpeedIcon.tintColor = .byResultClass(testResult.downloadSpeedClass)
+            cell.downloadSpeedIcon.image = .downloadIconByResultClass(testResult.downloadSpeedClass)
             cell.uploadSpeedLabel.text = testResult.uploadSpeedMbpsString
-            cell.uploadSpeedIcon.tintColor = .byResultClass(testResult.uploadSpeedClass)
+            cell.uploadSpeedIcon.image = .uploadIconByResultClass(testResult.downloadSpeedClass)
             cell.pingLabel.text = testResult.shortestPingMillisString
-            cell.pingIcon.tintColor = .byResultClass(testResult.pingClass)
+            cell.pingIcon.image = .pingIconByResultClass(testResult.pingClass)
             if testResults[indexPath.section].loopResults.count > 1 {
                 cell.leftPaddingConstraint?.constant = 32
             } else {

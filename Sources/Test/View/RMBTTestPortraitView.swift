@@ -174,10 +174,10 @@ class RMBTTestPortraitView: UIView, XibLoadable {
             self.speedGaugeView.value = speedGauge
         }
     }
-    
-    var pingColor: UIColor = UIColor.white {
+
+    var pingIcon: UIImage? {
         didSet {
-            self.pingIconImageView.tintColor = pingColor
+            self.pingIconImageView.image = pingIcon
         }
     }
     
@@ -187,9 +187,9 @@ class RMBTTestPortraitView: UIView, XibLoadable {
         }
     }
     
-    var downColor: UIColor = UIColor.white {
+    var downIcon: UIImage? {
         didSet {
-            self.downIconImageView.tintColor = downColor
+            self.downIconImageView.image = downIcon
         }
     }
     
@@ -198,10 +198,10 @@ class RMBTTestPortraitView: UIView, XibLoadable {
             self.downResultLabel.text = down
         }
     }
-    
-    var upColor: UIColor = UIColor.white {
+
+    var upIcon: UIImage? {
         didSet {
-            self.upIconImageView.tintColor = upColor
+            self.upIconImageView.image = upIcon
         }
     }
     
@@ -328,9 +328,9 @@ class RMBTTestPortraitView: UIView, XibLoadable {
         self.ping = "-"
         self.down = "-"
         self.up = "-"
-        self.upColor = UIColor.white
-        self.downColor = UIColor.white
-        self.pingColor = UIColor.white
+        self.upIcon = .uploadIconByResultClass(nil)
+        self.downIcon = .downloadIconByResultClass(nil)
+        self.pingIcon = .pingIconByResultClass(nil)
 
         self.arrowImageView.image = nil
 

@@ -294,11 +294,11 @@ extension RMBTHistoryResultViewController: UITableViewDelegate, UITableViewDataS
         case .basicInfo:
             let networkCell = tableView.dequeueReusableCell(withIdentifier: RMBTHistoryBasicInfoCell.ID, for: indexPath) as! RMBTHistoryBasicInfoCell
             networkCell.pingValue = historyResult.shortestPingMillisString
-            networkCell.pingIcon.tintColor = .byResultClass(historyResult.pingClass)
+            networkCell.pingIcon.image = .pingIconByResultClass(historyResult.pingClass)
             networkCell.downloadValue = historyResult.downloadSpeedMbpsString
-            networkCell.downIcon.tintColor = .byResultClass(historyResult.downloadSpeedClass)
+            networkCell.downIcon.image = .downloadIconByResultClass(historyResult.downloadSpeedClass)
             networkCell.uploadValue = historyResult.uploadSpeedMbpsString
-            networkCell.upIcon.tintColor = .byResultClass(historyResult.uploadSpeedClass)
+            networkCell.upIcon.image = .uploadIconByResultClass(historyResult.uploadSpeedClass)
             networkCell.signalValue = historyResult.signal?.stringValue
             networkCell.signalIcon.tintColor = .byResultClass(historyResult.signalClass)
             networkCell.selectionStyle = .none

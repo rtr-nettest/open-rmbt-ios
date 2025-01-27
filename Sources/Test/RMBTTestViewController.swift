@@ -89,10 +89,10 @@ final class RMBTTestViewController: RMBTBaseTestViewController {
             self.currentView.speed = speed
         }
     }
-    
-    var pingColor: UIColor = UIColor.white {
+
+    var pingIcon: UIImage? = .pingIconByResultClass(nil) {
         didSet {
-            self.currentView.pingColor = pingColor
+            self.currentView.pingIcon = pingIcon
         }
     }
     
@@ -102,9 +102,9 @@ final class RMBTTestViewController: RMBTBaseTestViewController {
         }
     }
     
-    var downColor: UIColor = UIColor.white {
+    var downIcon: UIImage? = .downloadIconByResultClass(nil) {
         didSet {
-            self.currentView.downColor = downColor
+            self.currentView.downIcon = downIcon
         }
     }
     
@@ -113,10 +113,10 @@ final class RMBTTestViewController: RMBTBaseTestViewController {
             self.currentView.down = down
         }
     }
-    
-    var upColor: UIColor = UIColor.white {
+
+    var upIcon: UIImage? = .uploadIconByResultClass(nil) {
         didSet {
-            self.currentView.upColor = upColor
+            self.currentView.upIcon = upIcon
         }
     }
     
@@ -343,9 +343,9 @@ final class RMBTTestViewController: RMBTBaseTestViewController {
         self.currentView.ping = self.ping
         self.currentView.down = self.down
         self.currentView.up = self.up
-        self.currentView.pingColor = self.pingColor
-        self.currentView.downColor = self.downColor
-        self.currentView.upColor = self.upColor
+        self.currentView.pingIcon = self.pingIcon
+        self.currentView.downIcon = self.downIcon
+        self.currentView.upIcon = self.upIcon
         self.currentView.isInfoCollapsed = self.isInfoCollapsed
         self.currentView.isQOSState = self.isQOSState
         self.currentView.currentTest = self.loopModeInfo?.current ?? 0
@@ -480,10 +480,10 @@ final class RMBTTestViewController: RMBTBaseTestViewController {
     func updateSpeedLabel(for phase: RMBTTestRunnerPhase, withSpeed kbps: UInt32, isFinal: Bool) {
         self.isShowSpeedSuffix = false
         if phase == .down {
-            self.downColor = .byResultClass(RMBTHelpers.RMBTDownClassification(with: Double(kbps)))
+            self.downIcon = .downloadIconByResultClass(RMBTHelpers.RMBTDownClassification(with: Double(kbps)))
             self.down = RMBTSpeedMbpsString(Double(kbps), withMbps: true)
         } else {
-            self.upColor = .byResultClass(RMBTHelpers.RMBTUpClassification(with: Double(kbps)))
+            self.upIcon = .uploadIconByResultClass(RMBTHelpers.RMBTUpClassification(with: Double(kbps)))
             self.up = RMBTSpeedMbpsString(Double(kbps), withMbps: true)
         }
         self.speed = kbps
@@ -712,7 +712,7 @@ extension RMBTTestViewController: RMBTBaseTestViewControllerSubclass {
     func onTestFinishedPhase(_ phase: RMBTTestRunnerPhase) { }
     
     func onTestMeasuredLatency(_ nanos: UInt64) {
-        self.pingColor = .byResultClass(RMBTHelpers.RMBTPingClassification(with: Int64(nanos)))
+        self.pingIcon = .pingIconByResultClass(RMBTHelpers.RMBTPingClassification(with: Int64(nanos)))
         self.currentView.ping = RMBTHelpers.RMBTMillisecondsString(with: Int64(nanos), withMS: true)
     }
     
