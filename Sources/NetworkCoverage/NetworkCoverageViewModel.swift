@@ -67,16 +67,27 @@ protocol SendCoverageResultsService {
 
     init(
         areas: [LocationArea] = [],
-        pingMeasurementService: some PingMeasurementService,
-        locationUpdatesService: some LocationUpdatesService,
+        updates: some AsynchronousSequence<Update>,
         sendResultsService: some SendCoverageResultsService
     ) {
         self.locationAreas = areas
         self.sendResultsService = sendResultsService
+        self.updates = updates
+    }
 
-        updates = merge(
-            pingMeasurementService.pings().map(Update.ping),
-            locationUpdatesService.locations().map(Update.location)
+    convenience init(
+        areas: [LocationArea] = [],
+        pingMeasurementService: some PingMeasurementService,
+        locationUpdatesService: some LocationUpdatesService,
+        sendResultsService: some SendCoverageResultsService
+    ) {
+        self.init(
+            areas: areas,
+            updates: merge(
+                pingMeasurementService.pings().map(Update.ping),
+                locationUpdatesService.locations().map(Update.location)
+            ),
+            sendResultsService: sendResultsService
         )
     }
 

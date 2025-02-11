@@ -27,10 +27,17 @@ struct SelectedLocationItemDetail: Equatable, Identifiable {
     let color: Color
 }
 
-struct NetworkCoverageViewPresenter {
+@MainActor struct NetworkCoverageViewPresenter {
     let locale: Locale
 
     let selectedItemDateFormatter: DateFormatter
+
+    struct Fence: Identifiable, Equatable {
+        let locationItem: LocationItem
+        let locationArea: LocationArea
+
+        var id: LocationArea { locationArea }
+    }
 
     init(locale: Locale) {
         self.locale = locale
@@ -47,13 +54,19 @@ struct NetworkCoverageViewPresenter {
         technology.radioTechnologyDisplayValue ?? technology
     }
 
+    func fences(from viewModel: NetworkCoverageViewModel) -> [Fence] {
+        viewModel.locationAreas.map {
+            .init(locationItem: locationItem(from: $0, selectedArea: viewModel.selectedArea), locationArea: $0)
+        }
+    }
+
     func locationItem(from area: LocationArea, selectedArea: LocationArea?) -> LocationItem {
         .init(
             id: area.id,
             date: area.time,
             coordinate: area.startingLocation.coordinate,
             technology: area.significantTechnology?.radioTechnologyDisplayValue ?? "N/A",
-            averagePing: area.averagePing.map { "\($0) ms" } ?? "err",
+            averagePing: area.averagePing.map { "\($0) ms" } ?? "",
             isSelected: selectedArea?.id == area.id,
             color: color(for: area.significantTechnology)
         )
@@ -64,7 +77,7 @@ struct NetworkCoverageViewPresenter {
             id: area.id,
             date: selectedItemDateFormatter.string(from: area.time),
             technology: area.significantTechnology?.radioTechnologyDisplayValue ?? "N/A",
-            averagePing: area.averagePing.map { "\($0) ms" } ?? "err",
+            averagePing: area.averagePing.map { "\($0) ms" } ?? "",
             color: color(for: area.significantTechnology)
         )
     }

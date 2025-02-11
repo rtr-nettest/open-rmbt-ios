@@ -12,7 +12,7 @@ import MapKit
 
 struct NetworkCoverageView: View {
     @Bindable var viewModel: NetworkCoverageViewModel
-    let presenter = NetworkCoverageViewPresenter(locale: .autoupdatingCurrent)
+    let presenter: NetworkCoverageViewPresenter
 
     init(areas: [LocationArea] = []) {
         viewModel = NetworkCoverageViewModel(
@@ -24,6 +24,7 @@ struct NetworkCoverageView: View {
             locationUpdatesService: RealLocationUpdatesService(),
             sendResultsService: RMBTControlServer.shared
         )
+        presenter = NetworkCoverageViewPresenter(locale: .autoupdatingCurrent)
     }
 
     @State private var position: MapCameraPosition = .userLocation(
@@ -41,9 +42,9 @@ struct NetworkCoverageView: View {
         Map(position: $position, selection: $viewModel.selectedArea) {
             UserAnnotation()
 
-            ForEach(viewModel.locationAreas) { area in
-                let locationItem = presenter.locationItem(from: area, selectedArea: viewModel.selectedArea)
-
+            ForEach(presenter.fences(from: viewModel)) { fence in
+                let area = fence.locationArea
+                let locationItem = fence.locationItem
 
                 if !isExpertMode && area == viewModel.currentArea {
                     fenceCircle(locationItem: locationItem, area: area)

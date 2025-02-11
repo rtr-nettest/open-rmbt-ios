@@ -35,7 +35,7 @@
 		498EF31A2D0B0CD7003A79EB /* NetworkCoverageViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 498EF3192D0B0CD7003A79EB /* NetworkCoverageViewModel.swift */; };
 		498EF31C2D0B0CFF003A79EB /* RESTPingMeasurementService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 498EF31B2D0B0CFF003A79EB /* RESTPingMeasurementService.swift */; };
 		498EF31E2D0B0D70003A79EB /* LocationArea.swift in Sources */ = {isa = PBXBuildFile; fileRef = 498EF31D2D0B0D70003A79EB /* LocationArea.swift */; };
-		498F7F942D352C2000EC975D /* Test.swift in Sources */ = {isa = PBXBuildFile; fileRef = 498F7F932D352C2000EC975D /* Test.swift */; };
+		498F7F942D352C2000EC975D /* NetworkCoverageViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 498F7F932D352C2000EC975D /* NetworkCoverageViewModelTests.swift */; };
 		49A31C6C2D3A97250039052B /* AsynchronousSequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A31C6B2D3A97250039052B /* AsynchronousSequence.swift */; };
 		49B28C762BA09D6A00697BB4 /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49B28C752BA09D6A00697BB4 /* Keychain.swift */; };
 		49B28C792BA1914E00697BB4 /* RMBTTestExportCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 49B28C782BA1914E00697BB4 /* RMBTTestExportCell.xib */; };
@@ -342,7 +342,7 @@
 		498EF3192D0B0CD7003A79EB /* NetworkCoverageViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkCoverageViewModel.swift; sourceTree = "<group>"; };
 		498EF31B2D0B0CFF003A79EB /* RESTPingMeasurementService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RESTPingMeasurementService.swift; sourceTree = "<group>"; };
 		498EF31D2D0B0D70003A79EB /* LocationArea.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationArea.swift; sourceTree = "<group>"; };
-		498F7F932D352C2000EC975D /* Test.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Test.swift; sourceTree = "<group>"; };
+		498F7F932D352C2000EC975D /* NetworkCoverageViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkCoverageViewModelTests.swift; sourceTree = "<group>"; };
 		49A31C6B2D3A97250039052B /* AsynchronousSequence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsynchronousSequence.swift; sourceTree = "<group>"; };
 		49B28C752BA09D6A00697BB4 /* Keychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Keychain.swift; sourceTree = "<group>"; };
 		49B28C772BA1914E00697BB4 /* RMBTTestExportCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTTestExportCell.swift; sourceTree = "<group>"; };
@@ -685,7 +685,7 @@
 		498F7F922D352C0400EC975D /* NetworkCoverage */ = {
 			isa = PBXGroup;
 			children = (
-				498F7F932D352C2000EC975D /* Test.swift */,
+				498F7F932D352C2000EC975D /* NetworkCoverageViewModelTests.swift */,
 			);
 			path = NetworkCoverage;
 			sourceTree = "<group>";
@@ -1651,7 +1651,7 @@
 			files = (
 				E92E07BA277B4DF6008143FE /* RMBTHelpersTest.swift in Sources */,
 				E92E07B6277B4A80008143FE /* RMBTSpeedTest.swift in Sources */,
-				498F7F942D352C2000EC975D /* Test.swift in Sources */,
+				498F7F942D352C2000EC975D /* NetworkCoverageViewModelTests.swift in Sources */,
 				E92E07B8277B4B4F008143FE /* RMBTProgressTest.swift in Sources */,
 				E92E07BC277B4E92008143FE /* RMBTThroughputHistoryTest.swift in Sources */,
 			);
