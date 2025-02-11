@@ -27,7 +27,7 @@
 			<string>at.rtr.rmbt</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>rmbt</string>
+				<string>rmbtat</string>
 			</array>
 		</dict>
 	</array>
@@ -69,7 +69,7 @@
 	<true/>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>This permission is required for the DNS QoS test.</string>
-    <key>UIBackgroundModes</key>
+	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>
 	</array>
