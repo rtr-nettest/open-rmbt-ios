@@ -17,9 +17,8 @@ struct NetworkCoverageView: View {
     init(areas: [LocationArea] = []) {
         viewModel = NetworkCoverageViewModel(
             areas: areas,
-            pingMeasurementService: RESTPingMeasurementService(
-                clock: ContinuousClock(),
-                urlSession: URLSession(configuration: .ephemeral)
+            pingMeasurementService: PingMeasurementService(
+                clock: ContinuousClock()
             ),
             locationUpdatesService: RealLocationUpdatesService(),
             sendResultsService: RMBTControlServer.shared

@@ -93,7 +93,7 @@ extension CLLocation: @retroactive Identifiable {
 
 extension PingResult {
     var displayValue: String {
-        switch self {
+        switch self.result {
         case .interval(let duration):
             "\(duration.milliseconds) ms"
         case .error:

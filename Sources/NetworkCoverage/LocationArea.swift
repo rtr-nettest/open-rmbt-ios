@@ -17,11 +17,11 @@ struct LocationArea: Identifiable, Hashable {
     let id: UUID = UUID()
     let time: Date
 
-    init(startingLocation: CLLocation, technology: String?, avgPing: Duration? = nil, dateNow: () -> Date = Date.init) {
+    init(startingLocation: CLLocation, technology: String?, pings: [PingResult] = [], dateNow: () -> Date = Date.init) {
         time = dateNow()
         self.startingLocation = startingLocation
         self.locations = [startingLocation]
-        self.pings = avgPing.map { [.interval($0)] } ?? []
+        self.pings = pings
         technologies = technology.map { [$0] } ?? []
     }
 
@@ -39,6 +39,16 @@ struct LocationArea: Identifiable, Hashable {
 }
 
 extension LocationArea {
+    init(startingLocation: CLLocation, technology: String?, avgPing: Duration?, dateNow: () -> Date = Date.init) {
+        time = dateNow()
+        self.startingLocation = startingLocation
+        self.locations = [startingLocation]
+        self.pings = avgPing.map { [.init(result: .interval($0), timestamp: dateNow())] } ?? []
+        technologies = technology.map { [$0] } ?? []
+    }
+}
+
+extension LocationArea {
     var averagePing: Int? {
         let pingsDurations = pings.compactMap(\.interval)
         if pingsDurations.isEmpty { return nil }
@@ -48,7 +58,7 @@ extension LocationArea {
 
 extension PingResult {
     var interval: Duration? {
-        switch self {
+        switch self.result {
         case .interval(let duration): duration
         case .error: nil
         }

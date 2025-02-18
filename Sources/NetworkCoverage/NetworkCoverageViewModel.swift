@@ -19,11 +19,12 @@ var backgroundActivity: CLBackgroundActivitySession?
 extension AsyncMerge2Sequence: AsynchronousSequence where Element == NetworkCoverageViewModel.Update {}
 
 @rethrows protocol PingsAsyncSequence: AsyncSequence where Element == PingResult { }
-protocol PingMeasurementService<Sequence> {
-    associatedtype Sequence: PingsAsyncSequence
-
-    func pings() -> Sequence
-}
+// TODO: decide if we need a protocol here or not
+//protocol PingMeasurementService<Sequence> {
+//    associatedtype Sequence: PingsAsyncSequence
+//
+//    func pings() -> Sequence
+//}
 
 @rethrows protocol LocationsAsyncSequence: AsyncSequence where Element == CLLocation { }
 protocol LocationUpdatesService<Sequence> {
@@ -77,7 +78,7 @@ protocol SendCoverageResultsService {
 
     convenience init(
         areas: [LocationArea] = [],
-        pingMeasurementService: some PingMeasurementService,
+        pingMeasurementService: PingMeasurementService,
         locationUpdatesService: some LocationUpdatesService,
         sendResultsService: some SendCoverageResultsService
     ) {
