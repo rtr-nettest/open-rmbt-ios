@@ -15,12 +15,22 @@ struct NetworkCoverageView: View {
     let presenter: NetworkCoverageViewPresenter
 
     init(areas: [LocationArea] = []) {
+        // TODO: move setup code below into some "Composition root" file
+
+        let sessionInitializer = CoverageMeasurementSessionInitializer(
+            now: Date.init,
+            controlServer: RMBTControlServer.shared
+        )
+        let resultSender = ControlServerCoverageResultsService(
+            controlServer: RMBTControlServer.shared,
+            testUUID: sessionInitializer.lastTestUUID
+        )
         viewModel = NetworkCoverageViewModel(
             areas: areas,
             pingMeasurementService: { PingMeasurementService.pings2(
                 clock: ContinuousClock(),
                 pingSender: UDPPingSession(
-                    sessionInitiator: MockSessionInitiator(),
+                    sessionInitiator: sessionInitializer,
                     udpConnection: UDPConnection(),
                     timeoutIntervalMs: 1000,
                     now: RMBTHelpers.RMBTCurrentNanos
@@ -28,7 +38,7 @@ struct NetworkCoverageView: View {
                 frequency: .milliseconds(500)
             ) },
             locationUpdatesService: RealLocationUpdatesService(),
-            sendResultsService: RMBTControlServer.shared
+            sendResultsService: resultSender
         )
         presenter = NetworkCoverageViewPresenter(locale: .autoupdatingCurrent)
     }

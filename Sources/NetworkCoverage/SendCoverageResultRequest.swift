@@ -61,6 +61,7 @@ public class SendCoverageResultRequest: BasicRequest {
     }
 
     var fences: [CoverageFence]
+    var testUUID: String
 
     public required init?(map: Map) {
         fatalError("init(map:) has not been implemented")
@@ -70,10 +71,12 @@ public class SendCoverageResultRequest: BasicRequest {
         super.mapping(map: map)
 
         fences <- map["fences"]
+        testUUID <- map["test_uuid"]
     }
 
-    init(areas: [LocationArea]) {
+    init(areas: [LocationArea], testUUID: String) {
         fences = areas.map(CoverageFence.init)
+        self.testUUID = testUUID
         super.init()
     }
 }
@@ -90,10 +93,26 @@ class CoverageMeasurementSubmitResponse: BasicResponse {
     }
 }
 
-extension RMBTControlServer: SendCoverageResultsService {
+struct ControlServerCoverageResultsService: SendCoverageResultsService {
+    enum Failure: Error {
+        case missingTestUUID
+    }
+
+    let controlServer: RMBTControlServer
+    let testUUID: () -> String?
+
+    init(controlServer: RMBTControlServer, testUUID: @escaping @autoclosure () -> String?) {
+        self.controlServer = controlServer
+        self.testUUID = testUUID
+    }
+
     func send(areas: [LocationArea]) async throws {
+        guard let testUUID = self.testUUID() else {
+            throw Failure.missingTestUUID
+        }
+
         _ = try await withCheckedThrowingContinuation { continuation in
-            submitCoverageResult(.init(areas: areas)) { response in
+            controlServer.submitCoverageResult(.init(areas: areas, testUUID: testUUID)) { response in
                 continuation.resume(returning: response)
             } error: { error in
                 continuation.resume(throwing: error)
