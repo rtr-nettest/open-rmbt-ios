@@ -12,14 +12,16 @@ import Foundation
 /// This type encapsulates commlunication rules against RTR UDP ping server
 ///
 actor UDPPingSession {
+    typealias PingSessionToken = String
+
     protocol SessionInitiating {
         func initiate() async throws -> SessionInitiation
     }
 
     struct SessionInitiation {
         let serverAddress: String
-        let serverPort: UInt16
-        let token: String
+        let serverPort: String
+        let token: PingSessionToken
     }
 
     typealias AbsoluteTimeNanos = UInt64
@@ -37,9 +39,8 @@ actor UDPPingSession {
     }
 
     private let sessionInitiator: any SessionInitiating
-    private let createUDPClient: (SessionInitiation) -> UDPClient
 
-    private var udpClient: UDPClient?
+    private var udpConnection: any UDPConnectable
     private var authToken: String?
     private var sequenceNumber: UInt32
     private let timeoutIntervalMs: Int
@@ -53,60 +54,49 @@ actor UDPPingSession {
 
     init(
         sessionInitiator: any SessionInitiating,
-        createUDPClient: @escaping (SessionInitiation) -> UDPClient,
+        udpConnection: any UDPConnectable,
         timeoutIntervalMs: Int,
         now: @escaping () -> AbsoluteTimeNanos
     ) {
         self.sessionInitiator = sessionInitiator
-        self.createUDPClient = createUDPClient
+        self.udpConnection = udpConnection
         self.sequenceNumber = UInt32.random(in: 0..<UInt32.max)
         self.timeoutIntervalMs = timeoutIntervalMs
         self.now = now
     }
-    
-    func sendPing() async throws {
-        let udpClient: UDPClient
-        let authToken: String
 
-        if let savedUdpClient = self.udpClient, let savedAuthToken = self.authToken {
-            udpClient = savedUdpClient
-            authToken = savedAuthToken
-        } else {
-            let sessionInitiation = try await sessionInitiator.initiate()
-            udpClient = createUDPClient(sessionInitiation)
-            authToken = sessionInitiation.token
-            udpClient.onReceivedData = { [weak self] data in
-                Task { await self?.receivedPingResponse(data) }
-            }
-            self.udpClient = udpClient
-            self.authToken = authToken
-        }
+    func initiatePingSession() async throws -> PingSessionToken {
+        let sessionInitiation = try await sessionInitiator.initiate()
+        try await udpConnection.start(host: sessionInitiation.serverAddress, port: sessionInitiation.serverPort)
+        return sessionInitiation.token
+    }
 
+    func sendPing(in authToken: PingSessionToken) async throws(PingSendingError) {
         cleanupExpiredPings()
 
-        try await withCheckedThrowingContinuation { continuation in
-            sequenceNumber &+= 1
+        sequenceNumber &+= 1
+        var message = Data()
+        message.append(requestProtocol.data(using: .ascii)!)
+        message.append(withUnsafeBytes(of: sequenceNumber.bigEndian) { Data($0) })
+        message.append(Data(base64Encoded: authToken)!)
 
-            var message = Data()
-            message.append(requestProtocol.data(using: .ascii)!)
-            message.append(withUnsafeBytes(of: sequenceNumber.bigEndian) { Data($0) })
-            message.append(Data(base64Encoded: authToken)!)
+        do {
+            try await udpConnection.send(data: message)
+        } catch {
+            throw .networkIssue
+        }
 
-            udpClient.send(message) {
-                switch $0 {
-                case .success:
-                    self.continuations[self.sequenceNumber] = .init(sentAt: self.now(), continuation: continuation)
-
-                    DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(self.timeoutIntervalMs)) {
-                        if let continuation = self.continuations[self.sequenceNumber] {
-                            self.continuations[self.sequenceNumber]?.continuation.resume(throwing: URLError(.timedOut))
-                            self.continuations[self.sequenceNumber] = nil
-                        }
-                    }
-                case .failure(let error):
-                    continuation.resume(throwing: error)
+        do {
+            try await withCheckedThrowingContinuation { continuation in
+                self.continuations[self.sequenceNumber] = .init(sentAt: self.now(), continuation: continuation)
+                Task {
+                    receivedPingResponse(try await udpConnection.receive())
                 }
             }
+        } catch let error as PingSendingError {
+            throw error
+        } catch {
+            throw .networkIssue
         }
     }
 
@@ -126,7 +116,12 @@ actor UDPPingSession {
             return
         }
         continuations[sequenceNumber] = nil
-        sentRequest.continuation.resume()
+
+        if protocolName == Const.responseErrorProtocol {
+            sentRequest.continuation.resume(throwing: PingSendingError.needsReinitialization)
+        } else {
+            sentRequest.continuation.resume()
+        }
     }
 
     func cleanupExpiredPings() {

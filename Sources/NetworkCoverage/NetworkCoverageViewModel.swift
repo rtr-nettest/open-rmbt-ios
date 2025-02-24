@@ -64,11 +64,11 @@ protocol SendCoverageResultsService {
     private(set) var latestTechnology = "N/A"
 
     private let sendResultsService: any SendCoverageResultsService
-    private let updates: any AsynchronousSequence<Update>
+    private let updates: () -> any AsynchronousSequence<Update>
 
     init(
         areas: [LocationArea] = [],
-        updates: some AsynchronousSequence<Update>,
+        updates: @escaping () -> some AsynchronousSequence<Update>,
         sendResultsService: some SendCoverageResultsService
     ) {
         self.locationAreas = areas
@@ -78,16 +78,16 @@ protocol SendCoverageResultsService {
 
     convenience init(
         areas: [LocationArea] = [],
-        pingMeasurementService: PingMeasurementService,
+        pingMeasurementService: @escaping () -> some PingsAsyncSequence,
         locationUpdatesService: some LocationUpdatesService,
         sendResultsService: some SendCoverageResultsService
     ) {
         self.init(
             areas: areas,
-            updates: merge(
-                pingMeasurementService.pings().map(Update.ping),
+            updates: { merge(
+                pingMeasurementService().map(Update.ping),
                 locationUpdatesService.locations().map(Update.location)
-            ),
+            )},
             sendResultsService: sendResultsService
         )
     }
@@ -154,7 +154,7 @@ protocol SendCoverageResultsService {
 
         backgroundActivity = CLBackgroundActivitySession()
 
-        await iterate(updates)
+        await iterate(updates())
     }
 
     private func currentRadioTechnology() -> String? {

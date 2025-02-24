@@ -28,11 +28,11 @@ import CoreLocation
     
     @Test func whenReceivingMultiplePingsForOneLocation_thenCombinesPingTotalValue() async throws {
         let sut = makeSUT(updates: [
-            .location(.init(latitude: 1.0, longitude: 1.0)),
-            .ping(.interval(.milliseconds(10))),
-            .ping(.interval(.milliseconds(20))),
-            .ping(.interval(.milliseconds(26))),
-            .location(.init(latitude: 2.0, longitude: 1.0)),
+            makeLocationUpdate(.init(latitude: 1.0, longitude: 1.0), at: 1),
+            makePingUpdate(interval: .milliseconds(10), at: 2),
+            makePingUpdate(interval: .milliseconds(20), at: 3),
+            makePingUpdate(interval: .milliseconds(26), at: 4),
+            makeLocationUpdate(.init(latitude: 2.0, longitude: 1.0), at: 5),
         ])
         await sut.startTest()
 
@@ -43,11 +43,11 @@ import CoreLocation
 
     @Test func whenReceivingPingsForDifferentLocations_thenAssignesPingsToProperLocations() async throws {
         let sut = makeSUT(updates: [
-            .location(.init(latitude: 1.0, longitude: 1.0)),
-            .ping(.interval(.milliseconds(10))),
-            .ping(.interval(.milliseconds(20))),
-            .location(.init(latitude: 2.0, longitude: 1.0)),
-            .ping(.interval(.milliseconds(26)))
+            makeLocationUpdate(.init(latitude: 1.0, longitude: 1.0), at: 1),
+            makePingUpdate(interval: .milliseconds(10), at: 2),
+            makePingUpdate(interval: .milliseconds(20), at: 3),
+            makeLocationUpdate(.init(latitude: 2.0, longitude: 1.0), at: 4),
+            makePingUpdate(interval: .milliseconds(26), at: 5)
         ])
         await sut.startTest()
 
@@ -70,12 +70,20 @@ extension NetworkCoverageTests {
     ) -> NetworkCoverageScene {
         let viewModel = NetworkCoverageViewModel(
             areas: areas,
-            updates: updates.publisher.values,
+            updates: { updates.publisher.values },
             sendResultsService: SendCoverageResultsServiceSpy()
         )
         let presenter = NetworkCoverageViewPresenter(locale: locale)
 
         return .init(viewModel: viewModel, presenter: presenter)
+    }
+
+    func makeLocationUpdate(_ location: CLLocation, at timestampOffset: TimeInterval) -> NetworkCoverageViewModel.Update {
+        .location(location)
+    }
+
+    func makePingUpdate(interval: Duration, at timestampOffset: TimeInterval) -> NetworkCoverageViewModel.Update {
+        .ping(.init(result: .interval(interval), timestamp: Date(timeIntervalSince1970: timestampOffset)))
     }
 }
 
