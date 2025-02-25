@@ -47,9 +47,6 @@ final class UDPConnection: UDPConnectable {
             throw UDPConnectionError.connectionNotAvailable
         }
         return try await withCheckedThrowingContinuation { continuation in
-#if DEBUG
-            print("UDP: sending: \(String(decoding: data, as: UTF8.self))")
-#endif
             connection.send(content: data, completion: .contentProcessed { error in
                 if let error {
                     continuation.resume(throwing: error)
@@ -69,9 +66,6 @@ final class UDPConnection: UDPConnectable {
                 if let error {
                     continuation.resume(throwing: error)
                 } else {
-#if DEBUG
-                    print("UDP: received: \(String(decoding: data ?? Data(), as: UTF8.self))")
-#endif
                     continuation.resume(returning: data ?? Data())
                 }
             }

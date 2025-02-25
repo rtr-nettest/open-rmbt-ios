@@ -35,7 +35,7 @@ struct NetworkCoverageView: View {
                     timeoutIntervalMs: 1000,
                     now: RMBTHelpers.RMBTCurrentNanos
                 ),
-                frequency: .milliseconds(500)
+                frequency: .milliseconds(100)
             ) },
             locationUpdatesService: RealLocationUpdatesService(),
             sendResultsService: resultSender
