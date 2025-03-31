@@ -19,7 +19,6 @@ enum PingSendingError: Error {
 protocol PingSending<PingSession> {
     associatedtype PingSession
 
-
     func initiatePingSession() async throws -> PingSession
     func sendPing(in session: PingSession) async throws(PingSendingError)
 }
@@ -60,9 +59,9 @@ struct PingMeasurementService {
                     pingSessionState = .inProgress
                     let session = try await pingSender.initiatePingSession()
                     pingSessionState = .finished(session)
-                    return [await pingResult(sender: pingSender, session: session, clock: clock, now: now)].async
+                    return [await pingResult(sender: pingSender, session: session, clock: clock, at: now())].async
                 case .finished(let session):
-                    return [await pingResult(sender: pingSender, session: session, clock: clock, now: now)].async
+                    return [await pingResult(sender: pingSender, session: session, clock: clock, at: now())].async
                 case .inProgress:
                     // session initiation in progress error
                     return [PingResult(result: .error, timestamp: now())].async
@@ -83,33 +82,77 @@ struct PingMeasurementService {
         var pingSessionState: PingSessionInitiationState<T> = .needsInitiation
 
         return AsyncStream { continuation in
-            let task = Task {
-                for await _ in chain(
-                    [clock.now].async,
-                    AsyncTimerSequence(interval: frequency, clock: clock)
-                ) {
-                    do {
-                        try Task.checkCancellation()
+            let start = clock.now
+            let startDate = now()
 
-                        switch pingSessionState {
-                        case .needsInitiation:
-                            pingSessionState = .inProgress
-                            let session = try await pingSender.initiatePingSession()
-                            pingSessionState = .finished(session)
-                            continuation.yield(await pingResult(sender: pingSender, session: session, clock: clock, now: now))
-                        case .finished(let session):
-                            continuation.yield(await pingResult(sender: pingSender, session: session, clock: clock, now: now))
-                        case .inProgress:
-                            // session initiation in progress error
-                            continuation.yield(PingResult(result: .error, timestamp: now()))
+            let task = Task {
+                while true {
+                    if Task.isCancelled { break }
+
+                    let tick = clock.now
+                    let duration = start.duration(to: tick)
+                    let currentDate = startDate.advanced(by: TimeInterval(duration.milliseconds) / 1000)
+                    let nextInstant = tick.advanced(by: frequency)
+
+                    Task {
+                        do {
+                            try Task.checkCancellation()
+
+                            switch pingSessionState {
+                            case .needsInitiation:
+                                pingSessionState = .inProgress
+                                let session = try await pingSender.initiatePingSession()
+                                pingSessionState = .finished(session)
+                            case .finished(let session):
+                                continuation.yield(await pingResult(sender: pingSender, session: session, clock: clock, at: currentDate))
+                            case .inProgress:
+                                break
+                            }
+                        } catch is CancellationError {
+                            continuation.finish()
+                        } catch {
+                            // TODO: differentiate errors and eventually initialize new ping session
+                            continuation.yield(PingResult(result: .error, timestamp: currentDate))
                         }
-                    } catch is CancellationError {
-                        continuation.finish()
-                    } catch {
-                        // TODO: return invalid ping session error
-                        continuation.yield(PingResult(result: .error, timestamp: now()))
                     }
+
+                    if Task.isCancelled { break }
+                    try await clock.sleep(until: nextInstant, tolerance: .milliseconds(1))
                 }
+
+                // Below is a different implementation which works as well - need to examine which one is better (after unit tests are in place)
+
+//                for await tick in chain(
+//                    [clock.now].async,
+//                    AsyncTimerSequence(interval: frequency, tolerance: .milliseconds(1), clock: clock)
+//                ) {
+//                    func currentDate() -> Date {
+//                        let duration = startInstant.duration(to: clock.now)
+//                        return startDate.advanced(by: TimeInterval(duration.milliseconds) / 1000)
+//                    }
+//                    do {
+//                        try Task.checkCancellation()
+//
+//                        switch pingSessionState {
+//                        case .needsInitiation:
+//                            pingSessionState = .inProgress
+//                            let session = try await pingSender.initiatePingSession()
+//                            pingSessionState = .finished(session)
+////                            continuation.yield(await pingResult(sender: pingSender, session: session, clock: clock, at: currentDate()))
+//                        case .finished(let session):
+//                            continuation.yield(await pingResult(sender: pingSender, session: session, clock: clock, at: currentDate()))
+//                        case .inProgress:
+//                            // session initiation in progress error, or do not yield anything until session is fully initialized
+//                            //continuation.yield(PingResult(result: .error, timestamp: now()))
+//                            break
+//                        }
+//                    } catch is CancellationError {
+//                        continuation.finish()
+//                    } catch {
+//                        // TODO: return invalid ping session error
+//                        continuation.yield(PingResult(result: .error, timestamp: currentDate()))
+//                    }
+//                }
             }
             continuation.onTermination = { _ in
                 task.cancel()
@@ -121,7 +164,7 @@ struct PingMeasurementService {
         sender: some PingSending<T>,
         session: T,
         clock: some Clock<Duration>,
-        now: @escaping () -> Date
+        at date: Date
     ) async -> PingResult {
         var capturedError: (any Error)? = nil
         let elapsed = await clock.measure {
@@ -133,7 +176,7 @@ struct PingMeasurementService {
         }
         return PingResult(
             result: capturedError.map { _ in .error } ?? .interval(elapsed),
-            timestamp: now()
+            timestamp: date
         )
     }
 }
@@ -147,7 +190,7 @@ extension AsyncStream: PingsAsyncSequence where Element == PingResult {}
 
 extension Duration {
     var milliseconds: Int64 {
-        Int64(Double(components.attoseconds) / 1e15)
+        components.seconds * 1000 + Int64(Double(components.attoseconds) / 1e15)
     }
 }
 

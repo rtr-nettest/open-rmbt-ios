@@ -34,6 +34,7 @@
 		495F7B9B2CF48FC4003750A3 /* NetworkCoverageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 495F7B9A2CF48FC4003750A3 /* NetworkCoverageView.swift */; };
 		497B42702D0064A40073775A /* AsyncAlgorithms in Frameworks */ = {isa = PBXBuildFile; productRef = 497B426F2D0064A40073775A /* AsyncAlgorithms */; };
 		498220BF2D424F51009A7055 /* UIImage+ResultClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 498220BE2D424F51009A7055 /* UIImage+ResultClass.swift */; };
+		498660252D88425A005E258C /* Clocks in Frameworks */ = {isa = PBXBuildFile; productRef = 498660242D88425A005E258C /* Clocks */; };
 		498EF31A2D0B0CD7003A79EB /* NetworkCoverageViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 498EF3192D0B0CD7003A79EB /* NetworkCoverageViewModel.swift */; };
 		498EF31C2D0B0CFF003A79EB /* PingMeasurementService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 498EF31B2D0B0CFF003A79EB /* PingMeasurementService.swift */; };
 		498EF31E2D0B0D70003A79EB /* LocationArea.swift in Sources */ = {isa = PBXBuildFile; fileRef = 498EF31D2D0B0D70003A79EB /* LocationArea.swift */; };
@@ -640,6 +641,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				498660252D88425A005E258C /* Clocks in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1453,6 +1455,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				498660232D8833E8005E258C /* PBXTargetDependency */,
 				C70828081CB6792F00F482EB /* PBXTargetDependency */,
 			);
 			name = RMBTTest;
@@ -1523,6 +1526,7 @@
 			mainGroup = C7DE146F173E8F610079477A;
 			packageReferences = (
 				497B426C2D0046030073775A /* XCRemoteSwiftPackageReference "swift-async-algorithms" */,
+				498660212D8833D0005E258C /* XCRemoteSwiftPackageReference "swift-clocks" */,
 			);
 			productRefGroup = C7DE1479173E8F610079477A /* Products */;
 			projectDirPath = "";
@@ -1919,6 +1923,10 @@
 			isa = PBXTargetDependency;
 			productRef = 497B426D2D0046520073775A /* AsyncAlgorithms */;
 		};
+		498660232D8833E8005E258C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = 498660222D8833E8005E258C /* Clocks */;
+		};
 		C70828081CB6792F00F482EB /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = C7DE1477173E8F610079477A /* RMBT */;
@@ -2282,6 +2290,14 @@
 				minimumVersion = 1.0.2;
 			};
 		};
+		498660212D8833D0005E258C /* XCRemoteSwiftPackageReference "swift-clocks" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/swift-clocks";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.6;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -2294,6 +2310,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 497B426C2D0046030073775A /* XCRemoteSwiftPackageReference "swift-async-algorithms" */;
 			productName = AsyncAlgorithms;
+		};
+		498660222D8833E8005E258C /* Clocks */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 498660212D8833D0005E258C /* XCRemoteSwiftPackageReference "swift-clocks" */;
+			productName = Clocks;
+		};
+		498660242D88425A005E258C /* Clocks */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 498660212D8833D0005E258C /* XCRemoteSwiftPackageReference "swift-clocks" */;
+			productName = Clocks;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
