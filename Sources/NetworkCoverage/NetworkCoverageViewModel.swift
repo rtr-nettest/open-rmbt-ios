@@ -41,6 +41,10 @@ struct RealLocationUpdatesService: LocationUpdatesService {
     }
 }
 
+protocol CurrentRadioTechnologyService {
+    func technologyCode() -> String?
+}
+
 protocol SendCoverageResultsService {
     func send(areas: [LocationArea]) async throws
 }
@@ -63,15 +67,23 @@ protocol SendCoverageResultsService {
     private(set) var latestPing = "N/A"
     private(set) var latestTechnology = "N/A"
 
+    private let currentRadioTechnology: any CurrentRadioTechnologyService
     private let sendResultsService: any SendCoverageResultsService
     private let updates: () -> any AsynchronousSequence<Update>
+
+    @MainActor
+    private(set) var locationAreas: [LocationArea]
+    var selectedArea: LocationArea?
+    var currentArea: LocationArea? { locationAreas.last }
 
     init(
         areas: [LocationArea] = [],
         updates: @escaping () -> some AsynchronousSequence<Update>,
+        currentRadioTechnology: some CurrentRadioTechnologyService,
         sendResultsService: some SendCoverageResultsService
     ) {
         self.locationAreas = areas
+        self.currentRadioTechnology = currentRadioTechnology
         self.sendResultsService = sendResultsService
         self.updates = updates
     }
@@ -80,6 +92,7 @@ protocol SendCoverageResultsService {
         areas: [LocationArea] = [],
         pingMeasurementService: @escaping () -> some PingsAsyncSequence,
         locationUpdatesService: some LocationUpdatesService,
+        currentRadioTechnology: some CurrentRadioTechnologyService,
         sendResultsService: some SendCoverageResultsService
     ) {
         self.init(
@@ -88,16 +101,12 @@ protocol SendCoverageResultsService {
                 pingMeasurementService().map(Update.ping),
                 locationUpdatesService.locations().map(Update.location)
             )},
+            currentRadioTechnology: currentRadioTechnology,
             sendResultsService: sendResultsService
         )
     }
 
-    @MainActor
-    private(set) var locationAreas: [LocationArea]
-    var selectedArea: LocationArea?
-    var currentArea: LocationArea? { locationAreas.last }
-
-    func iterate(_ sequence: some AsynchronousSequence<NetworkCoverageViewModel.Update>) async {
+    private func iterate(_ sequence: some AsynchronousSequence<NetworkCoverageViewModel.Update>) async {
         do {
             for try await update in sequence {
                 guard isStarted else { break }
@@ -118,7 +127,7 @@ protocol SendCoverageResultsService {
                 case .location(let locationUpdate):
                     locations.append(locationUpdate)
                     locationAccuracy = String(format: "%.2fm", locationUpdate.horizontalAccuracy)
-                    let currentRadioTechnology = currentRadioTechnology()
+                    let currentRadioTechnology = currentRadioTechnology.technologyCode()
                     latestTechnology = currentRadioTechnology ?? "N/A"
 
                     guard isLocationPreciseEnough(locationUpdate) else {
@@ -155,16 +164,6 @@ protocol SendCoverageResultsService {
         backgroundActivity = CLBackgroundActivitySession()
 
         await iterate(updates())
-    }
-
-    private func currentRadioTechnology() -> String? {
-        let netinfo = CTTelephonyNetworkInfo()
-        var radioAccessTechnology: String?
-
-        if let dataIndetifier = netinfo.dataServiceIdentifier {
-            radioAccessTechnology = netinfo.serviceCurrentRadioAccessTechnology?[dataIndetifier]
-        }
-        return radioAccessTechnology
     }
 
     private func stop() async {

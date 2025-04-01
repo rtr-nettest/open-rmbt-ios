@@ -38,6 +38,7 @@ struct NetworkCoverageView: View {
                 frequency: .milliseconds(100)
             ) },
             locationUpdatesService: RealLocationUpdatesService(),
+            currentRadioTechnology: CTTelephonyRadioTechnologyService(),
             sendResultsService: resultSender
         )
         presenter = NetworkCoverageViewPresenter(locale: .autoupdatingCurrent)

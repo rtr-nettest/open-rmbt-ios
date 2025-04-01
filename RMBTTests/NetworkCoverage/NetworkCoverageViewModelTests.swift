@@ -28,11 +28,11 @@ import CoreLocation
     
     @Test func whenReceivingMultiplePingsForOneLocation_thenCombinesPingTotalValue() async throws {
         let sut = makeSUT(updates: [
-            makeLocationUpdate(.init(latitude: 1.0, longitude: 1.0), at: 1),
-            makePingUpdate(interval: .milliseconds(10), at: 2),
-            makePingUpdate(interval: .milliseconds(20), at: 3),
-            makePingUpdate(interval: .milliseconds(26), at: 4),
-            makeLocationUpdate(.init(latitude: 2.0, longitude: 1.0), at: 5),
+            makeLocationUpdate  (at: 1, lat: 1.0, lon: 1.0),
+            makePingUpdate      (at: 2, ms: 10),
+            makePingUpdate      (at: 3, ms: 20),
+            makePingUpdate      (at: 4, ms: 26),
+            makeLocationUpdate  (at: 5, lat: 2.0, lon: 1.0),
         ])
         await sut.startTest()
 
@@ -43,11 +43,11 @@ import CoreLocation
 
     @Test func whenReceivingPingsForDifferentLocations_thenAssignesPingsToProperLocations() async throws {
         let sut = makeSUT(updates: [
-            makeLocationUpdate(.init(latitude: 1.0, longitude: 1.0), at: 1),
-            makePingUpdate(interval: .milliseconds(10), at: 2),
-            makePingUpdate(interval: .milliseconds(20), at: 3),
-            makeLocationUpdate(.init(latitude: 2.0, longitude: 1.0), at: 4),
-            makePingUpdate(interval: .milliseconds(26), at: 5)
+            makeLocationUpdate  (at: 1, lat: 1.0, lon: 1.0),
+            makePingUpdate      (at: 2, ms: 10),
+            makePingUpdate      (at: 3, ms: 20),
+            makeLocationUpdate  (at: 4, lat: 2.0, lon: 1.0),
+            makePingUpdate      (at: 5, ms: 26)
         ])
         await sut.startTest()
 
@@ -71,6 +71,7 @@ extension NetworkCoverageTests {
         let viewModel = NetworkCoverageViewModel(
             areas: areas,
             updates: { updates.publisher.values },
+            currentRadioTechnology: RadioTechnologyServiceStub(),
             sendResultsService: SendCoverageResultsServiceSpy()
         )
         let presenter = NetworkCoverageViewPresenter(locale: locale)
@@ -78,12 +79,12 @@ extension NetworkCoverageTests {
         return .init(viewModel: viewModel, presenter: presenter)
     }
 
-    func makeLocationUpdate(_ location: CLLocation, at timestampOffset: TimeInterval) -> NetworkCoverageViewModel.Update {
-        .location(location)
+    func makeLocationUpdate(at timestampOffset: TimeInterval, lat: CLLocationDegrees, lon: CLLocationDegrees) -> NetworkCoverageViewModel.Update {
+        .location(.init(latitude: lat, longitude: lon))
     }
 
-    func makePingUpdate(interval: Duration, at timestampOffset: TimeInterval) -> NetworkCoverageViewModel.Update {
-        .ping(.init(result: .interval(interval), timestamp: Date(timeIntervalSince1970: timestampOffset)))
+    func makePingUpdate(at timestampOffset: TimeInterval, ms: some BinaryInteger) -> NetworkCoverageViewModel.Update {
+        .ping(.init(result: .interval(.milliseconds(ms)), timestamp: Date(timeIntervalSince1970: timestampOffset)))
     }
 }
 
@@ -104,3 +105,9 @@ final class SendCoverageResultsServiceSpy: SendCoverageResultsService {
 }
 
 extension AsyncThrowingPublisher: @retroactive AsynchronousSequence {}
+
+final class RadioTechnologyServiceStub: CurrentRadioTechnologyService {
+    func technologyCode() -> String? {
+        nil
+    }
+}
