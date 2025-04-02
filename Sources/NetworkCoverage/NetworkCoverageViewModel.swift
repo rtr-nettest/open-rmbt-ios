@@ -26,21 +26,6 @@ extension AsyncMerge2Sequence: AsynchronousSequence where Element == NetworkCove
 //    func pings() -> Sequence
 //}
 
-@rethrows protocol LocationsAsyncSequence: AsyncSequence where Element == CLLocation { }
-protocol LocationUpdatesService<Sequence> {
-    associatedtype Sequence: LocationsAsyncSequence
-
-    func locations() -> Sequence
-}
-
-extension AsyncCompactMapSequence: LocationsAsyncSequence where Element == CLLocation {}
-
-struct RealLocationUpdatesService: LocationUpdatesService {
-    func locations() -> some LocationsAsyncSequence {
-        CLLocationUpdate.liveUpdates(.fitness).compactMap(\.location)
-    }
-}
-
 protocol CurrentRadioTechnologyService {
     func technologyCode() -> String?
 }
@@ -52,7 +37,7 @@ protocol SendCoverageResultsService {
 @Observable @MainActor class NetworkCoverageViewModel {
     enum Update {
         case ping(PingResult)
-        case location(CLLocation)
+        case location(LocationUpdate)
     }
 
     private var initialLocation: CLLocation?
@@ -63,8 +48,36 @@ protocol SendCoverageResultsService {
     private(set) var errorMessage: String?
 
     private(set) var locations: [CLLocation] = []
+
+    private let refreshInterval: TimeInterval
+    private var firstPingTimestamp: Date?
+    private var pingResults: [PingResult] = []
+
     private(set) var locationAccuracy = "N/A"
-    private(set) var latestPing = "N/A"
+
+    var latestPing: String {
+        guard let startTimestamp = firstPingTimestamp else { return "N/A" }
+
+        let lastTimestamp = pingResults
+            .sorted { $0.timestamp < $1.timestamp }
+            .last?.timestamp
+
+        guard let lastTimestamp else { return "N/A" }
+
+        var currentRefreshIntervalWindowStartTimestamp = startTimestamp
+        while currentRefreshIntervalWindowStartTimestamp.addingTimeInterval(refreshInterval) < lastTimestamp {
+            currentRefreshIntervalWindowStartTimestamp = currentRefreshIntervalWindowStartTimestamp.addingTimeInterval(refreshInterval)
+        }
+
+        let averagePing = pingResults
+            .filter { $0.timestamp >= currentRefreshIntervalWindowStartTimestamp }
+            .compactMap { $0.interval }
+            .map(\.milliseconds)
+            .average
+
+        return "\(Int(averagePing.rounded())) ms"
+    }
+    
     private(set) var latestTechnology = "N/A"
 
     private let currentRadioTechnology: any CurrentRadioTechnologyService
@@ -78,11 +91,13 @@ protocol SendCoverageResultsService {
 
     init(
         areas: [LocationArea] = [],
+        refreshInterval: TimeInterval,
         updates: @escaping () -> some AsynchronousSequence<Update>,
         currentRadioTechnology: some CurrentRadioTechnologyService,
         sendResultsService: some SendCoverageResultsService
     ) {
         self.locationAreas = areas
+        self.refreshInterval = refreshInterval
         self.currentRadioTechnology = currentRadioTechnology
         self.sendResultsService = sendResultsService
         self.updates = updates
@@ -90,6 +105,7 @@ protocol SendCoverageResultsService {
 
     convenience init(
         areas: [LocationArea] = [],
+        refreshInterval: TimeInterval,
         pingMeasurementService: @escaping () -> some PingsAsyncSequence,
         locationUpdatesService: some LocationUpdatesService,
         currentRadioTechnology: some CurrentRadioTechnologyService,
@@ -97,6 +113,7 @@ protocol SendCoverageResultsService {
     ) {
         self.init(
             areas: areas,
+            refreshInterval: refreshInterval,
             updates: { merge(
                 pingMeasurementService().map(Update.ping),
                 locationUpdatesService.locations().map(Update.location)
@@ -113,40 +130,51 @@ protocol SendCoverageResultsService {
 
                 switch update {
                 case .ping(let pingUpdate):
-                    latestPing = pingUpdate.displayValue
-
-                    if
-                        var currentArea = currentArea,
-                        let lastLocation = locations.last,
-                        isLocationPreciseEnough(lastLocation)
-                    {
-                        currentArea.append(ping: pingUpdate)
-                        locationAreas[locationAreas.endIndex - 1] = currentArea
+                    if firstPingTimestamp == nil {
+                        firstPingTimestamp = pingUpdate.timestamp
                     }
 
+                    pingResults.append(pingUpdate)
+
+                    if var (area, idx) = locationAreas.area(at: pingUpdate.timestamp) {
+                        area.append(ping: pingUpdate)
+                        locationAreas[idx] = area
+                    }
                 case .location(let locationUpdate):
-                    locations.append(locationUpdate)
-                    locationAccuracy = String(format: "%.2fm", locationUpdate.horizontalAccuracy)
+                    let location = locationUpdate.location
+                    locations.append(location)
+                    locationAccuracy = String(format: "%.2fm", location.horizontalAccuracy)
                     let currentRadioTechnology = currentRadioTechnology.technologyCode()
                     latestTechnology = currentRadioTechnology ?? "N/A"
 
-                    guard isLocationPreciseEnough(locationUpdate) else {
+                    guard isLocationPreciseEnough(location) else {
                         continue
                     }
 
                     let currentArea = currentArea
                     if var currentArea {
-                        if currentArea.startingLocation.distance(from: locationUpdate) >= fenceRadius {
-                            let newArea = LocationArea(startingLocation: locationUpdate, technology: currentRadioTechnology)
+                        if currentArea.startingLocation.distance(from: location) >= fenceRadius {
+                            let newArea = LocationArea(
+                                startingLocation: location,
+                                dateEntered: locationUpdate.timestamp,
+                                technology: currentRadioTechnology
+                            )
+
+                            currentArea.exit(at: locationUpdate.timestamp)
+                            locationAreas[locationAreas.endIndex - 1] = currentArea
+
                             locationAreas.append(newArea)
                         } else {
-                            currentArea.append(location: locationUpdate)
+                            currentArea.append(location: location)
                             currentRadioTechnology.map { currentArea.append(technology: $0) }
                             locationAreas[locationAreas.endIndex - 1] = currentArea
                         }
                     } else {
-                        let newArea = LocationArea(startingLocation: locationUpdate, technology: currentRadioTechnology)
-                        locationAreas.append(newArea)
+                        locationAreas.append(.init(
+                            startingLocation: location,
+                            dateEntered: locationUpdate.timestamp,
+                            technology: currentRadioTechnology
+                        ))
                     }
                 }
             }
@@ -169,7 +197,6 @@ protocol SendCoverageResultsService {
     private func stop() async {
         isStarted = false
         locationAccuracy = "N/A"
-        latestPing = "N/A"
         latestTechnology = "N/A"
 
         if !locationAreas.isEmpty {
@@ -191,6 +218,23 @@ protocol SendCoverageResultsService {
 
     private func isLocationPreciseEnough(_ location: CLLocation) -> Bool {
         location.horizontalAccuracy <= minimumLocationAccuracy
+    }
+}
+
+private extension [LocationArea] {
+    func area(at timestamp: Date) -> (LocationArea, Self.Index)? {
+        let reversedAreas = reversed()
+        let reversedIdx = reversedAreas.firstIndex {
+            if let dateExited = $0.dateExited {
+                $0.dateEntered < timestamp && dateExited > timestamp
+            } else {
+                $0.dateEntered < timestamp
+            }
+        }
+        return reversedIdx.map {
+            let baseIdx = index(before: $0.base)
+            return (self[baseIdx], baseIdx)
+        }
     }
 }
 

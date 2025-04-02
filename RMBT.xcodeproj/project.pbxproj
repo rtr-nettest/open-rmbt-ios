@@ -40,6 +40,8 @@
 		498EF31E2D0B0D70003A79EB /* LocationArea.swift in Sources */ = {isa = PBXBuildFile; fileRef = 498EF31D2D0B0D70003A79EB /* LocationArea.swift */; };
 		498F7F942D352C2000EC975D /* NetworkCoverageViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 498F7F932D352C2000EC975D /* NetworkCoverageViewModelTests.swift */; };
 		499406DD2D9C0B2600237AC1 /* CurrentRadioTechnologyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499406DC2D9C0B2600237AC1 /* CurrentRadioTechnologyService.swift */; };
+		499406E02D9D1C8A00237AC1 /* LocationUpdatesService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499406DF2D9D1C8A00237AC1 /* LocationUpdatesService.swift */; };
+		499406E22D9D1CD600237AC1 /* LocationUpdate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499406E12D9D1CD600237AC1 /* LocationUpdate.swift */; };
 		49A31C6C2D3A97250039052B /* AsynchronousSequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A31C6B2D3A97250039052B /* AsynchronousSequence.swift */; };
 		49B28C762BA09D6A00697BB4 /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49B28C752BA09D6A00697BB4 /* Keychain.swift */; };
 		49B28C792BA1914E00697BB4 /* RMBTTestExportCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 49B28C782BA1914E00697BB4 /* RMBTTestExportCell.xib */; };
@@ -352,6 +354,8 @@
 		498EF31D2D0B0D70003A79EB /* LocationArea.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationArea.swift; sourceTree = "<group>"; };
 		498F7F932D352C2000EC975D /* NetworkCoverageViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkCoverageViewModelTests.swift; sourceTree = "<group>"; };
 		499406DC2D9C0B2600237AC1 /* CurrentRadioTechnologyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentRadioTechnologyService.swift; sourceTree = "<group>"; };
+		499406DF2D9D1C8A00237AC1 /* LocationUpdatesService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationUpdatesService.swift; sourceTree = "<group>"; };
+		499406E12D9D1CD600237AC1 /* LocationUpdate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationUpdate.swift; sourceTree = "<group>"; };
 		49A31C6B2D3A97250039052B /* AsynchronousSequence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsynchronousSequence.swift; sourceTree = "<group>"; };
 		49B28C752BA09D6A00697BB4 /* Keychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Keychain.swift; sourceTree = "<group>"; };
 		49B28C772BA1914E00697BB4 /* RMBTTestExportCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTTestExportCell.swift; sourceTree = "<group>"; };
@@ -704,6 +708,7 @@
 				499406DB2D9C0B1900237AC1 /* CurrentRadioTechnology */,
 				49C921432D6CA0D50003EDBC /* CoverageMeasurementSession */,
 				4952889F2D64D45200C73435 /* Pings */,
+				499406DE2D9D1C6D00237AC1 /* LocationUpdates */,
 				49A31C6A2D3A971B0039052B /* Helpers */,
 				491471352D1062DD00885B82 /* SendCoverageResultRequest.swift */,
 				495F7B9A2CF48FC4003750A3 /* NetworkCoverageView.swift */,
@@ -729,6 +734,15 @@
 				499406DC2D9C0B2600237AC1 /* CurrentRadioTechnologyService.swift */,
 			);
 			path = CurrentRadioTechnology;
+			sourceTree = "<group>";
+		};
+		499406DE2D9D1C6D00237AC1 /* LocationUpdates */ = {
+			isa = PBXGroup;
+			children = (
+				499406E12D9D1CD600237AC1 /* LocationUpdate.swift */,
+				499406DF2D9D1C8A00237AC1 /* LocationUpdatesService.swift */,
+			);
+			path = LocationUpdates;
 			sourceTree = "<group>";
 		};
 		49A31C6A2D3A971B0039052B /* Helpers */ = {
@@ -1832,6 +1846,7 @@
 				E94EC064276DECC000DB0B21 /* RMBTMapOptionsType.swift in Sources */,
 				E9E993CD26EA617200E7EED6 /* RMBTOpenDataResponse.swift in Sources */,
 				36933A77274FCA96009A52BE /* RMBTHistoryTestDetailsViewController.swift in Sources */,
+				499406E22D9D1CD600237AC1 /* LocationUpdate.swift in Sources */,
 				36A9DF3F272C4E190099A57C /* UILabel.swift in Sources */,
 				E926C2F2276A1EDC009FCF12 /* RMBTBaseTestViewController.swift in Sources */,
 				E9881C82270C1190008EFDF6 /* RMBTLoaderView.swift in Sources */,
@@ -1841,6 +1856,7 @@
 				E94EC06B276E038800DB0B21 /* RMBTMapOptions.swift in Sources */,
 				E9400EE526BA32150067273A /* LogConfig.swift in Sources */,
 				49B28C762BA09D6A00697BB4 /* Keychain.swift in Sources */,
+				499406E02D9D1C8A00237AC1 /* LocationUpdatesService.swift in Sources */,
 				E95954AF26E602EC004EA6D9 /* RMBTHistoryFilter2ViewController.swift in Sources */,
 				495288A12D64D49400C73435 /* UDPConnection.swift in Sources */,
 				E9AA0DE127634EF1003C71D7 /* RMBTQoSDNSTest.swift in Sources */,

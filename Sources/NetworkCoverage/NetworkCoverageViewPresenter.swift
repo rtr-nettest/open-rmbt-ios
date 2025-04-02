@@ -63,7 +63,7 @@ struct SelectedLocationItemDetail: Equatable, Identifiable {
     func locationItem(from area: LocationArea, selectedArea: LocationArea?) -> LocationItem {
         .init(
             id: area.id,
-            date: area.time,
+            date: area.dateEntered,
             coordinate: area.startingLocation.coordinate,
             technology: area.significantTechnology?.radioTechnologyDisplayValue ?? "N/A",
             averagePing: area.averagePing.map { "\($0) ms" } ?? "",
@@ -75,7 +75,7 @@ struct SelectedLocationItemDetail: Equatable, Identifiable {
     func selectedItemDetail(from area: LocationArea) -> SelectedLocationItemDetail {
         .init(
             id: area.id,
-            date: selectedItemDateFormatter.string(from: area.time),
+            date: selectedItemDateFormatter.string(from: area.dateEntered),
             technology: area.significantTechnology?.radioTechnologyDisplayValue ?? "N/A",
             averagePing: area.averagePing.map { "\($0) ms" } ?? "",
             color: color(for: area.significantTechnology)

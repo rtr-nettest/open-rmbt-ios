@@ -37,7 +37,7 @@ public class SendCoverageResultRequest: BasicRequest {
         private(set) var technology_id: Int?
 
         init(area: LocationArea) {
-            timestamp = UInt64(area.time.timeIntervalSince1970 * 1_000_000) // microseconds
+            timestamp = UInt64(area.dateEntered.timeIntervalSince1970 * 1_000_000) // microseconds
             location = .init(
                 latitude: area.startingLocation.coordinate.latitude,
                 longitude: area.startingLocation.coordinate.longitude

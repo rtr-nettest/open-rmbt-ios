@@ -15,10 +15,11 @@ struct LocationArea: Identifiable, Hashable {
 
     let startingLocation: CLLocation
     let id: UUID = UUID()
-    let time: Date
+    let dateEntered: Date
+    private(set) var dateExited: Date?
 
-    init(startingLocation: CLLocation, technology: String?, pings: [PingResult] = [], dateNow: () -> Date = Date.init) {
-        time = dateNow()
+    init(startingLocation: CLLocation, dateEntered: Date, technology: String?, pings: [PingResult] = []) {
+        self.dateEntered = dateEntered
         self.startingLocation = startingLocation
         self.locations = [startingLocation]
         self.pings = pings
@@ -36,15 +37,9 @@ struct LocationArea: Identifiable, Hashable {
     mutating func append(technology: String) {
         technologies.append(technology)
     }
-}
 
-extension LocationArea {
-    init(startingLocation: CLLocation, technology: String?, avgPing: Duration?, dateNow: () -> Date = Date.init) {
-        time = dateNow()
-        self.startingLocation = startingLocation
-        self.locations = [startingLocation]
-        self.pings = avgPing.map { [.init(result: .interval($0), timestamp: dateNow())] } ?? []
-        technologies = technology.map { [$0] } ?? []
+    mutating func exit(at date: Date) {
+        dateExited = date
     }
 }
 

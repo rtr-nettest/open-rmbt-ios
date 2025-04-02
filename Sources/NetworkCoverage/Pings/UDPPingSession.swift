@@ -56,7 +56,7 @@ actor UDPPingSession {
         sessionInitiator: any SessionInitiating,
         udpConnection: any UDPConnectable,
         timeoutIntervalMs: Int,
-        now: @escaping () -> AbsoluteTimeNanos
+        now: @escaping () -> AbsoluteTimeNanos // TODO: replace with Clock.Instant
     ) {
         self.sessionInitiator = sessionInitiator
         self.udpConnection = udpConnection

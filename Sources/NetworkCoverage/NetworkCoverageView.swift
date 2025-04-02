@@ -16,9 +16,9 @@ struct NetworkCoverageView: View {
 
     init(areas: [LocationArea] = []) {
         // TODO: move setup code below into some "Composition root" file
-
+        let dateNow: () -> Date = Date.init
         let sessionInitializer = CoverageMeasurementSessionInitializer(
-            now: Date.init,
+            now: dateNow,
             controlServer: RMBTControlServer.shared
         )
         let resultSender = ControlServerCoverageResultsService(
@@ -27,6 +27,7 @@ struct NetworkCoverageView: View {
         )
         viewModel = NetworkCoverageViewModel(
             areas: areas,
+            refreshInterval: 1,
             pingMeasurementService: { PingMeasurementService.pings2(
                 clock: ContinuousClock(),
                 pingSender: UDPPingSession(
@@ -37,7 +38,7 @@ struct NetworkCoverageView: View {
                 ),
                 frequency: .milliseconds(100)
             ) },
-            locationUpdatesService: RealLocationUpdatesService(),
+            locationUpdatesService: RealLocationUpdatesService(now: dateNow),
             currentRadioTechnology: CTTelephonyRadioTechnologyService(),
             sendResultsService: resultSender
         )
@@ -295,37 +296,50 @@ private extension View {
                     latitude: 49.74805411063806,
                     longitude: 13.37696845562318
                 ),
+                dateEntered: .init(timeIntervalSince1970: 1734526653),
                 technology: "3G/HSDPA",
-                avgPing: .milliseconds(122),
-                dateNow: { .init(timeIntervalSince1970: 1734526653) }
+                avgPing: .milliseconds(122)
             ),
             .init(
                 startingLocation: CLLocation(
                     latitude: 49.747849194587204,
                     longitude: 13.376917714305671
                 ),
+                dateEntered: .init(timeIntervalSince1970: 1734526656),
                 technology: "4G/LTE",
-                avgPing: .milliseconds(84),
-                dateNow: { .init(timeIntervalSince1970: 1734526656) }
+                avgPing: .milliseconds(84)
             ),
             .init(
                 startingLocation: CLLocation(
                     latitude: 49.74741067132995,
                     longitude: 13.376784518347213
                 ),
+                dateEntered: .init(timeIntervalSince1970: 1734526659),
                 technology: "4G/LTE",
-                avgPing: .milliseconds(41),
-                dateNow: { .init(timeIntervalSince1970: 1734526659) }
+                avgPing: .milliseconds(41)
             ),
             .init(
                 startingLocation: CLLocation(
                     latitude: 49.74700902972835,
                     longitude: 13.376651322388751
                 ),
+                dateEntered: .init(timeIntervalSince1970: 1734526661),
                 technology: "5G/NRNSA",
-                avgPing: .milliseconds(26),
-                dateNow: { .init(timeIntervalSince1970: 1734526661) }
+                avgPing: .milliseconds(26)
             )
         ]
     )
 }
+
+#if DEBUG
+extension LocationArea {
+    init(startingLocation: CLLocation, dateEntered: Date, technology: String?, avgPing: Duration) {
+        self.init(
+            startingLocation: startingLocation,
+            dateEntered: dateEntered,
+            technology: technology,
+            pings: [.init(result: .interval(avgPing), timestamp: dateEntered)]
+        )
+    }
+}
+#endif
