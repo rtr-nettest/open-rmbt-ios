@@ -105,63 +105,104 @@ import CoreLocation
         #expect(sut.latestPing == "N/A")
     }
 
-    @Test func whenReceivedPingsVeryOftenForSameFence_thenLatestPingIsAverageOfAllPingsWithinRefreshInterval() async throws {
-        let sut = makeSUT(
-            refreshInterval: 10,
-            updates: [
-                makeLocationUpdate  (at: 1, lat: 1.0, lon: 1.0),
-                makePingUpdate      (at: 2, ms: 10),
-                makePingUpdate      (at: 3, ms: 12),
-                makeLocationUpdate  (at: 4, lat: 1.0000001, lon: 1.00000001),
-                makePingUpdate      (at: 5, ms: 17)
-            ]
-        )
+    @Test(arguments: [
+        [ // same location
+            makeLocationUpdate  (at: 1, lat: 1.0, lon: 1.0),
+            makePingUpdate      (at: 2, ms: 10),
+            makePingUpdate      (at: 3, ms: 20),
+            makePingUpdate      (at: 4, ms: 30)
+        ],
+        [ // different locations
+            makeLocationUpdate  (at: 1, lat: 1.0, lon: 1.0),
+            makePingUpdate      (at: 2, ms: 10),
+            makeLocationUpdate  (at: 3, lat: 2.0, lon: 2.0),
+            makePingUpdate      (at: 4, ms: 20),
+            makeLocationUpdate  (at: 5, lat: 3.0, lon: 3.0),
+            makePingUpdate      (at: 6, ms: 30)
+        ]
+    ])
+    func whenReceivedPingsBeforeCompletingRefreshInterval_thenLatestPingIsNotDisplayed(updates: [NetworkCoverageViewModel.Update]) async throws {
+        let sut = makeSUT(refreshInterval: 10, updates: updates)
         await sut.startTest()
-
-        #expect(sut.latestPing == "13 ms")
+        #expect(sut.latestPing == "-")
     }
-
-    @Test func whenReceivedPingsVeryOftenForDifferentFences_thenLatestPingIsAverageOfAllPingsWithinRefreshInterval() async throws {
-        let sut = makeSUT(
-            refreshInterval: 10,
-            updates: [
-                makeLocationUpdate  (at: 1, lat: 1.0, lon: 1.0),
-                makePingUpdate      (at: 2, ms: 10),
-                makePingUpdate      (at: 3, ms: 12),
-                makeLocationUpdate  (at: 4, lat: 2, lon: 2),
-                makePingUpdate      (at: 5, ms: 17)
-            ]
-        )
+    @Test(arguments: [
+        ([ // first interval, pings received withing the same fence
+            // refresh interval 0-9
+            makePingUpdate      (at: 0, ms: 10),
+            makeLocationUpdate  (at: 1, lat: 1.0, lon: 1.0),
+            makePingUpdate      (at: 3, ms: 12),
+            makeLocationUpdate  (at: 4, lat: 1.00000001, lon: 1.00000001),
+            makePingUpdate      (at: 5, ms: 17),
+            // refresh interval 10-19
+            makeLocationUpdate  (at: 10, lat: 2, lon: 2),
+            makePingUpdate      (at: 11, ms: 20),
+            makePingUpdate      (at: 12, ms: 40),
+            makeLocationUpdate  (at: 13, lat: 2.00000001, lon: 2.000000001)
+        ], "13 ms"),
+        ([ // first interval, pings received withing different fences
+            // refresh interval 0-9
+            makePingUpdate      (at: 0, ms: 10),
+            makeLocationUpdate  (at: 1, lat: 1.0, lon: 1.0),
+            makePingUpdate      (at: 3, ms: 12),
+            makeLocationUpdate  (at: 4, lat: 2.0, lon: 2.0),
+            makePingUpdate      (at: 5, ms: 17),
+            makeLocationUpdate  (at: 6, lat: 3.0, lon: 3.0),
+            makePingUpdate      (at: 7, ms: 13),
+            // refresh interval 10-19
+            makeLocationUpdate  (at: 10, lat: 2, lon: 2),
+            makePingUpdate      (at: 11, ms: 20),
+            makePingUpdate      (at: 12, ms: 40),
+            makeLocationUpdate  (at: 13, lat: 2.00000001, lon: 2.000000001)
+        ], "13 ms"),
+        ([ // third interval, pings received withing same fence
+            // refresh interval 0-9
+            makePingUpdate      (at: 0, ms: 5),
+            makeLocationUpdate  (at: 1, lat: 1.0, lon: 1.0),
+            makePingUpdate      (at: 2, ms: 10),
+            makePingUpdate      (at: 3, ms: 20),
+            // refresh interval 10-19
+            makeLocationUpdate  (at: 10, lat: 2, lon: 2),
+            makePingUpdate      (at: 11, ms: 20),
+            makePingUpdate      (at: 12, ms: 40),
+            makeLocationUpdate  (at: 13, lat: 2.00000001, lon: 2.000000001),
+            // refresh interval 20-29
+            makePingUpdate      (at: 20, ms: 110),
+            makeLocationUpdate  (at: 21, lat: 2.00000002, lon: 2.000000002), // same fence as previous refresh interval
+            makePingUpdate      (at: 22, ms: 120),
+            makePingUpdate      (at: 23, ms: 130),
+            makePingUpdate      (at: 24, ms: 200),
+            // refresh interval 30-39
+            makePingUpdate      (at: 31, ms: 10),
+        ], "140 ms"),
+        ([ // third interval, pings received withing different fences
+            // refresh interval 0-9
+            makePingUpdate      (at: 0, ms: 5),
+            makeLocationUpdate  (at: 1, lat: 1.0, lon: 1.0),
+            makePingUpdate      (at: 2, ms: 10),
+            makePingUpdate      (at: 3, ms: 20),
+            makeLocationUpdate  (at: 4, lat: 2.0, lon: 2.0),
+            // refresh interval 10-19
+            makeLocationUpdate  (at: 10, lat: 2, lon: 2),
+            makePingUpdate      (at: 11, ms: 20),
+            makePingUpdate      (at: 12, ms: 40),
+            makeLocationUpdate  (at: 13, lat: 2.00000001, lon: 2.000000001),
+            makeLocationUpdate  (at: 15, lat: 3.0, lon: 3.0),
+            // refresh interval 20-29
+            makePingUpdate      (at: 20, ms: 110),
+            makeLocationUpdate  (at: 21, lat: 3.00000001, lon: 3.000001),
+            makePingUpdate      (at: 22, ms: 120),
+            makePingUpdate      (at: 23, ms: 130),
+            makeLocationUpdate  (at: 24, lat: 4.0, lon: 4.0),
+            makePingUpdate      (at: 25, ms: 200),
+            // refresh interval 30-39
+            makePingUpdate      (at: 31, ms: 10),
+        ], "140 ms")
+    ])
+    func whenReceivedPingsAfterCompletingRefreshInterval_thenLatestPingIsAverageOfAllPingsWithinLastCompletedRefreshInterva(arguments: (updates: [NetworkCoverageViewModel.Update], expectedLatestPing: String)) async {
+        let sut = makeSUT(refreshInterval: 10, updates: arguments.updates)
         await sut.startTest()
-
-        #expect(sut.latestPing == "13 ms")
-    }
-
-    @Test func whenReceivedPingsVeryOftenAfterSeveralRefreshIntervalsElapsedForSameFence_thenLatestPingIsAverageOfAllPingsWithinRefreshInterval() async throws {
-        let sut = makeSUT(
-            refreshInterval: 10,
-            updates: [
-                // refresh interval 0-9
-                makePingUpdate      (at: 0, ms: 5),
-                makeLocationUpdate  (at: 1, lat: 1.0, lon: 1.0),
-                makePingUpdate      (at: 2, ms: 10),
-                makePingUpdate      (at: 3, ms: 20),
-                // refresh interval 10-19
-                makeLocationUpdate  (at: 10, lat: 2, lon: 2),
-                makePingUpdate      (at: 11, ms: 20),
-                makePingUpdate      (at: 12, ms: 40),
-                makeLocationUpdate  (at: 13, lat: 2.00000001, lon: 2.000000001),
-                // refresh interval 20-29
-                makePingUpdate      (at: 20, ms: 110),
-                makeLocationUpdate  (at: 21, lat: 2.00000002, lon: 2.000000002), // same fence as previous refresh interval
-                makePingUpdate      (at: 22, ms: 120),
-                makePingUpdate      (at: 23, ms: 130),
-                makePingUpdate      (at: 24, ms: 200)
-            ]
-        )
-        await sut.startTest()
-
-        #expect(sut.latestPing == "140 ms")
+        #expect(sut.latestPing == arguments.expectedLatestPing)
     }
 }
 
@@ -188,14 +229,14 @@ extension NetworkCoverageTests {
 
         return .init(viewModel: viewModel, presenter: presenter)
     }
+}
 
-    func makeLocationUpdate(at timestampOffset: TimeInterval, lat: CLLocationDegrees, lon: CLLocationDegrees) -> NetworkCoverageViewModel.Update {
-        .location(LocationUpdate(location: .init(latitude: lat, longitude: lon), timestamp: Date(timeIntervalSinceReferenceDate: timestampOffset)))
-    }
+func makeLocationUpdate(at timestampOffset: TimeInterval, lat: CLLocationDegrees, lon: CLLocationDegrees) -> NetworkCoverageViewModel.Update {
+    .location(LocationUpdate(location: .init(latitude: lat, longitude: lon), timestamp: Date(timeIntervalSinceReferenceDate: timestampOffset)))
+}
 
-    func makePingUpdate(at timestampOffset: TimeInterval, ms: some BinaryInteger) -> NetworkCoverageViewModel.Update {
-        .ping(.init(result: .interval(.milliseconds(ms)), timestamp: Date(timeIntervalSinceReferenceDate: timestampOffset)))
-    }
+func makePingUpdate(at timestampOffset: TimeInterval, ms: some BinaryInteger) -> NetworkCoverageViewModel.Update {
+    .ping(.init(result: .interval(.milliseconds(ms)), timestamp: Date(timeIntervalSinceReferenceDate: timestampOffset)))
 }
 
 @MainActor extension NetworkCoverageTests.NetworkCoverageScene {

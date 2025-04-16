@@ -64,13 +64,18 @@ protocol SendCoverageResultsService {
 
         guard let lastTimestamp else { return "N/A" }
 
-        var currentRefreshIntervalWindowStartTimestamp = startTimestamp
-        while currentRefreshIntervalWindowStartTimestamp.addingTimeInterval(refreshInterval) < lastTimestamp {
-            currentRefreshIntervalWindowStartTimestamp = currentRefreshIntervalWindowStartTimestamp.addingTimeInterval(refreshInterval)
+        var currentRefreshIntervalStartTimestamp = startTimestamp
+        var lastCompletedRefreshIntervalStartTimestamp: Date?
+        while currentRefreshIntervalStartTimestamp.addingTimeInterval(refreshInterval) < lastTimestamp {
+            lastCompletedRefreshIntervalStartTimestamp = currentRefreshIntervalStartTimestamp
+            currentRefreshIntervalStartTimestamp = currentRefreshIntervalStartTimestamp.addingTimeInterval(refreshInterval)
         }
 
+        guard let lastCompletedRefreshIntervalStartTimestamp else {
+            return "-"
+        }
         let averagePing = pingResults
-            .filter { $0.timestamp >= currentRefreshIntervalWindowStartTimestamp }
+            .filter { $0.timestamp >= lastCompletedRefreshIntervalStartTimestamp && $0.timestamp < currentRefreshIntervalStartTimestamp }
             .compactMap { $0.interval }
             .map(\.milliseconds)
             .average
