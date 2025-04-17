@@ -14,29 +14,35 @@ import Clocks
 
 struct UDPPingsSequenceTests {
     @Test func whenInitializingPingSession_thenDoesNotReportAnyPings() async throws {
-        let delays = [makePingResult(.ms(100))]
-        let clock = ContinuousClock()
+        let pingResults = [makePingResult(.ms(100))]
+        let clock = TestClock()
+        let frequency: Duration = .milliseconds(500)
         let sut = makeSUT(
             clock: clock,
             firstInitializationDate: Date(timeIntervalSinceReferenceDate: 0),
-            pingsFrequency: .milliseconds(500),
+            pingsFrequency: frequency,
             initiatePingSessionDelays: [("1", .seconds(1.7))],
-            sendPingResults: delays
+            sendPingResults: pingResults
         )
         var capturedElements: [PingResult] = []
-        var count = 0
-        for try await element in sut {
-            capturedElements.append(element)
-            count += 1
-            if count >= delays.count {
-                break
+        await confirmation(expectedCount: pingResults.count) { confirmation in
+            Task {
+                for try await element in sut {
+                    capturedElements.append(element)
+                    confirmation.confirm()
+                }
+            }
+
+            for _ in 0 ... pingResults.count + 3 {
+                await clock.advance(by: frequency)
             }
         }
+
         #expect(capturedElements.isEqual(to: [makePingResult(ms: 100, at: 2.0)]))
     }
 
     @Test func whenReceivingPingsShorterThenPingsFrequency_thenTheirTimestampDifferenceIsTheFrequency() async throws {
-        let clock = ContinuousClock()
+        let clock = TestClock()
         let pingResults = [
             makePingResult(.ms(50)),
             makePingResult(.ms(20)),
@@ -44,34 +50,40 @@ struct UDPPingsSequenceTests {
             makePingResult(.ms(40)),
             makePingResult(.ms(250))
         ]
+        let frequency = Duration.seconds(0.5)
         let sut = makeSUT(
             clock: clock,
             firstInitializationDate: Date(timeIntervalSinceReferenceDate: 0),
-            pingsFrequency: .seconds(0.5),
+            pingsFrequency: frequency,
             initiatePingSessionDelays: [("1", .seconds(0.2))],
             sendPingResults: pingResults
         )
+        
         var capturedElements: [PingResult] = []
-        var count = 0
-        for try await element in sut {
-            capturedElements.append(element)
-            count += 1
-            if count >= pingResults.count {
-                break
+        await confirmation(expectedCount: pingResults.count) { confirmation in
+            Task {
+                for try await element in sut {
+                    capturedElements.append(element)
+                    confirmation.confirm()
+                }
+            }
+
+            for _ in 0 ... pingResults.count {
+                await clock.advance(by: frequency)
             }
         }
 
-        #expect(capturedElements.isEqual(to: [
+        #expect(capturedElements == [
             makePingResult(ms: 50, at: 0.5),
             makePingResult(ms: 20, at: 1),
             makePingResult(ms: 120, at: 1.5),
             makePingResult(ms: 40, at: 2.0),
             makePingResult(ms: 250, at: 2.5)
-        ]))
+        ])
     }
 
     @Test func whenReceivingPingsLongerThenPingsFrequency_thenTheirTimestampDifferenceIsTheFrequency() async throws {
-        let clock = ContinuousClock()
+        let clock = TestClock()
         let pingResults = [
             makePingResult(.ms(300)),
             makePingResult(.ms(1200)),
@@ -86,24 +98,30 @@ struct UDPPingsSequenceTests {
             makePingResult(.ms(600)),
             makePingResult(.ms(400))
         ]
+        let frequency = Duration.seconds(1)
         let sut = makeSUT(
             clock: clock,
             firstInitializationDate: Date(timeIntervalSinceReferenceDate: 0),
-            pingsFrequency: .seconds(1),
+            pingsFrequency: frequency,
             initiatePingSessionDelays: [("1", .seconds(1.1))],
             sendPingResults: pingResults
         )
         var capturedElements: [PingResult] = []
         var count = 0
-        for try await element in sut {
-            capturedElements.append(element)
-            count += 1
-            if count >= pingResults.count {
-                break
+        await confirmation(expectedCount: pingResults.count) { confirmation in
+            Task {
+                for try await element in sut {
+                    capturedElements.append(element)
+                    confirmation.confirm()
+                }
+            }
+
+            for _ in 0 ... pingResults.count + 5 {
+                await clock.advance(by: frequency)
             }
         }
 
-        #expect(capturedElements.isEqual(to: [
+        #expect(capturedElements == [
             makePingResult(ms:  300, at: 2),
             makePingResult(ms: 1200, at: 3),
             makePingResult(ms:  100, at: 6),
@@ -116,7 +134,7 @@ struct UDPPingsSequenceTests {
             makePingResult(ms:  600, at: 12),
             makePingResult(ms: 3800, at: 9),
             makePingResult(ms:  400, at: 13)
-        ]))
+        ])
     }
 }
 
@@ -170,7 +188,7 @@ extension UDPPingsSequenceTests {
         func sendPing(in session: String) async throws(PingSendingError) {
             let delay: Duration
             if sendPingResults.isEmpty {
-                delay = .nanoseconds(-1)
+                delay = .seconds(404)
             } else {
                 delay = try sendPingResults.removeFirst().get()
             }
