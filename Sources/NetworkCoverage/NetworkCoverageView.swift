@@ -12,7 +12,6 @@ import MapKit
 
 struct NetworkCoverageView: View {
     @Bindable var viewModel: NetworkCoverageViewModel
-    let presenter: NetworkCoverageViewPresenter
 
     init(areas: [LocationArea] = []) {
         // TODO: move setup code below into some "Composition root" file
@@ -42,7 +41,6 @@ struct NetworkCoverageView: View {
             currentRadioTechnology: CTTelephonyRadioTechnologyService(),
             sendResultsService: resultSender
         )
-        presenter = NetworkCoverageViewPresenter(locale: .autoupdatingCurrent)
     }
 
     @State private var position: MapCameraPosition = .userLocation(
@@ -53,38 +51,36 @@ struct NetworkCoverageView: View {
     @State private var isExpertMode = false
 
     var body: some View {
+        let _ = Self._printChanges()
+
         Circle()
             .fill(Color.red)
             .frame(width: 10, height: 10)
 
-        Map(position: $position, selection: $viewModel.selectedArea) {
+        Map(position: $position, selection: $viewModel.selectedFenceID) {
             UserAnnotation()
 
-            ForEach(presenter.fences(from: viewModel)) { fence in
-                let area = fence.locationArea
-                let locationItem = fence.locationItem
-
-                if !isExpertMode && area == viewModel.currentArea {
-                    fenceCircle(locationItem: locationItem, area: area)
-                    fenceAnnotation(locationItem: locationItem, area: area)
+            ForEach(viewModel.fences) { fence in
+                if !isExpertMode && fence.isCurrent {
+                    fenceCircle(for: fence)
+                    fenceAnnotation(for: fence)
+                        .tag(fence.id)
                 }
                 if isExpertMode {
-                    fenceCircle(locationItem: locationItem, area: area)
+                    fenceCircle(for: fence)
 
                     Annotation(
-                        coordinate: locationItem.coordinate,
+                        coordinate: fence.coordinate,
                         content: {
-                            VStack(spacing: 16) {
-                                Text(locationItem.technology)
-                                Text(locationItem.averagePing)
-                            }
-                            .font(.caption)
+                            Text(fence.technology)
+                                .font(.caption)
                         },
                         label: { EmptyView() }
                     )
-                    .tag(area)
+                    .tag(fence.id)
                 } else {
-                    fenceAnnotation(locationItem: locationItem, area: area)
+                    fenceAnnotation(for: fence)
+                        .tag(fence.id)
                 }
             }
 
@@ -116,8 +112,8 @@ struct NetworkCoverageView: View {
                 }
 
                 HStack(alignment: .bottom, spacing: 8) {
-                    if let selectedItem = viewModel.selectedArea {
-                        selectedItemDetailView(selectedItem)
+                    if let detail = viewModel.selectedFenceDetail {
+                        selectedFenceDetailView(detail)
                     } else {
                         Spacer()
                     }
@@ -133,32 +129,31 @@ struct NetworkCoverageView: View {
         }
     }
 
-    func fenceCircle(locationItem: LocationItem, area: LocationArea) -> some MapContent {
-        MapCircle(center: area.startingLocation.coordinate, radius: viewModel.fenceRadius)
-            .foregroundStyle(locationItem.color.opacity(locationItem.isSelected ? 0.4 : 0.1))
+    func fenceCircle(for fence: FenceItem) -> some MapContent {
+        MapCircle(center: fence.coordinate, radius: viewModel.fenceRadius)
+            .foregroundStyle(fence.color.opacity(fence.isSelected ? 0.4 : 0.1))
             .stroke(
-                locationItem.color.opacity(locationItem.isSelected ? 1 : 0.8),
-                lineWidth: locationItem.isSelected ? 2 : 1
+                fence.color.opacity(fence.isSelected ? 1 : 0.8),
+                lineWidth: fence.isSelected ? 2 : 1
             )
             .mapOverlayLevel(level: .aboveLabels)
     }
 
-    func fenceAnnotation(locationItem: LocationItem, area: LocationArea) -> some MapContent {
+    func fenceAnnotation(for fence: FenceItem) -> some MapContent {
         Annotation(
-            coordinate: locationItem.coordinate,
+            coordinate: fence.coordinate,
             content: {
                 Circle()
-                    .fill(locationItem.color.opacity(locationItem.isSelected ? 1 : 0.6))
+                    .fill(fence.color.opacity(fence.isSelected ? 1 : 0.6))
                     .stroke(
-                        locationItem.isSelected ? Color.black.opacity(0.6) :
-                        locationItem.color,
-                        lineWidth: locationItem.isSelected ? 2 : 1
+                        fence.isSelected ? Color.black.opacity(0.6) :
+                        fence.color,
+                        lineWidth: fence.isSelected ? 2 : 1
                     )
                     .frame(width: 20, height: 20)
             },
             label: { EmptyView() }
         )
-        .tag(area)
     }
 
     func horizontalSeparator() -> some View {
@@ -217,7 +212,7 @@ struct NetworkCoverageView: View {
             VStack(alignment: .leading) {
                 Text("Technology")
                     .font(.caption)
-                Text(presenter.displayValue(forRadioTechnology: viewModel.latestTechnology))
+                Text(viewModel.latestTechnology)
             }
 
             Spacer()
@@ -254,25 +249,23 @@ struct NetworkCoverageView: View {
     }
 
     @ViewBuilder
-    func selectedItemDetailView(_ selectedItem: LocationArea) -> some View {
-        let item = presenter.selectedItemDetail(from: selectedItem)
-
+    func selectedFenceDetailView(_ detail: FenceDetail) -> some View {
         VStack(alignment: .leading) {
             HStack(alignment: .bottom) {
                 Text("Date:")
                     .font(.headline)
-                Text(item.date)
+                Text(detail.date)
             }
             HStack(alignment: .bottom) {
                 Text("Technology:")
                     .font(.headline)
-                Text(item.technology)
-                    .foregroundStyle(item.color)
+                Text(detail.technology)
+                    .foregroundStyle(detail.color)
             }
             HStack(alignment: .bottom) {
                 Text("Ping:")
                     .font(.headline)
-                Text(item.averagePing)
+                Text(detail.averagePing)
             }
         }
         .padding()

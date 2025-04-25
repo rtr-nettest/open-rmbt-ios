@@ -25,8 +25,8 @@ import CoreLocation
         await sut.startTest()
 
         #expect(sut.fences.count == 1)
-        #expect(sut.fences.first?.locationItem.coordinate.latitude == 1.0)
-        #expect(sut.fences.first?.locationItem.coordinate.longitude == 2.0)
+        #expect(sut.fences.first?.coordinate.latitude == 1.0)
+        #expect(sut.fences.last?.coordinate.longitude == 2.0)
     }
     
     @Test func whenReceivingMultiplePingsForOneLocation_thenCombinesPingTotalValue() async throws {
@@ -40,8 +40,12 @@ import CoreLocation
         await sut.startTest()
 
         #expect(sut.fences.count == 2)
-        #expect(sut.fences.first?.locationItem.averagePing == "18 ms")
-        #expect(sut.fences.last?.locationItem.averagePing == "")
+
+        sut.selectedFenceID = sut.fences.first?.id
+        #expect(sut.selectedFenceDetail?.averagePing == "18 ms")
+
+        sut.selectedFenceID = sut.fences.last?.id
+        #expect(sut.selectedFenceDetail?.averagePing == "")
     }
 
     @Test func whenReceivedPingsWithTimeBeforeFenceChanged_thenTheyAreAssignedToPreviousFence() async throws {
@@ -68,14 +72,20 @@ import CoreLocation
         ])
         await sut.startTest()
 
-        #expect(sut.fences.map(\.locationItem).map(\.averagePing) == [
-            "1670 ms",  // t = 0 - 5
-            "",         // t = 5 - 10
-            "150 ms",   // t = 10 - 20
-            "3000 ms",  // t = 20 - 30
-            "1100 ms",  // t = 30 = 40
-            "300 ms"    // t = 40+
-        ])
+        #expect(sut.fences
+            .map(\.id)
+            .map {
+                sut.selectedFenceID = $0
+                return sut.selectedFenceDetail?.averagePing ?? "(no detail selected)"
+            } == [
+                "1670 ms",  // t = 0 - 5
+                "",         // t = 5 - 10
+                "150 ms",   // t = 10 - 20
+                "3000 ms",  // t = 20 - 30
+                "1100 ms",  // t = 30 = 40
+                "300 ms"    // t = 40+
+            ]
+        )
     }
 
     @Test func whenReceivingPingsForDifferentLocations_thenAssignesPingsToProperLocations() async throws {
@@ -89,8 +99,12 @@ import CoreLocation
         await sut.startTest()
 
         #expect(sut.fences.count == 2)
-        #expect(sut.fences.first?.locationItem.averagePing == "15 ms")
-        #expect(sut.fences.last?.locationItem.averagePing == "26 ms")
+
+        sut.selectedFenceID = sut.fences.first?.id
+        #expect(sut.selectedFenceDetail?.averagePing == "15 ms")
+
+        sut.selectedFenceID = sut.fences.last?.id
+        #expect(sut.selectedFenceDetail?.averagePing == "26 ms")
     }
 
     @Test func whenReceivedNoPings_thenLatestPingIsNotAvailable() async throws {
@@ -217,17 +231,15 @@ extension NetworkCoverageTests {
         refreshInterval: TimeInterval = 1,
         updates: [NetworkCoverageViewModel.Update] = [],
         locale: Locale = Locale(identifier: "en_US")
-    ) -> NetworkCoverageScene {
-        let viewModel = NetworkCoverageViewModel(
+    ) -> NetworkCoverageViewModel {
+        .init(
             areas: areas,
             refreshInterval: refreshInterval,
             updates: { updates.publisher.values },
             currentRadioTechnology: RadioTechnologyServiceStub(),
-            sendResultsService: SendCoverageResultsServiceSpy()
+            sendResultsService: SendCoverageResultsServiceSpy(),
+            locale: locale
         )
-        let presenter = NetworkCoverageViewPresenter(locale: locale)
-
-        return .init(viewModel: viewModel, presenter: presenter)
     }
 }
 
@@ -239,14 +251,10 @@ func makePingUpdate(at timestampOffset: TimeInterval, ms: some BinaryInteger) ->
     .ping(.init(result: .interval(.milliseconds(ms)), timestamp: Date(timeIntervalSinceReferenceDate: timestampOffset)))
 }
 
-@MainActor extension NetworkCoverageTests.NetworkCoverageScene {
+@MainActor extension NetworkCoverageViewModel {
     func startTest() async {
-        await viewModel.toggleMeasurement()
+        await toggleMeasurement()
     }
-
-    var fences: [NetworkCoverageViewPresenter.Fence] { presenter.fences(from: viewModel) }
-
-    var latestPing: String { viewModel.latestPing }
 }
 
 final class SendCoverageResultsServiceSpy: SendCoverageResultsService {
