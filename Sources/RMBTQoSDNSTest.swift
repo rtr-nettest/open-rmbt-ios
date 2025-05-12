@@ -47,7 +47,7 @@ import UIKit
             return
         }
         
-        var res = __res_9_state()
+        var res = __res_9_state().pointee
         guard res_9_ninit(&res) == 0 else {
             return
         }
