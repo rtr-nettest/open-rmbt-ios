@@ -218,33 +218,126 @@ import CoreLocation
         await sut.startTest()
         #expect(sut.latestPing == arguments.expectedLatestPing)
     }
+
+    @MainActor @Suite("WHEN Received Location Updates With Bad Accuracy")
+    struct WhenReceivedLocationUpdatesWithBadAccuracy {
+        @Test func goodLocationUpdatesAreInsideSameFence_thenNoNewFenceIsCreated() async throws {
+            let minAccuracy = CLLocationDistance(100)
+            let sut = makeSUT(minimumLocationAccuracy: minAccuracy, updates: [
+                makeLocationUpdate  (at: 0, lat: 1.0000000001, lon: 1.0000000002, accuracy: minAccuracy / 2),
+                makePingUpdate      (at: 1, ms: 100),
+                makeLocationUpdate  (at: 2, lat: 2, lon: 2, accuracy: minAccuracy * 2),
+                makePingUpdate      (at: 3, ms: 20),
+                makePingUpdate      (at: 4, ms: 30),
+                makeLocationUpdate  (at: 5, lat: 1.0, lon: 1.0000000001, accuracy: minAccuracy / 3),
+                makePingUpdate      (at: 6, ms: 200),
+                makePingUpdate      (at: 7, ms: 150),
+                makeLocationUpdate  (at: 8, lat: 2, lon: 3, accuracy: minAccuracy + 1),
+                makePingUpdate      (at: 9, ms: 300),
+                makeLocationUpdate  (at: 10, lat: 1.00000000002, lon: 1.0000000003, accuracy: minAccuracy - 1),
+                makePingUpdate      (at: 11, ms: 150),
+            ])
+            await sut.startTest()
+
+            #expect(sut.fences.count == 1)
+            #expect(sut.fences.first?.date == Date(timeIntervalSinceReferenceDate: 0))
+            #expect(sut.fences.first?.coordinate.latitude == 1.0000000001)
+            #expect(sut.fences.first?.coordinate.longitude == 1.0000000002)
+        }
+
+        @Test func goodLocationUpdatesAreInsideDifferentFences_theNewFencesAreCreated() async throws {
+            let minAccuracy = CLLocationDistance(100)
+            let sut = makeSUT(minimumLocationAccuracy: minAccuracy, updates: [
+                makeLocationUpdate  (at: 0, lat: 1, lon: 1, accuracy: minAccuracy / 2),
+                makePingUpdate      (at: 1, ms: 100),
+                makeLocationUpdate  (at: 2, lat: 2, lon: 2, accuracy: minAccuracy * 2),
+                makePingUpdate      (at: 3, ms: 20),
+                makePingUpdate      (at: 4, ms: 30),
+                makeLocationUpdate  (at: 5, lat: 2.000000001, lon: 2.000000002, accuracy: minAccuracy / 3),
+                makePingUpdate      (at: 6, ms: 200),
+                makePingUpdate      (at: 7, ms: 150),
+                makeLocationUpdate  (at: 8, lat: 2, lon: 2.0000000002, accuracy: minAccuracy + 1),
+                makePingUpdate      (at: 9, ms: 300),
+                makeLocationUpdate  (at: 10, lat: 2.0, lon: 2.0000000003, accuracy: minAccuracy - 1),
+                makePingUpdate      (at: 11, ms: 150),
+                makeLocationUpdate  (at: 12, lat: 3, lon: 2.0000000003, accuracy: minAccuracy / 4)
+            ])
+            await sut.startTest()
+
+            #expect(sut.fences.count == 3)
+            #expect(sut.fences.map(\.date).map(\.timeIntervalSinceReferenceDate) == [0, 5, 12])
+            #expect(sut.fences.map(\.coordinate) == [
+                .init(latitude: 1, longitude: 1),
+                .init(latitude: 2.000000001, longitude: 2.000000002),
+                .init(latitude: 3, longitude: 2.0000000003)
+            ])
+        }
+
+        @Test func pingsReceivedDuringTimeOfBadLocationAreIgnored() async throws {
+            let minAccuracy = CLLocationDistance(100)
+            let sut = makeSUT(minimumLocationAccuracy: minAccuracy, updates: [
+                makeLocationUpdate  (at: 0, lat: 1, lon: 1, accuracy: minAccuracy / 2),
+                makePingUpdate      (at: 1, ms: 100),
+                makeLocationUpdate  (at: 2, lat: 2, lon: 2, accuracy: minAccuracy * 2),
+                makePingUpdate      (at: 3, ms: 20),
+                makePingUpdate      (at: 4, ms: 30),
+                makeLocationUpdate  (at: 5, lat: 1, lon: 1.0000000001, accuracy: minAccuracy / 3),
+                makePingUpdate      (at: 6, ms: 200),
+                makePingUpdate      (at: 7, ms: 150),
+                makeLocationUpdate  (at: 8, lat: 2, lon: 3, accuracy: minAccuracy + 1),
+                makePingUpdate      (at: 9, ms: 300),
+                makeLocationUpdate  (at: 10, lat: 2, lon: 2.0000000003, accuracy: minAccuracy - 1),
+                makePingUpdate      (at: 11, ms: 400),
+                makeLocationUpdate  (at: 12, lat: 2.000000001, lon: 2.0000000002, accuracy: minAccuracy * 2),
+                makePingUpdate      (at: 13, ms: 600),
+                makeLocationUpdate  (at: 14, lat: 2.000000002, lon: 2.0000000003, accuracy: minAccuracy - 2),
+                makePingUpdate      (at: 15, ms: 200),
+            ])
+            await sut.startTest()
+
+            #expect(sut.fences.count == 2)
+
+            sut.selectedFenceID = sut.fences.first?.id
+            #expect(sut.selectedFenceDetail?.averagePing == "150 ms")
+
+            sut.selectedFenceID = sut.fences.last?.id
+            #expect(sut.selectedFenceDetail?.averagePing == "300 ms")
+        }
+    }
 }
 
-extension NetworkCoverageTests {
-    struct NetworkCoverageScene {
-        let viewModel: NetworkCoverageViewModel
-        let presenter: NetworkCoverageViewPresenter
-    }
+@MainActor func makeSUT(
+    areas: [LocationArea] = [],
+    refreshInterval: TimeInterval = 1,
+    minimumLocationAccuracy: CLLocationDistance = 100,
+    updates: [NetworkCoverageViewModel.Update] = [],
+    locale: Locale = Locale(identifier: "en_US")
+) -> NetworkCoverageViewModel {
+    .init(
+        areas: areas,
+        refreshInterval: refreshInterval,
+        minimumLocationAccuracy: minimumLocationAccuracy,
+        updates: { updates.publisher.values },
+        currentRadioTechnology: RadioTechnologyServiceStub(),
+        sendResultsService: SendCoverageResultsServiceSpy(),
+        locale: locale
+    )
+}
 
-    func makeSUT(
-        areas: [LocationArea] = [],
-        refreshInterval: TimeInterval = 1,
-        updates: [NetworkCoverageViewModel.Update] = [],
-        locale: Locale = Locale(identifier: "en_US")
-    ) -> NetworkCoverageViewModel {
-        .init(
-            areas: areas,
-            refreshInterval: refreshInterval,
-            updates: { updates.publisher.values },
-            currentRadioTechnology: RadioTechnologyServiceStub(),
-            sendResultsService: SendCoverageResultsServiceSpy(),
-            locale: locale
+func makeLocationUpdate(at timestampOffset: TimeInterval, lat: CLLocationDegrees, lon: CLLocationDegrees, accuracy: CLLocationAccuracy = 1) -> NetworkCoverageViewModel.Update {
+    let timestamp = Date(timeIntervalSinceReferenceDate: timestampOffset)
+    return .location(
+        LocationUpdate(
+            location: .init(
+                coordinate: .init(latitude: lat, longitude: lon),
+                altitude: 0,
+                horizontalAccuracy: accuracy,
+                verticalAccuracy: 1,
+                timestamp: timestamp
+            ) ,
+            timestamp: timestamp
         )
-    }
-}
-
-func makeLocationUpdate(at timestampOffset: TimeInterval, lat: CLLocationDegrees, lon: CLLocationDegrees) -> NetworkCoverageViewModel.Update {
-    .location(LocationUpdate(location: .init(latitude: lat, longitude: lon), timestamp: Date(timeIntervalSinceReferenceDate: timestampOffset)))
+    )
 }
 
 func makePingUpdate(at timestampOffset: TimeInterval, ms: some BinaryInteger) -> NetworkCoverageViewModel.Update {

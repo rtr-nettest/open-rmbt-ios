@@ -27,6 +27,7 @@ struct NetworkCoverageView: View {
         viewModel = NetworkCoverageViewModel(
             areas: areas,
             refreshInterval: 1,
+            minimumLocationAccuracy: 10,
             pingMeasurementService: { PingMeasurementService.pings2(
                 clock: ContinuousClock(),
                 pingSender: UDPPingSession(

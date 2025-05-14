@@ -77,6 +77,7 @@ struct FenceDetail: Equatable, Identifiable {
     }
     @ObservationIgnored private var selectedFence: FenceItem?
     @ObservationIgnored private var currentArea: LocationArea? { locationAreas.last }
+    @ObservationIgnored private var inaccurateLocationsWindows: [InaccurateLocationWindow] = []
 
     // Dependencies
     @ObservationIgnored private let currentRadioTechnology: any CurrentRadioTechnologyService
@@ -85,7 +86,7 @@ struct FenceDetail: Equatable, Identifiable {
 
     // Observable state
     var fenceRadius: CLLocationDistance = 20
-    var minimumLocationAccuracy: CLLocationDistance = 10
+    var minimumLocationAccuracy: CLLocationDistance
     private(set) var isStarted = false
     private(set) var errorMessage: String?
     private(set) var locations: [CLLocation] = []
@@ -119,6 +120,7 @@ struct FenceDetail: Equatable, Identifiable {
     init(
         areas: [LocationArea] = [],
         refreshInterval: TimeInterval,
+        minimumLocationAccuracy: CLLocationDistance,
         updates: @escaping () -> some AsynchronousSequence<Update>,
         currentRadioTechnology: some CurrentRadioTechnologyService,
         sendResultsService: some SendCoverageResultsService,
@@ -126,6 +128,7 @@ struct FenceDetail: Equatable, Identifiable {
     ) {
         self.locationAreas = areas
         self.refreshInterval = refreshInterval
+        self.minimumLocationAccuracy = minimumLocationAccuracy
         self.currentRadioTechnology = currentRadioTechnology
         self.sendResultsService = sendResultsService
         self.updates = updates
@@ -141,6 +144,7 @@ struct FenceDetail: Equatable, Identifiable {
     convenience init(
         areas: [LocationArea] = [],
         refreshInterval: TimeInterval,
+        minimumLocationAccuracy: CLLocationDistance,
         pingMeasurementService: @escaping () -> some PingsAsyncSequence,
         locationUpdatesService: some LocationUpdatesService,
         currentRadioTechnology: some CurrentRadioTechnologyService,
@@ -150,6 +154,7 @@ struct FenceDetail: Equatable, Identifiable {
         self.init(
             areas: areas,
             refreshInterval: refreshInterval,
+            minimumLocationAccuracy: minimumLocationAccuracy,
             updates: { merge(
                 pingMeasurementService().map(Update.ping),
                 locationUpdatesService.locations().map(Update.location)
@@ -170,7 +175,9 @@ struct FenceDetail: Equatable, Identifiable {
                     if firstPingTimestamp == nil {
                         firstPingTimestamp = pingUpdate.timestamp
                     }
-
+                    guard !wasInsideInaccurateLocationWindow(pingUpdate) else {
+                        continue
+                    }
                     pingResults.append(pingUpdate)
 
                     if var (area, idx) = locationAreas.area(at: pingUpdate.timestamp) {
@@ -185,8 +192,10 @@ struct FenceDetail: Equatable, Identifiable {
                     latestTechnology = displayValue(forRadioTechnology: currentRadioTechnology ?? "N/A")
 
                     guard isLocationPreciseEnough(location) else {
+                        startInaccurateLocationWidnowIfNeeded(at: location.timestamp)
                         continue
                     }
+                    stopInaccurateLocationWindow(at: location.timestamp)
 
                     let currentArea = currentArea
                     if var currentArea {
@@ -255,6 +264,46 @@ struct FenceDetail: Equatable, Identifiable {
 
     private func isLocationPreciseEnough(_ location: CLLocation) -> Bool {
         location.horizontalAccuracy <= minimumLocationAccuracy
+    }
+}
+
+// functionality related to `InaccurateLocationWindow` = a time window in which location updates accuracy was below
+// required threshold. In such situations, we want the received ping updates to be ignored, not be assigned to any fence
+// since we do not know for sure, where we are located
+private extension NetworkCoverageViewModel {
+    struct InaccurateLocationWindow {
+        let begin: Date
+        private(set) var end: Date?
+
+        init(begin: Date) {
+            self.begin = begin
+            self.end = nil
+        }
+
+        mutating func end(at endDate: Date) {
+            self.end = endDate
+        }
+    }
+
+    private func startInaccurateLocationWidnowIfNeeded(at date: Date) {
+        if let lastInterval = inaccurateLocationsWindows.last, lastInterval.end == nil {
+            // we are inside "ignore pings window", do nothing
+        } else {
+            // start new "ignore pings window"
+            inaccurateLocationsWindows.append(.init(begin: date))
+        }
+    }
+
+    private func stopInaccurateLocationWindow(at date: Date) {
+        if let lastInterval = inaccurateLocationsWindows.last, lastInterval.end == nil {
+            inaccurateLocationsWindows[inaccurateLocationsWindows.count - 1].end(at: date)
+        }
+    }
+
+    private func wasInsideInaccurateLocationWindow(_ pingUpdate: PingResult) -> Bool {
+        !inaccurateLocationsWindows
+            .filter { ($0.end == nil || $0.end! > pingUpdate.timestamp) &&  $0.begin < pingUpdate.timestamp }
+            .isEmpty
     }
 }
 
