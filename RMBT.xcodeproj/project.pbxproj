@@ -26,6 +26,7 @@
 		36B75A29273EA73C006F4CB3 /* RMBTHistoryLoopCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36B75A28273EA73C006F4CB3 /* RMBTHistoryLoopCell.swift */; };
 		491471362D1062DD00885B82 /* SendCoverageResultRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 491471352D1062DD00885B82 /* SendCoverageResultRequest.swift */; };
 		49312C752BE91CC2001AA226 /* RMBTHistoryDownloadViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49312C742BE91CC2001AA226 /* RMBTHistoryDownloadViewController.swift */; };
+		493D514C2DD7526200CC3473 /* libresolv.9.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 49C5E41A2DD74C3E00C537D9 /* libresolv.9.tbd */; };
 		494998E32B7E353C0067B3D8 /* TopPopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 494998E22B7E353C0067B3D8 /* TopPopoverView.swift */; };
 		495288A12D64D49400C73435 /* UDPConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 495288A02D64D49400C73435 /* UDPConnection.swift */; };
 		495288A32D64D4C600C73435 /* UDPPingSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 495288A22D64D4C600C73435 /* UDPPingSession.swift */; };
@@ -60,7 +61,6 @@
 		C5DEB482176364D900187C94 /* libicucore.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C5DEB481176364D900187C94 /* libicucore.dylib */; };
 		C5DEB484176364DF00187C94 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C5DEB483176364DF00187C94 /* libz.dylib */; };
 		C70C178C17D7BFC400F55964 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C70C178B17D7BFC400F55964 /* Images.xcassets */; };
-		C741B62C1DD99D7A0097D84D /* libresolv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = C741B62B1DD99D7A0097D84D /* libresolv.tbd */; };
 		C779E9E917403364003874AB /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C779E9E817403364003874AB /* QuartzCore.framework */; };
 		C783F6911EDC7EB4001CB2F9 /* loop_mode_info.html in Resources */ = {isa = PBXBuildFile; fileRef = C783F68D1EDC7EB4001CB2F9 /* loop_mode_info.html */; };
 		C783F6921EDC7EB4001CB2F9 /* loop_mode_info2.html in Resources */ = {isa = PBXBuildFile; fileRef = C783F68F1EDC7EB4001CB2F9 /* loop_mode_info2.html */; };
@@ -361,6 +361,7 @@
 		49B28C7B2BA19C5400697BB4 /* RMBTFilePreviewViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTFilePreviewViewController.swift; sourceTree = "<group>"; };
 		49B28C7D2BA4238700697BB4 /* TestExportFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestExportFormat.swift; sourceTree = "<group>"; };
 		49B4A4782D677407007C6A17 /* HTTPPingSender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPPingSender.swift; sourceTree = "<group>"; };
+		49C5E41A2DD74C3E00C537D9 /* libresolv.9.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libresolv.9.tbd; path = usr/lib/libresolv.9.tbd; sourceTree = SDKROOT; };
 		49C86FDC2AFBBF1500663CE2 /* RMBTConfig.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RMBTConfig.swift; sourceTree = "<group>"; };
 		49C921442D6CA0E20003EDBC /* CoverageMeasurementSessionInitializer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverageMeasurementSessionInitializer.swift; sourceTree = "<group>"; };
 		89CA21386C488DD817CA1DC2 /* Pods-RMBT.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RMBT.debug.xcconfig"; path = "Pods/Target Support Files/Pods-RMBT/Pods-RMBT.debug.xcconfig"; sourceTree = "<group>"; };
@@ -655,7 +656,6 @@
 			files = (
 				E9555EAD2727D49C003547B0 /* MetalKit.framework in Frameworks */,
 				497B42702D0064A40073775A /* AsyncAlgorithms in Frameworks */,
-				C741B62C1DD99D7A0097D84D /* libresolv.tbd in Frameworks */,
 				C7F08F6A1769F37700741844 /* CoreTelephony.framework in Frameworks */,
 				C5DEB484176364DF00187C94 /* libz.dylib in Frameworks */,
 				C5DEB482176364D900187C94 /* libicucore.dylib in Frameworks */,
@@ -674,6 +674,7 @@
 				C7DE147E173E8F610079477A /* Foundation.framework in Frameworks */,
 				C7DE1480173E8F610079477A /* CoreGraphics.framework in Frameworks */,
 				E9555EAF2727D4B1003547B0 /* CoreServices.framework in Frameworks */,
+				493D514C2DD7526200CC3473 /* libresolv.9.tbd in Frameworks */,
 				F71B138A4E5F6DC41FF14268 /* Pods_RMBT.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -980,6 +981,7 @@
 		C7DE147A173E8F610079477A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				49C5E41A2DD74C3E00C537D9 /* libresolv.9.tbd */,
 				E9555EAE2727D4B0003547B0 /* CoreServices.framework */,
 				E9555EAA2727D49C003547B0 /* Metal.framework */,
 				E9555EAB2727D49C003547B0 /* MetalKit.framework */,
@@ -1500,7 +1502,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				497B426E2D0046520073775A /* PBXTargetDependency */,
 			);
 			name = RMBT;
 			productName = RMBT;
@@ -1643,9 +1644,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-RMBT/Pods-RMBT-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-RMBT/Pods-RMBT-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -1943,10 +1948,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		497B426E2D0046520073775A /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			productRef = 497B426D2D0046520073775A /* AsyncAlgorithms */;
-		};
 		498660232D8833E8005E258C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			productRef = 498660222D8833E8005E258C /* Clocks */;
@@ -2205,7 +2206,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 8;
 				DEVELOPMENT_TEAM = T7Y947AEPK;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -2247,7 +2248,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 8;
 				DEVELOPMENT_TEAM = T7Y947AEPK;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -2325,11 +2326,6 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		497B426D2D0046520073775A /* AsyncAlgorithms */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 497B426C2D0046030073775A /* XCRemoteSwiftPackageReference "swift-async-algorithms" */;
-			productName = AsyncAlgorithms;
-		};
 		497B426F2D0064A40073775A /* AsyncAlgorithms */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 497B426C2D0046030073775A /* XCRemoteSwiftPackageReference "swift-async-algorithms" */;
