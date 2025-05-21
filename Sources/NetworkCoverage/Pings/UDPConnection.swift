@@ -27,13 +27,12 @@ final class UDPConnection: UDPConnectable {
 
     func start(host: String, port: String) async throws(UDPConnectionError) {
         let params = NWParameters.udp
-//        params.allowLocalEndpointReuse = true
-//        params.includePeerToPeer = true
+        let ip = params.defaultProtocolStack.internetProtocol! as! NWProtocolIP.Options
+        ip.version = .any
         let host = NWEndpoint.Host(host)
         guard let aPort = NWEndpoint.Port(port) else {
             throw .invalidHostOrPort
         }
-
         connection = NWConnection(host: host, port: aPort, using: params)
         connection?.start(queue: .global())
     }
