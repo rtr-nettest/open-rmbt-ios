@@ -62,6 +62,7 @@ public class SendCoverageResultRequest: BasicRequest {
 
     var fences: [CoverageFence]
     var testUUID: String
+    var clientUUID: String?
 
     public required init?(map: Map) {
         fatalError("init(map:) has not been implemented")
@@ -72,6 +73,7 @@ public class SendCoverageResultRequest: BasicRequest {
 
         fences <- map["fences"]
         testUUID <- map["test_uuid"]
+        clientUUID <- map["client_uuid"]
     }
 
     init(areas: [LocationArea], testUUID: String) {

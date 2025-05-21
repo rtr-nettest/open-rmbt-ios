@@ -427,8 +427,8 @@ extension RMBTControlServer {
     ) {
         ensureClientUuid(
             success: { uuid in
-                coverageRequest.uuid = uuid
-                self.request(.post, path: "/coverage", requestObject: coverageRequest, success: success, error: failure)
+                coverageRequest.clientUUID = uuid
+                self.request(.post, path: "/coverageResult", requestObject: coverageRequest, success: success, error: failure)
             },
             error: failure
         )
