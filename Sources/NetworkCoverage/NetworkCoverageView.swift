@@ -325,7 +325,6 @@ private extension View {
     )
 }
 
-#if DEBUG
 extension LocationArea {
     init(startingLocation: CLLocation, dateEntered: Date, technology: String?, avgPing: Duration) {
         self.init(
@@ -336,4 +335,3 @@ extension LocationArea {
         )
     }
 }
-#endif
