@@ -434,16 +434,17 @@ extension RMBTControlServer {
         )
     }
 
-    func getSignalRequest(
-        _ request: SignalRequestRequest,
+    func getCoverageRequest(
+        _ request: CoverageRequestRequest,
         loopUUID: String? = nil,
         success: @escaping (_ response: SignalRequestResponse) -> (),
         error failure: @escaping ErrorCallback
     ) {
         ensureClientUuid(
             success: { uuid in
+                request.clientUUID = uuid
                 request.uuid = uuid
-                self.request(.post, path: "/signalRequest", requestObject: request, success: success, error: failure)
+                self.request(.post, path: "/coverageRequest", requestObject: request, success: success, error: failure)
             },
             error: failure
         )

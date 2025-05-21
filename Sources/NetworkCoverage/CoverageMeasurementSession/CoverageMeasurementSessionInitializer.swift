@@ -31,8 +31,8 @@ class CoverageMeasurementSessionInitializer {
 
     func startNewSession(loopID: String? = nil) async throws -> SessionCredentials {
         let response = try await withCheckedThrowingContinuation { continuation in
-            controlServer.getSignalRequest(
-                SignalRequestRequest(time: Int(now().timeIntervalSince1970 * 1000), measurementType: "dedicated")) { response in
+            controlServer.getCoverageRequest(
+                CoverageRequestRequest(time: Int(now().timeIntervalSince1970 * 1000), measurementType: "dedicated")) { response in
                     continuation.resume(returning: response)
                 } error: { error in
                     continuation.resume(throwing: error)
@@ -55,9 +55,10 @@ class CoverageMeasurementSessionInitializer {
 
 import ObjectMapper
 
-class SignalRequestRequest: BasicRequest {
+class CoverageRequestRequest: BasicRequest {
     var time: Int
     var measurementType: String
+    var clientUUID: String?
 
     init(time: Int, measurementType: String) {
         self.time = time
@@ -72,6 +73,7 @@ class SignalRequestRequest: BasicRequest {
     override func mapping(map: Map) {
         super.mapping(map: map)
 
+        clientUUID <- map["client_uuid"]
         time <- map["time"]
         measurementType <- map["measurement_type_flag"]
     }
