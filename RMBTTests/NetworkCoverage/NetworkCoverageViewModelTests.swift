@@ -3,13 +3,14 @@
 //  RMBTTest
 //
 //  Created by Jiri Urbasek on 13.01.2025.
-//  Copyright © 2025 appscape gmbh. All rights reserved.
+//  Copyright 2025 appscape gmbh. All rights reserved.
 //
 
 import Testing
 @testable import RMBT
 import Combine
 import CoreLocation
+import SwiftData
 
 // Looks like a bug inside SwiftTesting/Xcode - when running tests paralerly it crashes at objc_release_x8 deep inside
 // the stanradrd library. So running tests serially fixes it partially.
@@ -28,7 +29,7 @@ import CoreLocation
         #expect(sut.fences.first?.coordinate.latitude == 1.0)
         #expect(sut.fences.last?.coordinate.longitude == 2.0)
     }
-    
+
     @Test func whenReceivingMultiplePingsForOneLocation_thenCombinesPingTotalValue() async throws {
         let sut = makeSUT(updates: [
             makeLocationUpdate  (at: 1, lat: 1.0, lon: 1.0),
@@ -153,7 +154,7 @@ import CoreLocation
             makePingUpdate      (at: 11, ms: 20),
             makePingUpdate      (at: 12, ms: 40),
             makeLocationUpdate  (at: 13, lat: 2.00000001, lon: 2.000000001)
-        ], "13 ms"),
+         ], "13 ms"),
         ([ // first interval, pings received withing different fences
             // refresh interval 0-9
             makePingUpdate      (at: 0, ms: 10),
@@ -168,7 +169,7 @@ import CoreLocation
             makePingUpdate      (at: 11, ms: 20),
             makePingUpdate      (at: 12, ms: 40),
             makeLocationUpdate  (at: 13, lat: 2.00000001, lon: 2.000000001)
-        ], "13 ms"),
+         ], "13 ms"),
         ([ // third interval, pings received withing same fence
             // refresh interval 0-9
             makePingUpdate      (at: 0, ms: 5),
@@ -188,7 +189,7 @@ import CoreLocation
             makePingUpdate      (at: 24, ms: 200),
             // refresh interval 30-39
             makePingUpdate      (at: 31, ms: 10),
-        ], "140 ms"),
+         ], "140 ms"),
         ([ // third interval, pings received withing different fences
             // refresh interval 0-9
             makePingUpdate      (at: 0, ms: 5),
@@ -211,7 +212,7 @@ import CoreLocation
             makePingUpdate      (at: 25, ms: 200),
             // refresh interval 30-39
             makePingUpdate      (at: 31, ms: 10),
-        ], "140 ms")
+         ], "140 ms")
     ])
     func whenReceivedPingsAfterCompletingRefreshInterval_thenLatestPingIsAverageOfAllPingsWithinLastCompletedRefreshInterva(arguments: (updates: [NetworkCoverageViewModel.Update], expectedLatestPing: String)) async {
         let sut = makeSUT(refreshInterval: 10, updates: arguments.updates)
@@ -304,6 +305,86 @@ import CoreLocation
             #expect(sut.selectedFenceDetail?.averagePing == "300 ms")
         }
     }
+
+    @MainActor @Suite("Persistence")
+    struct Persistence {
+        @Test func whenReceivingLocationUpdatesAndPings_thenSavesNewPersistentLocationArea() async throws {
+            let persistenceLayer = PersistenceLayerSpy()
+            let sut = makeSUT(
+                updates: [
+                    makeLocationUpdate  (at: 0, lat: 1.0, lon: 1.0),
+                    makePingUpdate      (at: 1, ms: 100),
+                    makePingUpdate      (at: 2, ms: 200),
+                    makeLocationUpdate  (at: 3, lat: 2.0, lon: 2.0),
+                    makePingUpdate      (at: 4, ms: 300),
+                    makeLocationUpdate  (at: 5, lat: 2.000001, lon: 2.0000001),
+                    makePingUpdate      (at: 6, ms: 500),
+                    makeLocationUpdate  (at: 7, lat: 3.0, lon: 3.0),
+                ],
+                persistenceLayer: persistenceLayer
+            )
+            await sut.startTest()
+
+            let savedAreas = try persistenceLayer.savedAreas()
+
+            #expect(savedAreas.count == 2)
+            
+            #expect(savedAreas.first?.timestamp ==  UInt64(Date(timeIntervalSinceReferenceDate: 0).timeIntervalSince1970) * 1_000_000)
+            #expect(savedAreas.first?.latitude == 1.0)
+            #expect(savedAreas.first?.longitude == 1.0)
+            #expect(savedAreas.first?.avgPingMilliseconds == 150)
+            #expect(savedAreas.first?.technology == nil)
+
+            #expect(savedAreas.last?.timestamp ==  UInt64(Date(timeIntervalSinceReferenceDate: 3).timeIntervalSince1970) * 1_000_000)
+            #expect(savedAreas.last?.latitude == 2.0)
+            #expect(savedAreas.last?.longitude == 2.0)
+            #expect(savedAreas.last?.avgPingMilliseconds == 400)
+            #expect(savedAreas.last?.technology == nil)
+        }
+
+        @Test func whenSendingTestResultsSucceeds_thenClearsPersistedData() async throws {
+            let persistenceLayer = PersistenceLayerSpy()
+            let sendResultsService = SendCoverageResultsServiceSpy(sendResult: .success(()))
+            let sut = makeSUT(
+                updates: [
+                    makeLocationUpdate  (at: 0, lat: 1.0, lon: 1.0),
+                    makePingUpdate      (at: 1, ms: 100),
+                    makePingUpdate      (at: 2, ms: 200),
+                    makeLocationUpdate  (at: 3, lat: 2.0, lon: 2.0),
+                    makePingUpdate      (at: 4, ms: 300)
+                ],
+                persistenceLayer: persistenceLayer,
+                sendResultsService: sendResultsService
+            )
+            await sut.startTest()
+            await sut.toggleMeasurement() // Stop to trigger save and send
+
+            let savedAreas = try persistenceLayer.savedAreas()
+            #expect(savedAreas.isEmpty)
+        }
+
+        @Test func whenSendingTestResultsFails_thenPersistedDataIsNotCleared() async throws {
+            let persistenceLayer = PersistenceLayerSpy()
+            let sendResultsService = SendCoverageResultsServiceSpy(sendResult: .failure(makeSaveError()))
+            let sut = makeSUT(
+                minimumLocationAccuracy: 10,
+                updates: [
+                    makeLocationUpdate(at: 0, lat: 1.0, lon: 1.0, accuracy: 5),
+                    makePingUpdate(at: 1, ms: 100),
+                    makePingUpdate(at: 2, ms: 200),
+                    makeLocationUpdate(at: 3, lat: 2.0, lon: 2.0, accuracy: 5),
+                    makePingUpdate(at: 4, ms: 300)
+                ],
+                persistenceLayer: persistenceLayer,
+                sendResultsService: sendResultsService
+            )
+            await sut.startTest()
+            await sut.toggleMeasurement() // Stop to trigger save and send
+
+            let savedAreas = try persistenceLayer.savedAreas()
+            #expect(!savedAreas.isEmpty)
+        }
+    }
 }
 
 @MainActor func makeSUT(
@@ -311,7 +392,9 @@ import CoreLocation
     refreshInterval: TimeInterval = 1,
     minimumLocationAccuracy: CLLocationDistance = 100,
     updates: [NetworkCoverageViewModel.Update] = [],
-    locale: Locale = Locale(identifier: "en_US")
+    locale: Locale = Locale(identifier: "en_US"),
+    persistenceLayer: PersistenceLayerSpy = .init(),
+    sendResultsService: SendCoverageResultsServiceSpy = .init()
 ) -> NetworkCoverageViewModel {
     .init(
         areas: areas,
@@ -319,8 +402,9 @@ import CoreLocation
         minimumLocationAccuracy: minimumLocationAccuracy,
         updates: { updates.publisher.values },
         currentRadioTechnology: RadioTechnologyServiceStub(),
-        sendResultsService: SendCoverageResultsServiceSpy(),
-        locale: locale
+        sendResultsService: sendResultsService,
+        locale: locale,
+        modelContext: persistenceLayer.modelContext
     )
 }
 
@@ -344,6 +428,26 @@ func makePingUpdate(at timestampOffset: TimeInterval, ms: some BinaryInteger) ->
     .ping(.init(result: .interval(.milliseconds(ms)), timestamp: Date(timeIntervalSinceReferenceDate: timestampOffset)))
 }
 
+func makeSaveError() -> Error {
+    NSError(domain: "test", code: 1, userInfo: nil)
+}
+
+func makePersistedFence(
+    at timestampOffset: TimeInterval,
+    lat: Double,
+    lon: Double,
+    ping: Int?,
+    technology: String?
+) -> PersistentLocationArea {
+    return PersistentLocationArea(
+        timestamp: UInt64(Date(timeIntervalSinceReferenceDate: timestampOffset).timeIntervalSince1970) * 1_000_000,
+        latitude: lat,
+        longitude: lon,
+        avgPingMilliseconds: ping,
+        technology: technology
+    )
+}
+
 @MainActor extension NetworkCoverageViewModel {
     func startTest() async {
         await toggleMeasurement()
@@ -352,9 +456,20 @@ func makePingUpdate(at timestampOffset: TimeInterval, ms: some BinaryInteger) ->
 
 final class SendCoverageResultsServiceSpy: SendCoverageResultsService {
     private(set) var capturedSentAreas: [[LocationArea]] = []
+    private let sendResult: Result<Void, Error>
+
+    init(sendResult: Result<Void, Error> = .success(())) {
+        self.sendResult = sendResult
+    }
 
     func send(areas: [LocationArea]) async throws {
         capturedSentAreas.append(areas)
+        switch sendResult {
+        case .success:
+            return
+        case .failure(let error):
+            throw error
+        }
     }
 }
 
@@ -363,5 +478,22 @@ extension AsyncThrowingPublisher: @retroactive AsynchronousSequence {}
 final class RadioTechnologyServiceStub: CurrentRadioTechnologyService {
     func technologyCode() -> String? {
         nil
+    }
+}
+
+final class PersistenceLayerSpy {
+    let modelContext: ModelContext
+
+    init() {
+        let container = try! ModelContainer(
+            for: PersistentLocationArea.self,
+            configurations: .init(for: PersistentLocationArea.self, isStoredInMemoryOnly: true)
+        )
+        self.modelContext = ModelContext(container)
+    }
+
+    func savedAreas() throws -> [PersistentLocationArea] {
+        let descriptor = FetchDescriptor<PersistentLocationArea>()
+        return try modelContext.fetch(descriptor)
     }
 }

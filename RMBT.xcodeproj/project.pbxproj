@@ -24,6 +24,7 @@
 		36B75A212739692C006F4CB3 /* RMBTMaterialTextFieldState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36B75A202739692C006F4CB3 /* RMBTMaterialTextFieldState.swift */; };
 		36B75A27273EA096006F4CB3 /* RMBTHistoryLoopCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 36B75A26273EA096006F4CB3 /* RMBTHistoryLoopCell.xib */; };
 		36B75A29273EA73C006F4CB3 /* RMBTHistoryLoopCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36B75A28273EA73C006F4CB3 /* RMBTHistoryLoopCell.swift */; };
+		4909C2D32DE4A6D0003F3AB6 /* PersistentLocationArea.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4909C2D12DE4A6D0003F3AB6 /* PersistentLocationArea.swift */; };
 		491471362D1062DD00885B82 /* SendCoverageResultRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 491471352D1062DD00885B82 /* SendCoverageResultRequest.swift */; };
 		49312C752BE91CC2001AA226 /* RMBTHistoryDownloadViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49312C742BE91CC2001AA226 /* RMBTHistoryDownloadViewController.swift */; };
 		493D514C2DD7526200CC3473 /* libresolv.9.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 49C5E41A2DD74C3E00C537D9 /* libresolv.9.tbd */; };
@@ -339,6 +340,7 @@
 		36B75A202739692C006F4CB3 /* RMBTMaterialTextFieldState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTMaterialTextFieldState.swift; sourceTree = "<group>"; };
 		36B75A26273EA096006F4CB3 /* RMBTHistoryLoopCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = RMBTHistoryLoopCell.xib; sourceTree = "<group>"; };
 		36B75A28273EA73C006F4CB3 /* RMBTHistoryLoopCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTHistoryLoopCell.swift; sourceTree = "<group>"; };
+		4909C2D12DE4A6D0003F3AB6 /* PersistentLocationArea.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistentLocationArea.swift; sourceTree = "<group>"; };
 		491471352D1062DD00885B82 /* SendCoverageResultRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendCoverageResultRequest.swift; sourceTree = "<group>"; };
 		49312C742BE91CC2001AA226 /* RMBTHistoryDownloadViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTHistoryDownloadViewController.swift; sourceTree = "<group>"; };
 		494998E22B7E353C0067B3D8 /* TopPopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopPopoverView.swift; sourceTree = "<group>"; };
@@ -682,6 +684,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4909C2D22DE4A6D0003F3AB6 /* Persistence */ = {
+			isa = PBXGroup;
+			children = (
+				4909C2D12DE4A6D0003F3AB6 /* PersistentLocationArea.swift */,
+			);
+			path = Persistence;
+			sourceTree = "<group>";
+		};
 		4952889F2D64D45200C73435 /* Pings */ = {
 			isa = PBXGroup;
 			children = (
@@ -708,6 +718,7 @@
 				49C921432D6CA0D50003EDBC /* CoverageMeasurementSession */,
 				4952889F2D64D45200C73435 /* Pings */,
 				499406DE2D9D1C6D00237AC1 /* LocationUpdates */,
+				4909C2D22DE4A6D0003F3AB6 /* Persistence */,
 				49A31C6A2D3A971B0039052B /* Helpers */,
 				495F7B9A2CF48FC4003750A3 /* NetworkCoverageView.swift */,
 				498EF3192D0B0CD7003A79EB /* NetworkCoverageViewModel.swift */,
@@ -1755,6 +1766,7 @@
 				E9400F1226BE707C0067273A /* RMBTMapServer.swift in Sources */,
 				E9E993BA26EA398500E7EED6 /* RMBTHistoryMapCell.swift in Sources */,
 				E97CF78B2761FC5B0092352C /* RMBTHelpers.swift in Sources */,
+				4909C2D32DE4A6D0003F3AB6 /* PersistentLocationArea.swift in Sources */,
 				49B28C7A2BA1914E00697BB4 /* RMBTTestExportCell.swift in Sources */,
 				E93FB0F226F39A8C00DD24CD /* RMBTHistoryQoSSingleResultCell.swift in Sources */,
 				E926C2F4276A3345009FCF12 /* RMBTQoSTestRunner.swift in Sources */,

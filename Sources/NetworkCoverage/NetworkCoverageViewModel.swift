@@ -3,7 +3,7 @@
 //  RMBT
 //
 //  Created by Jiri Urbasek on 12/12/24.
-//  Copyright © 2024 appscape gmbh. All rights reserved.
+//  Copyright 2024 appscape gmbh. All rights reserved.
 //
 
 import Foundation
@@ -11,6 +11,7 @@ import CoreLocation
 import AsyncAlgorithms
 import CoreTelephony
 import SwiftUI
+import SwiftData
 
 var backgroundActivity: CLBackgroundActivitySession?
 
@@ -60,7 +61,7 @@ struct FenceDetail: Equatable, Identifiable {
     }
 
     // Private state
-    @ObservationIgnored private var initialLocation: CLLocation?
+    @ObservationIgnored private var initialLocation: Date?
     @ObservationIgnored private let selectedItemDateFormatter: DateFormatter
     @ObservationIgnored private let refreshInterval: TimeInterval
     @ObservationIgnored private var firstPingTimestamp: Date?
@@ -83,6 +84,7 @@ struct FenceDetail: Equatable, Identifiable {
     @ObservationIgnored private let currentRadioTechnology: any CurrentRadioTechnologyService
     @ObservationIgnored private let sendResultsService: any SendCoverageResultsService
     @ObservationIgnored private let updates: () -> any AsynchronousSequence<Update>
+    @ObservationIgnored private let modelContext: ModelContext
 
     // Observable state
     var fenceRadius: CLLocationDistance = 20
@@ -124,7 +126,8 @@ struct FenceDetail: Equatable, Identifiable {
         updates: @escaping () -> some AsynchronousSequence<Update>,
         currentRadioTechnology: some CurrentRadioTechnologyService,
         sendResultsService: some SendCoverageResultsService,
-        locale: Locale
+        locale: Locale,
+        modelContext: ModelContext
     ) {
         self.locationAreas = areas
         self.refreshInterval = refreshInterval
@@ -132,6 +135,7 @@ struct FenceDetail: Equatable, Identifiable {
         self.currentRadioTechnology = currentRadioTechnology
         self.sendResultsService = sendResultsService
         self.updates = updates
+        self.modelContext = modelContext
         selectedItemDateFormatter = {
             let dateFormatter = DateFormatter()
             dateFormatter.locale = locale
@@ -149,7 +153,8 @@ struct FenceDetail: Equatable, Identifiable {
         locationUpdatesService: some LocationUpdatesService,
         currentRadioTechnology: some CurrentRadioTechnologyService,
         sendResultsService: some SendCoverageResultsService,
-        locale: Locale = .autoupdatingCurrent
+        locale: Locale = .autoupdatingCurrent,
+        modelContext: ModelContext
     ) {
         self.init(
             areas: areas,
@@ -161,7 +166,8 @@ struct FenceDetail: Equatable, Identifiable {
             )},
             currentRadioTechnology: currentRadioTechnology,
             sendResultsService: sendResultsService,
-            locale: locale
+            locale: locale,
+            modelContext: modelContext
         )
     }
 
@@ -209,6 +215,9 @@ struct FenceDetail: Equatable, Identifiable {
                             currentArea.exit(at: locationUpdate.timestamp)
                             locationAreas[locationAreas.endIndex - 1] = currentArea
 
+                            modelContext.insert(PersistentLocationArea(from: currentArea))
+                            try? modelContext.save()
+
                             locationAreas.append(newArea)
                         } else {
                             currentArea.append(location: location)
@@ -246,8 +255,18 @@ struct FenceDetail: Equatable, Identifiable {
         latestTechnology = "N/A"
 
         if !locationAreas.isEmpty {
+            // save last location unexited location area into the persistence layer
+            if let lastArea = locationAreas.last, lastArea.dateExited == nil {
+                let persistentArea = PersistentLocationArea(from: lastArea)
+                modelContext.insert(persistentArea)
+                try? modelContext.save()
+            }
+
             do {
                 try await sendResultsService.send(areas: locationAreas)
+                // Clear persisted data after successful send
+                try modelContext.delete(model: PersistentLocationArea.self)
+                try modelContext.save()
             } catch {
                 // TODO: display error
             }

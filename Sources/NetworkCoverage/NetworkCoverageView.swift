@@ -10,6 +10,30 @@ import SwiftUI
 import CoreLocation
 import MapKit
 
+import SwiftData
+
+final class UserDatabase {
+    static let shared = UserDatabase()
+
+    private let container: ModelContainer
+
+    init(useInMemoryStore: Bool = false) {
+        let configuration = ModelConfiguration(
+            for: PersistentLocationArea.self,
+            isStoredInMemoryOnly: useInMemoryStore
+        )
+
+        container = try! ModelContainer(
+            for: PersistentLocationArea.self,
+            configurations: configuration
+        )
+    }
+
+    var context: ModelContext {
+        return ModelContext(container)
+    }
+}
+
 struct NetworkCoverageView: View {
     @Bindable var viewModel: NetworkCoverageViewModel
 
@@ -40,7 +64,8 @@ struct NetworkCoverageView: View {
             ) },
             locationUpdatesService: RealLocationUpdatesService(now: dateNow),
             currentRadioTechnology: CTTelephonyRadioTechnologyService(),
-            sendResultsService: resultSender
+            sendResultsService: resultSender,
+            modelContext: UserDatabase.shared.context
         )
     }
 
