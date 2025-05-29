@@ -36,6 +36,11 @@ protocol SendCoverageResultsService {
     func send(areas: [LocationArea]) async throws
 }
 
+protocol FencePersistenceService {
+    func save(_ area: LocationArea) throws
+    func clearAll() throws
+}
+
 struct FenceItem: Identifiable, Hashable {
     let id: UUID
     let date: Date
@@ -84,7 +89,7 @@ struct FenceDetail: Equatable, Identifiable {
     @ObservationIgnored private let currentRadioTechnology: any CurrentRadioTechnologyService
     @ObservationIgnored private let sendResultsService: any SendCoverageResultsService
     @ObservationIgnored private let updates: () -> any AsynchronousSequence<Update>
-    @ObservationIgnored private let modelContext: ModelContext
+    @ObservationIgnored private let persistenceService: any FencePersistenceService
 
     // Observable state
     var fenceRadius: CLLocationDistance = 20
@@ -126,16 +131,18 @@ struct FenceDetail: Equatable, Identifiable {
         updates: @escaping () -> some AsynchronousSequence<Update>,
         currentRadioTechnology: some CurrentRadioTechnologyService,
         sendResultsService: some SendCoverageResultsService,
-        locale: Locale,
-        modelContext: ModelContext
+        modelContext: ModelContext,
+        locale: Locale
     ) {
         self.locationAreas = areas
         self.refreshInterval = refreshInterval
         self.minimumLocationAccuracy = minimumLocationAccuracy
         self.currentRadioTechnology = currentRadioTechnology
         self.sendResultsService = sendResultsService
+        self.persistenceService = SwiftDataFencePersistenceService(
+            modelContext: modelContext
+        )
         self.updates = updates
-        self.modelContext = modelContext
         selectedItemDateFormatter = {
             let dateFormatter = DateFormatter()
             dateFormatter.locale = locale
@@ -153,8 +160,8 @@ struct FenceDetail: Equatable, Identifiable {
         locationUpdatesService: some LocationUpdatesService,
         currentRadioTechnology: some CurrentRadioTechnologyService,
         sendResultsService: some SendCoverageResultsService,
-        locale: Locale = .autoupdatingCurrent,
-        modelContext: ModelContext
+        modelContext: ModelContext,
+        locale: Locale = .autoupdatingCurrent
     ) {
         self.init(
             areas: areas,
@@ -163,11 +170,12 @@ struct FenceDetail: Equatable, Identifiable {
             updates: { merge(
                 pingMeasurementService().map(Update.ping),
                 locationUpdatesService.locations().map(Update.location)
-            )},
+            )
+            },
             currentRadioTechnology: currentRadioTechnology,
             sendResultsService: sendResultsService,
-            locale: locale,
-            modelContext: modelContext
+            modelContext: modelContext,
+            locale: locale
         )
     }
 
@@ -215,8 +223,7 @@ struct FenceDetail: Equatable, Identifiable {
                             currentArea.exit(at: locationUpdate.timestamp)
                             locationAreas[locationAreas.endIndex - 1] = currentArea
 
-                            modelContext.insert(PersistentLocationArea(from: currentArea))
-                            try? modelContext.save()
+                            try? persistenceService.save(currentArea)
 
                             locationAreas.append(newArea)
                         } else {
@@ -257,16 +264,13 @@ struct FenceDetail: Equatable, Identifiable {
         if !locationAreas.isEmpty {
             // save last location unexited location area into the persistence layer
             if let lastArea = locationAreas.last, lastArea.dateExited == nil {
-                let persistentArea = PersistentLocationArea(from: lastArea)
-                modelContext.insert(persistentArea)
-                try? modelContext.save()
+                try? persistenceService.save(lastArea)
             }
 
             do {
                 try await sendResultsService.send(areas: locationAreas)
                 // Clear persisted data after successful send
-                try modelContext.delete(model: PersistentLocationArea.self)
-                try modelContext.save()
+                try persistenceService.clearAll()
             } catch {
                 // TODO: display error
             }

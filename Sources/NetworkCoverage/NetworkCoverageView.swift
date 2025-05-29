@@ -3,7 +3,7 @@
 //  RMBT
 //
 //  Created by Jiri Urbasek on 11/25/24.
-//  Copyright © 2024 appscape gmbh. All rights reserved.
+//  Copyright 2024 appscape gmbh. All rights reserved.
 //
 
 import SwiftUI

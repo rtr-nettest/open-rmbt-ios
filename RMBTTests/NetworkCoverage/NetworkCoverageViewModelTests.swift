@@ -327,8 +327,8 @@ import SwiftData
 
             let savedAreas = try persistenceLayer.savedAreas()
 
-            #expect(savedAreas.count == 2)
-            
+            try #require(savedAreas.count == 2)
+
             #expect(savedAreas.first?.timestamp ==  UInt64(Date(timeIntervalSinceReferenceDate: 0).timeIntervalSince1970) * 1_000_000)
             #expect(savedAreas.first?.latitude == 1.0)
             #expect(savedAreas.first?.longitude == 1.0)
@@ -403,8 +403,8 @@ import SwiftData
         updates: { updates.publisher.values },
         currentRadioTechnology: RadioTechnologyServiceStub(),
         sendResultsService: sendResultsService,
-        locale: locale,
-        modelContext: persistenceLayer.modelContext
+        modelContext: persistenceLayer.modelContext,
+        locale: locale
     )
 }
 
