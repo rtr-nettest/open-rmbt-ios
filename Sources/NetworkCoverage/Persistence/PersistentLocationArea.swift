@@ -9,16 +9,19 @@ final class PersistentLocationArea {
     var longitude: Double
     var avgPingMilliseconds: Int?
     var technology: String?
+    var testUUID: String
 
-    init(from area: LocationArea) {
+    init(from area: LocationArea, testUUID: String) {
         self.timestamp = UInt64(area.dateEntered.timeIntervalSince1970 * 1_000_000) // microseconds
         self.latitude = area.startingLocation.coordinate.latitude
         self.longitude = area.startingLocation.coordinate.longitude
         self.avgPingMilliseconds = area.averagePing
         self.technology = area.technologies.last
+        self.testUUID = testUUID
     }
 
     init(
+        testUUID: String,
         timestamp: UInt64,
         latitude: Double,
         longitude: Double,
@@ -30,5 +33,6 @@ final class PersistentLocationArea {
         self.longitude = longitude
         self.avgPingMilliseconds = avgPingMilliseconds
         self.technology = technology
+        self.testUUID = testUUID
     }
 }

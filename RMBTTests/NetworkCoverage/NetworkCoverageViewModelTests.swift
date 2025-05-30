@@ -389,22 +389,6 @@ func makeSaveError() -> Error {
     NSError(domain: "test", code: 1, userInfo: nil)
 }
 
-func makePersistedFence(
-    at timestampOffset: TimeInterval,
-    lat: Double,
-    lon: Double,
-    ping: Int?,
-    technology: String?
-) -> PersistentLocationArea {
-    return PersistentLocationArea(
-        timestamp: UInt64(Date(timeIntervalSinceReferenceDate: timestampOffset).timeIntervalSince1970) * 1_000_000,
-        latitude: lat,
-        longitude: lon,
-        avgPingMilliseconds: ping,
-        technology: technology
-    )
-}
-
 @MainActor extension NetworkCoverageViewModel {
     func startTest() async {
         await toggleMeasurement()

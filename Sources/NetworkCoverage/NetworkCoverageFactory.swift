@@ -3,8 +3,7 @@
 //  RMBT
 //
 //  Created by Jiri Urbasek on 30.05.2025.
-//  Copyright © 2025 appscape gmbh. All rights reserved.
-//
+//  Copyright 2025 appscape gmbh. All rights reserved.
 
 import Foundation
 import SwiftData
@@ -19,30 +18,38 @@ final class UserDatabase {
             for: PersistentLocationArea.self,
             isStoredInMemoryOnly: useInMemoryStore
         )
-
         container = try! ModelContainer(
             for: PersistentLocationArea.self,
             configurations: configuration
         )
     }
+
+    @inlinable var modelContext: ModelContext { .init(container) }
 }
 
 struct NetworkCoverageFactory {
-    private let container: ModelContainer
+    private let database: UserDatabase
 
-    init(container: ModelContainer) {
-        self.container = container
+    init(database: UserDatabase) {
+        self.database = database
     }
 
     @MainActor func makeCoverageViewModel(areas: [LocationArea] = []) -> NetworkCoverageViewModel {
-        // TODO: move setup code below into some "Composition root" file
         let dateNow: () -> Date = Date.init
         let sessionInitializer = CoverageMeasurementSessionInitializer(
             now: dateNow,
             controlServer: RMBTControlServer.shared
         )
-        let resultSender = ControlServerCoverageResultsService(
-            controlServer: RMBTControlServer.shared,
+        let resultSender = PersistenceManagingCoverageResultsService(
+            modelContext: database.modelContext,
+            testUUID: sessionInitializer.lastTestUUID,
+            sendResultsService: ControlServerCoverageResultsService(
+                controlServer: RMBTControlServer.shared,
+                testUUID: sessionInitializer.lastTestUUID
+            )
+        )
+        let persistenceService = SwiftDataFencePersistenceService(
+            modelContext: database.modelContext,
             testUUID: sessionInitializer.lastTestUUID
         )
 
@@ -63,9 +70,7 @@ struct NetworkCoverageFactory {
             locationUpdatesService: RealLocationUpdatesService(now: dateNow),
             currentRadioTechnology: CTTelephonyRadioTechnologyService(),
             sendResultsService: resultSender,
-            persistenceService: SwiftDataFencePersistenceService(
-                modelContext: ModelContext(container)
-            )
+            persistenceService: persistenceService
         )
     }
 }
