@@ -10,65 +10,12 @@ import SwiftUI
 import CoreLocation
 import MapKit
 
-import SwiftData
-
-final class UserDatabase {
-    static let shared = UserDatabase()
-
-    private let container: ModelContainer
-
-    init(useInMemoryStore: Bool = false) {
-        let configuration = ModelConfiguration(
-            for: PersistentLocationArea.self,
-            isStoredInMemoryOnly: useInMemoryStore
-        )
-
-        container = try! ModelContainer(
-            for: PersistentLocationArea.self,
-            configurations: configuration
-        )
-    }
-
-    var context: ModelContext {
-        return ModelContext(container)
-    }
-}
-
 struct NetworkCoverageView: View {
     @Bindable var viewModel: NetworkCoverageViewModel
 
     init(areas: [LocationArea] = []) {
-        // TODO: move setup code below into some "Composition root" file
-        let dateNow: () -> Date = Date.init
-        let sessionInitializer = CoverageMeasurementSessionInitializer(
-            now: dateNow,
-            controlServer: RMBTControlServer.shared
-        )
-        let resultSender = ControlServerCoverageResultsService(
-            controlServer: RMBTControlServer.shared,
-            testUUID: sessionInitializer.lastTestUUID
-        )
-        viewModel = NetworkCoverageViewModel(
-            areas: areas,
-            refreshInterval: 1,
-            minimumLocationAccuracy: 10,
-            pingMeasurementService: { PingMeasurementService.pings2(
-                clock: ContinuousClock(),
-                pingSender: UDPPingSession(
-                    sessionInitiator: sessionInitializer,
-                    udpConnection: UDPConnection(),
-                    timeoutIntervalMs: 1000,
-                    now: RMBTHelpers.RMBTCurrentNanos
-                ),
-                frequency: .milliseconds(100)
-            ) },
-            locationUpdatesService: RealLocationUpdatesService(now: dateNow),
-            currentRadioTechnology: CTTelephonyRadioTechnologyService(),
-            sendResultsService: resultSender,
-            persistenceService: SwiftDataFencePersistenceService(
-                modelContext: UserDatabase.shared.context
-            )
-        )
+        viewModel = NetworkCoverageFactory(container: UserDatabase.shared.container)
+            .makeCoverageViewModel(areas: areas)
     }
 
     @State private var position: MapCameraPosition = .userLocation(

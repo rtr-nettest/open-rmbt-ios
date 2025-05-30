@@ -9,9 +9,7 @@
 import Foundation
 import CoreLocation
 import AsyncAlgorithms
-import CoreTelephony
 import SwiftUI
-import SwiftData
 
 var backgroundActivity: CLBackgroundActivitySession?
 
