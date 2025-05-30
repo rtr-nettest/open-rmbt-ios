@@ -309,7 +309,7 @@ import SwiftData
     @MainActor @Suite("Persistence")
     struct Persistence {
         @Test func whenReceivingLocationUpdatesAndPings_thenSavesNewPersistentLocationArea() async throws {
-            let persistenceLayer = PersistenceLayerSpy()
+            let persistenceService = FencePersistenceServiceSpy()
             let sut = makeSUT(
                 updates: [
                     makeLocationUpdate  (at: 0, lat: 1.0, lon: 1.0),
@@ -321,29 +321,29 @@ import SwiftData
                     makePingUpdate      (at: 6, ms: 500),
                     makeLocationUpdate  (at: 7, lat: 3.0, lon: 3.0),
                 ],
-                persistenceLayer: persistenceLayer
+                persistenceService: persistenceService
             )
             await sut.startTest()
 
-            let savedAreas = try persistenceLayer.savedAreas()
+            let savedAreas = persistenceService.capturedSavedAreas
 
             try #require(savedAreas.count == 2)
 
-            #expect(savedAreas.first?.timestamp ==  UInt64(Date(timeIntervalSinceReferenceDate: 0).timeIntervalSince1970) * 1_000_000)
-            #expect(savedAreas.first?.latitude == 1.0)
-            #expect(savedAreas.first?.longitude == 1.0)
-            #expect(savedAreas.first?.avgPingMilliseconds == 150)
-            #expect(savedAreas.first?.technology == nil)
+            #expect(savedAreas.first?.dateEntered ==  Date(timeIntervalSinceReferenceDate: 0))
+            #expect(savedAreas.first?.startingLocation.coordinate.latitude == 1.0)
+            #expect(savedAreas.first?.startingLocation.coordinate.longitude == 1.0)
+            #expect(savedAreas.first?.averagePing == 150)
+            #expect(savedAreas.first?.significantTechnology == nil)
 
-            #expect(savedAreas.last?.timestamp ==  UInt64(Date(timeIntervalSinceReferenceDate: 3).timeIntervalSince1970) * 1_000_000)
-            #expect(savedAreas.last?.latitude == 2.0)
-            #expect(savedAreas.last?.longitude == 2.0)
-            #expect(savedAreas.last?.avgPingMilliseconds == 400)
-            #expect(savedAreas.last?.technology == nil)
+            #expect(savedAreas.last?.dateEntered ==  Date(timeIntervalSinceReferenceDate: 3))
+            #expect(savedAreas.last?.startingLocation.coordinate.latitude == 2.0)
+            #expect(savedAreas.last?.startingLocation.coordinate.longitude == 2.0)
+            #expect(savedAreas.last?.averagePing == 400)
+            #expect(savedAreas.last?.significantTechnology == nil)
         }
 
         @Test func whenSendingTestResultsSucceeds_thenClearsPersistedData() async throws {
-            let persistenceLayer = PersistenceLayerSpy()
+            let persistenceService = FencePersistenceServiceSpy()
             let sendResultsService = SendCoverageResultsServiceSpy(sendResult: .success(()))
             let sut = makeSUT(
                 updates: [
@@ -353,18 +353,18 @@ import SwiftData
                     makeLocationUpdate  (at: 3, lat: 2.0, lon: 2.0),
                     makePingUpdate      (at: 4, ms: 300)
                 ],
-                persistenceLayer: persistenceLayer,
+                persistenceService: persistenceService,
                 sendResultsService: sendResultsService
             )
             await sut.startTest()
             await sut.toggleMeasurement() // Stop to trigger save and send
 
-            let savedAreas = try persistenceLayer.savedAreas()
+            let savedAreas = persistenceService.capturedSavedAreas
             #expect(savedAreas.isEmpty)
         }
 
         @Test func whenSendingTestResultsFails_thenPersistedDataIsNotCleared() async throws {
-            let persistenceLayer = PersistenceLayerSpy()
+            let persistenceService = FencePersistenceServiceSpy()
             let sendResultsService = SendCoverageResultsServiceSpy(sendResult: .failure(makeSaveError()))
             let sut = makeSUT(
                 minimumLocationAccuracy: 10,
@@ -375,13 +375,13 @@ import SwiftData
                     makeLocationUpdate(at: 3, lat: 2.0, lon: 2.0, accuracy: 5),
                     makePingUpdate(at: 4, ms: 300)
                 ],
-                persistenceLayer: persistenceLayer,
+                persistenceService: persistenceService,
                 sendResultsService: sendResultsService
             )
             await sut.startTest()
             await sut.toggleMeasurement() // Stop to trigger save and send
 
-            let savedAreas = try persistenceLayer.savedAreas()
+            let savedAreas = persistenceService.capturedSavedAreas
             #expect(!savedAreas.isEmpty)
         }
     }
@@ -393,7 +393,7 @@ import SwiftData
     minimumLocationAccuracy: CLLocationDistance = 100,
     updates: [NetworkCoverageViewModel.Update] = [],
     locale: Locale = Locale(identifier: "en_US"),
-    persistenceLayer: PersistenceLayerSpy = .init(),
+    persistenceService: FencePersistenceServiceSpy = .init(),
     sendResultsService: SendCoverageResultsServiceSpy = .init()
 ) -> NetworkCoverageViewModel {
     .init(
@@ -403,7 +403,7 @@ import SwiftData
         updates: { updates.publisher.values },
         currentRadioTechnology: RadioTechnologyServiceStub(),
         sendResultsService: sendResultsService,
-        modelContext: persistenceLayer.modelContext,
+        persistenceService: persistenceService,
         locale: locale
     )
 }
@@ -481,19 +481,16 @@ final class RadioTechnologyServiceStub: CurrentRadioTechnologyService {
     }
 }
 
-final class PersistenceLayerSpy {
-    let modelContext: ModelContext
+final class FencePersistenceServiceSpy: FencePersistenceService {
+    private(set) var capturedSavedAreas: [LocationArea] = []
 
-    init() {
-        let container = try! ModelContainer(
-            for: PersistentLocationArea.self,
-            configurations: .init(for: PersistentLocationArea.self, isStoredInMemoryOnly: true)
-        )
-        self.modelContext = ModelContext(container)
+    init() {}
+
+    func save(_ area: LocationArea) throws {
+        capturedSavedAreas.append(area)
     }
 
-    func savedAreas() throws -> [PersistentLocationArea] {
-        let descriptor = FetchDescriptor<PersistentLocationArea>()
-        return try modelContext.fetch(descriptor)
+    func clearAll() throws {
+        capturedSavedAreas.removeAll()
     }
 }

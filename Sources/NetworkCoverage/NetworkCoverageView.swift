@@ -65,7 +65,9 @@ struct NetworkCoverageView: View {
             locationUpdatesService: RealLocationUpdatesService(now: dateNow),
             currentRadioTechnology: CTTelephonyRadioTechnologyService(),
             sendResultsService: resultSender,
-            modelContext: UserDatabase.shared.context
+            persistenceService: SwiftDataFencePersistenceService(
+                modelContext: UserDatabase.shared.context
+            )
         )
     }
 

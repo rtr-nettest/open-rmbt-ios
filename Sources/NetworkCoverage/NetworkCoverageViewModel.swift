@@ -131,7 +131,7 @@ struct FenceDetail: Equatable, Identifiable {
         updates: @escaping () -> some AsynchronousSequence<Update>,
         currentRadioTechnology: some CurrentRadioTechnologyService,
         sendResultsService: some SendCoverageResultsService,
-        modelContext: ModelContext,
+        persistenceService: some FencePersistenceService,
         locale: Locale
     ) {
         self.locationAreas = areas
@@ -139,9 +139,7 @@ struct FenceDetail: Equatable, Identifiable {
         self.minimumLocationAccuracy = minimumLocationAccuracy
         self.currentRadioTechnology = currentRadioTechnology
         self.sendResultsService = sendResultsService
-        self.persistenceService = SwiftDataFencePersistenceService(
-            modelContext: modelContext
-        )
+        self.persistenceService = persistenceService
         self.updates = updates
         selectedItemDateFormatter = {
             let dateFormatter = DateFormatter()
@@ -160,7 +158,7 @@ struct FenceDetail: Equatable, Identifiable {
         locationUpdatesService: some LocationUpdatesService,
         currentRadioTechnology: some CurrentRadioTechnologyService,
         sendResultsService: some SendCoverageResultsService,
-        modelContext: ModelContext,
+        persistenceService: some FencePersistenceService,
         locale: Locale = .autoupdatingCurrent
     ) {
         self.init(
@@ -170,11 +168,10 @@ struct FenceDetail: Equatable, Identifiable {
             updates: { merge(
                 pingMeasurementService().map(Update.ping),
                 locationUpdatesService.locations().map(Update.location)
-            )
-            },
+            )},
             currentRadioTechnology: currentRadioTechnology,
             sendResultsService: sendResultsService,
-            modelContext: modelContext,
+            persistenceService: persistenceService,
             locale: locale
         )
     }
