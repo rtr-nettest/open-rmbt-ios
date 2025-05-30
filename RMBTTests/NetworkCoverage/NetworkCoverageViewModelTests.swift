@@ -341,49 +341,6 @@ import SwiftData
             #expect(savedAreas.last?.averagePing == 400)
             #expect(savedAreas.last?.significantTechnology == nil)
         }
-
-        @Test func whenSendingTestResultsSucceeds_thenClearsPersistedData() async throws {
-            let persistenceService = FencePersistenceServiceSpy()
-            let sendResultsService = SendCoverageResultsServiceSpy(sendResult: .success(()))
-            let sut = makeSUT(
-                updates: [
-                    makeLocationUpdate  (at: 0, lat: 1.0, lon: 1.0),
-                    makePingUpdate      (at: 1, ms: 100),
-                    makePingUpdate      (at: 2, ms: 200),
-                    makeLocationUpdate  (at: 3, lat: 2.0, lon: 2.0),
-                    makePingUpdate      (at: 4, ms: 300)
-                ],
-                persistenceService: persistenceService,
-                sendResultsService: sendResultsService
-            )
-            await sut.startTest()
-            await sut.toggleMeasurement() // Stop to trigger save and send
-
-            let savedAreas = persistenceService.capturedSavedAreas
-            #expect(savedAreas.isEmpty)
-        }
-
-        @Test func whenSendingTestResultsFails_thenPersistedDataIsNotCleared() async throws {
-            let persistenceService = FencePersistenceServiceSpy()
-            let sendResultsService = SendCoverageResultsServiceSpy(sendResult: .failure(makeSaveError()))
-            let sut = makeSUT(
-                minimumLocationAccuracy: 10,
-                updates: [
-                    makeLocationUpdate(at: 0, lat: 1.0, lon: 1.0, accuracy: 5),
-                    makePingUpdate(at: 1, ms: 100),
-                    makePingUpdate(at: 2, ms: 200),
-                    makeLocationUpdate(at: 3, lat: 2.0, lon: 2.0, accuracy: 5),
-                    makePingUpdate(at: 4, ms: 300)
-                ],
-                persistenceService: persistenceService,
-                sendResultsService: sendResultsService
-            )
-            await sut.startTest()
-            await sut.toggleMeasurement() // Stop to trigger save and send
-
-            let savedAreas = persistenceService.capturedSavedAreas
-            #expect(!savedAreas.isEmpty)
-        }
     }
 }
 
@@ -488,9 +445,5 @@ final class FencePersistenceServiceSpy: FencePersistenceService {
 
     func save(_ area: LocationArea) throws {
         capturedSavedAreas.append(area)
-    }
-
-    func clearAll() throws {
-        capturedSavedAreas.removeAll()
     }
 }

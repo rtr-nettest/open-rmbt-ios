@@ -38,7 +38,6 @@ protocol SendCoverageResultsService {
 
 protocol FencePersistenceService {
     func save(_ area: LocationArea) throws
-    func clearAll() throws
 }
 
 struct FenceItem: Identifiable, Hashable {
@@ -266,8 +265,6 @@ struct FenceDetail: Equatable, Identifiable {
 
             do {
                 try await sendResultsService.send(areas: locationAreas)
-                // Clear persisted data after successful send
-                try persistenceService.clearAll()
             } catch {
                 // TODO: display error
             }
