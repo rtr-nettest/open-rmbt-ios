@@ -29,19 +29,24 @@ final class UserDatabase {
 
 struct NetworkCoverageFactory {
     private let database: UserDatabase
+    private let maxResendAge: TimeInterval
 
-    init(database: UserDatabase) {
+    init(database: UserDatabase, maxResendAge: TimeInterval) {
         self.database = database
+        self.maxResendAge = maxResendAge
     }
 
     func services(
         testUUID: @escaping @autoclosure () -> String?,
+        dateNow: @escaping () -> Date, 
         sendResultsServiceMaker: @escaping (String) -> some SendCoverageResultsService
     ) -> (some FencePersistenceService, some SendCoverageResultsService) {
         let resultSender = PersistenceManagingCoverageResultsService(
             modelContext: database.modelContext,
             testUUID: testUUID(),
-            sendResultsService: sendResultsServiceMaker
+            sendResultsService: sendResultsServiceMaker,
+            maxResendAge: maxResendAge,
+            dateNow: dateNow
         )
         let persistenceService = SwiftDataFencePersistenceService(
             modelContext: database.modelContext,
@@ -57,12 +62,15 @@ struct NetworkCoverageFactory {
             now: dateNow,
             controlServer: RMBTControlServer.shared
         )
-        let (persistenceService, resultSender) = services(testUUID: sessionInitializer.lastTestUUID) { testUUID in
+        let (persistenceService, resultSender) = services(
+            testUUID: sessionInitializer.lastTestUUID,
+            dateNow: dateNow,
+            sendResultsServiceMaker: { testUUID in
             ControlServerCoverageResultsService(
                 controlServer: RMBTControlServer.shared,
                 testUUID: testUUID
             )
-        }
+        })
 
         return NetworkCoverageViewModel(
             areas: areas,

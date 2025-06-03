@@ -14,7 +14,10 @@ struct NetworkCoverageView: View {
     @Bindable var viewModel: NetworkCoverageViewModel
 
     init(areas: [LocationArea] = []) {
-        viewModel = NetworkCoverageFactory(database: UserDatabase.shared).makeCoverageViewModel(areas: areas)
+        viewModel = NetworkCoverageFactory(
+            database: UserDatabase.shared,
+            maxResendAge: 7 * 24 * 60 * 60 // 7 days
+        ).makeCoverageViewModel(areas: areas)
     }
 
     @State private var position: MapCameraPosition = .userLocation(
