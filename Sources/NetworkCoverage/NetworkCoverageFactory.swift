@@ -24,7 +24,7 @@ final class UserDatabase {
         )
     }
 
-    @inlinable var modelContext: ModelContext { .init(container) }
+    lazy var modelContext: ModelContext = .init(container)
 }
 
 struct NetworkCoverageFactory {
@@ -34,24 +34,35 @@ struct NetworkCoverageFactory {
         self.database = database
     }
 
+    func services(
+        testUUID: @escaping @autoclosure () -> String?,
+        sendResultsServiceMaker: @escaping (String) -> some SendCoverageResultsService
+    ) -> (some FencePersistenceService, some SendCoverageResultsService) {
+        let resultSender = PersistenceManagingCoverageResultsService(
+            modelContext: database.modelContext,
+            testUUID: testUUID(),
+            sendResultsService: sendResultsServiceMaker
+        )
+        let persistenceService = SwiftDataFencePersistenceService(
+            modelContext: database.modelContext,
+            testUUID: testUUID()
+        )
+
+        return (persistenceService, resultSender)
+    }
+
     @MainActor func makeCoverageViewModel(areas: [LocationArea] = []) -> NetworkCoverageViewModel {
         let dateNow: () -> Date = Date.init
         let sessionInitializer = CoverageMeasurementSessionInitializer(
             now: dateNow,
             controlServer: RMBTControlServer.shared
         )
-        let resultSender = PersistenceManagingCoverageResultsService(
-            modelContext: database.modelContext,
-            testUUID: sessionInitializer.lastTestUUID,
-            sendResultsService: ControlServerCoverageResultsService(
+        let (persistenceService, resultSender) = services(testUUID: sessionInitializer.lastTestUUID) { testUUID in
+            ControlServerCoverageResultsService(
                 controlServer: RMBTControlServer.shared,
-                testUUID: sessionInitializer.lastTestUUID
+                testUUID: testUUID
             )
-        )
-        let persistenceService = SwiftDataFencePersistenceService(
-            modelContext: database.modelContext,
-            testUUID: sessionInitializer.lastTestUUID
-        )
+        }
 
         return NetworkCoverageViewModel(
             areas: areas,
