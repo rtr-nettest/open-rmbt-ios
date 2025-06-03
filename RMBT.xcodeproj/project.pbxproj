@@ -43,6 +43,7 @@
 		499406DD2D9C0B2600237AC1 /* CurrentRadioTechnologyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499406DC2D9C0B2600237AC1 /* CurrentRadioTechnologyService.swift */; };
 		499406E02D9D1C8A00237AC1 /* LocationUpdatesService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499406DF2D9D1C8A00237AC1 /* LocationUpdatesService.swift */; };
 		499406E22D9D1CD600237AC1 /* LocationUpdate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499406E12D9D1CD600237AC1 /* LocationUpdate.swift */; };
+		49965DA82DEF984A00D93737 /* PersistentAreasResender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49965DA72DEF984A00D93737 /* PersistentAreasResender.swift */; };
 		499CF46D2DE9D48200D5DCDE /* NetworkCoverageFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499CF46C2DE9D48200D5DCDE /* NetworkCoverageFactory.swift */; };
 		499CF46F2DE9DA1700D5DCDE /* PersistenceManagingCoverageResultsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499CF46E2DE9DA1700D5DCDE /* PersistenceManagingCoverageResultsService.swift */; };
 		499CF4732DE9DF8300D5DCDE /* FencePersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499CF4722DE9DF8300D5DCDE /* FencePersistenceTests.swift */; };
@@ -360,6 +361,7 @@
 		499406DC2D9C0B2600237AC1 /* CurrentRadioTechnologyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentRadioTechnologyService.swift; sourceTree = "<group>"; };
 		499406DF2D9D1C8A00237AC1 /* LocationUpdatesService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationUpdatesService.swift; sourceTree = "<group>"; };
 		499406E12D9D1CD600237AC1 /* LocationUpdate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationUpdate.swift; sourceTree = "<group>"; };
+		49965DA72DEF984A00D93737 /* PersistentAreasResender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistentAreasResender.swift; sourceTree = "<group>"; };
 		499CF46C2DE9D48200D5DCDE /* NetworkCoverageFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkCoverageFactory.swift; sourceTree = "<group>"; };
 		499CF46E2DE9DA1700D5DCDE /* PersistenceManagingCoverageResultsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceManagingCoverageResultsService.swift; sourceTree = "<group>"; };
 		499CF4722DE9DF8300D5DCDE /* FencePersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FencePersistenceTests.swift; sourceTree = "<group>"; };
@@ -697,6 +699,7 @@
 			children = (
 				499CF46E2DE9DA1700D5DCDE /* PersistenceManagingCoverageResultsService.swift */,
 				49AC77132DE8B2C100EBFAAE /* SwiftDataFencePersistenceService.swift */,
+				49965DA72DEF984A00D93737 /* PersistentAreasResender.swift */,
 				4909C2D12DE4A6D0003F3AB6 /* PersistentLocationArea.swift */,
 			);
 			path = Persistence;
@@ -1956,6 +1959,7 @@
 				E95954AB26E60287004EA6D9 /* RMBTHistoryFilterTitleCell.swift in Sources */,
 				E946B93F26D28BA20006E1F1 /* RMBTMapOptionsCell.swift in Sources */,
 				E9E993C226EA435200E7EED6 /* RMBTHistoryBasicInfoCell.swift in Sources */,
+				49965DA82DEF984A00D93737 /* PersistentAreasResender.swift in Sources */,
 				E93FB10926F4C41600DD24CD /* RMBTVerticalTransitionController.swift in Sources */,
 				E946B94E26D65F0D0006E1F1 /* RMBTMapOptionsFilterViewController.swift in Sources */,
 				E9A9A9AD27687A03002671C0 /* RMBTHistoryResult.swift in Sources */,

@@ -30,10 +30,15 @@ final class UserDatabase {
 struct NetworkCoverageFactory {
     private let database: UserDatabase
     private let maxResendAge: TimeInterval
+    private let dateNow: () -> Date = Date.init
 
-    init(database: UserDatabase, maxResendAge: TimeInterval) {
+    init(database: UserDatabase, maxResendAge: TimeInterval = 7 * 24 * 60 * 60) {
         self.database = database
         self.maxResendAge = maxResendAge
+    }
+
+    var persistedFencesSender: PersistentAreasResender {
+        persistedFencesResender(sendResultsServiceMaker: makeSendResultsService(testUUID:))
     }
 
     func services(
@@ -45,8 +50,7 @@ struct NetworkCoverageFactory {
             modelContext: database.modelContext,
             testUUID: testUUID(),
             sendResultsService: sendResultsServiceMaker,
-            maxResendAge: maxResendAge,
-            dateNow: dateNow
+            resender: persistedFencesResender(sendResultsServiceMaker: sendResultsServiceMaker)
         )
         let persistenceService = SwiftDataFencePersistenceService(
             modelContext: database.modelContext,
@@ -57,7 +61,6 @@ struct NetworkCoverageFactory {
     }
 
     @MainActor func makeCoverageViewModel(areas: [LocationArea] = []) -> NetworkCoverageViewModel {
-        let dateNow: () -> Date = Date.init
         let sessionInitializer = CoverageMeasurementSessionInitializer(
             now: dateNow,
             controlServer: RMBTControlServer.shared
@@ -65,12 +68,8 @@ struct NetworkCoverageFactory {
         let (persistenceService, resultSender) = services(
             testUUID: sessionInitializer.lastTestUUID,
             dateNow: dateNow,
-            sendResultsServiceMaker: { testUUID in
-            ControlServerCoverageResultsService(
-                controlServer: RMBTControlServer.shared,
-                testUUID: testUUID
-            )
-        })
+            sendResultsServiceMaker: makeSendResultsService(testUUID:)
+        )
 
         return NetworkCoverageViewModel(
             areas: areas,
@@ -90,6 +89,24 @@ struct NetworkCoverageFactory {
             currentRadioTechnology: CTTelephonyRadioTechnologyService(),
             sendResultsService: resultSender,
             persistenceService: persistenceService
+        )
+    }
+
+    private func persistedFencesResender(
+        sendResultsServiceMaker: @escaping (String) -> some SendCoverageResultsService
+    ) -> PersistentAreasResender {
+        PersistentAreasResender(
+            modelContext: database.modelContext,
+            sendResultsService: sendResultsServiceMaker,
+            maxResendAge: maxResendAge,
+            dateNow: dateNow
+        )
+    }
+
+    private func makeSendResultsService(testUUID: String) -> some SendCoverageResultsService {
+        ControlServerCoverageResultsService(
+            controlServer: RMBTControlServer.shared,
+            testUUID: testUUID
         )
     }
 }
