@@ -18,13 +18,13 @@ struct PersistenceManagingCoverageResultsService: SendCoverageResultsService {
     private let modelContext: ModelContext
     private let sendResultsService: (String) -> any SendCoverageResultsService
     private let testUUID: () -> String?
-    private let persistentAreasResender: PersistentAreasResender
+    private let persistentAreasResender: PersistedFencesResender
 
     init(
         modelContext: ModelContext,
         testUUID: @escaping @autoclosure () -> String?,
         sendResultsService: @escaping (String) -> some SendCoverageResultsService,
-        resender: PersistentAreasResender
+        resender: PersistedFencesResender
     ) {
         self.modelContext = modelContext
         self.testUUID = testUUID
@@ -32,14 +32,14 @@ struct PersistenceManagingCoverageResultsService: SendCoverageResultsService {
         self.persistentAreasResender = resender
     }
 
-    func send(areas: [LocationArea]) async throws {
-        // Send current areas using the main service
+    func send(fences: [Fence]) async throws {
+        // Send current fences using the main service
         if let currentTestUUID = testUUID() {
             let mainService = sendResultsService(currentTestUUID)
-            try await mainService.send(areas: areas)
+            try await mainService.send(fences: fences)
 
-            // Delete persisted areas with matching testUUID
-            let descriptor = FetchDescriptor<PersistentLocationArea>(
+            // Delete persisted fences with matching testUUID
+            let descriptor = FetchDescriptor<PersistentFence>(
                 predicate: #Predicate { $0.testUUID == currentTestUUID }
             )
             let areasToDelete = try modelContext.fetch(descriptor)
@@ -51,7 +51,7 @@ struct PersistenceManagingCoverageResultsService: SendCoverageResultsService {
             throw ServiceError.missingTestUUID
         }
 
-        // Resend any remaining persistent areas
+        // Resend any remaining persistent fences
         try await persistentAreasResender.resendPersistentAreas()
     }
 }

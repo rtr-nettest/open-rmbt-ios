@@ -15,11 +15,11 @@ final class UserDatabase {
 
     init(useInMemoryStore: Bool = false) {
         let configuration = ModelConfiguration(
-            for: PersistentLocationArea.self,
+            for: PersistentFence.self,
             isStoredInMemoryOnly: useInMemoryStore
         )
         container = try! ModelContainer(
-            for: PersistentLocationArea.self,
+            for: PersistentFence.self,
             configurations: configuration
         )
     }
@@ -37,7 +37,7 @@ struct NetworkCoverageFactory {
         self.maxResendAge = maxResendAge
     }
 
-    var persistedFencesSender: PersistentAreasResender {
+    var persistedFencesSender: PersistedFencesResender {
         persistedFencesResender(sendResultsServiceMaker: makeSendResultsService(testUUID:))
     }
 
@@ -60,7 +60,7 @@ struct NetworkCoverageFactory {
         return (persistenceService, resultSender)
     }
 
-    @MainActor func makeCoverageViewModel(areas: [LocationArea] = []) -> NetworkCoverageViewModel {
+    @MainActor func makeCoverageViewModel(fences: [Fence] = []) -> NetworkCoverageViewModel {
         let sessionInitializer = CoverageMeasurementSessionInitializer(
             now: dateNow,
             controlServer: RMBTControlServer.shared
@@ -72,7 +72,7 @@ struct NetworkCoverageFactory {
         )
 
         return NetworkCoverageViewModel(
-            areas: areas,
+            fences: fences,
             refreshInterval: 1,
             minimumLocationAccuracy: 10,
             pingMeasurementService: { PingMeasurementService.pings2(
@@ -94,8 +94,8 @@ struct NetworkCoverageFactory {
 
     private func persistedFencesResender(
         sendResultsServiceMaker: @escaping (String) -> some SendCoverageResultsService
-    ) -> PersistentAreasResender {
-        PersistentAreasResender(
+    ) -> PersistedFencesResender {
+        PersistedFencesResender(
             modelContext: database.modelContext,
             sendResultsService: sendResultsServiceMaker,
             maxResendAge: maxResendAge,

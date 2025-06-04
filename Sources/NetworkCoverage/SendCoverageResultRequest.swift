@@ -3,7 +3,7 @@
 //  RMBT
 //
 //  Created by Jiri Urbasek on 12/16/24.
-//  Copyright © 2024 appscape gmbh. All rights reserved.
+//  Copyright 2024 appscape gmbh. All rights reserved.
 //
 
 import Foundation
@@ -36,15 +36,15 @@ public class SendCoverageResultRequest: BasicRequest {
         private(set) var technology: String?
         private(set) var technology_id: Int?
 
-        init(area: LocationArea) {
-            timestamp = UInt64(area.dateEntered.timeIntervalSince1970 * 1_000_000) // microseconds
+        init(fence: Fence) {
+            timestamp = UInt64(fence.dateEntered.timeIntervalSince1970 * 1_000_000) // microseconds
             location = .init(
-                latitude: area.startingLocation.coordinate.latitude,
-                longitude: area.startingLocation.coordinate.longitude
+                latitude: fence.startingLocation.coordinate.latitude,
+                longitude: fence.startingLocation.coordinate.longitude
             )
-            avgPingMilliseconds = area.averagePing
-            technology = area.technologies.last?.radioTechnologyCode
-            technology_id = area.technologies.last?.radioTechnologyTypeID
+            avgPingMilliseconds = fence.averagePing
+            technology = fence.technologies.last?.radioTechnologyCode
+            technology_id = fence.technologies.last?.radioTechnologyTypeID
         }
 
         required init?(map: Map) {
@@ -76,8 +76,8 @@ public class SendCoverageResultRequest: BasicRequest {
         clientUUID <- map["client_uuid"]
     }
 
-    init(areas: [LocationArea], testUUID: String) {
-        fences = areas.map(CoverageFence.init)
+    init(fences: [Fence], testUUID: String) {
+        self.fences = fences.map(CoverageFence.init)
         self.testUUID = testUUID
         super.init()
     }
@@ -108,13 +108,13 @@ struct ControlServerCoverageResultsService: SendCoverageResultsService {
         self.testUUID = testUUID
     }
 
-    func send(areas: [LocationArea]) async throws {
+    func send(fences: [Fence]) async throws {
         guard let testUUID = self.testUUID() else {
             throw Failure.missingTestUUID
         }
 
         _ = try await withCheckedThrowingContinuation { continuation in
-            controlServer.submitCoverageResult(.init(areas: areas, testUUID: testUUID)) { response in
+            controlServer.submitCoverageResult(.init(fences: fences, testUUID: testUUID)) { response in
                 continuation.resume(returning: response)
             } error: { error in
                 continuation.resume(throwing: error)

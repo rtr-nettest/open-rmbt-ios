@@ -1,5 +1,5 @@
 //
-//  PersistentAreasResender.swift
+//  PersistedFencesResender.swift
 //  RMBT
 //
 //  Created by Jiri Urbasek on 30.05.2025.
@@ -10,7 +10,7 @@ import Foundation
 import SwiftData
 import CoreLocation
 
-struct PersistentAreasResender {
+struct PersistedFencesResender {
     private let modelContext: ModelContext
     private let sendResultsService: (String) -> any SendCoverageResultsService
     private let maxResendAge: TimeInterval
@@ -29,40 +29,40 @@ struct PersistentAreasResender {
     }
 
     func resendPersistentAreas() async throws {
-        try deleteOldPersistentAreas()
+        try deleteOldPersistentFences()
 
-        // Fetch remaining persisted areas and send them grouped by testUUID
-        let remainingAreas = try modelContext.fetch(FetchDescriptor<PersistentLocationArea>())
-        let groupedAreas = Dictionary(grouping: remainingAreas, by: \.testUUID)
+        // Fetch remaining persisted fences and send them grouped by testUUID
+        let remainingFences = try modelContext.fetch(FetchDescriptor<PersistentFence>())
+        let groupedFences = Dictionary(grouping: remainingFences, by: \.testUUID)
 
         // Sort groups by earliest timestamp in descending order (latest first)
-        let sortedGroups = groupedAreas.sorted { (group1, group2) in
+        let sortedGroups = groupedFences.sorted { (group1, group2) in
             let earliestTimestamp1 = group1.value.min { $0.timestamp < $1.timestamp }?.timestamp ?? 0
             let earliestTimestamp2 = group2.value.min { $0.timestamp < $1.timestamp }?.timestamp ?? 0
             return earliestTimestamp1 > earliestTimestamp2 // Descending order
         }
 
-        for (groupTestUUID, persistentAreas) in sortedGroups {
-            let sortedAreas = persistentAreas.sorted { $0.timestamp < $1.timestamp }
-            let locationAreas = sortedAreas.map { persistentArea in
-                LocationArea(
+        for (groupTestUUID, persistedFences) in sortedGroups {
+            let sortedFences = persistedFences.sorted { $0.timestamp < $1.timestamp }
+            let fences = sortedFences.map { persistedFence in
+                Fence(
                     startingLocation: CLLocation(
-                        latitude: persistentArea.latitude,
-                        longitude: persistentArea.longitude
+                        latitude: persistedFence.latitude,
+                        longitude: persistedFence.longitude
                     ),
-                    dateEntered: Date(timeIntervalSince1970: Double(persistentArea.timestamp) / 1_000_000),
-                    technology: persistentArea.technology,
-                    pings: persistentArea.avgPingMilliseconds.map { [PingResult(result: .interval(.milliseconds($0)), timestamp: Date(timeIntervalSince1970: Double(persistentArea.timestamp) / 1_000_000))] } ?? []
+                    dateEntered: Date(timeIntervalSince1970: Double(persistedFence.timestamp) / 1_000_000),
+                    technology: persistedFence.technology,
+                    pings: persistedFence.avgPingMilliseconds.map { [PingResult(result: .interval(.milliseconds($0)), timestamp: Date(timeIntervalSince1970: Double(persistedFence.timestamp) / 1_000_000))] } ?? []
                 )
             }
 
             let groupService = sendResultsService(groupTestUUID)
             do {
-                try await groupService.send(areas: locationAreas)
+                try await groupService.send(fences: fences)
 
-                // Delete sent areas from persistence
-                for persistentArea in persistentAreas {
-                    modelContext.delete(persistentArea)
+                // Delete sent fences from persistence
+                for persistedFence in persistedFences {
+                    modelContext.delete(persistedFence)
                 }
                 try modelContext.save()
             } catch {
@@ -71,16 +71,16 @@ struct PersistentAreasResender {
         }
     }
 
-    private func deleteOldPersistentAreas() throws {
+    private func deleteOldPersistentFences() throws {
         let cutoffTimestamp = UInt64(max(0, (dateNow().timeIntervalSince1970 - maxResendAge) * 1_000_000))
-        let descriptor = FetchDescriptor<PersistentLocationArea>(
+        let descriptor = FetchDescriptor<PersistentFence>(
             predicate: #Predicate { $0.timestamp < cutoffTimestamp }
         )
-        let oldAreas = try modelContext.fetch(descriptor)
-        for area in oldAreas {
-            modelContext.delete(area)
+        let oldFences = try modelContext.fetch(descriptor)
+        for fence in oldFences {
+            modelContext.delete(fence)
         }
-        if !oldAreas.isEmpty {
+        if !oldFences.isEmpty {
             try modelContext.save()
         }
     }

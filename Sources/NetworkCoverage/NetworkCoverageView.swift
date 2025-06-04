@@ -13,8 +13,8 @@ import MapKit
 struct NetworkCoverageView: View {
     @Bindable var viewModel: NetworkCoverageViewModel
 
-    init(areas: [LocationArea] = []) {
-        viewModel = NetworkCoverageFactory(database: UserDatabase.shared).makeCoverageViewModel(areas: areas)
+    init(fences: [Fence] = []) {
+        viewModel = NetworkCoverageFactory(database: UserDatabase.shared).makeCoverageViewModel(fences: fences)
     }
 
     @State private var position: MapCameraPosition = .userLocation(
@@ -34,7 +34,7 @@ struct NetworkCoverageView: View {
         Map(position: $position, selection: $viewModel.selectedFenceID) {
             UserAnnotation()
 
-            ForEach(viewModel.fences) { fence in
+            ForEach(viewModel.fenceItems) { fence in
                 if !isExpertMode && fence.isCurrent {
                     fenceCircle(for: fence)
                     fenceAnnotation(for: fence)
@@ -257,7 +257,7 @@ private extension View {
 
 #Preview {
     NetworkCoverageView(
-        areas: [
+        fences: [
             .init(
                 startingLocation: CLLocation(
                     latitude: 49.74805411063806,
@@ -274,7 +274,7 @@ private extension View {
                 ),
                 dateEntered: .init(timeIntervalSince1970: 1734526656),
                 technology: "4G/LTE",
-                avgPing: .milliseconds(84)
+                pings: [.init(result: .interval(.milliseconds(84)), timestamp: .init(timeIntervalSince1970: 1734526656))]
             ),
             .init(
                 startingLocation: CLLocation(
@@ -283,7 +283,7 @@ private extension View {
                 ),
                 dateEntered: .init(timeIntervalSince1970: 1734526659),
                 technology: "4G/LTE",
-                avgPing: .milliseconds(41)
+                pings: [.init(result: .interval(.milliseconds(41)), timestamp: .init(timeIntervalSince1970: 1734526659))]
             ),
             .init(
                 startingLocation: CLLocation(
@@ -292,13 +292,13 @@ private extension View {
                 ),
                 dateEntered: .init(timeIntervalSince1970: 1734526661),
                 technology: "5G/NRNSA",
-                avgPing: .milliseconds(26)
+                pings: [.init(result: .interval(.milliseconds(26)), timestamp: .init(timeIntervalSince1970: 1734526661))]
             )
         ]
     )
 }
 
-extension LocationArea {
+extension Fence {
     init(startingLocation: CLLocation, dateEntered: Date, technology: String?, avgPing: Duration) {
         self.init(
             startingLocation: startingLocation,

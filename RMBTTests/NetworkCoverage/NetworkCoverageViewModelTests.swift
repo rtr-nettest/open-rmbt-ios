@@ -16,18 +16,18 @@ import SwiftData
 // the stanradrd library. So running tests serially fixes it partially.
 @Suite(.serialized)
 @MainActor struct NetworkCoverageTests {
-    @Test func whenInitializedWithNoPrefilledLocationAreas_thenAreasAreEmpty() async throws {
-        let sut = makeSUT(areas: [])
-        #expect(sut.fences.isEmpty)
+    @Test func whenInitializedWithNoPrefilledFences_thenFenceItemsAreEmpty() async throws {
+        let sut = makeSUT(fences: [])
+        #expect(sut.fenceItems.isEmpty)
     }
 
-    @Test func whenReceivingFirstLocationUpdate_thenCreatesFirstArea() async throws {
+    @Test func whenReceivingFirstLocationUpdate_thenCreatesFirstFence() async throws {
         let sut = makeSUT(updates: [makeLocationUpdate(at: 5, lat: 1.0, lon: 2.0)])
         await sut.startTest()
 
-        #expect(sut.fences.count == 1)
-        #expect(sut.fences.first?.coordinate.latitude == 1.0)
-        #expect(sut.fences.last?.coordinate.longitude == 2.0)
+        #expect(sut.fenceItems.count == 1)
+        #expect(sut.fenceItems.first?.coordinate.latitude == 1.0)
+        #expect(sut.fenceItems.last?.coordinate.longitude == 2.0)
     }
 
     @Test func whenReceivingMultiplePingsForOneLocation_thenCombinesPingTotalValue() async throws {
@@ -40,12 +40,12 @@ import SwiftData
         ])
         await sut.startTest()
 
-        #expect(sut.fences.count == 2)
+        #expect(sut.fenceItems.count == 2)
 
-        sut.selectedFenceID = sut.fences.first?.id
+        sut.selectedFenceID = sut.fenceItems.first?.id
         #expect(sut.selectedFenceDetail?.averagePing == "18 ms")
 
-        sut.selectedFenceID = sut.fences.last?.id
+        sut.selectedFenceID = sut.fenceItems.last?.id
         #expect(sut.selectedFenceDetail?.averagePing == "")
     }
 
@@ -73,7 +73,7 @@ import SwiftData
         ])
         await sut.startTest()
 
-        #expect(sut.fences
+        #expect(sut.fenceItems
             .map(\.id)
             .map {
                 sut.selectedFenceID = $0
@@ -99,12 +99,12 @@ import SwiftData
         ])
         await sut.startTest()
 
-        #expect(sut.fences.count == 2)
+        #expect(sut.fenceItems.count == 2)
 
-        sut.selectedFenceID = sut.fences.first?.id
+        sut.selectedFenceID = sut.fenceItems.first?.id
         #expect(sut.selectedFenceDetail?.averagePing == "15 ms")
 
-        sut.selectedFenceID = sut.fences.last?.id
+        sut.selectedFenceID = sut.fenceItems.last?.id
         #expect(sut.selectedFenceDetail?.averagePing == "26 ms")
     }
 
@@ -240,10 +240,10 @@ import SwiftData
             ])
             await sut.startTest()
 
-            #expect(sut.fences.count == 1)
-            #expect(sut.fences.first?.date == Date(timeIntervalSinceReferenceDate: 0))
-            #expect(sut.fences.first?.coordinate.latitude == 1.0000000001)
-            #expect(sut.fences.first?.coordinate.longitude == 1.0000000002)
+            #expect(sut.fenceItems.count == 1)
+            #expect(sut.fenceItems.first?.date == Date(timeIntervalSinceReferenceDate: 0))
+            #expect(sut.fenceItems.first?.coordinate.latitude == 1.0000000001)
+            #expect(sut.fenceItems.first?.coordinate.longitude == 1.0000000002)
         }
 
         @Test func goodLocationUpdatesAreInsideDifferentFences_theNewFencesAreCreated() async throws {
@@ -265,9 +265,9 @@ import SwiftData
             ])
             await sut.startTest()
 
-            #expect(sut.fences.count == 3)
-            #expect(sut.fences.map(\.date).map(\.timeIntervalSinceReferenceDate) == [0, 5, 12])
-            #expect(sut.fences.map(\.coordinate) == [
+            #expect(sut.fenceItems.count == 3)
+            #expect(sut.fenceItems.map(\.date).map(\.timeIntervalSinceReferenceDate) == [0, 5, 12])
+            #expect(sut.fenceItems.map(\.coordinate) == [
                 .init(latitude: 1, longitude: 1),
                 .init(latitude: 2.000000001, longitude: 2.000000002),
                 .init(latitude: 3, longitude: 2.0000000003)
@@ -296,19 +296,19 @@ import SwiftData
             ])
             await sut.startTest()
 
-            #expect(sut.fences.count == 2)
+            #expect(sut.fenceItems.count == 2)
 
-            sut.selectedFenceID = sut.fences.first?.id
+            sut.selectedFenceID = sut.fenceItems.first?.id
             #expect(sut.selectedFenceDetail?.averagePing == "150 ms")
 
-            sut.selectedFenceID = sut.fences.last?.id
+            sut.selectedFenceID = sut.fenceItems.last?.id
             #expect(sut.selectedFenceDetail?.averagePing == "300 ms")
         }
     }
 
     @MainActor @Suite("Persistence")
     struct Persistence {
-        @Test func whenReceivingLocationUpdatesAndPings_thenSavesNewPersistentLocationArea() async throws {
+        @Test func whenReceivingLocationUpdatesAndPings_thenPersistedFencesIntoPersistenceLayer() async throws {
             let persistenceService = FencePersistenceServiceSpy()
             let sut = makeSUT(
                 updates: [
@@ -325,27 +325,27 @@ import SwiftData
             )
             await sut.startTest()
 
-            let savedAreas = persistenceService.capturedSavedAreas
+            let savedFences = persistenceService.capturedSavedFences
 
-            try #require(savedAreas.count == 2)
+            try #require(savedFences.count == 2)
 
-            #expect(savedAreas.first?.dateEntered ==  Date(timeIntervalSinceReferenceDate: 0))
-            #expect(savedAreas.first?.startingLocation.coordinate.latitude == 1.0)
-            #expect(savedAreas.first?.startingLocation.coordinate.longitude == 1.0)
-            #expect(savedAreas.first?.averagePing == 150)
-            #expect(savedAreas.first?.significantTechnology == nil)
+            #expect(savedFences.first?.dateEntered ==  Date(timeIntervalSinceReferenceDate: 0))
+            #expect(savedFences.first?.startingLocation.coordinate.latitude == 1.0)
+            #expect(savedFences.first?.startingLocation.coordinate.longitude == 1.0)
+            #expect(savedFences.first?.averagePing == 150)
+            #expect(savedFences.first?.significantTechnology == nil)
 
-            #expect(savedAreas.last?.dateEntered ==  Date(timeIntervalSinceReferenceDate: 3))
-            #expect(savedAreas.last?.startingLocation.coordinate.latitude == 2.0)
-            #expect(savedAreas.last?.startingLocation.coordinate.longitude == 2.0)
-            #expect(savedAreas.last?.averagePing == 400)
-            #expect(savedAreas.last?.significantTechnology == nil)
+            #expect(savedFences.last?.dateEntered ==  Date(timeIntervalSinceReferenceDate: 3))
+            #expect(savedFences.last?.startingLocation.coordinate.latitude == 2.0)
+            #expect(savedFences.last?.startingLocation.coordinate.longitude == 2.0)
+            #expect(savedFences.last?.averagePing == 400)
+            #expect(savedFences.last?.significantTechnology == nil)
         }
     }
 }
 
 @MainActor func makeSUT(
-    areas: [LocationArea] = [],
+    fences: [Fence] = [],
     refreshInterval: TimeInterval = 1,
     minimumLocationAccuracy: CLLocationDistance = 100,
     updates: [NetworkCoverageViewModel.Update] = [],
@@ -354,7 +354,7 @@ import SwiftData
     sendResultsService: SendCoverageResultsServiceSpy = .init()
 ) -> NetworkCoverageViewModel {
     .init(
-        areas: areas,
+        fences: fences,
         refreshInterval: refreshInterval,
         minimumLocationAccuracy: minimumLocationAccuracy,
         updates: { updates.publisher.values },
@@ -396,15 +396,15 @@ func makeSaveError() -> Error {
 }
 
 final class SendCoverageResultsServiceSpy: SendCoverageResultsService {
-    private(set) var capturedSentAreas: [[LocationArea]] = []
+    private(set) var capturedSentFences: [[Fence]] = []
     private let sendResult: Result<Void, Error>
 
     init(sendResult: Result<Void, Error> = .success(())) {
         self.sendResult = sendResult
     }
 
-    func send(areas: [LocationArea]) async throws {
-        capturedSentAreas.append(areas)
+    func send(fences: [Fence]) async throws {
+        capturedSentFences.append(fences)
         switch sendResult {
         case .success:
             return
@@ -423,11 +423,11 @@ final class RadioTechnologyServiceStub: CurrentRadioTechnologyService {
 }
 
 final class FencePersistenceServiceSpy: FencePersistenceService {
-    private(set) var capturedSavedAreas: [LocationArea] = []
+    private(set) var capturedSavedFences: [Fence] = []
 
     init() {}
 
-    func save(_ area: LocationArea) throws {
-        capturedSavedAreas.append(area)
+    func save(_ fence: Fence) throws {
+        capturedSavedFences.append(fence)
     }
 }

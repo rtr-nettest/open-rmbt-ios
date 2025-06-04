@@ -31,11 +31,11 @@ protocol CurrentRadioTechnologyService {
 }
 
 protocol SendCoverageResultsService {
-    func send(areas: [LocationArea]) async throws
+    func send(fences: [Fence]) async throws
 }
 
 protocol FencePersistenceService {
-    func save(_ area: LocationArea) throws
+    func save(_ fence: Fence) throws
 }
 
 struct FenceItem: Identifiable, Hashable {
@@ -79,7 +79,6 @@ struct FenceDetail: Equatable, Identifiable {
         }
     }
     @ObservationIgnored private var selectedFence: FenceItem?
-    @ObservationIgnored private var currentArea: LocationArea? { locationAreas.last }
     @ObservationIgnored private var inaccurateLocationsWindows: [InaccurateLocationWindow] = []
 
     // Dependencies
@@ -100,21 +99,23 @@ struct FenceDetail: Equatable, Identifiable {
     private(set) var locationAccuracy = "N/A"
 
     @MainActor
-    private var locationAreas: [LocationArea] {
+    private var fences: [Fence] {
         didSet {
             // TODO: optimize: only very last fence is likely to need update, previous fences shoud remain untouched
-            // so no need to mapp all `locationAreas` into fences, but can cache previous mappings and update only the very last one
-            let newFences = locationAreas.map(fence)
-            if fences != newFences {
-                fences = newFences
+            // so no need to mapp all `fences` into fences items, but can cache previous mappings and update only the very last one
+            let newFences = fences.map(fenceItem)
+            if fenceItems != newFences {
+                fenceItems = newFences
             }
         }
     }
 
-    private(set) var fences: [FenceItem] = []
+    private var currentFence: Fence? { fences.last }
+
+    private(set) var fenceItems: [FenceItem] = []
     var selectedFenceID: FenceItem.ID? {
         didSet {
-            selectedFenceDetail = locationAreas
+            selectedFenceDetail = fences
                 .first { $0.id == selectedFenceID }
                 .map(fenceDetail)
         }
@@ -122,7 +123,7 @@ struct FenceDetail: Equatable, Identifiable {
     private(set) var selectedFenceDetail: FenceDetail?
 
     init(
-        areas: [LocationArea] = [],
+        fences: [Fence] = [],
         refreshInterval: TimeInterval,
         minimumLocationAccuracy: CLLocationDistance,
         updates: @escaping () -> some AsynchronousSequence<Update>,
@@ -131,7 +132,7 @@ struct FenceDetail: Equatable, Identifiable {
         persistenceService: some FencePersistenceService,
         locale: Locale
     ) {
-        self.locationAreas = areas
+        self.fences = fences
         self.refreshInterval = refreshInterval
         self.minimumLocationAccuracy = minimumLocationAccuracy
         self.currentRadioTechnology = currentRadioTechnology
@@ -148,7 +149,7 @@ struct FenceDetail: Equatable, Identifiable {
     }
 
     convenience init(
-        areas: [LocationArea] = [],
+        fences: [Fence] = [],
         refreshInterval: TimeInterval,
         minimumLocationAccuracy: CLLocationDistance,
         pingMeasurementService: @escaping () -> some PingsAsyncSequence,
@@ -159,7 +160,7 @@ struct FenceDetail: Equatable, Identifiable {
         locale: Locale = .autoupdatingCurrent
     ) {
         self.init(
-            areas: areas,
+            fences: fences,
             refreshInterval: refreshInterval,
             minimumLocationAccuracy: minimumLocationAccuracy,
             updates: { merge(
@@ -188,9 +189,9 @@ struct FenceDetail: Equatable, Identifiable {
                     }
                     pingResults.append(pingUpdate)
 
-                    if var (area, idx) = locationAreas.area(at: pingUpdate.timestamp) {
-                        area.append(ping: pingUpdate)
-                        locationAreas[idx] = area
+                    if var (fence, idx) = fences.fence(at: pingUpdate.timestamp) {
+                        fence.append(ping: pingUpdate)
+                        fences[idx] = fence
                     }
                 case .location(let locationUpdate):
                     let location = locationUpdate.location
@@ -205,28 +206,28 @@ struct FenceDetail: Equatable, Identifiable {
                     }
                     stopInaccurateLocationWindow(at: location.timestamp)
 
-                    let currentArea = currentArea
-                    if var currentArea {
-                        if currentArea.startingLocation.distance(from: location) >= fenceRadius {
-                            let newArea = LocationArea(
+                    let currentFence = currentFence
+                    if var currentFence {
+                        if currentFence.startingLocation.distance(from: location) >= fenceRadius {
+                            let newFence = Fence(
                                 startingLocation: location,
                                 dateEntered: locationUpdate.timestamp,
                                 technology: currentRadioTechnology
                             )
 
-                            currentArea.exit(at: locationUpdate.timestamp)
-                            locationAreas[locationAreas.endIndex - 1] = currentArea
+                            currentFence.exit(at: locationUpdate.timestamp)
+                            fences[fences.endIndex - 1] = currentFence
 
-                            try? persistenceService.save(currentArea)
+                            try? persistenceService.save(currentFence)
 
-                            locationAreas.append(newArea)
+                            fences.append(newFence)
                         } else {
-                            currentArea.append(location: location)
-                            currentRadioTechnology.map { currentArea.append(technology: $0) }
-                            locationAreas[locationAreas.endIndex - 1] = currentArea
+                            currentFence.append(location: location)
+                            currentRadioTechnology.map { currentFence.append(technology: $0) }
+                            fences[fences.endIndex - 1] = currentFence
                         }
                     } else {
-                        locationAreas.append(.init(
+                        fences.append(.init(
                             startingLocation: location,
                             dateEntered: locationUpdate.timestamp,
                             technology: currentRadioTechnology
@@ -242,7 +243,7 @@ struct FenceDetail: Equatable, Identifiable {
     private func start() async {
         guard !isStarted else { return }
         isStarted = true
-        locationAreas.removeAll()
+        fences.removeAll()
         locations.removeAll()
 
         backgroundActivity = CLBackgroundActivitySession()
@@ -255,14 +256,14 @@ struct FenceDetail: Equatable, Identifiable {
         locationAccuracy = "N/A"
         latestTechnology = "N/A"
 
-        if !locationAreas.isEmpty {
-            // save last location unexited location area into the persistence layer
-            if let lastArea = locationAreas.last, lastArea.dateExited == nil {
-                try? persistenceService.save(lastArea)
+        if !fences.isEmpty {
+            // save last unexited fence into the persistence layer
+            if let lastFence = fences.last, lastFence.dateExited == nil {
+                try? persistenceService.save(lastFence)
             }
 
             do {
-                try await sendResultsService.send(areas: locationAreas)
+                try await sendResultsService.send(fences: fences)
             } catch {
                 // TODO: display error
             }
@@ -323,25 +324,25 @@ private extension NetworkCoverageViewModel {
 }
 
 private extension NetworkCoverageViewModel {
-    private func fence(from area: LocationArea) -> FenceItem {
+    private func fenceItem(from fence: Fence) -> FenceItem {
         .init(
-            id: area.id,
-            date: area.dateEntered,
-            coordinate: area.startingLocation.coordinate,
-            technology: area.significantTechnology?.radioTechnologyDisplayValue ?? "N/A",
-            isSelected: selectedFence?.id == area.id,
-            isCurrent: currentArea?.id == area.id,
-            color: color(for: area.significantTechnology)
+            id: fence.id,
+            date: fence.dateEntered,
+            coordinate: fence.startingLocation.coordinate,
+            technology: fence.significantTechnology?.radioTechnologyDisplayValue ?? "N/A",
+            isSelected: selectedFence?.id == fence.id,
+            isCurrent: currentFence?.id == fence.id,
+            color: color(for: fence.significantTechnology)
         )
     }
 
-    private func fenceDetail(from area: LocationArea) -> FenceDetail {
+    private func fenceDetail(from fence: Fence) -> FenceDetail {
         .init(
-            id: area.id,
-            date: selectedItemDateFormatter.string(from: area.dateEntered),
-            technology: area.significantTechnology?.radioTechnologyDisplayValue ?? "N/A",
-            averagePing: area.averagePing.map { "\($0) ms" } ?? "",
-            color: color(for: area.significantTechnology)
+            id: fence.id,
+            date: selectedItemDateFormatter.string(from: fence.dateEntered),
+            technology: fence.significantTechnology?.radioTechnologyDisplayValue ?? "N/A",
+            averagePing: fence.averagePing.map { "\($0) ms" } ?? "",
+            color: color(for: fence.significantTechnology)
         )
     }
 
@@ -397,12 +398,6 @@ extension PingResult {
     }
 }
 
-extension LocationArea {
-    var significantTechnology: String? {
-        technologies.last
-    }
-}
-
 extension String {
     var radioTechnologyDisplayValue: String? {
         if
@@ -447,10 +442,10 @@ extension RMBTNetworkTypeConstants.NetworkType {
     }
 }
 
-private extension [LocationArea] {
-    func area(at timestamp: Date) -> (LocationArea, Self.Index)? {
-        let reversedAreas = reversed()
-        let reversedIdx = reversedAreas.firstIndex {
+private extension [Fence] {
+    func fence(at timestamp: Date) -> (Fence, Self.Index)? {
+        let reversedFences = reversed()
+        let reversedIdx = reversedFences.firstIndex {
             if let dateExited = $0.dateExited {
                 $0.dateEntered < timestamp && dateExited > timestamp
             } else {

@@ -3,7 +3,7 @@ import SwiftData
 import CoreLocation
 
 @Model
-final class PersistentLocationArea {
+final class PersistentFence {
     var timestamp: UInt64
     var latitude: Double
     var longitude: Double
@@ -11,12 +11,12 @@ final class PersistentLocationArea {
     var technology: String?
     var testUUID: String
 
-    init(from area: LocationArea, testUUID: String) {
-        self.timestamp = UInt64(area.dateEntered.timeIntervalSince1970 * 1_000_000) // microseconds
-        self.latitude = area.startingLocation.coordinate.latitude
-        self.longitude = area.startingLocation.coordinate.longitude
-        self.avgPingMilliseconds = area.averagePing
-        self.technology = area.technologies.last
+    init(from fence: Fence, testUUID: String) {
+        self.timestamp = UInt64(fence.dateEntered.timeIntervalSince1970 * 1_000_000) // microseconds
+        self.latitude = fence.startingLocation.coordinate.latitude
+        self.longitude = fence.startingLocation.coordinate.longitude
+        self.avgPingMilliseconds = fence.averagePing
+        self.technology = fence.technologies.last
         self.testUUID = testUUID
     }
 

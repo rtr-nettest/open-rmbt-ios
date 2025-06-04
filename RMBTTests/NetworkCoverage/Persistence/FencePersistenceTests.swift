@@ -13,54 +13,54 @@ import CoreLocation
 
 struct FencePersistenceTests {
     struct GivenHasNoPreviouslyPersitedData {
-        @Test func whenPersistedLocationAreas_thenTheyArePresentInPersistenceLayer() async throws {
+        @Test func whenPersistedFences_thenTheyArePresentInPersistenceLayer() async throws {
             let (sut, persistence, _) = makeSUT(testUUID: "dummy")
 
-            try sut.persist(fence: makeLocationArea(lat: 1, lon: 2, date: Date(timeIntervalSinceReferenceDate: 1), technology: "LTE"))
-            try sut.persist(fence: makeLocationArea(lat: 3, lon: 4, date: Date(timeIntervalSinceReferenceDate: 2), technology: "3G"))
+            try sut.persist(fence: makeFence(lat: 1, lon: 2, date: Date(timeIntervalSinceReferenceDate: 1), technology: "LTE"))
+            try sut.persist(fence: makeFence(lat: 3, lon: 4, date: Date(timeIntervalSinceReferenceDate: 2), technology: "3G"))
 
-            let persistedAreas = try #require(try persistence.persistedAreas())
-            try #require(persistedAreas.count == 2)
+            let persistedFences = try #require(try persistence.persistedFences())
+            try #require(persistedFences.count == 2)
 
-            #expect(persistedAreas[0].testUUID == "dummy")
-            #expect(persistedAreas[0].latitude == 1)
-            #expect(persistedAreas[0].longitude == 2)
-            #expect(persistedAreas[0].timestamp == Date(timeIntervalSinceReferenceDate: 1).microsecondsTimestamp)
-            #expect(persistedAreas[0].technology == "LTE")
+            #expect(persistedFences[0].testUUID == "dummy")
+            #expect(persistedFences[0].latitude == 1)
+            #expect(persistedFences[0].longitude == 2)
+            #expect(persistedFences[0].timestamp == Date(timeIntervalSinceReferenceDate: 1).microsecondsTimestamp)
+            #expect(persistedFences[0].technology == "LTE")
 
-            #expect(persistedAreas[1].testUUID == "dummy")
-            #expect(persistedAreas[1].latitude == 3)
-            #expect(persistedAreas[1].longitude == 4)
-            #expect(persistedAreas[1].timestamp == Date(timeIntervalSinceReferenceDate: 2).microsecondsTimestamp)
-            #expect(persistedAreas[1].technology == "3G")
+            #expect(persistedFences[1].testUUID == "dummy")
+            #expect(persistedFences[1].latitude == 3)
+            #expect(persistedFences[1].longitude == 4)
+            #expect(persistedFences[1].timestamp == Date(timeIntervalSinceReferenceDate: 2).microsecondsTimestamp)
+            #expect(persistedFences[1].technology == "3G")
         }
 
-        @Test func whenSendingLocationAreasSucceds_thenTheyAreRemovedFromPersistenceLayer() async throws {
+        @Test func whenSendingFencesSucceds_thenTheyAreRemovedFromPersistenceLayer() async throws {
             let (sut, persistence, sendService) = makeSUT(testUUID: "dummy", sendResults: [.success(())])
-            let areas = [
-                makeLocationArea(lat: 1, lon: 2, technology: "LTE"),
-                makeLocationArea(lat: 3, lon: 4, technology: "3G")
+            let fences = [
+                makeFence(lat: 1, lon: 2, technology: "LTE"),
+                makeFence(lat: 3, lon: 4, technology: "3G")
             ]
-            try await sut.persistAndSend(fences: areas)
+            try await sut.persistAndSend(fences: fences)
 
-            let persistedAreas = try persistence.persistedAreas()
-            #expect(persistedAreas.count == 0)
+            let persistedFences = try persistence.persistedFences()
+            #expect(persistedFences.count == 0)
             #expect(sendService.capturedSendCalls.count == 1)
         }
 
-        @Test func whenSendingLocationAreaFails_thenTheyAreKeptInPersistenceLayer() async throws {
+        @Test func whenSendingFenceFails_thenTheyAreKeptInPersistenceLayer() async throws {
             let (sut, persistence, sendService) = makeSUT(testUUID: "dummy", sendResults: [.failure(TestError.sendFailed)])
-            let areas = [
-                makeLocationArea(lat: 1, lon: 2, date: Date(timeIntervalSinceReferenceDate: 1), technology: "LTE"),
-                makeLocationArea(lat: 3, lon: 4, date: Date(timeIntervalSinceReferenceDate: 2), technology: "3G")
+            let fences = [
+                makeFence(lat: 1, lon: 2, date: Date(timeIntervalSinceReferenceDate: 1), technology: "LTE"),
+                makeFence(lat: 3, lon: 4, date: Date(timeIntervalSinceReferenceDate: 2), technology: "3G")
             ]
             await #expect(throws: TestError.sendFailed) {
-                try await sut.persistAndSend(fences: areas)
+                try await sut.persistAndSend(fences: fences)
             }
 
-            let persistedAreas = try persistence.persistedAreas()
+            let persistedFences = try persistence.persistedFences()
             #expect(sendService.capturedSendCalls.count == 1)
-            #expect(persistedAreas.count == 2)
+            #expect(persistedFences.count == 2)
         }
     }
 
@@ -69,8 +69,8 @@ struct FencePersistenceTests {
             let testUUID = "test-uuid"
             let prevTestUUID = "prev-test-uuid"
             let prevPersistedFences = [
-                makePersistentArea(testUUID: prevTestUUID, timestamp: 10),
-                makePersistentArea(testUUID: prevTestUUID, timestamp: 11)
+                makePersistentFence(testUUID: prevTestUUID, timestamp: 10),
+                makePersistentFence(testUUID: prevTestUUID, timestamp: 11)
             ]
             let (sut, persistence, sendService) = makeSUT(
                 testUUID: testUUID,
@@ -78,13 +78,13 @@ struct FencePersistenceTests {
                 previouslyPersistedFences: prevPersistedFences
             )
 
-            try await sut.persistAndSend(fences: [makeLocationArea(), makeLocationArea(), makeLocationArea()])
+            try await sut.persistAndSend(fences: [makeFence(), makeFence(), makeFence()])
 
-            let remainingAreas = try persistence.persistedAreas()
-            #expect(remainingAreas.count == 0)
+            let remainingFences = try persistence.persistedFences()
+            #expect(remainingFences.count == 0)
             #expect(sendService.capturedSendCalls.count == 2)
             #expect(sendService.capturedSendCalls.map(\.testUUID) == [testUUID, prevTestUUID])
-            #expect(sendService.capturedSendCalls.map(\.areas.count) == [3, prevPersistedFences.count])
+            #expect(sendService.capturedSendCalls.map(\.fences.count) == [3, prevPersistedFences.count])
         }
 
         @Test func whenAttemptToSendPreviouslyPersistedFencesFails_thenKeepsThoseFencesPersisted() async throws {
@@ -92,12 +92,12 @@ struct FencePersistenceTests {
             let prevTestUUID = "prev-test-uuid"
             let prevPrevTestUUID = "prev-prev-test-uuid"
             let prevPersistedFences = [
-                makePersistentArea(testUUID: prevTestUUID, timestamp: 100),
-                makePersistentArea(testUUID: prevTestUUID, timestamp: 110),
-                makePersistentArea(testUUID: prevPrevTestUUID, timestamp: 10),
-                makePersistentArea(testUUID: prevPrevTestUUID, timestamp: 12),
-                makePersistentArea(testUUID: prevPrevTestUUID, timestamp: 14),
-                makePersistentArea(testUUID: prevPrevTestUUID, timestamp: 16)
+                makePersistentFence(testUUID: prevTestUUID, timestamp: 100),
+                makePersistentFence(testUUID: prevTestUUID, timestamp: 110),
+                makePersistentFence(testUUID: prevPrevTestUUID, timestamp: 10),
+                makePersistentFence(testUUID: prevPrevTestUUID, timestamp: 12),
+                makePersistentFence(testUUID: prevPrevTestUUID, timestamp: 14),
+                makePersistentFence(testUUID: prevPrevTestUUID, timestamp: 16)
             ]
             let (sut, persistence, sendService) = makeSUT(
                 testUUID: testUUID,
@@ -105,15 +105,15 @@ struct FencePersistenceTests {
                 previouslyPersistedFences: prevPersistedFences
             )
 
-            try await sut.persistAndSend(fences: [makeLocationArea(), makeLocationArea(), makeLocationArea()])
+            try await sut.persistAndSend(fences: [makeFence(), makeFence(), makeFence()])
 
-            let remainingAreas = try persistence.persistedAreas()
-            #expect(remainingAreas.count == 2)
-            #expect(remainingAreas.allSatisfy { $0.testUUID == prevTestUUID })
+            let remainingFences = try persistence.persistedFences()
+            #expect(remainingFences.count == 2)
+            #expect(remainingFences.allSatisfy { $0.testUUID == prevTestUUID })
 
             #expect(sendService.capturedSendCalls.count == 3)
             #expect(sendService.capturedSendCalls.map(\.testUUID) == [testUUID, prevTestUUID, prevPrevTestUUID])
-            #expect(sendService.capturedSendCalls.map(\.areas.count) == [3, 2, 4])
+            #expect(sendService.capturedSendCalls.map(\.fences.count) == [3, 2, 4])
         }
 
         @Test func whenSendingPreviouslyPersistedFences_thenMappsThemProperlyToDomainObjects() async throws {
@@ -124,7 +124,7 @@ struct FencePersistenceTests {
             let expectedTimestamp: UInt64 = 1640995200000000 // 2022-01-01 00:00:00 in microseconds
             let expectedTechnology = "5G"
 
-            let persistentArea = PersistentLocationArea(
+            let persistentFence = PersistentFence(
                 testUUID: testUUID,
                 timestamp: expectedTimestamp,
                 latitude: expectedLat,
@@ -136,12 +136,12 @@ struct FencePersistenceTests {
             let (sut, _, sendService) = makeSUT(
                 testUUID: "main-uuid",
                 sendResults: [.success(()), .success(())],
-                previouslyPersistedFences: [persistentArea]
+                previouslyPersistedFences: [persistentFence]
             )
 
-            try await sut.persistAndSend(fences: [makeLocationArea()])
+            try await sut.persistAndSend(fences: [makeFence()])
 
-            let mappedFence = try #require(sendService.capturedSendCalls.last?.areas.first)
+            let mappedFence = try #require(sendService.capturedSendCalls.last?.fences.first)
 
             #expect(mappedFence.startingLocation.coordinate.latitude == expectedLat)
             #expect(mappedFence.startingLocation.coordinate.longitude == expectedLon)
@@ -151,103 +151,98 @@ struct FencePersistenceTests {
         }
     }
 
-    struct GivenHasPersistentAreasOderThenMaxResendAge {
-        @Test func whenPersistentAreasAreOlderThanMaxAge_thenTheyAreDeletedWithoutSending() async throws {
+    struct GivenHasPersistentFencesOlderThenMaxResendAge {
+        @Test func whenPersistedFencesAreOlderThanMaxAge_thenTheyAreDeletedWithoutSending() async throws {
             let testUUID = "current-test"
             let oldTestUUID = "old-test"
             let maxAgeSeconds: TimeInterval = 3600 // 1 hour
             let currentTime = Date()
 
-            // Create old areas (older than maxAge)
+            // Create old fences (older than maxAge)
             let oldTimestamp = currentTime.addingTimeInterval(-maxAgeSeconds - 1).microsecondsTimestamp
-            let oldAreas = [
-                makePersistentArea(testUUID: oldTestUUID, timestamp: oldTimestamp),
-                makePersistentArea(testUUID: oldTestUUID, timestamp: oldTimestamp + 1000)
+            let oldFences = [
+                makePersistentFence(testUUID: oldTestUUID, timestamp: oldTimestamp),
+                makePersistentFence(testUUID: oldTestUUID, timestamp: oldTimestamp + 1000)
             ]
 
-            // Create recent areas (within maxAge)
+            // Create recent fences (within maxAge)
             let recentTimestamp = currentTime.addingTimeInterval(-maxAgeSeconds + 600).microsecondsTimestamp
-            let recentAreas = [
-                makePersistentArea(testUUID: "recent-test", timestamp: recentTimestamp)
+            let recentFences = [
+                makePersistentFence(testUUID: "recent-test", timestamp: recentTimestamp)
             ]
 
             let (sut, persistence, sendService) = makeSUT(
                 testUUID: testUUID,
                 sendResults: [.success(()), .success(())],
-                previouslyPersistedFences: oldAreas + recentAreas,
+                previouslyPersistedFences: oldFences + recentFences,
                 maxResendAge: maxAgeSeconds
             )
 
-            try await sut.persistAndSend(fences: [makeLocationArea()])
+            try await sut.persistAndSend(fences: [makeFence()])
 
-            let remainingAreas = try persistence.persistedAreas()
-            // Only recent areas should remain, old areas should be deleted
-            #expect(remainingAreas.count == 0) // recent area should be sent and removed too
-            #expect(sendService.capturedSendCalls.count == 2) // current + recent (old areas not sent)
+            let remainingFences = try persistence.persistedFences()
+            #expect(remainingFences.count == 0)
+            #expect(sendService.capturedSendCalls.count == 2) // current + recent (old fences not sent)
             #expect(sendService.capturedSendCalls.map(\.testUUID).contains(oldTestUUID) == false)
         }
 
-        @Test func whenPersistentAreasAreWithinMaxAge_thenTheyAreKeptAndSent() async throws {
+        @Test func whenPersistedFencesAreWithinMaxAge_thenTheyAreKeptAndSent() async throws {
             let testUUID = "current-test"
             let recentTestUUID = "recent-test"
             let maxAgeSeconds: TimeInterval = 3600 // 1 hour
             let currentTime = Date()
 
-            // Create recent areas (within maxAge)
+            // Create recent fences (within maxAge)
             let recentTimestamp = currentTime.addingTimeInterval(-maxAgeSeconds + 600).microsecondsTimestamp
-            let recentAreas = [
-                makePersistentArea(testUUID: recentTestUUID, timestamp: recentTimestamp),
-                makePersistentArea(testUUID: recentTestUUID, timestamp: recentTimestamp + 1000)
+            let recentFences = [
+                makePersistentFence(testUUID: recentTestUUID, timestamp: recentTimestamp),
+                makePersistentFence(testUUID: recentTestUUID, timestamp: recentTimestamp + 1000)
             ]
 
             let (sut, persistence, sendService) = makeSUT(
                 testUUID: testUUID,
                 sendResults: [.success(()), .success(())],
-                previouslyPersistedFences: recentAreas,
+                previouslyPersistedFences: recentFences,
                 maxResendAge: maxAgeSeconds
             )
 
-            try await sut.persistAndSend(fences: [makeLocationArea()])
+            try await sut.persistAndSend(fences: [makeFence()])
 
-            let remainingAreas = try persistence.persistedAreas()
-            #expect(remainingAreas.count == 0) // All should be sent and removed
+            let remainingFences = try persistence.persistedFences()
+            #expect(remainingFences.count == 0) // All should be sent and removed
             #expect(sendService.capturedSendCalls.count == 2) // current + recent
             #expect(sendService.capturedSendCalls.map(\.testUUID) == [testUUID, recentTestUUID])
-            #expect(sendService.capturedSendCalls.map(\.areas.count) == [1, 2])
+            #expect(sendService.capturedSendCalls.map(\.fences.count) == [1, 2])
         }
 
-        @Test func whenSendingRecentAreasFailsButOldAreasExist_thenOnlyOldAreasAreDeleted() async throws {
+        @Test func whenSendingRecentFencesFailsButOldFencesExist_thenOnlyOldFencesAreDeleted() async throws {
             let testUUID = "current-test"
             let recentTestUUID = "recent-test"
             let oldTestUUID = "old-test"
             let maxAgeSeconds: TimeInterval = 3600 // 1 hour
             let currentTime = Date()
 
-            // Create old areas (older than maxAge)
+            // Create old fences (older than maxAge)
             let oldTimestamp = currentTime.addingTimeInterval(-maxAgeSeconds - 1).microsecondsTimestamp
-            let oldAreas = [
-                makePersistentArea(testUUID: oldTestUUID, timestamp: oldTimestamp)
-            ]
+            let oldFences = [makePersistentFence(testUUID: oldTestUUID, timestamp: oldTimestamp)]
 
-            // Create recent areas (within maxAge)
+            // Create recent fences (within maxAge)
             let recentTimestamp = currentTime.addingTimeInterval(-maxAgeSeconds + 600).microsecondsTimestamp
-            let recentAreas = [
-                makePersistentArea(testUUID: recentTestUUID, timestamp: recentTimestamp)
-            ]
+            let recentFences = [makePersistentFence(testUUID: recentTestUUID, timestamp: recentTimestamp)]
 
             let (sut, persistence, sendService) = makeSUT(
                 testUUID: testUUID,
-                sendResults: [.success(()), .failure(TestError.sendFailed)], // recent areas fail to send
-                previouslyPersistedFences: oldAreas + recentAreas,
+                sendResults: [.success(()), .failure(TestError.sendFailed)], // recent fences fail to send
+                previouslyPersistedFences: oldFences + recentFences,
                 maxResendAge: maxAgeSeconds
             )
 
-            try await sut.persistAndSend(fences: [makeLocationArea()])
+            try await sut.persistAndSend(fences: [makeFence()])
 
-            let remainingAreas = try persistence.persistedAreas()
-            // Only recent areas should remain (old areas deleted, recent areas kept due to send failure)
-            #expect(remainingAreas.count == 1)
-            #expect(remainingAreas.first?.testUUID == recentTestUUID)
+            let remainingFences = try persistence.persistedFences()
+            // Only recent fences should remain (old fences deleted, recent fences kept due to send failure)
+            #expect(remainingFences.count == 1)
+            #expect(remainingFences.first?.testUUID == recentTestUUID)
             #expect(sendService.capturedSendCalls.count == 2) // current + attempt to send recent
             #expect(sendService.capturedSendCalls.map(\.testUUID).contains(oldTestUUID) == false)
         }
@@ -256,15 +251,15 @@ struct FencePersistenceTests {
 
 private struct SendCall {
     let testUUID: String
-    let areas: [LocationArea]
+    let fences: [Fence]
 }
 
 // MARK: - Test Helpers
 
 private func makeInMemoryModelContext() -> ModelContext {
     let container = try! ModelContainer(
-        for: PersistentLocationArea.self,
-        configurations: .init(for: PersistentLocationArea.self, isStoredInMemoryOnly: true)
+        for: PersistentFence.self,
+        configurations: .init(for: PersistentFence.self, isStoredInMemoryOnly: true)
     )
     return ModelContext(container)
 }
@@ -272,7 +267,7 @@ private func makeInMemoryModelContext() -> ModelContext {
 private func makeSUT(
     testUUID: String?,
     sendResults: [Result<Void, Error>] = [.success(())],
-    previouslyPersistedFences: [PersistentLocationArea] = [],
+    previouslyPersistedFences: [PersistentFence] = [],
     maxResendAge: TimeInterval = Date().timeIntervalSince1970 * 1000,
     dateNow: @escaping () -> Date = Date.init
 ) -> (sut: SUT, persistence: PersistenceLayerSpy, sendService: SendCoverageResultsServiceFactory) {
@@ -280,9 +275,9 @@ private func makeSUT(
     let persistence = PersistenceLayerSpy(modelContext: database.modelContext)
     let sendServiceFactory = SendCoverageResultsServiceFactory(sendResults: sendResults)
 
-    // Insert prefilled areas into modelContext
-    for area in previouslyPersistedFences {
-        database.modelContext.insert(area)
+    // Insert prefilled fences into modelContext
+    for fence in previouslyPersistedFences {
+        database.modelContext.insert(fence)
     }
     try! database.modelContext.save()
 
@@ -303,15 +298,15 @@ final class SUT {
         self.sendResultsServices = sendResultsServices
     }
 
-    func persist(fence: LocationArea) throws {
+    func persist(fence: Fence) throws {
         try fencePersistenceService.save(fence)
     }
 
-    func persistAndSend(fences: [LocationArea]) async throws {
+    func persistAndSend(fences: [Fence]) async throws {
         try fences.forEach {
             try persist(fence: $0)
         }
-        try await sendResultsServices.send(areas: fences)
+        try await sendResultsServices.send(fences: fences)
     }
 }
 
@@ -322,33 +317,33 @@ private final class PersistenceLayerSpy {
         self.modelContext = modelContext
     }
 
-    func persistedAreas() throws -> [PersistentLocationArea] {
-        try modelContext.fetch(FetchDescriptor<PersistentLocationArea>())
+    func persistedFences() throws -> [PersistentFence] {
+        try modelContext.fetch(FetchDescriptor<PersistentFence>())
     }
 }
 
-private func makeLocationArea(
+private func makeFence(
     lat: CLLocationDegrees = Double.random(in: -90...90),
     lon: CLLocationDegrees = Double.random(in: -180...180),
     date: Date = Date(timeIntervalSinceReferenceDate: TimeInterval.random(in: 0...10000)),
     technology: String? = ["3G", "4G", "5G", "LTE"].randomElement(),
     averagePing: Int? = nil
-) -> LocationArea {
-    var area = LocationArea(
+) -> Fence {
+    var fence = Fence(
         startingLocation: CLLocation(latitude: lat, longitude: lon),
         dateEntered: date,
         technology: technology
     )
 
     if let ping = averagePing {
-        area.append(ping: PingResult(result: .interval(.milliseconds(ping)), timestamp: date))
+        fence.append(ping: PingResult(result: .interval(.milliseconds(ping)), timestamp: date))
     }
 
-    return area
+    return fence
 }
 
-private func makePersistentArea(testUUID: String, timestamp: UInt64) -> PersistentLocationArea {
-    PersistentLocationArea(
+private func makePersistentFence(testUUID: String, timestamp: UInt64) -> PersistentFence {
+    PersistentFence(
         testUUID: testUUID,
         timestamp: timestamp,
         latitude: Double.random(in: -90...90),
@@ -375,15 +370,15 @@ private extension UInt64 {
 }
 
 private final class SendCoverageResultsServiceSpyLocal: SendCoverageResultsService {
-    private(set) var capturedSentAreas: [[LocationArea]] = []
+    private(set) var capturedSentFences: [[Fence]] = []
     private let sendResult: Result<Void, Error>
 
     init(sendResult: Result<Void, Error> = .success(())) {
         self.sendResult = sendResult
     }
 
-    func send(areas: [LocationArea]) async throws {
-        capturedSentAreas.append(areas)
+    func send(fences: [Fence]) async throws {
+        capturedSentFences.append(fences)
         switch sendResult {
         case .success:
             return
@@ -407,8 +402,8 @@ private final class SendCoverageResultsServiceFactory {
         return SendCoverageResultsServiceWrapper(
             testUUID: testUUID,
             originalService: service,
-            onSend: { [weak self] areas in
-                self?.capturedSendCalls.append(SendCall(testUUID: testUUID, areas: areas))
+            onSend: { [weak self] fences in
+                self?.capturedSendCalls.append(SendCall(testUUID: testUUID, fences: fences))
             }
         )
     }
@@ -417,16 +412,16 @@ private final class SendCoverageResultsServiceFactory {
 private final class SendCoverageResultsServiceWrapper: SendCoverageResultsService {
     private let testUUID: String
     private let originalService: SendCoverageResultsServiceSpyLocal
-    private let onSend: ([LocationArea]) -> Void
+    private let onSend: ([Fence]) -> Void
 
-    init(testUUID: String, originalService: SendCoverageResultsServiceSpyLocal, onSend: @escaping ([LocationArea]) -> Void) {
+    init(testUUID: String, originalService: SendCoverageResultsServiceSpyLocal, onSend: @escaping ([Fence]) -> Void) {
         self.testUUID = testUUID
         self.originalService = originalService
         self.onSend = onSend
     }
 
-    func send(areas: [LocationArea]) async throws {
-        onSend(areas)
-        try await originalService.send(areas: areas)
+    func send(fences: [Fence]) async throws {
+        onSend(fences)
+        try await originalService.send(fences: fences)
     }
 }

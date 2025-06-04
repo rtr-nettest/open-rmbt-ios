@@ -24,7 +24,7 @@
 		36B75A212739692C006F4CB3 /* RMBTMaterialTextFieldState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36B75A202739692C006F4CB3 /* RMBTMaterialTextFieldState.swift */; };
 		36B75A27273EA096006F4CB3 /* RMBTHistoryLoopCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 36B75A26273EA096006F4CB3 /* RMBTHistoryLoopCell.xib */; };
 		36B75A29273EA73C006F4CB3 /* RMBTHistoryLoopCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36B75A28273EA73C006F4CB3 /* RMBTHistoryLoopCell.swift */; };
-		4909C2D32DE4A6D0003F3AB6 /* PersistentLocationArea.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4909C2D12DE4A6D0003F3AB6 /* PersistentLocationArea.swift */; };
+		4909C2D32DE4A6D0003F3AB6 /* PersistentFence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4909C2D12DE4A6D0003F3AB6 /* PersistentFence.swift */; };
 		491471362D1062DD00885B82 /* SendCoverageResultRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 491471352D1062DD00885B82 /* SendCoverageResultRequest.swift */; };
 		49312C752BE91CC2001AA226 /* RMBTHistoryDownloadViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49312C742BE91CC2001AA226 /* RMBTHistoryDownloadViewController.swift */; };
 		493D514C2DD7526200CC3473 /* libresolv.9.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 49C5E41A2DD74C3E00C537D9 /* libresolv.9.tbd */; };
@@ -38,12 +38,12 @@
 		498660252D88425A005E258C /* Clocks in Frameworks */ = {isa = PBXBuildFile; productRef = 498660242D88425A005E258C /* Clocks */; };
 		498EF31A2D0B0CD7003A79EB /* NetworkCoverageViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 498EF3192D0B0CD7003A79EB /* NetworkCoverageViewModel.swift */; };
 		498EF31C2D0B0CFF003A79EB /* PingMeasurementService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 498EF31B2D0B0CFF003A79EB /* PingMeasurementService.swift */; };
-		498EF31E2D0B0D70003A79EB /* LocationArea.swift in Sources */ = {isa = PBXBuildFile; fileRef = 498EF31D2D0B0D70003A79EB /* LocationArea.swift */; };
+		498EF31E2D0B0D70003A79EB /* Fence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 498EF31D2D0B0D70003A79EB /* Fence.swift */; };
 		498F7F942D352C2000EC975D /* NetworkCoverageViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 498F7F932D352C2000EC975D /* NetworkCoverageViewModelTests.swift */; };
 		499406DD2D9C0B2600237AC1 /* CurrentRadioTechnologyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499406DC2D9C0B2600237AC1 /* CurrentRadioTechnologyService.swift */; };
 		499406E02D9D1C8A00237AC1 /* LocationUpdatesService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499406DF2D9D1C8A00237AC1 /* LocationUpdatesService.swift */; };
 		499406E22D9D1CD600237AC1 /* LocationUpdate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499406E12D9D1CD600237AC1 /* LocationUpdate.swift */; };
-		49965DA82DEF984A00D93737 /* PersistentAreasResender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49965DA72DEF984A00D93737 /* PersistentAreasResender.swift */; };
+		49965DA82DEF984A00D93737 /* PersistedFencesResender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49965DA72DEF984A00D93737 /* PersistedFencesResender.swift */; };
 		499CF46D2DE9D48200D5DCDE /* NetworkCoverageFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499CF46C2DE9D48200D5DCDE /* NetworkCoverageFactory.swift */; };
 		499CF46F2DE9DA1700D5DCDE /* PersistenceManagingCoverageResultsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499CF46E2DE9DA1700D5DCDE /* PersistenceManagingCoverageResultsService.swift */; };
 		499CF4732DE9DF8300D5DCDE /* FencePersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499CF4722DE9DF8300D5DCDE /* FencePersistenceTests.swift */; };
@@ -345,7 +345,7 @@
 		36B75A202739692C006F4CB3 /* RMBTMaterialTextFieldState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTMaterialTextFieldState.swift; sourceTree = "<group>"; };
 		36B75A26273EA096006F4CB3 /* RMBTHistoryLoopCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = RMBTHistoryLoopCell.xib; sourceTree = "<group>"; };
 		36B75A28273EA73C006F4CB3 /* RMBTHistoryLoopCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTHistoryLoopCell.swift; sourceTree = "<group>"; };
-		4909C2D12DE4A6D0003F3AB6 /* PersistentLocationArea.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistentLocationArea.swift; sourceTree = "<group>"; };
+		4909C2D12DE4A6D0003F3AB6 /* PersistentFence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistentFence.swift; sourceTree = "<group>"; };
 		491471352D1062DD00885B82 /* SendCoverageResultRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendCoverageResultRequest.swift; sourceTree = "<group>"; };
 		49312C742BE91CC2001AA226 /* RMBTHistoryDownloadViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTHistoryDownloadViewController.swift; sourceTree = "<group>"; };
 		494998E22B7E353C0067B3D8 /* TopPopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopPopoverView.swift; sourceTree = "<group>"; };
@@ -356,12 +356,12 @@
 		498220BE2D424F51009A7055 /* UIImage+ResultClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+ResultClass.swift"; sourceTree = "<group>"; };
 		498EF3192D0B0CD7003A79EB /* NetworkCoverageViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkCoverageViewModel.swift; sourceTree = "<group>"; };
 		498EF31B2D0B0CFF003A79EB /* PingMeasurementService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PingMeasurementService.swift; sourceTree = "<group>"; };
-		498EF31D2D0B0D70003A79EB /* LocationArea.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationArea.swift; sourceTree = "<group>"; };
+		498EF31D2D0B0D70003A79EB /* Fence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fence.swift; sourceTree = "<group>"; };
 		498F7F932D352C2000EC975D /* NetworkCoverageViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkCoverageViewModelTests.swift; sourceTree = "<group>"; };
 		499406DC2D9C0B2600237AC1 /* CurrentRadioTechnologyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentRadioTechnologyService.swift; sourceTree = "<group>"; };
 		499406DF2D9D1C8A00237AC1 /* LocationUpdatesService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationUpdatesService.swift; sourceTree = "<group>"; };
 		499406E12D9D1CD600237AC1 /* LocationUpdate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationUpdate.swift; sourceTree = "<group>"; };
-		49965DA72DEF984A00D93737 /* PersistentAreasResender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistentAreasResender.swift; sourceTree = "<group>"; };
+		49965DA72DEF984A00D93737 /* PersistedFencesResender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistedFencesResender.swift; sourceTree = "<group>"; };
 		499CF46C2DE9D48200D5DCDE /* NetworkCoverageFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkCoverageFactory.swift; sourceTree = "<group>"; };
 		499CF46E2DE9DA1700D5DCDE /* PersistenceManagingCoverageResultsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceManagingCoverageResultsService.swift; sourceTree = "<group>"; };
 		499CF4722DE9DF8300D5DCDE /* FencePersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FencePersistenceTests.swift; sourceTree = "<group>"; };
@@ -699,8 +699,8 @@
 			children = (
 				499CF46E2DE9DA1700D5DCDE /* PersistenceManagingCoverageResultsService.swift */,
 				49AC77132DE8B2C100EBFAAE /* SwiftDataFencePersistenceService.swift */,
-				49965DA72DEF984A00D93737 /* PersistentAreasResender.swift */,
-				4909C2D12DE4A6D0003F3AB6 /* PersistentLocationArea.swift */,
+				49965DA72DEF984A00D93737 /* PersistedFencesResender.swift */,
+				4909C2D12DE4A6D0003F3AB6 /* PersistentFence.swift */,
 			);
 			path = Persistence;
 			sourceTree = "<group>";
@@ -745,7 +745,7 @@
 				495F7B9A2CF48FC4003750A3 /* NetworkCoverageView.swift */,
 				498EF3192D0B0CD7003A79EB /* NetworkCoverageViewModel.swift */,
 				491471352D1062DD00885B82 /* SendCoverageResultRequest.swift */,
-				498EF31D2D0B0D70003A79EB /* LocationArea.swift */,
+				498EF31D2D0B0D70003A79EB /* Fence.swift */,
 			);
 			path = NetworkCoverage;
 			sourceTree = "<group>";
@@ -1791,7 +1791,7 @@
 				E9400F1226BE707C0067273A /* RMBTMapServer.swift in Sources */,
 				E9E993BA26EA398500E7EED6 /* RMBTHistoryMapCell.swift in Sources */,
 				E97CF78B2761FC5B0092352C /* RMBTHelpers.swift in Sources */,
-				4909C2D32DE4A6D0003F3AB6 /* PersistentLocationArea.swift in Sources */,
+				4909C2D32DE4A6D0003F3AB6 /* PersistentFence.swift in Sources */,
 				49B28C7A2BA1914E00697BB4 /* RMBTTestExportCell.swift in Sources */,
 				E93FB0F226F39A8C00DD24CD /* RMBTHistoryQoSSingleResultCell.swift in Sources */,
 				E926C2F4276A3345009FCF12 /* RMBTQoSTestRunner.swift in Sources */,
@@ -1937,7 +1937,7 @@
 				E9400F1626BE71EE0067273A /* MapMeasurementRequest.swift in Sources */,
 				E9A23BF42764F62200717814 /* RMBTHistoryQoSSingleResult.swift in Sources */,
 				E9AA6420275DD6FA0079E5A1 /* RMBTHistoryPingGraphCell.swift in Sources */,
-				498EF31E2D0B0D70003A79EB /* LocationArea.swift in Sources */,
+				498EF31E2D0B0D70003A79EB /* Fence.swift in Sources */,
 				E959547C26E3B5DF004EA6D9 /* RMBTHistoryLoadingCell.swift in Sources */,
 				E9400F1F26BE89440067273A /* QosMeasurementResultResponse.swift in Sources */,
 				494998E32B7E353C0067B3D8 /* TopPopoverView.swift in Sources */,
@@ -1959,7 +1959,7 @@
 				E95954AB26E60287004EA6D9 /* RMBTHistoryFilterTitleCell.swift in Sources */,
 				E946B93F26D28BA20006E1F1 /* RMBTMapOptionsCell.swift in Sources */,
 				E9E993C226EA435200E7EED6 /* RMBTHistoryBasicInfoCell.swift in Sources */,
-				49965DA82DEF984A00D93737 /* PersistentAreasResender.swift in Sources */,
+				49965DA82DEF984A00D93737 /* PersistedFencesResender.swift in Sources */,
 				E93FB10926F4C41600DD24CD /* RMBTVerticalTransitionController.swift in Sources */,
 				E946B94E26D65F0D0006E1F1 /* RMBTMapOptionsFilterViewController.swift in Sources */,
 				E9A9A9AD27687A03002671C0 /* RMBTHistoryResult.swift in Sources */,
