@@ -73,15 +73,7 @@ struct PersistedFencesResender {
 
     private func deleteOldPersistentFences() throws {
         let cutoffTimestamp = UInt64(max(0, (dateNow().timeIntervalSince1970 - maxResendAge) * 1_000_000))
-        let descriptor = FetchDescriptor<PersistentFence>(
-            predicate: #Predicate { $0.timestamp < cutoffTimestamp }
-        )
-        let oldFences = try modelContext.fetch(descriptor)
-        for fence in oldFences {
-            modelContext.delete(fence)
-        }
-        if !oldFences.isEmpty {
-            try modelContext.save()
-        }
+        try modelContext.delete(model: PersistentFence.self, where: #Predicate { $0.timestamp < cutoffTimestamp })
+        try modelContext.save()
     }
 }

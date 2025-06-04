@@ -38,14 +38,7 @@ struct PersistenceManagingCoverageResultsService: SendCoverageResultsService {
             let mainService = sendResultsService(currentTestUUID)
             try await mainService.send(fences: fences)
 
-            // Delete persisted fences with matching testUUID
-            let descriptor = FetchDescriptor<PersistentFence>(
-                predicate: #Predicate { $0.testUUID == currentTestUUID }
-            )
-            let areasToDelete = try modelContext.fetch(descriptor)
-            for area in areasToDelete {
-                modelContext.delete(area)
-            }
+            try modelContext.delete(model: PersistentFence.self, where: #Predicate { $0.testUUID == currentTestUUID })
             try modelContext.save()
         } else {
             throw ServiceError.missingTestUUID
