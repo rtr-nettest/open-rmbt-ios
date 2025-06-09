@@ -80,6 +80,9 @@ struct FenceDetail: Equatable, Identifiable {
     }
     @ObservationIgnored private var selectedFence: FenceItem?
     @ObservationIgnored private var inaccurateLocationsWindows: [InaccurateLocationWindow] = []
+    @ObservationIgnored private var testStartTime: Date?
+    @ObservationIgnored private let maxTestDuration: TimeInterval = 4 * 60 * 60 // 4 hours in seconds
+    @ObservationIgnored private let timeNow: () -> Date
 
     // Dependencies
     @ObservationIgnored private let currentRadioTechnology: any CurrentRadioTechnologyService
@@ -130,7 +133,8 @@ struct FenceDetail: Equatable, Identifiable {
         currentRadioTechnology: some CurrentRadioTechnologyService,
         sendResultsService: some SendCoverageResultsService,
         persistenceService: some FencePersistenceService,
-        locale: Locale
+        locale: Locale,
+        timeNow: @escaping () -> Date = Date.init
     ) {
         self.fences = fences
         self.refreshInterval = refreshInterval
@@ -139,6 +143,7 @@ struct FenceDetail: Equatable, Identifiable {
         self.sendResultsService = sendResultsService
         self.persistenceService = persistenceService
         self.updates = updates
+        self.timeNow = timeNow
         selectedItemDateFormatter = {
             let dateFormatter = DateFormatter()
             dateFormatter.locale = locale
@@ -178,6 +183,12 @@ struct FenceDetail: Equatable, Identifiable {
         do {
             for try await update in sequence {
                 guard isStarted else { break }
+
+                if let startTime = testStartTime,
+                    timeNow().timeIntervalSince(startTime) >= maxTestDuration {
+                    await stop()
+                    break
+                }
 
                 switch update {
                 case .ping(let pingUpdate):
@@ -243,6 +254,7 @@ struct FenceDetail: Equatable, Identifiable {
     private func start() async {
         guard !isStarted else { return }
         isStarted = true
+        testStartTime = timeNow()
         fences.removeAll()
         locations.removeAll()
 
@@ -253,6 +265,7 @@ struct FenceDetail: Equatable, Identifiable {
 
     private func stop() async {
         isStarted = false
+        testStartTime = nil
         locationAccuracy = "N/A"
         latestTechnology = "N/A"
 

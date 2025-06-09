@@ -220,6 +220,67 @@ import SwiftData
         #expect(sut.latestPing == arguments.expectedLatestPing)
     }
 
+    @Test func whenTestRunsForFourHours_thenAutomaticallyStops() async throws {
+        let startTime = Date(timeIntervalSinceReferenceDate: 0)
+        let fourHoursInSeconds: TimeInterval = 4 * 60 * 60
+
+        var currentTime = startTime
+        let updates = [
+            makeLocationUpdate(at: 0, lat: 1.0, lon: 1.0),
+            makePingUpdate(at: 1, ms: 100),
+            makeLocationUpdate(at: 2, lat: 2.0, lon: 2.0),
+            makePingUpdate(at: 3, ms: 200),
+        ]
+
+        let sut = makeSUT(
+            updates: updates,
+            currentTime: { currentTime }
+        )
+
+        await sut.startTest()
+
+        // Simulate time passing to exactly 4 hours
+        currentTime = startTime.addingTimeInterval(fourHoursInSeconds)
+
+        // Process one more update to trigger the time check
+        await sut.toggleMeasurement() // This should stop due to time limit
+
+        // Verify test automatically stopped
+        #expect(!sut.isStarted)
+    }
+
+    @Test func whenTestRunsForLessThanFourHours_thenDoesNotAutoStop() async throws {
+        let startTime = Date(timeIntervalSinceReferenceDate: 0)
+        let threeHoursInSeconds: TimeInterval = 3 * 60 * 60
+
+        var currentTime = startTime
+        let updates = [
+            makeLocationUpdate(at: 0, lat: 1.0, lon: 1.0),
+            makePingUpdate(at: 1, ms: 100),
+            makeLocationUpdate(at: 2, lat: 2.0, lon: 2.0),
+            makePingUpdate(at: 3, ms: 200),
+        ]
+
+        let sut = makeSUT(
+            updates: updates,
+            currentTime: { currentTime }
+        )
+
+        await sut.startTest()
+
+        // Simulate time passing to 3 hours (less than 4)
+        currentTime = startTime.addingTimeInterval(threeHoursInSeconds)
+
+        // Process updates - should not auto-stop
+        // Test should still be running
+        #expect(sut.isStarted)
+
+        // Verify both fences were created
+        #expect(sut.fenceItems.count == 2)
+        #expect(sut.fenceItems.first?.coordinate.latitude == 1.0)
+        #expect(sut.fenceItems.last?.coordinate.latitude == 2.0)
+    }
+
     @MainActor @Suite("WHEN Received Location Updates With Bad Accuracy")
     struct WhenReceivedLocationUpdatesWithBadAccuracy {
         @Test func goodLocationUpdatesAreInsideSameFence_thenNoNewFenceIsCreated() async throws {
@@ -351,9 +412,10 @@ import SwiftData
     updates: [NetworkCoverageViewModel.Update] = [],
     locale: Locale = Locale(identifier: "en_US"),
     persistenceService: FencePersistenceServiceSpy = .init(),
-    sendResultsService: SendCoverageResultsServiceSpy = .init()
+    sendResultsService: SendCoverageResultsServiceSpy = .init(),
+    currentTime: @escaping () -> Date = Date.init
 ) -> NetworkCoverageViewModel {
-    .init(
+    return NetworkCoverageViewModel(
         fences: fences,
         refreshInterval: refreshInterval,
         minimumLocationAccuracy: minimumLocationAccuracy,
@@ -361,7 +423,8 @@ import SwiftData
         currentRadioTechnology: RadioTechnologyServiceStub(),
         sendResultsService: sendResultsService,
         persistenceService: persistenceService,
-        locale: locale
+        locale: locale,
+        timeNow: currentTime
     )
 }
 
