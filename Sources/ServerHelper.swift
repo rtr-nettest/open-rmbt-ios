@@ -53,7 +53,16 @@ class ServerHelper {
     }
 
     ///
-    class func requestArray<T: BasicResponse>(_ manager: Alamofire.Session, baseUrl: String?, method: Alamofire.HTTPMethod, path: String, requestObject: BasicRequest?, success: @escaping (_ response: [T]) -> (), error failure: @escaping ErrorCallback) {
+    class func requestArray<T: BasicResponse>(
+        _ manager: Alamofire.Session,
+        baseUrl: String?,
+        method: Alamofire.HTTPMethod,
+        path: String,
+        requestObject: BasicRequest?,
+        acceptableStatusCodes: some Sequence<Int> = 200..<300,
+        success: @escaping (_ response: [T]) -> (),
+        error failure: @escaping ErrorCallback
+    ) {
         // add basic request values (TODO: make device independent -> for osx, tvos)
 
         var parameters: [String: AnyObject]?
@@ -82,7 +91,7 @@ class ServerHelper {
         manager
             .request(basePath, method: method, parameters: parameters, encoding: encoding, headers: [:])
  // maybe use alamofire router later? (https://grokswift.com/router/)
-            .validate() // https://github.com/Alamofire/Alamofire#validation // need custom code to get body from error (see https://github.com/Alamofire/Alamofire/issues/233)
+            .validate(statusCode: acceptableStatusCodes) // https://github.com/Alamofire/Alamofire#validation // need custom code to get body from error (see https://github.com/Alamofire/Alamofire/issues/233)
             /*.responseString { response in
                 Log.logger.debug {
                     debugPrint(response)
@@ -144,7 +153,16 @@ class ServerHelper {
     }
 
     ///
-    class func request<T: BasicResponse>(_ manager: Alamofire.Session, baseUrl: String?, method: Alamofire.HTTPMethod, path: String, requestObject: BasicRequest?, success:  @escaping (_ response: T) -> (), error failure: @escaping ErrorCallback) {
+    class func request<T: BasicResponse>(
+        _ manager: Alamofire.Session,
+        baseUrl: String?,
+        method: Alamofire.HTTPMethod,
+        path: String,
+        requestObject: BasicRequest?,
+        acceptableStatusCodes: some Sequence<Int> = 200..<300,
+        success:  @escaping (_ response: T) -> (),
+        error failure: @escaping ErrorCallback
+    ) {
         // add basic request values (TODO: make device independent -> for osx, tvos)
 
         var parameters: [String: AnyObject]?
@@ -173,8 +191,8 @@ class ServerHelper {
         manager
             .request(url, method: method, parameters: parameters, encoding: encoding, headers: nil)
     // maybe use alamofire router later? (https://grokswift.com/router/)
-            .validate() // https://github.com/Alamofire/Alamofire#validation // need custom code to get body from error (see https://github.com/Alamofire/Alamofire/issues/233)
-        
+            .validate(statusCode: acceptableStatusCodes) // https://github.com/Alamofire/Alamofire#validation // need custom code to get body from error (see https://github.com/Alamofire/Alamofire/issues/233)
+
             .responseObject { (response: AFDataResponse<T>) in
                 print(String(data: response.data ?? Data(), encoding: .utf8) ?? "")
                 switch response.result {

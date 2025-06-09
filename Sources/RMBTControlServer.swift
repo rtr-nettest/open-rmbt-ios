@@ -422,13 +422,21 @@ extension RMBTControlServer {
 
     func submitCoverageResult(
         _ coverageRequest: SendCoverageResultRequest,
+        acceptableStatusCodes: some Sequence<Int>,
         success: @escaping (_ response: CoverageMeasurementSubmitResponse) -> (),
         error failure: @escaping ErrorCallback
     ) {
         ensureClientUuid(
             success: { uuid in
                 coverageRequest.clientUUID = uuid
-                self.request(.post, path: "/coverageResult", requestObject: coverageRequest, success: success, error: failure)
+                self.request(
+                    .post,
+                    path: "/coverageResult",
+                    requestObject: coverageRequest,
+                    acceptableStatusCodes: acceptableStatusCodes,
+                    success: success,
+                    error: failure
+                )
             },
             error: failure
         )
@@ -538,8 +546,24 @@ extension RMBTControlServer {
         ServerHelper.requestArray(alamofireManager, baseUrl: baseUrl, method: method, path: path, requestObject: requestObject, success: success, error: failure)
     }
 
-    private func request<T: BasicResponse>(_ method: Alamofire.HTTPMethod, path: String, requestObject: BasicRequest?, success: @escaping  (_ response: T) -> (), error failure: @escaping ErrorCallback) {
-        ServerHelper.request(alamofireManager, baseUrl: baseUrl, method: method, path: path, requestObject: requestObject, success: success, error: failure)
+    private func request<T: BasicResponse>(
+        _ method: Alamofire.HTTPMethod,
+        path: String,
+        requestObject: BasicRequest?,
+        acceptableStatusCodes: some Sequence<Int> = 200..<300,
+        success: @escaping  (_ response: T) -> (),
+        error failure: @escaping ErrorCallback
+    ) {
+        ServerHelper.request(
+            alamofireManager,
+            baseUrl: baseUrl,
+            method: method,
+            path: path,
+            requestObject: requestObject,
+            acceptableStatusCodes: acceptableStatusCodes,
+            success: success,
+            error: failure
+        )
     }
     
     private func request<T: BasicResponse>(_ baseUrl: String?, _ method: Alamofire.HTTPMethod, path: String, requestObject: BasicRequest?, success: @escaping  (_ response: T) -> (), error failure: @escaping ErrorCallback) {

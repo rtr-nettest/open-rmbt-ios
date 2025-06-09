@@ -114,7 +114,10 @@ struct ControlServerCoverageResultsService: SendCoverageResultsService {
         }
 
         _ = try await withCheckedThrowingContinuation { continuation in
-            controlServer.submitCoverageResult(.init(fences: fences, testUUID: testUUID)) { response in
+            controlServer.submitCoverageResult(
+                .init(fences: fences, testUUID: testUUID),
+                acceptableStatusCodes: NetworkCoverageFactory.acceptableSubmitResultsRequestStatusCodes
+            ) { response in
                 continuation.resume(returning: response)
             } error: { error in
                 continuation.resume(throwing: error)

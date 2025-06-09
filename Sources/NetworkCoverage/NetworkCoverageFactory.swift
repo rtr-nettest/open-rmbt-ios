@@ -28,6 +28,8 @@ final class UserDatabase {
 }
 
 struct NetworkCoverageFactory {
+    static let acceptableSubmitResultsRequestStatusCodes = 200..<300
+    
     private let database: UserDatabase
     private let maxResendAge: TimeInterval
     private let dateNow: () -> Date = Date.init
