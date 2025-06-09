@@ -30,6 +30,9 @@ class CoverageMeasurementSessionInitializer {
     }
 
     func startNewSession(loopID: String? = nil) async throws -> SessionCredentials {
+        // before staring new session, try to resend failed-to-be-sent coverage test results, if any
+        try? await NetworkCoverageFactory().persistedFencesSender.resendPersistentAreas()
+
         let response = try await withCheckedThrowingContinuation { continuation in
             controlServer.getCoverageRequest(
                 CoverageRequestRequest(time: Int(now().timeIntervalSince1970 * 1000), measurementType: "dedicated")) { response in

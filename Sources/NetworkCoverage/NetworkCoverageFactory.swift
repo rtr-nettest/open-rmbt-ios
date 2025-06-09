@@ -32,7 +32,7 @@ struct NetworkCoverageFactory {
     private let maxResendAge: TimeInterval
     private let dateNow: () -> Date = Date.init
 
-    init(database: UserDatabase, maxResendAge: TimeInterval = 7 * 24 * 60 * 60) {
+    init(database: UserDatabase = .shared, maxResendAge: TimeInterval = 7 * 24 * 60 * 60) {
         self.database = database
         self.maxResendAge = maxResendAge
     }

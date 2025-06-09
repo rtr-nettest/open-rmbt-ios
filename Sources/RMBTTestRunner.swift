@@ -144,6 +144,7 @@ class RMBTTestRunner: NSObject {
     }
 
     func start(with extraParams: [String: Any]? = nil) { // optional extra params like loop info
+        
         workerQueue.async { [weak self] in
             guard let self = self else { return }
             assert(self.phase == .none, "Invalid state")

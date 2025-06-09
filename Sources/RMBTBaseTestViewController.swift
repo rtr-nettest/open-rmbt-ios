@@ -184,6 +184,11 @@ class RMBTBaseTestViewController: UIViewController {
         }
         testRunner = RMBTTestRunner(delegate: self)
         testRunner?.start(with: extraParams)
+
+        // when starting new test, try to resend failed-to-be-sent coverage test results, if any
+        Task {
+            try? await NetworkCoverageFactory().persistedFencesSender.resendPersistentAreas()
+        }
     }
     
     func cancelTest() {
