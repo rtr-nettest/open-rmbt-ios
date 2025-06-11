@@ -29,12 +29,13 @@ final class UserDatabase {
 
 struct NetworkCoverageFactory {
     static let acceptableSubmitResultsRequestStatusCodes = 200..<300
-    
+    static let persistenceMaxAgeInterval: TimeInterval = 7 * 24 * 60 * 60
+
     private let database: UserDatabase
     private let maxResendAge: TimeInterval
     private let dateNow: () -> Date = Date.init
 
-    init(database: UserDatabase = .shared, maxResendAge: TimeInterval = 7 * 24 * 60 * 60) {
+    init(database: UserDatabase = .shared, maxResendAge: TimeInterval = Self.persistenceMaxAgeInterval) {
         self.database = database
         self.maxResendAge = maxResendAge
     }

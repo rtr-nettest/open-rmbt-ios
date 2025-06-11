@@ -735,13 +735,13 @@
 		495F7B992CF48FB0003750A3 /* NetworkCoverage */ = {
 			isa = PBXGroup;
 			children = (
+				499CF46C2DE9D48200D5DCDE /* NetworkCoverageFactory.swift */,
 				499406DB2D9C0B1900237AC1 /* CurrentRadioTechnology */,
 				49C921432D6CA0D50003EDBC /* CoverageMeasurementSession */,
 				4952889F2D64D45200C73435 /* Pings */,
 				499406DE2D9D1C6D00237AC1 /* LocationUpdates */,
 				4909C2D22DE4A6D0003F3AB6 /* Persistence */,
 				49A31C6A2D3A971B0039052B /* Helpers */,
-				499CF46C2DE9D48200D5DCDE /* NetworkCoverageFactory.swift */,
 				495F7B9A2CF48FC4003750A3 /* NetworkCoverageView.swift */,
 				498EF3192D0B0CD7003A79EB /* NetworkCoverageViewModel.swift */,
 				491471352D1062DD00885B82 /* SendCoverageResultRequest.swift */,

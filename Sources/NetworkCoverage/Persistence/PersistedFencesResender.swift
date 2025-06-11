@@ -19,7 +19,7 @@ struct PersistedFencesResender {
     init(
         modelContext: ModelContext,
         sendResultsService: @escaping (String) -> some SendCoverageResultsService,
-        maxResendAge: TimeInterval = 7 * 24 * 60 * 60,
+        maxResendAge: TimeInterval,
         dateNow: @escaping () -> Date = Date.init
     ) {
         self.modelContext = modelContext
