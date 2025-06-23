@@ -47,10 +47,6 @@ actor UDPPingSession {
     private let now: () -> AbsoluteTimeNanos
 
     private var continuations: [UInt32: PingRequest] = [:]
-    private let requestProtocol = "RP01"
-    private let responseProtocol = "RR01"
-    private let responseErrorProtocol = "RE01"
-    private let responseLength = 8
 
     init(
         sessionInitiator: any SessionInitiating,
@@ -76,7 +72,7 @@ actor UDPPingSession {
 
         sequenceNumber &+= 1
         var message = Data()
-        message.append(requestProtocol.data(using: .ascii)!)
+        message.append(Const.requestProtocol.data(using: .ascii)!)
         message.append(withUnsafeBytes(of: sequenceNumber.bigEndian) { Data($0) })
         message.append(Data(base64Encoded: authToken)!)
 
