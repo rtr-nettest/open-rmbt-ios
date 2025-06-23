@@ -7,7 +7,10 @@
 //
 
 import UIKit
+// Disabled since current code is not compatible with iOS 18.4+
+// If we need to enable DNS QoS test, we need to rewrite the logic below into new Apple APIs
 
+/*
 @objc class RMBTQoSDNSTest: RMBTQoSTest, @unchecked Sendable {
 
     private var resolver: String?
@@ -188,3 +191,4 @@ import UIKit
                     resolver ?? "-")
     }
 }
+*/

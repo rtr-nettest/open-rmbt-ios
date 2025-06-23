@@ -20,11 +20,13 @@ import UIKit
     static func group(for key: String, description: String) -> Self? {
         let initializer: (_ p: [String: Any]) -> RMBTQoSTest?
 
-        if key == "dns" {
-            initializer = { p in
-                return RMBTQoSDNSTest(with: p)
-            }
-        } else if key == "http_proxy" {
+        // DNS test disabled fro now since current code not compatible with iOS 18.4+
+//        if key == "dns" {
+//            initializer = { p in
+//                return RMBTQoSDNSTest(with: p)
+//            }
+//        } else
+        if key == "http_proxy" {
             initializer = { p in
                 return RMBTQoSHTTPTest(with: p)
             }
