@@ -23,6 +23,7 @@ struct NetworkCoverageView: View {
 
     @State private var showsSetings = false
     @State private var isExpertMode = false
+    @State private var showStartTestPopup = false
 
     var body: some View {
         let _ = Self._printChanges()
@@ -96,11 +97,20 @@ struct NetworkCoverageView: View {
                         action: { showsSetings.toggle() },
                         label: { Image(systemName: "gearshape").padding() }
                     )
+                    .tint(.brand)
                     .mapOverlay()
                 }
                 .padding()
             }
         }
+        .testStartPopup(
+            isPresented: $showStartTestPopup,
+            title: "Start Coverage Test",
+            subtitle: "This will begin the network coverage test to measure signal quality in your area.",
+            onStartTest: {
+                Task { await viewModel.toggleMeasurement() }
+            }
+        )
     }
 
     func fenceCircle(for fence: FenceItem) -> some MapContent {
@@ -121,7 +131,7 @@ struct NetworkCoverageView: View {
                     .fill(fence.color.opacity(fence.isSelected ? 1 : 0.6))
                     .stroke(
                         fence.isSelected ? Color.black.opacity(0.6) :
-                        fence.color,
+                            fence.color,
                         lineWidth: fence.isSelected ? 2 : 1
                     )
                     .frame(width: 20, height: 20)
@@ -213,8 +223,14 @@ struct NetworkCoverageView: View {
             Spacer()
 
             Button(viewModel.isStarted ? "Stop" : "Start") {
-                Task { await viewModel.toggleMeasurement() }
+                if viewModel.isStarted {
+                    Task { await viewModel.toggleMeasurement() }
+                } else {
+                    showStartTestPopup = true
+                }
             }
+            .tint(.brand)
+
             Spacer()
         }
         .frame(maxWidth: .infinity, alignment: .center)
@@ -251,7 +267,7 @@ struct NetworkCoverageView: View {
 private extension View {
     func mapOverlay() -> some View {
         background(Color.white.opacity(0.85))
-        .cornerRadius(8)
+            .cornerRadius(8)
     }
 }
 

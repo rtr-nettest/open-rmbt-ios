@@ -55,6 +55,8 @@
 		49B28C7C2BA19C5400697BB4 /* RMBTFilePreviewViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49B28C7B2BA19C5400697BB4 /* RMBTFilePreviewViewController.swift */; };
 		49B28C7E2BA4238700697BB4 /* TestExportFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49B28C7D2BA4238700697BB4 /* TestExportFormat.swift */; };
 		49B4A4792D677407007C6A17 /* HTTPPingSender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49B4A4782D677407007C6A17 /* HTTPPingSender.swift */; };
+		49C202CB2E0C3E0400CB6520 /* TestStartPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49C202CA2E0C3E0400CB6520 /* TestStartPopup.swift */; };
+		49C202CD2E0D3A6800CB6520 /* Color+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49C202CC2E0D3A6600CB6520 /* Color+Ext.swift */; };
 		49C921452D6CA0E80003EDBC /* CoverageMeasurementSessionInitializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49C921442D6CA0E20003EDBC /* CoverageMeasurementSessionInitializer.swift */; };
 		49F976802B0B3E880098C4CC /* RMBTConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49C86FDC2AFBBF1500663CE2 /* RMBTConfig.swift */; };
 		C573F2A5175281D300C728FC /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C573F2A4175281D300C728FC /* MapKit.framework */; };
@@ -373,6 +375,8 @@
 		49B28C7B2BA19C5400697BB4 /* RMBTFilePreviewViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTFilePreviewViewController.swift; sourceTree = "<group>"; };
 		49B28C7D2BA4238700697BB4 /* TestExportFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestExportFormat.swift; sourceTree = "<group>"; };
 		49B4A4782D677407007C6A17 /* HTTPPingSender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPPingSender.swift; sourceTree = "<group>"; };
+		49C202CA2E0C3E0400CB6520 /* TestStartPopup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestStartPopup.swift; sourceTree = "<group>"; };
+		49C202CC2E0D3A6600CB6520 /* Color+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Ext.swift"; sourceTree = "<group>"; };
 		49C5E41A2DD74C3E00C537D9 /* libresolv.9.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libresolv.9.tbd; path = usr/lib/libresolv.9.tbd; sourceTree = SDKROOT; };
 		49C86FDC2AFBBF1500663CE2 /* RMBTConfig.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RMBTConfig.swift; sourceTree = "<group>"; };
 		49C921442D6CA0E20003EDBC /* CoverageMeasurementSessionInitializer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverageMeasurementSessionInitializer.swift; sourceTree = "<group>"; };
@@ -742,6 +746,7 @@
 				499406DE2D9D1C6D00237AC1 /* LocationUpdates */,
 				4909C2D22DE4A6D0003F3AB6 /* Persistence */,
 				49A31C6A2D3A971B0039052B /* Helpers */,
+				49C202C92E0C3DF300CB6520 /* Components */,
 				495F7B9A2CF48FC4003750A3 /* NetworkCoverageView.swift */,
 				498EF3192D0B0CD7003A79EB /* NetworkCoverageViewModel.swift */,
 				491471352D1062DD00885B82 /* SendCoverageResultRequest.swift */,
@@ -783,6 +788,15 @@
 				49A31C6B2D3A97250039052B /* AsynchronousSequence.swift */,
 			);
 			path = Helpers;
+			sourceTree = "<group>";
+		};
+		49C202C92E0C3DF300CB6520 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				49C202CC2E0D3A6600CB6520 /* Color+Ext.swift */,
+				49C202CA2E0C3E0400CB6520 /* TestStartPopup.swift */,
+			);
+			path = Components;
 			sourceTree = "<group>";
 		};
 		49C921432D6CA0D50003EDBC /* CoverageMeasurementSession */ = {
@@ -1772,6 +1786,7 @@
 				E939AAAB26DB98E900D73F0B /* RMBTMapResultsListViewController.swift in Sources */,
 				E9400F3526BE8D250067273A /* MeasurementSpeedRawItem.swift in Sources */,
 				E94ED1D326C63C7400B17B25 /* RMBTGaugeView.swift in Sources */,
+				49C202CB2E0C3E0400CB6520 /* TestStartPopup.swift in Sources */,
 				E930769B26CE3AA80046A17B /* RMBTMapOptionsViewController.swift in Sources */,
 				E9AA0DE727635CF9003C71D7 /* Data+MD5.swift in Sources */,
 				E959547826E38AF7004EA6D9 /* RMBTHistoryIndexViewController.swift in Sources */,
@@ -1792,6 +1807,7 @@
 				E9E993BA26EA398500E7EED6 /* RMBTHistoryMapCell.swift in Sources */,
 				E97CF78B2761FC5B0092352C /* RMBTHelpers.swift in Sources */,
 				4909C2D32DE4A6D0003F3AB6 /* PersistentFence.swift in Sources */,
+				49C202CD2E0D3A6800CB6520 /* Color+Ext.swift in Sources */,
 				49B28C7A2BA1914E00697BB4 /* RMBTTestExportCell.swift in Sources */,
 				E93FB0F226F39A8C00DD24CD /* RMBTHistoryQoSSingleResultCell.swift in Sources */,
 				E926C2F4276A3345009FCF12 /* RMBTQoSTestRunner.swift in Sources */,
