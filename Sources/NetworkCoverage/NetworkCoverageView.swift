@@ -26,8 +26,6 @@ struct NetworkCoverageView: View {
     @State private var showStartTestPopup = false
 
     var body: some View {
-        let _ = Self._printChanges()
-
         Circle()
             .fill(Color.red)
             .frame(width: 10, height: 10)

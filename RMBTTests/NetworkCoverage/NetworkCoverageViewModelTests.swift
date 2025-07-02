@@ -12,9 +12,6 @@ import Combine
 import CoreLocation
 import SwiftData
 
-// Looks like a bug inside SwiftTesting/Xcode - when running tests paralerly it crashes at objc_release_x8 deep inside
-// the stanradrd library. So running tests serially fixes it partially.
-@Suite(.serialized)
 @MainActor struct NetworkCoverageTests {
     @Test func whenInitializedWithNoPrefilledFences_thenFenceItemsAreEmpty() async throws {
         let sut = makeSUT(fences: [])

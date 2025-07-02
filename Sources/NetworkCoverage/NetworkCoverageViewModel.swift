@@ -90,19 +90,7 @@ struct FenceDetail: Equatable, Identifiable {
     @ObservationIgnored private let updates: () -> any AsynchronousSequence<Update>
     @ObservationIgnored private let persistenceService: any FencePersistenceService
 
-    // Observable state
-    var fenceRadius: CLLocationDistance = 20
-    var minimumLocationAccuracy: CLLocationDistance
-    private(set) var isStarted = false
-    private(set) var errorMessage: String?
-    private(set) var locations: [CLLocation] = []
-
-    private(set) var latestPing: String = "N/A"
-    private(set) var latestTechnology = "N/A"
-    private(set) var locationAccuracy = "N/A"
-
-    @MainActor
-    private var fences: [Fence] {
+    @ObservationIgnored private var fences: [Fence] {
         didSet {
             // TODO: optimize: only very last fence is likely to need update, previous fences shoud remain untouched
             // so no need to mapp all `fences` into fences items, but can cache previous mappings and update only the very last one
@@ -113,9 +101,20 @@ struct FenceDetail: Equatable, Identifiable {
         }
     }
 
-    private var currentFence: Fence? { fences.last }
+    @ObservationIgnored private var currentFence: Fence? { fences.last }
 
+    // Observable state
+    var fenceRadius: CLLocationDistance = 20
+    var minimumLocationAccuracy: CLLocationDistance
+    private(set) var isStarted = false
+    private(set) var errorMessage: String?
+    private(set) var locations: [CLLocation] = []
+
+    private(set) var latestPing: String = "N/A"
+    private(set) var latestTechnology = "N/A"
+    private(set) var locationAccuracy = "N/A"
     private(set) var fenceItems: [FenceItem] = []
+
     var selectedFenceID: FenceItem.ID? {
         didSet {
             selectedFenceDetail = fences
@@ -129,7 +128,7 @@ struct FenceDetail: Equatable, Identifiable {
         fences: [Fence] = [],
         refreshInterval: TimeInterval,
         minimumLocationAccuracy: CLLocationDistance,
-        updates: @escaping () -> some AsynchronousSequence<Update>,
+        updates: @escaping @Sendable () -> some AsynchronousSequence<Update>,
         currentRadioTechnology: some CurrentRadioTechnologyService,
         sendResultsService: some SendCoverageResultsService,
         persistenceService: some FencePersistenceService,
@@ -169,8 +168,8 @@ struct FenceDetail: Equatable, Identifiable {
             refreshInterval: refreshInterval,
             minimumLocationAccuracy: minimumLocationAccuracy,
             updates: { merge(
-                pingMeasurementService().map(Update.ping),
-                locationUpdatesService.locations().map(Update.location)
+                pingMeasurementService().map { .ping($0) },
+                locationUpdatesService.locations().map { .location($0) }
             )},
             currentRadioTechnology: currentRadioTechnology,
             sendResultsService: sendResultsService,
@@ -184,8 +183,7 @@ struct FenceDetail: Equatable, Identifiable {
             for try await update in sequence {
                 guard isStarted else { break }
 
-                if let startTime = testStartTime,
-                    timeNow().timeIntervalSince(startTime) >= maxTestDuration {
+                if let startTime = testStartTime, timeNow().timeIntervalSince(startTime) >= maxTestDuration {
                     await stop()
                     break
                 }

@@ -84,6 +84,7 @@ struct PingMeasurementService {
         return AsyncStream { continuation in
             let start = clock.now
             let startDate = now()
+//            let startInstant = clock.now
 
             let task = Task {
                 while true {
