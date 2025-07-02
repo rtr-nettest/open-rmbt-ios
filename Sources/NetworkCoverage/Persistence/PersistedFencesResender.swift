@@ -12,13 +12,13 @@ import CoreLocation
 
 struct PersistedFencesResender {
     private let modelContext: ModelContext
-    private let sendResultsService: (String) -> any SendCoverageResultsService
+    private let sendResultsService: (String, Date) -> any SendCoverageResultsService
     private let maxResendAge: TimeInterval
     private let dateNow: () -> Date
 
     init(
         modelContext: ModelContext,
-        sendResultsService: @escaping (String) -> some SendCoverageResultsService,
+        sendResultsService: @escaping (String, Date) -> some SendCoverageResultsService,
         maxResendAge: TimeInterval,
         dateNow: @escaping () -> Date = Date.init
     ) {
@@ -55,8 +55,11 @@ struct PersistedFencesResender {
                     pings: persistedFence.avgPingMilliseconds.map { [PingResult(result: .interval(.milliseconds($0)), timestamp: Date(timeIntervalSince1970: Double(persistedFence.timestamp) / 1_000_000))] } ?? []
                 )
             }
-
-            let groupService = sendResultsService(groupTestUUID)
+            guard let startDate = fences.first?.dateEntered  else {
+                return
+            }
+            
+            let groupService = sendResultsService(groupTestUUID, startDate)
             do {
                 try await groupService.send(fences: fences)
 

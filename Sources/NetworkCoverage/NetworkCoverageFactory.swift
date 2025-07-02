@@ -41,18 +41,23 @@ struct NetworkCoverageFactory {
     }
 
     var persistedFencesSender: PersistedFencesResender {
-        persistedFencesResender(sendResultsServiceMaker: makeSendResultsService(testUUID:))
+        persistedFencesResender(sendResultsServiceMaker: { testUUID, startDate in
+            makeSendResultsService(testUUID: testUUID, startDate: startDate)
+        })
     }
 
     func services(
         testUUID: @escaping @autoclosure () -> String?,
-        dateNow: @escaping () -> Date, 
-        sendResultsServiceMaker: @escaping (String) -> some SendCoverageResultsService
+        startDate: @escaping @autoclosure () -> Date?,
+        dateNow: @escaping () -> Date,
+        sendResultsServiceMaker: @escaping (String, Date?) -> some SendCoverageResultsService
     ) -> (some FencePersistenceService, some SendCoverageResultsService) {
         let resultSender = PersistenceManagingCoverageResultsService(
             modelContext: database.modelContext,
             testUUID: testUUID(),
-            sendResultsService: sendResultsServiceMaker,
+            sendResultsService: { testUUID in
+                sendResultsServiceMaker(testUUID, startDate())
+            },
             resender: persistedFencesResender(sendResultsServiceMaker: sendResultsServiceMaker)
         )
         let persistenceService = SwiftDataFencePersistenceService(
@@ -70,8 +75,11 @@ struct NetworkCoverageFactory {
         )
         let (persistenceService, resultSender) = services(
             testUUID: sessionInitializer.lastTestUUID,
+            startDate: sessionInitializer.lastTestStartDate,
             dateNow: dateNow,
-            sendResultsServiceMaker: makeSendResultsService(testUUID:)
+            sendResultsServiceMaker: { testUUID, startDate in
+                makeSendResultsService(testUUID: testUUID, startDate: startDate)
+            }
         )
 
         return NetworkCoverageViewModel(
@@ -88,7 +96,7 @@ struct NetworkCoverageFactory {
                 ),
                 frequency: .milliseconds(100)
             ) },
-            locationUpdatesService: RealLocationUpdatesService(now: dateNow),
+            locationUpdatesService: RealLocationUpdatesService(now: dateNow, canReportLocations: { sessionInitializer.isInitialized }),
             currentRadioTechnology: CTTelephonyRadioTechnologyService(),
             sendResultsService: resultSender,
             persistenceService: persistenceService
@@ -96,7 +104,7 @@ struct NetworkCoverageFactory {
     }
 
     private func persistedFencesResender(
-        sendResultsServiceMaker: @escaping (String) -> some SendCoverageResultsService
+        sendResultsServiceMaker: @escaping (String, Date) -> some SendCoverageResultsService
     ) -> PersistedFencesResender {
         PersistedFencesResender(
             modelContext: database.modelContext,
@@ -106,10 +114,11 @@ struct NetworkCoverageFactory {
         )
     }
 
-    private func makeSendResultsService(testUUID: String) -> some SendCoverageResultsService {
+    private func makeSendResultsService(testUUID: String, startDate: Date?) -> some SendCoverageResultsService {
         ControlServerCoverageResultsService(
             controlServer: RMBTControlServer.shared,
-            testUUID: testUUID
+            testUUID: testUUID,
+            startDate: startDate
         )
     }
 }

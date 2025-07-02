@@ -23,6 +23,11 @@ class CoverageMeasurementSessionInitializer {
     private let now: () -> Date
     private let controlServer: RMBTControlServer
     private(set) var lastTestUUID: String?
+    private(set) var lastTestStartDate: Date?
+
+    var isInitialized: Bool {
+        lastTestUUID != nil && lastTestStartDate != nil
+    }
 
     init(now: @escaping () -> Date, controlServer: RMBTControlServer) {
         self.now = now
@@ -42,6 +47,7 @@ class CoverageMeasurementSessionInitializer {
                 }
         }
         lastTestUUID = response.testUUID
+        lastTestStartDate = now()
 
         return SessionCredentials(
             testID: response.testUUID,

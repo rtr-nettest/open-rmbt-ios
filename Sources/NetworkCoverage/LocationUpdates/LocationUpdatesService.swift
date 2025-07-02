@@ -17,10 +17,12 @@ protocol LocationUpdatesService<Sequence> {
 
 struct RealLocationUpdatesService: LocationUpdatesService {
     let now: () -> Date
+    let canReportLocations: () -> Bool
 
     func locations() -> some LocationsAsyncSequence {
         CLLocationUpdate
             .liveUpdates(.fitness)
+            .filter { _ in canReportLocations() }
             .compactMap(\.location)
             .map { LocationUpdate(location: $0, timestamp: now()) }
     }

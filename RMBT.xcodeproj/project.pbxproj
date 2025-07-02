@@ -747,9 +747,9 @@
 				4909C2D22DE4A6D0003F3AB6 /* Persistence */,
 				49A31C6A2D3A971B0039052B /* Helpers */,
 				49C202C92E0C3DF300CB6520 /* Components */,
+				499E9F9C2E15115A00A6744B /* SendResult */,
 				495F7B9A2CF48FC4003750A3 /* NetworkCoverageView.swift */,
 				498EF3192D0B0CD7003A79EB /* NetworkCoverageViewModel.swift */,
-				491471352D1062DD00885B82 /* SendCoverageResultRequest.swift */,
 				498EF31D2D0B0D70003A79EB /* Fence.swift */,
 			);
 			path = NetworkCoverage;
@@ -780,6 +780,14 @@
 				499406DF2D9D1C8A00237AC1 /* LocationUpdatesService.swift */,
 			);
 			path = LocationUpdates;
+			sourceTree = "<group>";
+		};
+		499E9F9C2E15115A00A6744B /* SendResult */ = {
+			isa = PBXGroup;
+			children = (
+				491471352D1062DD00885B82 /* SendCoverageResultRequest.swift */,
+			);
+			path = SendResult;
 			sourceTree = "<group>";
 		};
 		49A31C6A2D3A971B0039052B /* Helpers */ = {

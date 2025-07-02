@@ -281,7 +281,7 @@ private func makeSUT(
     }
     try! database.modelContext.save()
 
-    let services = NetworkCoverageFactory(database: database, maxResendAge: maxResendAge).services(testUUID: testUUID, dateNow: dateNow, sendResultsServiceMaker: { testUUID in
+    let services = NetworkCoverageFactory(database: database, maxResendAge: maxResendAge).services(testUUID: testUUID, startDate: Date(timeIntervalSinceReferenceDate: 0), dateNow: dateNow, sendResultsServiceMaker: { testUUID, _ in
         sendServiceFactory.createService(for: testUUID)
     })
     let sut = SUT(fencePersistenceService: services.0, sendResultsServices: services.1)
