@@ -15,3 +15,7 @@ xcuserdata
 /Configs/
 Pods/
 Resources/Images.xcassets/AppIcon.appiconset/
+
+# Claude Code
+.claude/
+

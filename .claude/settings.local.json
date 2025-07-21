@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(xcodebuild:*)",
+      "mcp__XcodeBuildMCP__build_sim_name_ws",
+      "Bash(rm:*)"
+    ],
+    "deny": []
+  }
+}
