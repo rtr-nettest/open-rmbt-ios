@@ -291,26 +291,13 @@ class RMBTIntroViewController: UIViewController {
     }
 
     private func coverageTapHandler(_ tintColor: UIColor) {
-        let coverageView = NetworkCoverageView()
+        let coverageView = NetworkCoverageView(onClose: { [weak self] in
+            self?.dismiss(animated: true)
+        })
         let hostingController = UIHostingController(rootView: coverageView)
         hostingController.modalPresentationStyle = .fullScreen
 
-        // Add navigation bar
-        let navigationController = UINavigationController(rootViewController: hostingController)
-        navigationController.modalPresentationStyle = .fullScreen
-
-        // Configure navigation bar
-        hostingController.navigationItem.title = "Network Coverage"
-        hostingController.navigationItem.leftBarButtonItem = UIBarButtonItem(
-            barButtonSystemItem: .done,
-            target: self,
-            action: #selector(dismissCoverage)
-        )
-
-        navigationController.modalPresentationStyle = .fullScreen
-        navigationController.transitioningDelegate = self
-
-        present(navigationController, animated: true)
+        present(hostingController, animated: true)
     }
 
     @objc private func dismissCoverage() {

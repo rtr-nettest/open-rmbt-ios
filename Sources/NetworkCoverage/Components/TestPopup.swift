@@ -8,11 +8,14 @@
 
 import SwiftUI
 
-struct TestStartPopup: View {
+struct TestPopup: View {
     let title: String
     let subtitle: String
-    let onStartTest: () -> Void
-    let onCancel: () -> Void
+    let primaryButtonTitle: String
+    let primaryButtonColor: Color
+    let secondaryButtonTitle: String
+    let onPrimaryAction: () -> Void
+    let onSecondaryAction: () -> Void
 
     var body: some View {
         VStack(spacing: 32) {
@@ -30,22 +33,21 @@ struct TestStartPopup: View {
             }
 
             VStack(spacing: 16) {
-                // Start test button
-                Button(action: onStartTest) {
-                    Text("Start test") // TODO: Localize
+                // Primary action button
+                Button(action: onPrimaryAction) {
+                    Text(primaryButtonTitle)
                         .font(.callout)
                         .fontWeight(.medium)
                         .foregroundColor(.white)
                         .frame(height: 50)
                         .frame(maxWidth: .infinity)
-                        .background(Color("greenButtonBackground"))
+                        .background(primaryButtonColor)
                         .cornerRadius(8)
                 }
 
-                Button(action: {
-                    onCancel()
-                }) {
-                    Text("text_button_decline")
+                // Secondary action button
+                Button(action: onSecondaryAction) {
+                    Text(secondaryButtonTitle)
                         .font(.callout)
                         .fontWeight(.medium)
                         .frame(height: 50)
@@ -65,12 +67,17 @@ struct TestStartPopup: View {
     }
 }
 
-// MARK: - View Modifier
-struct TestStartPopupModifier: ViewModifier {
+// MARK: - Generic Test Popup Modifier
+struct TestPopupModifier: ViewModifier {
     @Binding var isPresented: Bool
     let title: String
     let subtitle: String
-    let onStartTest: () -> Void
+    let primaryButtonTitle: String
+    let primaryButtonColor: Color
+    let secondaryButtonTitle: String
+    let onPrimaryAction: () -> Void
+    let onSecondaryAction: () -> Void
+    let allowBackgroundDismiss: Bool
 
     func body(content: Content) -> some View {
         content
@@ -82,8 +89,10 @@ struct TestStartPopupModifier: ViewModifier {
                             .fill(Color.black.opacity(0.4))
                             .ignoresSafeArea()
                             .onTapGesture {
-                                withAnimation(.easeInOut(duration: 0.3)) {
-                                    isPresented = false
+                                if allowBackgroundDismiss {
+                                    withAnimation(.easeInOut(duration: 0.3)) {
+                                        isPresented = false
+                                    }
                                 }
                             }
                             .transition(.opacity)
@@ -94,19 +103,23 @@ struct TestStartPopupModifier: ViewModifier {
                 // Popup content - centered in screen
                 Group {
                     if isPresented {
-                        TestStartPopup(
+                        TestPopup(
                             title: title,
                             subtitle: subtitle,
-                            onStartTest: {
+                            primaryButtonTitle: primaryButtonTitle,
+                            primaryButtonColor: primaryButtonColor,
+                            secondaryButtonTitle: secondaryButtonTitle,
+                            onPrimaryAction: {
                                 withAnimation(.easeInOut(duration: 0.3)) {
                                     isPresented = false
                                 }
-                                onStartTest()
+                                onPrimaryAction()
                             },
-                            onCancel: {
+                            onSecondaryAction: {
                                 withAnimation(.easeInOut(duration: 0.3)) {
                                     isPresented = false
                                 }
+                                onSecondaryAction()
                             }
                         )
                         .padding(.horizontal, 20)
@@ -120,20 +133,47 @@ struct TestStartPopupModifier: ViewModifier {
     }
 }
 
-// MARK: - View Extension
+// MARK: - View Extensions
 extension View {
     func testStartPopup(
         isPresented: Binding<Bool>,
         title: String,
         subtitle: String,
-        onStartTest: @escaping () -> Void
+        onStartTest: @escaping () -> Void,
+        onCancel: @escaping () -> Void = {}
     ) -> some View {
         modifier(
-            TestStartPopupModifier(
+            TestPopupModifier(
                 isPresented: isPresented,
                 title: title,
                 subtitle: subtitle,
-                onStartTest: onStartTest
+                primaryButtonTitle: "Start test",
+                primaryButtonColor: Color("greenButtonBackground"),
+                secondaryButtonTitle: NSLocalizedString("Cancel", comment: ""),
+                onPrimaryAction: onStartTest,
+                onSecondaryAction: onCancel,
+                allowBackgroundDismiss: false
+            )
+        )
+    }
+    
+    func testStopPopup(
+        isPresented: Binding<Bool>,
+        title: String,
+        subtitle: String,
+        onStopTest: @escaping () -> Void
+    ) -> some View {
+        modifier(
+            TestPopupModifier(
+                isPresented: isPresented,
+                title: title,
+                subtitle: subtitle,
+                primaryButtonTitle: "Continue test",
+                primaryButtonColor: Color("greenButtonBackground"),
+                secondaryButtonTitle: "Stop test",
+                onPrimaryAction: {}, // Continue just dismisses
+                onSecondaryAction: onStopTest,
+                allowBackgroundDismiss: false
             )
         )
     }
@@ -142,11 +182,14 @@ extension View {
 #Preview {
     ZStack {
         Color.gray.opacity(0.2)
-        TestStartPopup(
+        TestPopup(
             title: "Start Coverage Test",
             subtitle: "This will begin the network coverage test with your current settings.",
-            onStartTest: {},
-            onCancel: {}
+            primaryButtonTitle: "Start test",
+            primaryButtonColor: Color("greenButtonBackground"),
+            secondaryButtonTitle: "Cancel",
+            onPrimaryAction: {},
+            onSecondaryAction: {}
         )
         .padding(.horizontal, 20)
     }

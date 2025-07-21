@@ -12,8 +12,10 @@ import MapKit
 
 struct NetworkCoverageView: View {
     @Bindable var viewModel: NetworkCoverageViewModel
+    let onClose: () -> Void
 
-    init(fences: [Fence] = []) {
+    init(fences: [Fence] = [], onClose: @escaping () -> Void = {}) {
+        self.onClose = onClose
         viewModel = NetworkCoverageFactory(database: UserDatabase.shared).makeCoverageViewModel(fences: fences)
     }
 
@@ -24,13 +26,12 @@ struct NetworkCoverageView: View {
     @State private var showsSetings = false
     @State private var isExpertMode = false
     @State private var showStartTestPopup = false
+    @State private var showStopTestPopup = false
+    @State private var navigationPath = NavigationPath()
 
     var body: some View {
-        Circle()
-            .fill(Color.red)
-            .frame(width: 10, height: 10)
-
-        Map(position: $position, selection: $viewModel.selectedFenceID) {
+        NavigationStack(path: $navigationPath) {
+            Map(position: $position, selection: $viewModel.selectedFenceID) {
             UserAnnotation()
 
             ForEach(viewModel.fenceItems) { fence in
@@ -73,6 +74,8 @@ struct NetworkCoverageView: View {
         }
         .overlay() {
             VStack {
+                Text("Network Coverage")
+                    .font(.title2)
                 topBarView
                     .padding(.leading, 8)
                     .padding(.trailing, 56)
@@ -107,8 +110,34 @@ struct NetworkCoverageView: View {
             subtitle: "This will begin the network coverage test to measure signal quality in your area.",
             onStartTest: {
                 Task { await viewModel.toggleMeasurement() }
+            },
+            onCancel: onClose
+        )
+        .onAppear {
+            if !viewModel.isStarted {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    showStartTestPopup = true
+                }
+            }
+        }
+        .testStopPopup(
+            isPresented: $showStopTestPopup,
+            title: "Stop Coverage Test",
+            subtitle: "The test will be stopped and results will be sent to the server.",
+            onStopTest: {
+                Task {
+                    await viewModel.toggleMeasurement()
+                    navigationPath.append("results")
+                }
             }
         )
+        .toolbar(.hidden, for: .navigationBar)
+        .navigationDestination(for: String.self) { destination in
+            if destination == "results" {
+                CoverageResultView(onClose: onClose)
+            }
+        }
+        }
     }
 
     func fenceCircle(for fence: FenceItem) -> some MapContent {
@@ -222,7 +251,7 @@ struct NetworkCoverageView: View {
 
             Button(viewModel.isStarted ? "Stop" : "Start") {
                 if viewModel.isStarted {
-                    Task { await viewModel.toggleMeasurement() }
+                    showStopTestPopup = true
                 } else {
                     showStartTestPopup = true
                 }
@@ -308,7 +337,8 @@ private extension View {
                 technology: "5G/NRNSA",
                 pings: [.init(result: .interval(.milliseconds(26)), timestamp: .init(timeIntervalSince1970: 1734526661))]
             )
-        ]
+        ],
+        onClose: {}
     )
 }
 
