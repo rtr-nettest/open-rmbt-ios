@@ -19,164 +19,97 @@ struct NetworkCoverageView: View {
         viewModel = NetworkCoverageFactory(database: UserDatabase.shared).makeCoverageViewModel(fences: fences)
     }
 
-    @State private var position: MapCameraPosition = .userLocation(
-        fallback: .automatic
-    )
-
-    @State private var showsSetings = false
-    @State private var isExpertMode = false
     @State private var showStartTestPopup = false
     @State private var showStopTestPopup = false
     @State private var navigationPath = NavigationPath()
+    @State private var showsSettings = false
+    @State private var isExpertMode = false
 
     var body: some View {
         NavigationStack(path: $navigationPath) {
-            Map(position: $position, selection: $viewModel.selectedFenceID) {
-            UserAnnotation()
-
-            ForEach(viewModel.fenceItems) { fence in
-                if !isExpertMode && fence.isCurrent {
-                    fenceCircle(for: fence)
-                    fenceAnnotation(for: fence)
-                        .tag(fence.id)
-                }
-                if isExpertMode {
-                    fenceCircle(for: fence)
-
-                    Annotation(
-                        coordinate: fence.coordinate,
-                        content: {
-                            Text(fence.technology)
-                                .font(.caption)
-                        },
-                        label: { EmptyView() }
-                    )
-                    .tag(fence.id)
-                } else {
-                    fenceAnnotation(for: fence)
-                        .tag(fence.id)
-                }
-            }
-
-            if isExpertMode {
-                ForEach(viewModel.locations) { location in
-                    MapCircle(center: location.coordinate, radius: location.horizontalAccuracy)
-                        .foregroundStyle(.blue.opacity(0.2))
-                        .mapOverlayLevel(level: .aboveLabels)
-
-                }
-            }
-        }
-        .mapControls {
-            MapScaleView()
-            MapCompass()
-            MapUserLocationButton()
-        }
-        .overlay() {
-            VStack {
-                Text("Network Coverage")
-                    .font(.title2)
-                topBarView
-                    .padding(.leading, 8)
-                    .padding(.trailing, 56)
-
-                Spacer()
-
-                if showsSetings {
-                    settingsView
-                        .padding(.horizontal, 16)
-                }
-
-                HStack(alignment: .bottom, spacing: 8) {
-                    if let detail = viewModel.selectedFenceDetail {
-                        selectedFenceDetailView(detail)
-                    } else {
-                        Spacer()
+            ZStack {
+                FencesMapView(
+                    fenceItems: viewModel.fenceItems,
+                    locations: viewModel.locations.map { LocationUpdate(location: $0, timestamp: $0.timestamp) },
+                    selectedFenceID: $viewModel.selectedFenceID,
+                    selectedFenceDetail: viewModel.selectedFenceDetail,
+                    fenceRadius: viewModel.fenceRadius,
+                    isExpertMode: isExpertMode,
+                    showsSettingsButton: true,
+                    showsSettings: showsSettings,
+                    onSettingsToggle: { showsSettings.toggle() },
+                    trackUserLocation: true
+                )
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    if showsSettings {
+                        showsSettings = false
                     }
-
-                    Button(
-                        action: { showsSetings.toggle() },
-                        label: { Image(systemName: "gearshape").padding() }
-                    )
-                    .tint(.brand)
-                    .mapOverlay()
                 }
-                .padding()
-            }
-        }
-        .testStartPopup(
-            isPresented: $showStartTestPopup,
-            title: "Start Coverage Test",
-            subtitle: "This will begin the network coverage test to measure signal quality in your area.",
-            onStartTest: {
-                Task { await viewModel.toggleMeasurement() }
-            },
-            onCancel: onClose
-        )
-        .onAppear {
-            if !viewModel.isStarted {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    showStartTestPopup = true
+                
+                VStack {
+                    Text("Network Coverage")
+                        .font(.title2)
+                    topBarView
+                        .padding(.leading, 8)
+                        .padding(.trailing, 56)
+                    
+                    Spacer()
+                    
+                    if showsSettings {
+                        settingsView
+                            .padding(.horizontal, 16)
+                            .padding(.bottom, 80)
+                    }
                 }
             }
-        }
-        .testStopPopup(
-            isPresented: $showStopTestPopup,
-            title: "Stop Coverage Test",
-            subtitle: "The test will be stopped and results will be sent to the server.",
-            onStopTest: {
-                Task {
-                    await viewModel.toggleMeasurement()
-                    navigationPath.append("results")
-                }
-            }
-        )
-        .toolbar(.hidden, for: .navigationBar)
-        .navigationDestination(for: String.self) { destination in
-            if destination == "results" {
-                CoverageResultView(onClose: onClose)
-            }
-        }
-        }
-    }
-
-    func fenceCircle(for fence: FenceItem) -> some MapContent {
-        MapCircle(center: fence.coordinate, radius: viewModel.fenceRadius)
-            .foregroundStyle(fence.color.opacity(fence.isSelected ? 0.4 : 0.1))
-            .stroke(
-                fence.color.opacity(fence.isSelected ? 1 : 0.8),
-                lineWidth: fence.isSelected ? 2 : 1
+            .testStartPopup(
+                isPresented: $showStartTestPopup,
+                title: "Start Coverage Test",
+                subtitle: "This will begin the network coverage test to measure signal quality in your area.",
+                onStartTest: {
+                    Task { await viewModel.toggleMeasurement() }
+                },
+                onCancel: onClose
             )
-            .mapOverlayLevel(level: .aboveLabels)
-    }
-
-    func fenceAnnotation(for fence: FenceItem) -> some MapContent {
-        Annotation(
-            coordinate: fence.coordinate,
-            content: {
-                Circle()
-                    .fill(fence.color.opacity(fence.isSelected ? 1 : 0.6))
-                    .stroke(
-                        fence.isSelected ? Color.black.opacity(0.6) :
-                            fence.color,
-                        lineWidth: fence.isSelected ? 2 : 1
-                    )
-                    .frame(width: 20, height: 20)
-            },
-            label: { EmptyView() }
-        )
-    }
-
-    func horizontalSeparator() -> some View {
-        Rectangle()
-            .fill(Color.gray.opacity(0.2))
-            .frame(maxWidth: .infinity, maxHeight: 1, alignment: .center)
+            .onAppear {
+                if !viewModel.isStarted {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        showStartTestPopup = true
+                    }
+                }
+            }
+            .testStopPopup(
+                isPresented: $showStopTestPopup,
+                title: "Stop Coverage Test",
+                subtitle: "The test will be stopped and results will be sent to the server.",
+                onStopTest: {
+                    Task {
+                        await viewModel.toggleMeasurement()
+                        navigationPath.append("results")
+                    }
+                }
+            )
+            .toolbar(.hidden, for: .navigationBar)
+            .navigationDestination(for: String.self) { destination in
+                if destination == "results" {
+                    CoverageResultView(onClose: onClose)
+                        .environment(viewModel)
+                }
+            }
+        }
     }
 
     func verticalSeparator() -> some View {
         Rectangle()
             .fill(Color.gray.opacity(0.2))
             .frame(maxWidth: 1, maxHeight: .infinity, alignment: .center)
+    }
+
+    func horizontalSeparator() -> some View {
+        Rectangle()
+            .fill(Color.gray.opacity(0.2))
+            .frame(maxWidth: .infinity, maxHeight: 1, alignment: .center)
     }
 
     var settingsView: some View {
@@ -265,30 +198,6 @@ struct NetworkCoverageView: View {
         .mapOverlay()
     }
 
-    @ViewBuilder
-    func selectedFenceDetailView(_ detail: FenceDetail) -> some View {
-        VStack(alignment: .leading) {
-            HStack(alignment: .bottom) {
-                Text("Date:")
-                    .font(.headline)
-                Text(detail.date)
-            }
-            HStack(alignment: .bottom) {
-                Text("Technology:")
-                    .font(.headline)
-                Text(detail.technology)
-                    .foregroundStyle(detail.color)
-            }
-            HStack(alignment: .bottom) {
-                Text("Ping:")
-                    .font(.headline)
-                Text(detail.averagePing)
-            }
-        }
-        .padding()
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .mapOverlay()
-    }
 }
 
 private extension View {

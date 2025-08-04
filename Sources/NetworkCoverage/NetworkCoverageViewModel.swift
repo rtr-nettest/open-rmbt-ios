@@ -89,7 +89,7 @@ struct FenceDetail: Equatable, Identifiable {
     @ObservationIgnored private let updates: () -> any AsynchronousSequence<Update>
     @ObservationIgnored private let persistenceService: any FencePersistenceService
 
-    @ObservationIgnored private var fences: [Fence] {
+    @ObservationIgnored private(set) var fences: [Fence] {
         didSet {
             // TODO: optimize: only very last fence is likely to need update, previous fences shoud remain untouched
             // so no need to mapp all `fences` into fences items, but can cache previous mappings and update only the very last one
@@ -118,7 +118,9 @@ struct FenceDetail: Equatable, Identifiable {
         didSet {
             selectedFenceDetail = fences
                 .first { $0.id == selectedFenceID }
-                .map(fenceDetail)
+                .map {
+                    .init(fence: $0, selectedItemDateFormatter: selectedItemDateFormatter)
+                }
         }
     }
     private(set) var selectedFenceDetail: FenceDetail?
@@ -381,22 +383,8 @@ private extension NetworkCoverageViewModel {
             technology: fence.significantTechnology?.radioTechnologyDisplayValue ?? "N/A",
             isSelected: selectedFence?.id == fence.id,
             isCurrent: currentFence?.id == fence.id,
-            color: color(for: fence.significantTechnology)
+            color: .init(technology: fence.significantTechnology)
         )
-    }
-
-    private func fenceDetail(from fence: Fence) -> FenceDetail {
-        .init(
-            id: fence.id,
-            date: selectedItemDateFormatter.string(from: fence.dateEntered),
-            technology: fence.significantTechnology?.radioTechnologyDisplayValue ?? "N/A",
-            averagePing: fence.averagePing.map { "\($0) ms" } ?? "",
-            color: color(for: fence.significantTechnology)
-        )
-    }
-
-    private func color(for technology: String?) -> Color {
-        .init(uiColor: .byResultClass(technology?.radioTechnologyColorClassification))
     }
 
     private func latestPingValue() -> String {
@@ -530,3 +518,20 @@ extension CLLocationCoordinate2D: @retroactive Equatable, @retroactive Hashable 
         hasher.combine(longitude)
     }
 }
+
+extension FenceDetail {
+    init(fence: Fence, selectedItemDateFormatter: DateFormatter) {
+        id = fence.id
+        date = selectedItemDateFormatter.string(from: fence.dateEntered)
+        technology = fence.significantTechnology?.radioTechnologyDisplayValue ?? "N/A"
+        averagePing = fence.averagePing.map { "\($0) ms" } ?? ""
+        color = Color(technology: fence.significantTechnology)
+    }
+}
+
+extension Color {
+    init(technology: String?) {
+        self.init(uiColor: .byResultClass(technology?.radioTechnologyColorClassification))
+    }
+}
+

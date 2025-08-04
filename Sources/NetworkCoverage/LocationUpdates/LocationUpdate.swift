@@ -8,7 +8,16 @@
 
 import CoreLocation
 
-struct LocationUpdate: Hashable {
+struct LocationUpdate: Hashable, Identifiable {
+    let id = UUID()
     let location: CLLocation
     let timestamp: Date
+    
+    var coordinate: CLLocationCoordinate2D {
+        location.coordinate
+    }
+    
+    var horizontalAccuracy: CLLocationAccuracy {
+        location.horizontalAccuracy
+    }
 }

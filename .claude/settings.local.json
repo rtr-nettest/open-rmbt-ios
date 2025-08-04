@@ -4,7 +4,9 @@
       "Bash(find:*)",
       "Bash(xcodebuild:*)",
       "mcp__XcodeBuildMCP__build_sim_name_ws",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(mkdir:*)",
+      "mcp__XcodeBuildMCP__clean_ws"
     ],
     "deny": []
   }

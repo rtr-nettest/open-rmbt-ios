@@ -49,6 +49,7 @@
 		499CF46F2DE9DA1700D5DCDE /* PersistenceManagingCoverageResultsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499CF46E2DE9DA1700D5DCDE /* PersistenceManagingCoverageResultsService.swift */; };
 		499CF4732DE9DF8300D5DCDE /* FencePersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499CF4722DE9DF8300D5DCDE /* FencePersistenceTests.swift */; };
 		49A31C6C2D3A97250039052B /* AsynchronousSequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A31C6B2D3A97250039052B /* AsynchronousSequence.swift */; };
+		49A646BC2E401615007F0F4E /* FencesMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A646BB2E401615007F0F4E /* FencesMapView.swift */; };
 		49ABB8512E2E4AB900583F5E /* CoverageResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49ABB8502E2E4AB900583F5E /* CoverageResultView.swift */; };
 		49AC77142DE8B2C100EBFAAE /* SwiftDataFencePersistenceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49AC77132DE8B2C100EBFAAE /* SwiftDataFencePersistenceService.swift */; };
 		49B28C762BA09D6A00697BB4 /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49B28C752BA09D6A00697BB4 /* Keychain.swift */; };
@@ -371,6 +372,7 @@
 		499CF46E2DE9DA1700D5DCDE /* PersistenceManagingCoverageResultsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceManagingCoverageResultsService.swift; sourceTree = "<group>"; };
 		499CF4722DE9DF8300D5DCDE /* FencePersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FencePersistenceTests.swift; sourceTree = "<group>"; };
 		49A31C6B2D3A97250039052B /* AsynchronousSequence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsynchronousSequence.swift; sourceTree = "<group>"; };
+		49A646BB2E401615007F0F4E /* FencesMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FencesMapView.swift; sourceTree = "<group>"; };
 		49ABB8502E2E4AB900583F5E /* CoverageResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverageResultView.swift; sourceTree = "<group>"; };
 		49AC77132DE8B2C100EBFAAE /* SwiftDataFencePersistenceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftDataFencePersistenceService.swift; sourceTree = "<group>"; };
 		49B28C752BA09D6A00697BB4 /* Keychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Keychain.swift; sourceTree = "<group>"; };
@@ -808,6 +810,7 @@
 			isa = PBXGroup;
 			children = (
 				49C202CC2E0D3A6600CB6520 /* Color+Ext.swift */,
+				49A646BB2E401615007F0F4E /* FencesMapView.swift */,
 				49C202CA2E0C3E0400CB6520 /* TestPopup.swift */,
 			);
 			path = Components;
@@ -1854,6 +1857,7 @@
 				E9C4BA2727140B8F00D6FAE8 /* CLLocation+Additions.swift in Sources */,
 				E959547F26E3B74B004EA6D9 /* RMBTHistoryIndexCell.swift in Sources */,
 				491471362D1062DD00885B82 /* SendCoverageResultRequest.swift in Sources */,
+				49A646BC2E401615007F0F4E /* FencesMapView.swift in Sources */,
 				E9400EFC26BA78FD0067273A /* Requests.swift in Sources */,
 				E9400F0226BACF340067273A /* ServerHelper.swift in Sources */,
 				495288A32D64D4C600C73435 /* UDPPingSession.swift in Sources */,
