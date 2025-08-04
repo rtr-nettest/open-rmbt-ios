@@ -31,7 +31,7 @@ struct NetworkCoverageView: View {
                 FencesMapView(
                     fenceItems: viewModel.fenceItems,
                     locations: viewModel.locations.map { LocationUpdate(location: $0, timestamp: $0.timestamp) },
-                    selectedFenceID: $viewModel.selectedFenceID,
+                    selectedFenceItem: $viewModel.selectedFenceItem,
                     selectedFenceDetail: viewModel.selectedFenceDetail,
                     fenceRadius: viewModel.fenceRadius,
                     isExpertMode: isExpertMode,

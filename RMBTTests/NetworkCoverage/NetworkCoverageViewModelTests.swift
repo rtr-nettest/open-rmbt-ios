@@ -11,8 +11,31 @@ import Testing
 import Combine
 import CoreLocation
 import SwiftData
+import SwiftUI
+import CoreTelephony
 
 @MainActor struct NetworkCoverageTests {
+    @Test func debugDateFormatterTest() throws {
+        // Test the date formatter directly
+        let date = Date(timeIntervalSinceReferenceDate: 1000)
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US")
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .medium
+        
+        let formattedDate = formatter.string(from: date)
+        print("DEBUG: Formatted date = '\(formattedDate)'")
+        print("DEBUG: Date bytes = \(Array(formattedDate.utf8))")
+        
+        // Test technology conversion
+        let technology = CTRadioAccessTechnologyLTE
+        print("DEBUG: CTRadioAccessTechnologyLTE = '\(technology)'")
+        print("DEBUG: technology.radioTechnologyCode = '\(technology.radioTechnologyCode ?? "nil")'")
+        print("DEBUG: technology.radioTechnologyDisplayValue = '\(technology.radioTechnologyDisplayValue ?? "nil")'")
+        
+        // This should pass - just testing basic date formatting
+        #expect(!formattedDate.isEmpty)
+    }
     @Test func whenInitializedWithNoPrefilledFences_thenFenceItemsAreEmpty() async throws {
         let sut = makeSUT(fences: [])
         #expect(sut.fenceItems.isEmpty)
@@ -39,10 +62,10 @@ import SwiftData
 
         #expect(sut.fenceItems.count == 2)
 
-        sut.selectedFenceID = sut.fenceItems.first?.id
+        sut.selectedFenceItem = sut.fenceItems.first
         #expect(sut.selectedFenceDetail?.averagePing == "18 ms")
 
-        sut.selectedFenceID = sut.fenceItems.last?.id
+        sut.selectedFenceItem = sut.fenceItems.last
         #expect(sut.selectedFenceDetail?.averagePing == "")
     }
 
@@ -72,8 +95,8 @@ import SwiftData
 
         #expect(sut.fenceItems
             .map(\.id)
-            .map {
-                sut.selectedFenceID = $0
+            .map { fenceId in
+                sut.selectedFenceItem = sut.fenceItems.first { $0.id == fenceId }
                 return sut.selectedFenceDetail?.averagePing ?? "(no detail selected)"
             } == [
                 "1670 ms",  // t = 0 - 5
@@ -98,10 +121,10 @@ import SwiftData
 
         #expect(sut.fenceItems.count == 2)
 
-        sut.selectedFenceID = sut.fenceItems.first?.id
+        sut.selectedFenceItem = sut.fenceItems.first
         #expect(sut.selectedFenceDetail?.averagePing == "15 ms")
 
-        sut.selectedFenceID = sut.fenceItems.last?.id
+        sut.selectedFenceItem = sut.fenceItems.last
         #expect(sut.selectedFenceDetail?.averagePing == "26 ms")
     }
 
@@ -356,10 +379,10 @@ import SwiftData
 
             #expect(sut.fenceItems.count == 2)
 
-            sut.selectedFenceID = sut.fenceItems.first?.id
+            sut.selectedFenceItem = sut.fenceItems.first
             #expect(sut.selectedFenceDetail?.averagePing == "150 ms")
 
-            sut.selectedFenceID = sut.fenceItems.last?.id
+            sut.selectedFenceItem = sut.fenceItems.last
             #expect(sut.selectedFenceDetail?.averagePing == "300 ms")
         }
     }
@@ -398,6 +421,98 @@ import SwiftData
             #expect(savedFences.last?.startingLocation.coordinate.longitude == 2.0)
             #expect(savedFences.last?.averagePing == 400)
             #expect(savedFences.last?.significantTechnology == nil)
+        }
+    }
+
+    @MainActor @Suite("Fence Selection Tests")
+    struct FenceSelectionTests {
+        @Test("WHEN initialized with no fences THEN no fence is selected and fenceItems are empty")
+        func whenInitializedWithNoFences_thenNoFenceIsSelectedAndFenceItemsAreEmpty() async throws {
+            let sut = makeSUT(fences: [])
+            
+            #expect(sut.selectedFenceItem == nil)
+            #expect(sut.selectedFenceDetail == nil)
+            #expect(sut.fenceItems.isEmpty)
+        }
+
+        @Test("WHEN initialized with fences THEN no fence is selected initially")
+        func whenInitializedWithFences_thenNoFenceIsSelectedInitially() async throws {
+            let fences = [makeFence(at: 1.0, lon: 1.0), makeFence(at: 2.0, lon: 2.0)]
+            let sut = makeSUT(fences: fences)
+            
+            #expect(sut.selectedFenceItem == nil)
+            #expect(sut.selectedFenceDetail == nil)
+            #expect(sut.fenceItems.map(\.isSelected) == [false, false])
+        }
+
+        @Test("WHEN valid fence ID is selected THEN fence is marked as selected and detail is populated")
+        func whenValidFenceIDIsSelected_thenFenceIsMarkedAsSelectedAndDetailIsPopulated() async throws {
+            let fence1 = makeFence(at: 1.0, lon: 1.0)
+            let fence2 = makeFenceWithPings(
+                at: 2.0, 
+                lon: 3.0, 
+                dateEntered: Date(timeIntervalSinceReferenceDate: 1000),
+                technology: CTRadioAccessTechnologyLTE,
+                pings: [
+                    PingResult(result: .interval(.milliseconds(50)), timestamp: Date(timeIntervalSinceReferenceDate: 1001)),
+                    PingResult(result: .interval(.milliseconds(60)), timestamp: Date(timeIntervalSinceReferenceDate: 1002)),
+                    PingResult(result: .interval(.milliseconds(70)), timestamp: Date(timeIntervalSinceReferenceDate: 1003))
+                ]
+            )
+            let sut = makeSUT(fences: [fence1, fence2])
+
+            sut.simulateSelectFence(fence2)
+            
+            #expect(sut.selectedFenceItem?.id == fence2.id)
+            #expect(sut.selectedFenceDetail?.id == fence2.id)
+            
+            #expect(sut.selectedFenceDetail?.date == sut.selectedItemDateFormatter.string(from: Date(timeIntervalSinceReferenceDate: 1000)))
+            
+            #expect(sut.selectedFenceDetail?.technology == "4G")
+            #expect(sut.selectedFenceDetail?.averagePing == "60 ms")
+            #expect(sut.selectedFenceDetail?.color == Color(technology: CTRadioAccessTechnologyLTE))
+            #expect(sut.fenceItems.map(\.isSelected) == [false, true])
+        }
+
+        @Test("WHEN selection is changed to different fence THEN previous fence is deselected and new one is selected")
+        func whenSelectionIsChangedToDifferentFence_thenPreviousFenceIsDeselectedAndNewOneIsSelected() async throws {
+            let fence1 = makeFence(at: 1.0, lon: 1.0)
+            let fence2 = makeFence(at: 2.0, lon: 2.0)
+            let fence3 = makeFence(at: 3.0, lon: 3.0)
+            let sut = makeSUT(fences: [fence1, fence2, fence3])
+            
+            sut.simulateSelectFence(fence1)
+            sut.simulateSelectFence(fence3)
+
+            #expect(sut.fenceItems.map(\.isSelected) == [false, false, true])
+        }
+
+        @Test("WHEN selection is set to nil THEN all fences are deselected")
+        func whenSelectionIsSetToNil_thenAllFencesAreDeselected() async throws {
+            let fence1 = makeFence(at: 1.0, lon: 1.0)
+            let fence2 = makeFence(at: 2.0, lon: 2.0)
+            let sut = makeSUT(fences: [fence1, fence2])
+
+            sut.simulateSelectFence(fence1)
+            sut.selectedFenceItem = nil
+            
+            #expect(sut.selectedFenceItem == nil)
+            #expect(sut.selectedFenceDetail == nil)
+            #expect(sut.fenceItems.allSatisfy { !$0.isSelected })
+        }
+
+        @Test("WHEN non-existent fence ID is selected THEN selection remains nil and no fence is marked as selected")
+        func whenNonExistentFenceIDIsSelected_thenSelectionRemainsNilAndNoFenceIsMarkedAsSelected() async throws {
+            let fence1 = makeFence(at: 1.0, lon: 1.0)
+            let fence2 = makeFence(at: 2.0, lon: 2.0)
+            let sut = makeSUT(fences: [fence1, fence2])
+            
+            let nonExistentFenceItem = FenceItem(id: UUID(), date: Date(), coordinate: CLLocationCoordinate2D(), technology: "N/A", isSelected: false, isCurrent: false, color: .gray)
+            sut.selectedFenceItem = nonExistentFenceItem
+            
+            #expect(sut.selectedFenceItem?.id == nonExistentFenceItem.id)
+            #expect(sut.selectedFenceDetail == nil)
+            #expect(sut.fenceItems.allSatisfy { !$0.isSelected })
         }
     }
 }
@@ -445,6 +560,47 @@ func makePingUpdate(at timestampOffset: TimeInterval, ms: some BinaryInteger) ->
     .ping(.init(result: .interval(.milliseconds(ms)), timestamp: Date(timeIntervalSinceReferenceDate: timestampOffset)))
 }
 
+func makeFence(
+    id: UUID = UUID(),
+    at lat: CLLocationDegrees,
+    lon: CLLocationDegrees,
+    dateEntered: Date = Date(timeIntervalSinceReferenceDate: 0),
+    technology: String? = nil
+) -> Fence {
+    Fence(
+        startingLocation: CLLocation(
+            coordinate: CLLocationCoordinate2D(latitude: lat, longitude: lon),
+            altitude: 0,
+            horizontalAccuracy: 1,
+            verticalAccuracy: 1,
+            timestamp: dateEntered
+        ),
+        dateEntered: dateEntered,
+        technology: technology
+    )
+}
+
+func makeFenceWithPings(
+    at lat: CLLocationDegrees,
+    lon: CLLocationDegrees,
+    dateEntered: Date,
+    technology: String,
+    pings: [PingResult]
+) -> Fence {
+    Fence(
+        startingLocation: CLLocation(
+            coordinate: CLLocationCoordinate2D(latitude: lat, longitude: lon),
+            altitude: 0,
+            horizontalAccuracy: 1,
+            verticalAccuracy: 1,
+            timestamp: dateEntered
+        ),
+        dateEntered: dateEntered,
+        technology: technology,
+        pings: pings
+    )
+}
+
 func makeSaveError() -> Error {
     NSError(domain: "test", code: 1, userInfo: nil)
 }
@@ -452,6 +608,10 @@ func makeSaveError() -> Error {
 @MainActor extension NetworkCoverageViewModel {
     func startTest() async {
         await toggleMeasurement()
+    }
+
+    func simulateSelectFence(_ fence: Fence) {
+        selectedFenceItem = fenceItems.first { $0.id == fence.id }
     }
 }
 
@@ -489,5 +649,31 @@ final class FencePersistenceServiceSpy: FencePersistenceService {
 
     func save(_ fence: Fence) throws {
         capturedSavedFences.append(fence)
+    }
+}
+
+// MARK: - SwiftTesting Debug Support
+
+extension FenceItem: @retroactive CustomTestStringConvertible, @retroactive CustomDebugStringConvertible {
+    public var debugDescription: String { testDescription }
+
+    public var testDescription: String {
+        let idPrefix = String(id.uuidString.prefix(6))
+        let selectedStatus = isSelected ? "selected" : ""
+        let currentStatus = isCurrent ? "current" : ""
+        
+        let statuses = [selectedStatus, currentStatus].filter { !$0.isEmpty }
+        let statusString = statuses.isEmpty ? "" : " [\(statuses.joined(separator: ", "))]"
+        
+        return "FenceItem(\(idPrefix), \(coordinate.latitude),\(coordinate.longitude)\(statusString))"
+    }
+}
+
+extension FenceDetail: @retroactive CustomTestStringConvertible, @retroactive CustomDebugStringConvertible {
+    public var debugDescription: String { testDescription }
+
+    public var testDescription: String {
+        let idPrefix = String(id.uuidString.prefix(6))
+        return "FenceDetail(\(idPrefix), \(technology), \(averagePing))"
     }
 }

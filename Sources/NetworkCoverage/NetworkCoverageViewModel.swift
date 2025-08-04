@@ -63,7 +63,7 @@ struct FenceDetail: Equatable, Identifiable {
     // Private state
     @ObservationIgnored private var iterationTask: Task<Void, Never>?
     @ObservationIgnored private var initialLocation: Date?
-    @ObservationIgnored private let selectedItemDateFormatter: DateFormatter
+    @ObservationIgnored private(set) var selectedItemDateFormatter: DateFormatter
     @ObservationIgnored private let refreshInterval: TimeInterval
     @ObservationIgnored private var firstPingTimestamp: Date?
     @ObservationIgnored private var pingResults: [PingResult] = [] {
@@ -77,7 +77,7 @@ struct FenceDetail: Equatable, Identifiable {
             }
         }
     }
-    @ObservationIgnored private var selectedFence: FenceItem?
+    @ObservationIgnored private var selectedFence: Fence?
     @ObservationIgnored private var inaccurateLocationsWindows: [InaccurateLocationWindow] = []
     @ObservationIgnored private var testStartTime: Date?
     @ObservationIgnored private let maxTestDuration: TimeInterval = 4 * 60 * 60 // 4 hours in seconds
@@ -114,13 +114,16 @@ struct FenceDetail: Equatable, Identifiable {
     private(set) var locationAccuracy = "N/A"
     private(set) var fenceItems: [FenceItem] = []
 
-    var selectedFenceID: FenceItem.ID? {
+    var selectedFenceItem: FenceItem? {
         didSet {
-            selectedFenceDetail = fences
-                .first { $0.id == selectedFenceID }
-                .map {
-                    .init(fence: $0, selectedItemDateFormatter: selectedItemDateFormatter)
-                }
+            selectedFence = selectedFenceItem.flatMap { selectedItem in
+                fences.first { $0.id == selectedItem.id }
+            }
+            selectedFenceDetail = selectedFence.map {
+                .init(fence: $0, selectedItemDateFormatter: selectedItemDateFormatter)
+            }
+            // Recreate fenceItems to update selection state
+            fenceItems = fences.map(fenceItem)
         }
     }
     private(set) var selectedFenceDetail: FenceDetail?
@@ -151,6 +154,10 @@ struct FenceDetail: Equatable, Identifiable {
             dateFormatter.timeStyle = .medium
             return dateFormatter
         }()
+
+        if !fences.isEmpty {
+            self.fenceItems = fences.map(fenceItem)
+        }
     }
 
     convenience init(
@@ -381,7 +388,7 @@ private extension NetworkCoverageViewModel {
             date: fence.dateEntered,
             coordinate: fence.startingLocation.coordinate,
             technology: fence.significantTechnology?.radioTechnologyDisplayValue ?? "N/A",
-            isSelected: selectedFence?.id == fence.id,
+            isSelected: selectedFenceItem?.id == fence.id,
             isCurrent: currentFence?.id == fence.id,
             color: .init(technology: fence.significantTechnology)
         )

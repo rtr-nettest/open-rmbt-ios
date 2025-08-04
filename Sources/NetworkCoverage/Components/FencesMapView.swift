@@ -13,7 +13,7 @@ import MapKit
 struct FencesMapView: View {
     let fenceItems: [FenceItem]
     let locations: [LocationUpdate]
-    let selectedFenceID: Binding<UUID?>
+    let selectedFenceItem: Binding<FenceItem?>
     let selectedFenceDetail: FenceDetail?
     let fenceRadius: Double
     let isExpertMode: Bool
@@ -24,10 +24,10 @@ struct FencesMapView: View {
     
     @State private var position: MapCameraPosition
     
-    init(fenceItems: [FenceItem], locations: [LocationUpdate], selectedFenceID: Binding<UUID?>, selectedFenceDetail: FenceDetail?, fenceRadius: Double, isExpertMode: Bool, showsSettingsButton: Bool, showsSettings: Bool, onSettingsToggle: @escaping () -> Void, trackUserLocation: Bool) {
+    init(fenceItems: [FenceItem], locations: [LocationUpdate], selectedFenceItem: Binding<FenceItem?>, selectedFenceDetail: FenceDetail?, fenceRadius: Double, isExpertMode: Bool, showsSettingsButton: Bool, showsSettings: Bool, onSettingsToggle: @escaping () -> Void, trackUserLocation: Bool) {
         self.fenceItems = fenceItems
         self.locations = locations
-        self.selectedFenceID = selectedFenceID
+        self.selectedFenceItem = selectedFenceItem
         self.selectedFenceDetail = selectedFenceDetail
         self.fenceRadius = fenceRadius
         self.isExpertMode = isExpertMode
@@ -73,14 +73,14 @@ struct FencesMapView: View {
     }
     
     var body: some View {
-        Map(position: $position, selection: selectedFenceID) {
+        Map(position: $position, selection: selectedFenceItem) {
             UserAnnotation()
 
             ForEach(fenceItems) { fence in
                 if !isExpertMode && fence.isCurrent {
                     fenceCircle(for: fence)
                     fenceAnnotation(for: fence)
-                        .tag(fence.id)
+                        .tag(fence)
                 }
                 if isExpertMode {
                     fenceCircle(for: fence)
@@ -93,10 +93,10 @@ struct FencesMapView: View {
                         },
                         label: { EmptyView() }
                     )
-                    .tag(fence.id)
+                    .tag(fence)
                 } else {
                     fenceAnnotation(for: fence)
-                        .tag(fence.id)
+                        .tag(fence)
                 }
             }
 
@@ -219,7 +219,7 @@ private extension View {
             )
         ],
         locations: [],
-        selectedFenceID: .constant(nil),
+        selectedFenceItem: .constant(nil),
         selectedFenceDetail: nil,
         fenceRadius: 20.0,
         isExpertMode: false,
