@@ -11,8 +11,6 @@ import CoreLocation
 import AsyncAlgorithms
 import SwiftUI
 
-var backgroundActivity: CLBackgroundActivitySession?
-
 @rethrows private protocol UpdateAsyncIteratorProtocol: AsyncIteratorProtocol where Element == NetworkCoverageViewModel.Update { }
 @rethrows private protocol UpdateAsyncSequence: AsyncSequence where Element == NetworkCoverageViewModel.Update { }
 
@@ -63,6 +61,7 @@ struct FenceDetail: Equatable, Identifiable {
     }
 
     // Private state
+    @ObservationIgnored private var iterationTask: Task<Void, Never>?
     @ObservationIgnored private var initialLocation: Date?
     @ObservationIgnored private let selectedItemDateFormatter: DateFormatter
     @ObservationIgnored private let refreshInterval: TimeInterval
@@ -181,6 +180,7 @@ struct FenceDetail: Equatable, Identifiable {
     private func iterate(_ sequence: some AsynchronousSequence<NetworkCoverageViewModel.Update>) async {
         do {
             for try await update in sequence {
+                try Task.checkCancellation()
                 guard isStarted else { break }
 
                 if let startTime = testStartTime, timeNow().timeIntervalSince(startTime) >= maxTestDuration {
@@ -188,64 +188,74 @@ struct FenceDetail: Equatable, Identifiable {
                     break
                 }
 
-                switch update {
-                case .ping(let pingUpdate):
-                    if firstPingTimestamp == nil {
-                        firstPingTimestamp = pingUpdate.timestamp
-                    }
-                    guard !wasInsideInaccurateLocationWindow(pingUpdate) else {
-                        continue
-                    }
-                    pingResults.append(pingUpdate)
-
-                    if var (fence, idx) = fences.fence(at: pingUpdate.timestamp) {
-                        fence.append(ping: pingUpdate)
-                        fences[idx] = fence
-                    }
-                case .location(let locationUpdate):
-                    let location = locationUpdate.location
-                    locations.append(location)
-                    locationAccuracy = String(format: "%.2fm", location.horizontalAccuracy)
-                    let currentRadioTechnology = currentRadioTechnology.technologyCode()
-                    latestTechnology = displayValue(forRadioTechnology: currentRadioTechnology ?? "N/A")
-
-                    guard isLocationPreciseEnough(location) else {
-                        startInaccurateLocationWidnowIfNeeded(at: location.timestamp)
-                        continue
-                    }
-                    stopInaccurateLocationWindow(at: location.timestamp)
-
-                    let currentFence = currentFence
-                    if var currentFence {
-                        if currentFence.startingLocation.distance(from: location) >= fenceRadius {
-                            let newFence = Fence(
-                                startingLocation: location,
-                                dateEntered: locationUpdate.timestamp,
-                                technology: currentRadioTechnology
-                            )
-
-                            currentFence.exit(at: locationUpdate.timestamp)
-                            fences[fences.endIndex - 1] = currentFence
-
-                            try? persistenceService.save(currentFence)
-
-                            fences.append(newFence)
-                        } else {
-                            currentFence.append(location: location)
-                            currentRadioTechnology.map { currentFence.append(technology: $0) }
-                            fences[fences.endIndex - 1] = currentFence
-                        }
-                    } else {
-                        fences.append(.init(
-                            startingLocation: location,
-                            dateEntered: locationUpdate.timestamp,
-                            technology: currentRadioTechnology
-                        ))
-                    }
-                }
+                await processUpdate(update)
             }
+        } catch is CancellationError {
+            // Expected cancellation - no error
+            return
         } catch {
-            errorMessage = "There were some errors"
+            errorMessage = "Network coverage measurement error: \(error.localizedDescription)"
+        }
+    }
+
+    @MainActor
+    private func processUpdate(_ update: Update) async {
+        switch update {
+        case .ping(let pingUpdate):
+            if firstPingTimestamp == nil {
+                firstPingTimestamp = pingUpdate.timestamp
+            }
+            guard !wasInsideInaccurateLocationWindow(pingUpdate) else {
+                return
+            }
+            pingResults.append(pingUpdate)
+
+            if var (fence, idx) = fences.fence(at: pingUpdate.timestamp) {
+                fence.append(ping: pingUpdate)
+                fences[idx] = fence
+            }
+            
+        case .location(let locationUpdate):
+            let location = locationUpdate.location
+            locations.append(location)
+            locationAccuracy = String(format: "%.2fm", location.horizontalAccuracy)
+            let currentRadioTechnology = currentRadioTechnology.technologyCode()
+            latestTechnology = displayValue(forRadioTechnology: currentRadioTechnology ?? "N/A")
+
+            guard isLocationPreciseEnough(location) else {
+                startInaccurateLocationWidnowIfNeeded(at: location.timestamp)
+                return
+            }
+            stopInaccurateLocationWindow(at: location.timestamp)
+
+            // Handle fence logic...
+            let currentFence = currentFence
+            if var currentFence {
+                if currentFence.startingLocation.distance(from: location) >= fenceRadius {
+                    let newFence = Fence(
+                        startingLocation: location,
+                        dateEntered: locationUpdate.timestamp,
+                        technology: currentRadioTechnology
+                    )
+
+                    currentFence.exit(at: locationUpdate.timestamp)
+                    fences[fences.endIndex - 1] = currentFence
+
+                    try? persistenceService.save(currentFence)
+
+                    fences.append(newFence)
+                } else {
+                    currentFence.append(location: location)
+                    currentRadioTechnology.map { currentFence.append(technology: $0) }
+                    fences[fences.endIndex - 1] = currentFence
+                }
+            } else {
+                fences.append(.init(
+                    startingLocation: location,
+                    dateEntered: locationUpdate.timestamp,
+                    technology: currentRadioTechnology
+                ))
+            }
         }
     }
 
@@ -255,10 +265,13 @@ struct FenceDetail: Equatable, Identifiable {
         testStartTime = timeNow()
         fences.removeAll()
         locations.removeAll()
-
-        backgroundActivity = CLBackgroundActivitySession()
-
-        await iterate(updates())
+        
+        await BackgroundActivityActor.shared.startActivity()
+        
+        iterationTask = Task { @MainActor in
+            await iterate(updates())
+        }
+        await iterationTask?.value
     }
 
     private func stop() async {
@@ -266,13 +279,19 @@ struct FenceDetail: Equatable, Identifiable {
         testStartTime = nil
         locationAccuracy = "N/A"
         latestTechnology = "N/A"
-
+        
+        // Cancel async sequences
+        iterationTask?.cancel()
+        iterationTask = nil
+        
+        await BackgroundActivityActor.shared.stopActivity()
+        
+        // Handle saving and sending results...
         if !fences.isEmpty {
-            // save last unexited fence into the persistence layer
             if let lastFence = fences.last, lastFence.dateExited == nil {
                 try? persistenceService.save(lastFence)
             }
-
+            
             do {
                 try await sendResultsService.send(fences: fences)
             } catch {
@@ -288,9 +307,28 @@ struct FenceDetail: Equatable, Identifiable {
             await stop()
         }
     }
+    
+    deinit {
+        iterationTask?.cancel()
+        Task {
+            await BackgroundActivityActor.shared.stopActivity()
+        }
+    }
 
     private func isLocationPreciseEnough(_ location: CLLocation) -> Bool {
         location.horizontalAccuracy <= minimumLocationAccuracy
+    }
+}
+
+@MainActor extension NetworkCoverageViewModel {
+    func startTest() async {
+        await toggleMeasurement()
+    }
+    
+    func stopTest() async {
+        if isStarted {
+            await toggleMeasurement()
+        }
     }
 }
 
