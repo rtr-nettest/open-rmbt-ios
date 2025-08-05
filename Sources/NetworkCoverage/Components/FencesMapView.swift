@@ -24,7 +24,18 @@ struct FencesMapView: View {
     
     @State private var position: MapCameraPosition
     
-    init(fenceItems: [FenceItem], locations: [LocationUpdate], selectedFenceItem: Binding<FenceItem?>, selectedFenceDetail: FenceDetail?, fenceRadius: Double, isExpertMode: Bool, showsSettingsButton: Bool, showsSettings: Bool, onSettingsToggle: @escaping () -> Void, trackUserLocation: Bool) {
+    init(
+        fenceItems: [FenceItem],
+        locations: [LocationUpdate],
+        selectedFenceItem: Binding<FenceItem?>,
+        selectedFenceDetail: FenceDetail?,
+        fenceRadius: Double,
+        isExpertMode: Bool,
+        showsSettingsButton: Bool,
+        showsSettings: Bool,
+        onSettingsToggle: @escaping () -> Void,
+        trackUserLocation: Bool
+    ) {
         self.fenceItems = fenceItems
         self.locations = locations
         self.selectedFenceItem = selectedFenceItem
@@ -108,6 +119,7 @@ struct FencesMapView: View {
                 }
             }
         }
+//        .adjustTopSafeAreaInset()
         .mapControls {
             MapScaleView()
             MapCompass()
@@ -203,28 +215,25 @@ private extension View {
         background(Color.white.opacity(0.85))
             .cornerRadius(8)
     }
+
+    func adjustTopSafeAreaInset() -> some View {
+        self
+    }
 }
 
 #Preview {
+    @Previewable @State var selectedFenceItem: FenceItem?
+    let viewModel = NetworkCoverageFactory().makeReadOnlyCoverageViewModel(fences: Fence.mockFences)
+    
     FencesMapView(
-        fenceItems: [
-            FenceItem(
-                id: UUID(),
-                date: Date(),
-                coordinate: CLLocationCoordinate2D(latitude: 49.748, longitude: 13.377),
-                technology: "4G/LTE",
-                isSelected: false,
-                isCurrent: true,
-                color: .blue
-            )
-        ],
+        fenceItems: viewModel.fenceItems,
         locations: [],
-        selectedFenceItem: .constant(nil),
+        selectedFenceItem: $selectedFenceItem,
         selectedFenceDetail: nil,
         fenceRadius: 20.0,
         isExpertMode: false,
-        showsSettingsButton: false,
-        showsSettings: false,
+        showsSettingsButton: true,
+        showsSettings: true,
         onSettingsToggle: {},
         trackUserLocation: false
     )

@@ -28,32 +28,8 @@ struct CoverageResultView: View {
                 onSettingsToggle: {},
                 trackUserLocation: false
             )
-            
-            VStack {
-                HStack {
-                    Text("Coverage Test Results")
-                        .font(.title2)
-                        .fontWeight(.semibold)
-                    
-                    Spacer()
-                    
-                    Button(action: onClose) {
-                        Text("Close")
-                            .font(.callout)
-                            .fontWeight(.medium)
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 8)
-                            .background(Color("greenButtonBackground"))
-                            .cornerRadius(8)
-                    }
-                }
-                .padding()
-                .background(Color.white.opacity(0.85))
-                .cornerRadius(8)
-                .padding()
-                
-                Spacer()
+            .safeAreaInset(edge: .top, spacing: -10) {
+                CoverageHeader(title: "Coverage Test Results", action: .init(title: "Close", action: onClose))
             }
         }
         .navigationBarHidden(true)
@@ -63,58 +39,6 @@ struct CoverageResultView: View {
 #Preview {
     NavigationStack {
         CoverageResultView(onClose: {})
-            .environment(NetworkCoverageViewModel(
-                fences: [
-                    .init(
-                        startingLocation: CLLocation(
-                            latitude: 49.74805411063806,
-                            longitude: 13.37696845562318
-                        ),
-                        dateEntered: .init(timeIntervalSince1970: 1734526653),
-                        technology: "3G/HSDPA",
-                        avgPing: .milliseconds(122)
-                    ),
-                    .init(
-                        startingLocation: CLLocation(
-                            latitude: 49.747849194587204,
-                            longitude: 13.376917714305671
-                        ),
-                        dateEntered: .init(timeIntervalSince1970: 1734526656),
-                        technology: "4G/LTE",
-                        pings: [.init(result: .interval(.milliseconds(84)), timestamp: .init(timeIntervalSince1970: 1734526656))]
-                    )
-                ],
-                refreshInterval: 1.0,
-                minimumLocationAccuracy: 10.0,
-                updates: { EmptyAsyncSequence().asOpaque() },
-                currentRadioTechnology: MockCurrentRadioTechnologyService(),
-                sendResultsService: MockSendCoverageResultsService(),
-                persistenceService: MockFencePersistenceService(),
-                locale: .current
-            ))
+            .environment(NetworkCoverageFactory().makeReadOnlyCoverageViewModel(fences: Fence.mockFences))
     }
-}
-
-// MARK: - Mock Services for Preview
-
-private struct MockCurrentRadioTechnologyService: CurrentRadioTechnologyService {
-    func technologyCode() -> String? { "4G" }
-}
-
-private struct MockSendCoverageResultsService: SendCoverageResultsService {
-    func send(fences: [Fence]) async throws {}
-}
-
-private struct MockFencePersistenceService: FencePersistenceService {
-    func save(_ fence: Fence) throws {}
-}
-
-private struct EmptyAsyncSequence: AsyncSequence {
-    typealias Element = NetworkCoverageViewModel.Update
-    
-    struct AsyncIterator: AsyncIteratorProtocol {
-        mutating func next() async throws -> NetworkCoverageViewModel.Update? { nil }
-    }
-    
-    func makeAsyncIterator() -> AsyncIterator { AsyncIterator() }
 }

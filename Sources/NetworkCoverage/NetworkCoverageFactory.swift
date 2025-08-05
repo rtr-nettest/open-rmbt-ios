@@ -68,6 +68,19 @@ struct NetworkCoverageFactory {
         return (persistenceService, resultSender)
     }
 
+    @MainActor func makeReadOnlyCoverageViewModel(fences: [Fence] = []) -> NetworkCoverageViewModel {
+        NetworkCoverageViewModel(
+            fences: fences,
+            refreshInterval: 1.0,
+            minimumLocationAccuracy: 10.0,
+            updates: { EmptyAsyncSequence().asOpaque() },
+            currentRadioTechnology: CTTelephonyRadioTechnologyService(),
+            sendResultsService: MockSendCoverageResultsService(),
+            persistenceService: MockFencePersistenceService(),
+            locale: .current
+        )
+    }
+
     @MainActor func makeCoverageViewModel(fences: [Fence] = []) -> NetworkCoverageViewModel {
         let sessionInitializer = CoverageMeasurementSessionInitializer(
             now: dateNow,
@@ -121,4 +134,24 @@ struct NetworkCoverageFactory {
             startDate: startDate
         )
     }
+}
+
+// MARK: - Mock Services
+
+private struct MockSendCoverageResultsService: SendCoverageResultsService {
+    func send(fences: [Fence]) async throws {}
+}
+
+private struct MockFencePersistenceService: FencePersistenceService {
+    func save(_ fence: Fence) throws {}
+}
+
+private struct EmptyAsyncSequence: AsyncSequence {
+    typealias Element = NetworkCoverageViewModel.Update
+    
+    struct AsyncIterator: AsyncIteratorProtocol {
+        mutating func next() async throws -> NetworkCoverageViewModel.Update? { nil }
+    }
+    
+    func makeAsyncIterator() -> AsyncIterator { AsyncIterator() }
 }

@@ -46,16 +46,12 @@ struct NetworkCoverageView: View {
                         showsSettings = false
                     }
                 }
-                
+                .safeAreaInset(edge: .top, spacing: -10) {
+                    CoverageHeader(title: "Network Coverage") { topBarView }
+                }
+
                 VStack {
-                    Text("Network Coverage")
-                        .font(.title2)
-                    topBarView
-                        .padding(.leading, 8)
-                        .padding(.trailing, 56)
-                    
                     Spacer()
-                    
                     if showsSettings {
                         settingsView
                             .padding(.horizontal, 16)
@@ -152,27 +148,27 @@ struct NetworkCoverageView: View {
 
     var topBarView: some View {
         HStack {
-            Spacer()
-            VStack(alignment: .leading) {
-                Text("Technology")
-                    .font(.caption)
-                Text(viewModel.latestTechnology)
-            }
+            HStack(spacing: 0) {
+                VStack(alignment: .leading) {
+                    Text("Technology")
+                        .font(.caption)
+                    Text(viewModel.latestTechnology)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
 
-            Spacer()
+                VStack(alignment: .leading) {
+                    Text("Ping")
+                        .font(.caption)
+                    Text(viewModel.latestPing)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
 
-            VStack(alignment: .leading) {
-                Text("Ping")
-                    .font(.caption)
-                Text(viewModel.latestPing)
-            }
-
-            Spacer()
-
-            VStack(alignment: .leading) {
-                Text("Loc. accuracy")
-                    .font(.caption)
-                Text(viewModel.locationAccuracy)
+                VStack(alignment: .leading) {
+                    Text("Loc. accuracy")
+                        .font(.caption)
+                    Text(viewModel.locationAccuracy)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
 
             Spacer()
@@ -190,14 +186,12 @@ struct NetworkCoverageView: View {
                 }
             }
             .tint(.brand)
-
-            Spacer()
+            .padding(.horizontal, 16)
         }
         .frame(maxWidth: .infinity, alignment: .center)
-        .padding(12)
-        .mapOverlay()
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
     }
-
 }
 
 private extension View {
@@ -209,44 +203,7 @@ private extension View {
 
 #Preview {
     NetworkCoverageView(
-        fences: [
-            .init(
-                startingLocation: CLLocation(
-                    latitude: 49.74805411063806,
-                    longitude: 13.37696845562318
-                ),
-                dateEntered: .init(timeIntervalSince1970: 1734526653),
-                technology: "3G/HSDPA",
-                avgPing: .milliseconds(122)
-            ),
-            .init(
-                startingLocation: CLLocation(
-                    latitude: 49.747849194587204,
-                    longitude: 13.376917714305671
-                ),
-                dateEntered: .init(timeIntervalSince1970: 1734526656),
-                technology: "4G/LTE",
-                pings: [.init(result: .interval(.milliseconds(84)), timestamp: .init(timeIntervalSince1970: 1734526656))]
-            ),
-            .init(
-                startingLocation: CLLocation(
-                    latitude: 49.74741067132995,
-                    longitude: 13.376784518347213
-                ),
-                dateEntered: .init(timeIntervalSince1970: 1734526659),
-                technology: "4G/LTE",
-                pings: [.init(result: .interval(.milliseconds(41)), timestamp: .init(timeIntervalSince1970: 1734526659))]
-            ),
-            .init(
-                startingLocation: CLLocation(
-                    latitude: 49.74700902972835,
-                    longitude: 13.376651322388751
-                ),
-                dateEntered: .init(timeIntervalSince1970: 1734526661),
-                technology: "5G/NRNSA",
-                pings: [.init(result: .interval(.milliseconds(26)), timestamp: .init(timeIntervalSince1970: 1734526661))]
-            )
-        ],
+        fences: Fence.mockFences,
         onClose: {}
     )
 }
