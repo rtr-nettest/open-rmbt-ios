@@ -297,7 +297,9 @@ struct FenceDetail: Equatable, Identifiable {
         
         // Handle saving and sending results...
         if !fences.isEmpty {
-            if let lastFence = fences.last, lastFence.dateExited == nil {
+            if var lastFence = fences.last, lastFence.dateExited == nil {
+                lastFence.exit(at: timeNow())
+                fences[fences.endIndex - 1] = lastFence
                 try? persistenceService.save(lastFence)
             }
             
