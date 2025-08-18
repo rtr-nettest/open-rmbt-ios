@@ -95,8 +95,8 @@
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ESc-IZ-OIN">
                             <rect key="frame" x="64" y="0.0" width="101" height="393"/>
                             <subviews>
-                                <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="equalSpacing" spacing="50" translatesAutoresizingMaskIntoConstraints="NO" id="pZL-Ze-t9k">
-                                    <rect key="frame" x="8" y="80.5" width="45" height="232"/>
+                                <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="equalSpacing" spacing="38" translatesAutoresizingMaskIntoConstraints="NO" id="pZL-Ze-t9k">
+                                    <rect key="frame" x="8" y="65.5" width="45" height="262"/>
                                     <subviews>
                                         <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="center" image="ip_v4" translatesAutoresizingMaskIntoConstraints="NO" id="cjZ-DF-2qQ">
                                             <rect key="frame" x="0.0" y="0.0" width="45" height="44"/>
@@ -117,6 +117,14 @@
                                             <constraints>
                                                 <constraint firstAttribute="width" constant="45" id="JdH-XW-T5p"/>
                                                 <constraint firstAttribute="height" constant="44" id="icL-z1-56R"/>
+                                            </constraints>
+                                        </imageView>
+                                        <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="center" image="tab_coverage" translatesAutoresizingMaskIntoConstraints="NO" id="cvg-qB-scu-landscape">
+                                            <rect key="frame" x="0.0" y="282" width="45" height="44"/>
+                                            <color key="tintColor" name="greenButtonBackground"/>
+                                            <constraints>
+                                                <constraint firstAttribute="width" constant="45" id="cvg-width-const"/>
+                                                <constraint firstAttribute="height" constant="44" id="cvg-height-const"/>
                                             </constraints>
                                         </imageView>
                                     </subviews>
@@ -317,6 +325,7 @@
                 <constraint firstItem="5Xc-wd-VcA" firstAttribute="trailing" secondItem="pZL-Ze-t9k" secondAttribute="trailing" id="y1E-4l-dQ5"/>
             </constraints>
             <connections>
+                <outlet property="coverageImageView" destination="cvg-qB-scu-landscape" id="cvg-outlet-connection"/>
                 <outlet property="gradientView" destination="Scg-aO-ECo" id="oAz-zl-5CQ"/>
                 <outlet property="ipV4ImageView" destination="cjZ-DF-2qQ" id="87O-wQ-KBc"/>
                 <outlet property="ipV6ImageView" destination="jmy-Rn-45m" id="Wmk-J8-AD9"/>
@@ -354,8 +363,12 @@
         <image name="loop_mode_switcher_off" width="46" height="46"/>
         <image name="loop_mode_switcher_on" width="46" height="46"/>
         <image name="mobile_icon" width="84" height="52"/>
+        <image name="tab_coverage" width="24" height="24"/>
         <image name="test_button" width="307" height="307"/>
         <image name="wifi_icon" width="102" height="74"/>
+        <namedColor name="greenButtonBackground">
+            <color red="0.34901960784313724" green="0.69803921568627447" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
