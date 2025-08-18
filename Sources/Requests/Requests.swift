@@ -44,6 +44,8 @@ public class HistoryWithFiltersRequest: BasicRequest {
     var networks:[String]?
     //
     var devices: [String]?
+    //
+    var includeCoverageFences: Bool?
     
     ///
     override public func mapping(map: Map) {
@@ -53,6 +55,7 @@ public class HistoryWithFiltersRequest: BasicRequest {
         resultLimit <- map["result_limit"]
         networks <- map["networks"]
         devices <- map["devices"]
+        includeCoverageFences <- map["include_coverage_fences"]
     }
 }
 

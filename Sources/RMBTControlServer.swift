@@ -294,6 +294,10 @@ extension RMBTControlServer {
     }
     
     @objc(getHistoryWithFilters:length:offset:success:error:) func getHistoryWithFilters(filters: HistoryFilterType?, length: UInt, offset: UInt, success: @escaping (_ response: HistoryWithFiltersResponse) -> Void, error errorCallback: @escaping ErrorCallback) {
+        getHistoryWithFilters(filters: filters, length: length, offset: offset, includeCoverageFences: true, success: success, error: errorCallback)
+    }
+    
+    @objc(getHistoryWithFilters:length:offset:includeCoverageFences:success:error:) func getHistoryWithFilters(filters: HistoryFilterType?, length: UInt, offset: UInt, includeCoverageFences: Bool, success: @escaping (_ response: HistoryWithFiltersResponse) -> Void, error errorCallback: @escaping ErrorCallback) {
 
         ensureClientUuid(success: { uuid in
             let req = HistoryWithFiltersRequest()
@@ -301,6 +305,7 @@ extension RMBTControlServer {
             req.uuid = uuid
             req.resultLimit = NSNumber(value: length)
             req.resultOffset = NSNumber(value: offset)
+            req.includeCoverageFences = includeCoverageFences
             //
             if let theFilters = filters {
                 for filter in theFilters {

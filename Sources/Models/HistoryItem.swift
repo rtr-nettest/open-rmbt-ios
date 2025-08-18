@@ -66,6 +66,10 @@ import ObjectMapper
     public var qosResult: String?
     
     public var loopUuid: String?
+    
+    public var isCoverageFences: Bool?
+    
+    public var fencesCount: Int?
 
     @objc func json() -> [String: Any] {
         return self.toJSON()
@@ -97,5 +101,7 @@ import ObjectMapper
         operatorName         <- map["operator"]
         qosResult           <- map["qos_result"]
         loopUuid            <- map["loop_uuid"]
+        isCoverageFences    <- map["isCoverageFences"]
+        fencesCount         <- map["fencesCount"]
     }
 }
