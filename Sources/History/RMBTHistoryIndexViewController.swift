@@ -236,15 +236,30 @@ final class RMBTHistoryIndexViewController: UIViewController {
             var results: [String:[RMBTHistoryResult]] = [:]
             
             for r in records {
-                let result = RMBTHistoryResult(response: r.json())
-                if let loopUuid = r.loopUuid {
-                    if var _ = results[loopUuid] {
-                        results[loopUuid]!.append(result)
-                    } else {
-                        results[loopUuid] = [result]
+                if r.isCoverageFences == true {
+                    // Handle coverage measurements - create wrapper with HistoryItem
+                    let result = RMBTHistoryCoverageResult(historyItem: r)
+                    if let loopUuid = r.loopUuid {
+                        if var _ = results[loopUuid] {
+                            results[loopUuid]!.append(result)
+                        } else {
+                            results[loopUuid] = [result]
+                        }
+                    } else if let testUuid = r.testUuid {
+                        results[testUuid] = [result]
                     }
-                } else if let testUuid = r.testUuid {
-                    results[testUuid] = [result]
+                } else {
+                    // Handle regular speed test measurements
+                    let result = RMBTHistoryResult(response: r.json())
+                    if let loopUuid = r.loopUuid {
+                        if var _ = results[loopUuid] {
+                            results[loopUuid]!.append(result)
+                        } else {
+                            results[loopUuid] = [result]
+                        }
+                    } else if let testUuid = r.testUuid {
+                        results[testUuid] = [result]
+                    }
                 }
             }
             
@@ -268,21 +283,25 @@ final class RMBTHistoryIndexViewController: UIViewController {
             self.loading = false
 
             self.tableView?.refreshControl?.endRefreshing()
-        } error: { error in
+        } error: { [weak self] error in
+            guard let self else { return }
             Log.logger.error(error)
         }
     }
     
     private func refreshFilters() {
         // Wait for UUID to be retrieved
-        RMBTControlServer.shared.ensureClientUuid { uuid in
-            RMBTControlServer.shared.getSettings {
+        RMBTControlServer.shared.ensureClientUuid { [weak self] uuid in
+            guard let self else { return }
+            RMBTControlServer.shared.getSettings { [weak self] in
+                guard let self else { return }
                 self.allFilters = RMBTControlServer.shared.historyFilters ?? [:]
                 self.activeFilters = self.activeFilters.count > 0 ? self.activeFilters : [:]
             } error: { error in
                 Log.logger.error(error)
             }
-        } error: { error in
+        } error: { [weak self] error in
+            guard let self else { return }
             Log.logger.error(error)
         }
     }
@@ -325,6 +344,14 @@ final class RMBTHistoryIndexViewController: UIViewController {
             vc.openTestUUIDs = testResults.flatMap(\.openTestUUIDs)
         }
     }
+    
+    // TODO: Implement full SwiftUI coverage detail view
+    // private func presentCoverageDetail(_ coverageResult: RMBTHistoryCoverageResult) {
+    //     let coverageDetailView = CoverageHistoryDetailView(coverageResult: coverageResult)
+    //     let hostingController = UIHostingController(rootView: coverageDetailView)
+    //     hostingController.modalPresentationStyle = .fullScreen
+    //     present(hostingController, animated: true)
+    // }
     
 }
 
@@ -400,15 +427,13 @@ extension RMBTHistoryIndexViewController: UITableViewDataSource, UITableViewDele
             
             let cell = tableView.dequeueReusableCell(withIdentifier: RMBTHistoryIndexCell.ID, for: indexPath) as! RMBTHistoryIndexCell
 
-            let networTypeIcon = RMBTNetworkTypeConstants.networkTypeDictionary[testResult.networkTypeServerDescription]?.icon
-            cell.typeImageView.image = networTypeIcon
-            cell.dateLabel.text = testResult.timeStringIn24hFormat
-            cell.downloadSpeedLabel.text = testResult.downloadSpeedMbpsString
-            cell.downloadSpeedIcon.image = .downloadIconByResultClass(testResult.downloadSpeedClass)
-            cell.uploadSpeedLabel.text = testResult.uploadSpeedMbpsString
-            cell.uploadSpeedIcon.image = .uploadIconByResultClass(testResult.downloadSpeedClass)
-            cell.pingLabel.text = testResult.shortestPingMillisString
-            cell.pingIcon.image = .pingIconByResultClass(testResult.pingClass)
+            if let coverageResult = testResult as? RMBTHistoryCoverageResult {
+                let isLoop = testResults[indexPath.section].loopResults.count > 1
+                cell.configureAsCoverageTest(with: coverageResult.historyItem, isLoop: isLoop)
+            } else {
+                cell.configureAsSpeedTest(with: testResult)
+            }
+            
             if testResults[indexPath.section].loopResults.count > 1 {
                 cell.leftPaddingConstraint?.constant = 32
             } else {
@@ -425,7 +450,17 @@ extension RMBTHistoryIndexViewController: UITableViewDataSource, UITableViewDele
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         guard indexPath.section < testResults.count else { return }
         let result = testResults[indexPath.section].loopResults[indexPath.row]
-        self.performSegue(withIdentifier: "show_result", sender: result)
+        
+        if let coverageResult = result as? RMBTHistoryCoverageResult {
+            // TODO: Present coverage detail view modally
+            // For now, just show an alert to confirm coverage detection works
+            let alert = UIAlertController(title: "Coverage Test", message: "Coverage test with \(coverageResult.historyItem.fencesCount ?? 0) points", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .default))
+            self.present(alert, animated: true)
+        } else {
+            // Navigate to regular speed test result
+            self.performSegue(withIdentifier: "show_result", sender: result)
+        }
     }
     
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {

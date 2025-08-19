@@ -16,6 +16,7 @@ import ObjectMapper
     @objc var pingGraphValues: [RMBTHistoryPing] = []
     var signal: Int?
     var signalClass: Int?
+    var fences: [FenceData] = []
     
     @objc func json() -> [String: Any] {
         return self.toJSON()
@@ -27,6 +28,7 @@ import ObjectMapper
         pingGraphValues <- map["speed_curve.ping"]
         signal <- map["signal_strength"]
         signalClass <- map["signal_classification"]
+        fences <- map["fences"]
     }
 }
 
@@ -40,6 +42,28 @@ public class RMBTOpenDataSpeedCurveValue: Mappable {
         bytesTotal <- map["bytes_total"]
         timeElapsed <- map["time_elapsed"]
     }
+}
+
+public class FenceData: Mappable {
+    var fenceId: String?
+    var technologyId: Int?
+    var technology: String?
+    var longitude: Double?
+    var latitude: Double?
+    var offsetMs: Int?
+    var durationMs: Int?
+    var radius: Double?
     
+    public required init?(map: Map) { }
     
+    public func mapping(map: Map) {
+        fenceId <- map["fence_id"]
+        technologyId <- map["technology_id"]
+        technology <- map["technology"]
+        longitude <- map["longitude"]
+        latitude <- map["latitude"]
+        offsetMs <- map["offset_ms"]
+        durationMs <- map["duration_ms"]
+        radius <- map["radius"]
+    }
 }
