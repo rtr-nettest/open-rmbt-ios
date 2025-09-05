@@ -49,8 +49,6 @@ import UIKit
     }
     
     func configureAsCoverageTest(with item: HistoryItem, isLoop: Bool = false) {
-        print("🔍 Configuring coverage test - isLoop: \(isLoop), fencesCount: \(item.fencesCount ?? -1)")
-        
         if let coverageIcon = UIImage(named: "tab_coverage") {
             typeImageView.image = coverageIcon
             // Apply dark grey color to match other icons like 4G icon
@@ -85,13 +83,10 @@ import UIKit
             // Use dedicated coverage label with proper space
             if let count = item.fencesCount {
                 coverageLabel.text = "\(count) Points"
-                print("🏷️ Setting coverage label to: \(count) Points")
             } else {
                 coverageLabel.text = "Coverage"
-                print("🏷️ Setting coverage label to: Coverage")
             }
             coverageLabel.isHidden = false
-            print("🏷️ Coverage label hidden: \(coverageLabel.isHidden)")
         }
     }
 }
