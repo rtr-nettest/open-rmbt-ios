@@ -32,6 +32,7 @@ public class SendCoverageResultRequest: BasicRequest {
 
         private(set) var timestamp: UInt64
         private(set) var location: Location
+        private(set) var avgPingMilliseconds: Int?
         private(set) var offsetMiliseconds: Int
         private(set) var durationMiliseconds: Int?
         private(set) var technology: String?
@@ -43,6 +44,7 @@ public class SendCoverageResultRequest: BasicRequest {
                 latitude: fence.startingLocation.coordinate.latitude,
                 longitude: fence.startingLocation.coordinate.longitude
             )
+            avgPingMilliseconds = fence.averagePing
 
             offsetMiliseconds = Int(fence.dateEntered.timeIntervalSince(coverageStartDate) * 1000)
 
@@ -63,6 +65,7 @@ public class SendCoverageResultRequest: BasicRequest {
         func mapping(map: Map) {
             timestamp           <- map["timestamp_microseconds"]
             location            <- map["location"]
+            avgPingMilliseconds <- map["avg_ping_ms"]
             offsetMiliseconds   <- map["offset_ms"]
             durationMiliseconds <- map["duration_ms"]
             technology          <- map["technology"]
