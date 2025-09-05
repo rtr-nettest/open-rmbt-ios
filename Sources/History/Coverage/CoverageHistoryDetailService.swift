@@ -16,7 +16,7 @@ struct CoverageHistoryDetail {
     let metadata: [String: Any]
 }
 
-class CoverageHistoryDetailService {
+@Observable class CoverageHistoryDetailService {
     private let controlServer: RMBTControlServer
     
     init(controlServer: RMBTControlServer = .shared) {
@@ -25,47 +25,43 @@ class CoverageHistoryDetailService {
     
     func loadCoverageDetails(for testUUID: String) async throws -> CoverageHistoryDetail {
         return try await withCheckedThrowingContinuation { continuation in
-            // For now, create a simple mock implementation since the API method doesn't exist yet
-            // TODO: Replace with actual API call when getHistoryOpenDataResult is implemented
-            DispatchQueue.global().asyncAfter(deadline: .now() + 0.5) {
-                let mockFences: [Fence] = []
+            controlServer.getHistoryOpenDataResult(with: testUUID, success: { response in
+                let fences = self.convertFenceData(response.fences)
                 let detail = CoverageHistoryDetail(
-                    fences: mockFences,
+                    fences: fences,
                     testUUID: testUUID,
                     startDate: nil,
-                    metadata: [:]
+                    metadata: response.json()
                 )
                 continuation.resume(returning: detail)
-            }
+            }, error: { error, _ in
+                continuation.resume(throwing: error ?? NSError(domain: "CoverageHistoryDetailService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Unknown error occurred"]))
+            })
         }
     }
     
     internal func convertFenceData(_ fenceData: [FenceData]) -> [Fence] {
         return fenceData.compactMap { data in
-            // Validate data before conversion
-            guard let lat = data.latitude,
-                  let lng = data.longitude,
-                  let offsetMs = data.offsetMs,
-                  lat >= -90 && lat <= 90,
-                  lng >= -180 && lng <= 180 else {
-                return nil
-            }
             
-            let location = CLLocation(latitude: lat, longitude: lng)
-            let dateEntered = Date(timeIntervalSince1970: TimeInterval(offsetMs) / 1000.0)
-            let technology = data.technology
-            
+            let location = CLLocation(latitude: data.latitude, longitude: data.longitude)
+
+            // offset_ms is milliseconds from test start, so we use it as relative time
+            // For historical data, we can use a base reference time
+            let baseTime = Date().timeIntervalSince1970 - TimeInterval(data.offsetMs) / 1000.0
+            let dateEntered = Date(timeIntervalSince1970: baseTime + TimeInterval(data.offsetMs) / 1000.0)
+            let technologyString = data.technologyId.radioAccessTechnology
+
             var fence = Fence(
                 startingLocation: location,
                 dateEntered: dateEntered,
-                technology: technology
+                technology: technologyString
             )
-            
+
             if let durationMs = data.durationMs {
-                let exitDate = Date(timeIntervalSince1970: TimeInterval(offsetMs + durationMs) / 1000.0)
+                let exitDate = Date(timeIntervalSince1970: baseTime + TimeInterval(data.offsetMs + durationMs) / 1000.0)
                 fence.exit(at: exitDate)
             }
-            
+
             return fence
         }
     }

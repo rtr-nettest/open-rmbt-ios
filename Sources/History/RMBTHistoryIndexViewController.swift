@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import SwiftUI
 
 final class RMBTHistoryIndexViewController: UIViewController {
     enum State {
@@ -346,13 +347,12 @@ final class RMBTHistoryIndexViewController: UIViewController {
     }
     
     // TODO: Implement full SwiftUI coverage detail view
-    // private func presentCoverageDetail(_ coverageResult: RMBTHistoryCoverageResult) {
-    //     let coverageDetailView = CoverageHistoryDetailView(coverageResult: coverageResult)
-    //     let hostingController = UIHostingController(rootView: coverageDetailView)
-    //     hostingController.modalPresentationStyle = .fullScreen
-    //     present(hostingController, animated: true)
-    // }
-    
+     private func presentCoverageDetail(_ coverageResult: RMBTHistoryCoverageResult) {
+         let coverageDetailView = CoverageHistoryDetailView(coverageResult: coverageResult)
+         let hostingController = UIHostingController(rootView: coverageDetailView)
+         hostingController.modalPresentationStyle = .fullScreen
+         navigationController?.pushViewController(hostingController, animated: true)
+     }
 }
 
 // MARK: UITableViewDataSource
@@ -452,11 +452,7 @@ extension RMBTHistoryIndexViewController: UITableViewDataSource, UITableViewDele
         let result = testResults[indexPath.section].loopResults[indexPath.row]
         
         if let coverageResult = result as? RMBTHistoryCoverageResult {
-            // TODO: Present coverage detail view modally
-            // For now, just show an alert to confirm coverage detection works
-            let alert = UIAlertController(title: "Coverage Test", message: "Coverage test with \(coverageResult.historyItem.fencesCount ?? 0) points", preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "OK", style: .default))
-            self.present(alert, animated: true)
+            presentCoverageDetail(coverageResult)
         } else {
             // Navigate to regular speed test result
             self.performSegue(withIdentifier: "show_result", sender: result)

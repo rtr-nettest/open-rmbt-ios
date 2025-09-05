@@ -307,21 +307,31 @@ extension String {
     }
 
     var radioTechnologyTypeID: Int? {
-        var table = [
-            CTRadioAccessTechnologyGPRS:         1,
-            CTRadioAccessTechnologyEdge:         2,
-            CTRadioAccessTechnologyWCDMA:        3,
-            CTRadioAccessTechnologyCDMA1x:       4,
-            CTRadioAccessTechnologyCDMAEVDORev0: 5,
-            CTRadioAccessTechnologyCDMAEVDORevA: 6,
-            CTRadioAccessTechnologyHSDPA:        8,
-            CTRadioAccessTechnologyHSUPA:        9,
-            CTRadioAccessTechnologyCDMAEVDORevB: 12,
-            CTRadioAccessTechnologyLTE:          13,
-            CTRadioAccessTechnologyeHRPD:        14,
-            CTRadioAccessTechnologyNRNSA:        41,
-            CTRadioAccessTechnologyNR:           20
-        ]
-        return table[self]
+        return technologyIDTable[self]
+    }
+}
+
+private let technologyIDTable = [
+    CTRadioAccessTechnologyGPRS:         1,
+    CTRadioAccessTechnologyEdge:         2,
+    CTRadioAccessTechnologyWCDMA:        3,
+    CTRadioAccessTechnologyCDMA1x:       4,
+    CTRadioAccessTechnologyCDMAEVDORev0: 5,
+    CTRadioAccessTechnologyCDMAEVDORevA: 6,
+    CTRadioAccessTechnologyHSDPA:        8,
+    CTRadioAccessTechnologyHSUPA:        9,
+    CTRadioAccessTechnologyCDMAEVDORevB: 12,
+    CTRadioAccessTechnologyLTE:          13,
+    CTRadioAccessTechnologyeHRPD:        14,
+    CTRadioAccessTechnologyNRNSA:        41,
+    CTRadioAccessTechnologyNR:           20
+]
+
+extension Int {
+    var radioAccessTechnology: String? {
+        technologyIDTable
+            .filter { $0.value == self }
+            .keys
+            .first
     }
 }

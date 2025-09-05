@@ -256,19 +256,16 @@ class RMBTHistoryResult: NSObject {
                 if let measurementResult = response["measurement_result"] as? [String: Any] {
                     if let download = measurementResult["download_kbit"] as? Int {
                         self.downloadSpeedMbpsString = RMBTSpeedMbpsString(Double(download), withMbps: false)
-                    } else {
-                        assert(false, "can't parse download")
-                    }
-                    if let upload = measurementResult["upload_kbit"] as? Int {
-                        self.uploadSpeedMbpsString = RMBTSpeedMbpsString(Double(upload), withMbps: false)
-                    } else {
-                        assert(false, "can't parse upload")
                     }
                     
-                    if let ping = measurementResult["ping_ms"] as? Int {
+                    if let upload = measurementResult["upload_kbit"] as? Int {
+                        self.uploadSpeedMbpsString = RMBTSpeedMbpsString(Double(upload), withMbps: false)
+                    }
+                    
+                    if let ping = measurementResult["ping_ms"] as? Double {
+                        self.shortestPingMillisString = "\(Int(ping))"
+                    } else if let ping = measurementResult["ping_ms"] as? Int {
                         self.shortestPingMillisString = "\(ping)"
-                    } else {
-                        assert(false, "can't parse upload")
                     }
                 }
 

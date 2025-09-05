@@ -2,7 +2,7 @@
 //  CoverageResultView.swift
 //  RMBT
 //
-//  Created by Claude Code on 7/21/25.
+//  Created by Jiri Urbasek on 7/21/25.
 //  Copyright 2024 appscape gmbh. All rights reserved.
 //
 

@@ -105,8 +105,7 @@ final class RMBTNetworkTypeConstants {
         "3G/HSDPA": .type3G,
         "3G/HSUPA": .type3G,
         "4G/LTE": .type4G,
-        "5G/NRNSA": .type5G,
-        "5G/NSA": .type5G,
+        "5G/NRNSA": .type5GNSA,
         "5G/NR": .type5G,
     ]
 }

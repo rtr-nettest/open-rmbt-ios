@@ -16,7 +16,7 @@ final class PersistentFence {
         self.latitude = fence.startingLocation.coordinate.latitude
         self.longitude = fence.startingLocation.coordinate.longitude
         self.avgPingMilliseconds = fence.averagePing
-        self.technology = fence.technologies.last
+        self.technology = fence.significantTechnology
         self.testUUID = testUUID
     }
 

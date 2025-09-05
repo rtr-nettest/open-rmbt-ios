@@ -15,27 +15,6 @@ import SwiftUI
 import CoreTelephony
 
 @MainActor struct NetworkCoverageTests {
-    @Test func debugDateFormatterTest() throws {
-        // Test the date formatter directly
-        let date = Date(timeIntervalSinceReferenceDate: 1000)
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "en_US")
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .medium
-        
-        let formattedDate = formatter.string(from: date)
-        print("DEBUG: Formatted date = '\(formattedDate)'")
-        print("DEBUG: Date bytes = \(Array(formattedDate.utf8))")
-        
-        // Test technology conversion
-        let technology = CTRadioAccessTechnologyLTE
-        print("DEBUG: CTRadioAccessTechnologyLTE = '\(technology)'")
-        print("DEBUG: technology.radioTechnologyCode = '\(technology.radioTechnologyCode ?? "nil")'")
-        print("DEBUG: technology.radioTechnologyDisplayValue = '\(technology.radioTechnologyDisplayValue ?? "nil")'")
-        
-        // This should pass - just testing basic date formatting
-        #expect(!formattedDate.isEmpty)
-    }
     @Test func whenInitializedWithNoPrefilledFences_thenFenceItemsAreEmpty() async throws {
         let sut = makeSUT(fences: [])
         #expect(sut.fenceItems.isEmpty)
@@ -470,7 +449,7 @@ import CoreTelephony
             
             #expect(sut.selectedFenceDetail?.technology == "4G")
             #expect(sut.selectedFenceDetail?.averagePing == "60 ms")
-            #expect(sut.selectedFenceDetail?.color == Color(technology: CTRadioAccessTechnologyLTE))
+            #expect(sut.selectedFenceDetail?.color == Color(hex: "#b12a90"))
             #expect(sut.fenceItems.map(\.isSelected) == [false, true])
         }
 

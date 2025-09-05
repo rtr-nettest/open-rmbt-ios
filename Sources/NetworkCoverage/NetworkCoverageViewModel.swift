@@ -389,10 +389,10 @@ private extension NetworkCoverageViewModel {
             id: fence.id,
             date: fence.dateEntered,
             coordinate: fence.startingLocation.coordinate,
-            technology: fence.significantTechnology?.radioTechnologyDisplayValue ?? "N/A",
+            technology: fence.significantTechnology.map(displayValue) ?? "N/A",
             isSelected: selectedFenceItem?.id == fence.id,
             isCurrent: currentFence?.id == fence.id,
-            color: .init(technology: fence.significantTechnology)
+            color: Color(technology: fence.significantTechnology?.radioTechnologyDisplayValue)
         )
     }
 
@@ -454,16 +454,6 @@ extension String {
             return nil
         }
     }
-
-    var radioTechnologyColorClassification: Int? {
-        if
-            let code = radioTechnologyCode,
-            let celularCodeDescription = RMBTNetworkTypeConstants.cellularCodeDescriptionDictionary[code] {
-            return celularCodeDescription.radioTechnologyColorClassification
-        } else {
-            return nil
-        }
-    }
 }
 
 extension RMBTNetworkTypeConstants.NetworkType {
@@ -472,18 +462,9 @@ extension RMBTNetworkTypeConstants.NetworkType {
         case .type2G: "2G"
         case .type3G: "3G"
         case .type4G: "4G"
-        case .type5G, .type5GNSA, .type5GAvailable: "5G"
+        case .type5G, .type5GAvailable: "5G SA"
+        case .type5GNSA: "5G NSA"
         case .wlan, .lan, .bluetooth, .unknown, .browser: "--"
-        }
-    }
-
-    var radioTechnologyColorClassification: Int? {
-        switch self {
-        case .type2G: 1
-        case .type3G: 2
-        case .type4G: 3
-        case .type5G, .type5GNSA, .type5GAvailable: 4
-        case .wlan, .lan, .bluetooth, .unknown, .browser: nil
         }
     }
 }
@@ -534,13 +515,53 @@ extension FenceDetail {
         date = selectedItemDateFormatter.string(from: fence.dateEntered)
         technology = fence.significantTechnology?.radioTechnologyDisplayValue ?? "N/A"
         averagePing = fence.averagePing.map { "\($0) ms" } ?? ""
-        color = Color(technology: fence.significantTechnology)
+        color = Color(technology: fence.significantTechnology?.radioTechnologyDisplayValue)
     }
 }
 
 extension Color {
+    /// The `technology` should be  String value produced by `RMBTNetworkTypeConstants.NetworkType.radioTechnologyDisplayValue`
     init(technology: String?) {
-        self.init(uiColor: .byResultClass(technology?.radioTechnologyColorClassification))
+        switch technology {
+        case "2G":
+            self.init(hex: "#fca636")
+        case "3G":
+            self.init(hex: "#e16462")
+        case "4G":
+            self.init(hex: "#b12a90")
+        case "5G NSA":
+            self.init(hex: "#6a00a8")
+        case "5G SA":
+            self.init(hex: "#0d0887")
+        default:
+            self.init(hex: "#d9d9d9")
+        }
+    }
+
+    init(hex: String) {
+        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+        var int: UInt64 = 0
+        Scanner(string: hex).scanHexInt64(&int)
+        let a, r, g, b: UInt64
+        switch hex.count {
+        case 3: // RGB (12-bit)
+            (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
+        case 6: // RGB (24-bit)
+            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
+        case 8: // ARGB (32-bit)
+            (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
+        default:
+            (a, r, g, b) = (1, 1, 1, 0)
+        }
+
+        self.init(
+            .sRGB,
+            red: Double(r) / 255,
+            green: Double(g) / 255,
+            blue: Double(b) / 255,
+            opacity: Double(a) / 255
+        )
     }
 }
+
 

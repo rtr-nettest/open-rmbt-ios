@@ -364,12 +364,20 @@ extension RMBTControlServer {
     }
     
     @objc(getHistoryOpenDataResultWithUUID:success:error:) func getHistoryOpenDataResult(with uuid: String, success: @escaping (_ response: RMBTOpenDataResponse) -> Void, error: @escaping RMBTErrorBlock) {
-        ensureClientUuid(success: { _ in
-            let path = "/opentests/\(uuid)"
-            self.request(.get, path: path, requestObject: nil, success: success, error: { resultError in
-                error(resultError, nil)
-            })
-        }, error: { resultError in
+        ensureClientUuid(
+            success: { _ in
+                let path = "/opentests/\(uuid)"
+                self.request(
+                    .get,
+                    overrideBaseURL: self.statisticServerURL,
+                    path: path,
+                    requestObject: nil,
+                    success: success,
+                    error: { resultError in
+                        error(resultError, nil)
+                    })
+            },
+            error: { resultError in
             error(resultError, nil)
         })
     }
@@ -532,7 +540,7 @@ extension RMBTControlServer {
 
         return try await session.download(
             for: format.downloadRequest(
-                baseURL: statisticServerURL ?? URL(string: "https://m01.netztest.at/RMBTStatisticServer")!,
+                baseURL: statisticServerURL ?? URL(string: "https://app-cloud.netztest.at/RMBTStatisticServer")!,
                 openTestUUIDs: openTestUUIDs,
                 maxResults: openTestUUIDs.count > 1 ? min(openTestUUIDs.count, 100) : nil
             )
@@ -553,6 +561,7 @@ extension RMBTControlServer {
 
     private func request<T: BasicResponse>(
         _ method: Alamofire.HTTPMethod,
+        overrideBaseURL: URL? = nil,
         path: String,
         requestObject: BasicRequest?,
         acceptableStatusCodes: some Sequence<Int> = 200..<300,
@@ -561,7 +570,7 @@ extension RMBTControlServer {
     ) {
         ServerHelper.request(
             alamofireManager,
-            baseUrl: baseUrl,
+            baseUrl: overrideBaseURL?.absoluteString ?? baseUrl,
             method: method,
             path: path,
             requestObject: requestObject,

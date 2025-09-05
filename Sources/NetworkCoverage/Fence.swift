@@ -98,24 +98,6 @@ extension Fence {
     var coordinate: CLLocationCoordinate2D {
         startingLocation.coordinate
     }
-    
-    var technology: String? {
-        significantTechnology
-    }
-    
-    var technologyColor: SwiftUI.Color {
-        // Simple color mapping based on technology
-        guard let tech = technology else { return .gray }
-        if tech.contains("5G") {
-            return .green
-        } else if tech.contains("4G") || tech.contains("LTE") {
-            return .blue
-        } else if tech.contains("3G") {
-            return .orange
-        } else {
-            return .red
-        }
-    }
 }
 
 extension PingResult {

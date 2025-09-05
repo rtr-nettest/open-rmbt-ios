@@ -28,7 +28,7 @@ import ObjectMapper
         pingGraphValues <- map["speed_curve.ping"]
         signal <- map["signal_strength"]
         signalClass <- map["signal_classification"]
-        fences <- map["fences"]
+        fences <- map["speed_curve.fences"]
     }
 }
 
@@ -44,26 +44,22 @@ public class RMBTOpenDataSpeedCurveValue: Mappable {
     }
 }
 
-public class FenceData: Mappable {
-    var fenceId: String?
-    var technologyId: Int?
-    var technology: String?
-    var longitude: Double?
-    var latitude: Double?
-    var offsetMs: Int?
-    var durationMs: Int?
-    var radius: Double?
-    
-    public required init?(map: Map) { }
-    
-    public func mapping(map: Map) {
-        fenceId <- map["fence_id"]
-        technologyId <- map["technology_id"]
-        technology <- map["technology"]
-        longitude <- map["longitude"]
-        latitude <- map["latitude"]
-        offsetMs <- map["offset_ms"]
-        durationMs <- map["duration_ms"]
-        radius <- map["radius"]
+public class FenceData: ImmutableMappable {
+    let fenceId: String?
+    let technologyId: Int
+    let longitude: Double
+    let latitude: Double
+    let offsetMs: Int
+    let durationMs: Int?
+    let radius: Double?
+
+    required public init(map: Map) throws {
+        fenceId = try? map.value("fence_id")
+        technologyId = try map.value("technology_id")
+        longitude = try map.value("longitude")
+        latitude = try map.value("latitude")
+        offsetMs = try map.value("offset_ms")
+        durationMs = try? map.value("duration_ms")
+        radius = try? map.value("radius")
     }
 }
