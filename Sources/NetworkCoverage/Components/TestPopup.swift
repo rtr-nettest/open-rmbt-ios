@@ -168,11 +168,11 @@ extension View {
                 isPresented: isPresented,
                 title: title,
                 subtitle: subtitle,
-                primaryButtonTitle: "Continue test",
+                primaryButtonTitle: "Stop test",
                 primaryButtonColor: Color("greenButtonBackground"),
-                secondaryButtonTitle: "Stop test",
-                onPrimaryAction: {}, // Continue just dismisses
-                onSecondaryAction: onStopTest,
+                secondaryButtonTitle: "Continue test",
+                onPrimaryAction: onStopTest,
+                onSecondaryAction: {}, // Continue just dismisses
                 allowBackgroundDismiss: false
             )
         )
