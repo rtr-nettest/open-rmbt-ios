@@ -178,13 +178,14 @@ struct NetworkCoverageView: View {
 
             Spacer()
 
-            Button(viewModel.isStarted ? "Stop" : "Start") {
+            Button(viewModel.isStarted ? "Stop" : "") {
                 if viewModel.isStarted {
                     showStopTestPopup = true
                 } else {
                     showStartTestPopup = true
                 }
             }
+            .frame(minWidth: 40) // to maintain space when the button text is empty (Start scenario)
             .tint(.brand)
             .padding(.horizontal, 16)
         }
