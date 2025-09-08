@@ -82,12 +82,16 @@ struct FenceDetail: Equatable, Identifiable {
     @ObservationIgnored private var testStartTime: Date?
     @ObservationIgnored private let maxTestDuration: TimeInterval = 4 * 60 * 60 // 4 hours in seconds
     @ObservationIgnored private let timeNow: () -> Date
+    @ObservationIgnored private let locationInaccuracyWarningInitialDelay: TimeInterval
+    @ObservationIgnored private var locationInaccuracyWarningTask: Task<Void, Never>?
+    @ObservationIgnored private var canCheckForLocationInaccuracyWarning: Bool = false
 
     // Dependencies
     @ObservationIgnored private let currentRadioTechnology: any CurrentRadioTechnologyService
     @ObservationIgnored private let sendResultsService: any SendCoverageResultsService
     @ObservationIgnored private let updates: () -> any AsynchronousSequence<Update>
     @ObservationIgnored private let persistenceService: any FencePersistenceService
+    @ObservationIgnored private let clock: any Clock<Duration>
 
     @ObservationIgnored private(set) var fences: [Fence] {
         didSet {
@@ -114,6 +118,8 @@ struct FenceDetail: Equatable, Identifiable {
     private(set) var locationAccuracy = "N/A"
     private(set) var fenceItems: [FenceItem] = []
 
+    private(set) var warningPopups: [WarningPopupItem] = []
+
     var selectedFenceItem: FenceItem? {
         didSet {
             selectedFence = selectedFenceItem.flatMap { selectedItem in
@@ -127,26 +133,33 @@ struct FenceDetail: Equatable, Identifiable {
         }
     }
     private(set) var selectedFenceDetail: FenceDetail?
+    
+    var currentUserLocation: CLLocation? { locations.last }
 
     init(
         fences: [Fence] = [],
         refreshInterval: TimeInterval,
         minimumLocationAccuracy: CLLocationDistance,
+        locationInaccuracyWarningInitialDelay: TimeInterval,
         updates: @escaping @Sendable () -> some AsynchronousSequence<Update>,
         currentRadioTechnology: some CurrentRadioTechnologyService,
         sendResultsService: some SendCoverageResultsService,
         persistenceService: some FencePersistenceService,
         locale: Locale,
-        timeNow: @escaping () -> Date = Date.init
+        timeNow: @escaping () -> Date = Date.init,
+        clock: some Clock<Duration>
     ) {
         self.fences = fences
         self.refreshInterval = refreshInterval
         self.minimumLocationAccuracy = minimumLocationAccuracy
+        self.locationInaccuracyWarningInitialDelay = locationInaccuracyWarningInitialDelay
         self.currentRadioTechnology = currentRadioTechnology
         self.sendResultsService = sendResultsService
         self.persistenceService = persistenceService
         self.updates = updates
         self.timeNow = timeNow
+        self.clock = clock
+
         selectedItemDateFormatter = {
             let dateFormatter = DateFormatter()
             dateFormatter.locale = locale
@@ -164,17 +177,20 @@ struct FenceDetail: Equatable, Identifiable {
         fences: [Fence] = [],
         refreshInterval: TimeInterval,
         minimumLocationAccuracy: CLLocationDistance,
+        locationInaccuracyWarningInitialDelay: TimeInterval,
         pingMeasurementService: @escaping () -> some PingsAsyncSequence,
         locationUpdatesService: some LocationUpdatesService,
         currentRadioTechnology: some CurrentRadioTechnologyService,
         sendResultsService: some SendCoverageResultsService,
         persistenceService: some FencePersistenceService,
-        locale: Locale = .autoupdatingCurrent
+        locale: Locale = .autoupdatingCurrent,
+        clock: some Clock<Duration>
     ) {
         self.init(
             fences: fences,
             refreshInterval: refreshInterval,
             minimumLocationAccuracy: minimumLocationAccuracy,
+            locationInaccuracyWarningInitialDelay: locationInaccuracyWarningInitialDelay,
             updates: { merge(
                 pingMeasurementService().map { .ping($0) },
                 locationUpdatesService.locations().map { .location($0) }
@@ -182,7 +198,8 @@ struct FenceDetail: Equatable, Identifiable {
             currentRadioTechnology: currentRadioTechnology,
             sendResultsService: sendResultsService,
             persistenceService: persistenceService,
-            locale: locale
+            locale: locale,
+            clock: clock
         )
     }
 
@@ -233,9 +250,11 @@ struct FenceDetail: Equatable, Identifiable {
 
             guard isLocationPreciseEnough(location) else {
                 startInaccurateLocationWidnowIfNeeded(at: location.timestamp)
+                checkForLocationInaccuracyWarning(location: location)
                 return
             }
             stopInaccurateLocationWindow(at: location.timestamp)
+            warningPopups.removeAll { $0 == .inaccurateLocationWarning }
 
             // Handle fence logic...
             let currentFence = currentFence
@@ -274,9 +293,17 @@ struct FenceDetail: Equatable, Identifiable {
         testStartTime = timeNow()
         fences.removeAll()
         locations.removeAll()
-        
+        canCheckForLocationInaccuracyWarning = false
+
         await BackgroundActivityActor.shared.startActivity()
-        
+
+        locationInaccuracyWarningTask = Task { @MainActor in
+            try? await clock.sleep(for: .seconds(locationInaccuracyWarningInitialDelay))
+
+            canCheckForLocationInaccuracyWarning = true
+            locations.last.map(checkForLocationInaccuracyWarning)
+        }
+
         iterationTask = Task { @MainActor in
             await iterate(updates())
         }
@@ -288,10 +315,13 @@ struct FenceDetail: Equatable, Identifiable {
         testStartTime = nil
         locationAccuracy = "N/A"
         latestTechnology = "N/A"
+        warningPopups.removeAll()
         
         // Cancel async sequences
         iterationTask?.cancel()
         iterationTask = nil
+        locationInaccuracyWarningTask?.cancel()
+        locationInaccuracyWarningTask = nil
         
         await BackgroundActivityActor.shared.stopActivity()
         
@@ -324,6 +354,7 @@ struct FenceDetail: Equatable, Identifiable {
         Task {
             await BackgroundActivityActor.shared.stopActivity()
         }
+        locationInaccuracyWarningTask?.cancel()
     }
 
     private func isLocationPreciseEnough(_ location: CLLocation) -> Bool {
@@ -380,6 +411,35 @@ private extension NetworkCoverageViewModel {
         !inaccurateLocationsWindows
             .filter { ($0.end == nil || $0.end! > pingUpdate.timestamp) &&  $0.begin < pingUpdate.timestamp }
             .isEmpty
+    }
+}
+
+// Functionality related to displaying Warning Popups
+// - when GPS location is not accurate enough
+// - when user is on WiFi network
+extension NetworkCoverageViewModel {
+    struct WarningPopupItem: Identifiable, Equatable {
+        var id: String { title + description }
+        let title: String
+        let description: String
+
+        static var inaccurateLocationWarning: Self {
+            .init(
+                title: "Waiting for GPS",
+                description: "Currently the location accuracy is insufficient. Please measure outdoors."
+            )
+        }
+    }
+
+    private func checkForLocationInaccuracyWarning(location: CLLocation) {
+        if
+            isStarted,
+            canCheckForLocationInaccuracyWarning,
+            !isLocationPreciseEnough(location),
+            !warningPopups.contains(where: { $0 == .inaccurateLocationWarning } )
+        {
+            warningPopups.append(.inaccurateLocationWarning)
+        }
     }
 }
 

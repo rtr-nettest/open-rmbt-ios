@@ -13,6 +13,7 @@ import CoreLocation
 import SwiftData
 import SwiftUI
 import CoreTelephony
+import Clocks
 
 @MainActor struct NetworkCoverageTests {
     @Test func whenInitializedWithNoPrefilledFences_thenFenceItemsAreEmpty() async throws {
@@ -408,7 +409,7 @@ import CoreTelephony
         @Test("WHEN initialized with no fences THEN no fence is selected and fenceItems are empty")
         func whenInitializedWithNoFences_thenNoFenceIsSelectedAndFenceItemsAreEmpty() async throws {
             let sut = makeSUT(fences: [])
-            
+
             #expect(sut.selectedFenceItem == nil)
             #expect(sut.selectedFenceDetail == nil)
             #expect(sut.fenceItems.isEmpty)
@@ -418,7 +419,7 @@ import CoreTelephony
         func whenInitializedWithFences_thenNoFenceIsSelectedInitially() async throws {
             let fences = [makeFence(at: 1.0, lon: 1.0), makeFence(at: 2.0, lon: 2.0)]
             let sut = makeSUT(fences: fences)
-            
+
             #expect(sut.selectedFenceItem == nil)
             #expect(sut.selectedFenceDetail == nil)
             #expect(sut.fenceItems.map(\.isSelected) == [false, false])
@@ -428,8 +429,8 @@ import CoreTelephony
         func whenValidFenceIDIsSelected_thenFenceIsMarkedAsSelectedAndDetailIsPopulated() async throws {
             let fence1 = makeFence(at: 1.0, lon: 1.0)
             let fence2 = makeFenceWithPings(
-                at: 2.0, 
-                lon: 3.0, 
+                at: 2.0,
+                lon: 3.0,
                 dateEntered: Date(timeIntervalSinceReferenceDate: 1000),
                 technology: CTRadioAccessTechnologyLTE,
                 pings: [
@@ -441,12 +442,12 @@ import CoreTelephony
             let sut = makeSUT(fences: [fence1, fence2])
 
             sut.simulateSelectFence(fence2)
-            
+
             #expect(sut.selectedFenceItem?.id == fence2.id)
             #expect(sut.selectedFenceDetail?.id == fence2.id)
-            
+
             #expect(sut.selectedFenceDetail?.date == sut.selectedItemDateFormatter.string(from: Date(timeIntervalSinceReferenceDate: 1000)))
-            
+
             #expect(sut.selectedFenceDetail?.technology == "4G")
             #expect(sut.selectedFenceDetail?.averagePing == "60 ms")
             #expect(sut.selectedFenceDetail?.color == Color(hex: "#b12a90"))
@@ -459,7 +460,7 @@ import CoreTelephony
             let fence2 = makeFence(at: 2.0, lon: 2.0)
             let fence3 = makeFence(at: 3.0, lon: 3.0)
             let sut = makeSUT(fences: [fence1, fence2, fence3])
-            
+
             sut.simulateSelectFence(fence1)
             sut.simulateSelectFence(fence3)
 
@@ -474,7 +475,7 @@ import CoreTelephony
 
             sut.simulateSelectFence(fence1)
             sut.selectedFenceItem = nil
-            
+
             #expect(sut.selectedFenceItem == nil)
             #expect(sut.selectedFenceDetail == nil)
             #expect(sut.fenceItems.allSatisfy { !$0.isSelected })
@@ -485,13 +486,138 @@ import CoreTelephony
             let fence1 = makeFence(at: 1.0, lon: 1.0)
             let fence2 = makeFence(at: 2.0, lon: 2.0)
             let sut = makeSUT(fences: [fence1, fence2])
-            
+
             let nonExistentFenceItem = FenceItem(id: UUID(), date: Date(), coordinate: CLLocationCoordinate2D(), technology: "N/A", isSelected: false, isCurrent: false, color: .gray)
             sut.selectedFenceItem = nonExistentFenceItem
-            
+
             #expect(sut.selectedFenceItem?.id == nonExistentFenceItem.id)
             #expect(sut.selectedFenceDetail == nil)
             #expect(sut.fenceItems.allSatisfy { !$0.isSelected })
+        }
+    }
+
+    @MainActor @Suite("Inaccurate Location Warningy")
+    struct InaccurateLocationWarningTests {
+        @Test func whenTestNotStarted_thenGpsInaccurateLocationWarningIsHidden() async throws {
+            let sut = makeSUT(updates: [])
+            #expect(sut.warningPopups.isEmpty)
+        }
+
+        @Test func whenJustStartedAndDelayNotElapsed_thenInaccurateLocationWarningIsHidden() async throws {
+            let clock = TestClock()
+            let sut = makeSUT(updates: [], overlayDelay: 3.0, clock: clock)
+
+            await sut.startTest()
+            await clock.advance(by: .seconds(2.9))
+
+            #expect(sut.warningPopups == [])
+        }
+
+        @Test func whenDelayElapsedAndNoLocationYet_thenInaccurateLocationWarningIsHidden() async throws {
+            let clock = TestClock()
+            let sut = makeSUT(updates: [], overlayDelay: 3.0, clock: clock)
+
+            await sut.startTest()
+            await clock.advance(by: .seconds(3.1))
+
+            #expect(sut.warningPopups == [])
+        }
+
+        @Test func whenDelayElapsedAndLocationAccuracyIsBad_thenInaccurateLocationWarningIsShown() async throws {
+            let minAccuracy: CLLocationDistance = 10
+            let clock = TestClock()
+            let sut = makeSUT(
+                minimumLocationAccuracy: minAccuracy,
+                updates: [
+                    makeLocationUpdate(at: 0, lat: 1.0, lon: 1.0, accuracy: minAccuracy * 2)
+                ],
+                overlayDelay: 3.0,
+                clock: clock
+            )
+
+            await sut.startTest()
+            await clock.advance(by: .seconds(3.1))
+
+            #expect(sut.warningPopups == [makeInaccurateLocationWarningPopup()])
+        }
+
+        @Test func whenDelayElapsedAndLocationAccuracyIsGood_thenInaccurateLocationWarningIsHidden() async throws {
+            let minAccuracy: CLLocationDistance = 10
+            let clock = TestClock()
+            let sut = makeSUT(
+                minimumLocationAccuracy: minAccuracy,
+                updates: [
+                    makeLocationUpdate(at: 0, lat: 1.0, lon: 1.0, accuracy: minAccuracy / 2)
+                ],
+                overlayDelay: 3.0,
+                clock: clock
+            )
+
+            await sut.startTest()
+            await clock.advance(by: .seconds(3.1))
+
+            #expect(sut.warningPopups == [])
+        }
+
+        @Test func whenOverlayWouldBeShown_thenStoppingMeasurementHidesIt() async throws {
+            let minAccuracy: CLLocationDistance = 10
+            let clock = TestClock()
+            let sut = makeSUT(
+                minimumLocationAccuracy: minAccuracy,
+                updates: [
+                    makeLocationUpdate(at: 0, lat: 1.0, lon: 1.0, accuracy: minAccuracy * 2)
+                ],
+                overlayDelay: 3.0,
+                clock: clock
+            )
+
+            await sut.startTest()
+            await clock.advance(by: .seconds(3.1))
+
+            #expect(sut.warningPopups == [makeInaccurateLocationWarningPopup()])
+
+            await sut.stopTest()
+            #expect(sut.warningPopups.isEmpty)
+        }
+
+        @Test func whenReceivedBadAfterGoodLocation_thenInaccurateLocationWarningIsShown() async throws {
+            let minAccuracy: CLLocationDistance = 10
+            let clock = TestClock()
+            let sut = makeSUT(
+                minimumLocationAccuracy: minAccuracy,
+                updates: [
+                    makeLocationUpdate(at: 0, lat: 1, lon: 1, accuracy: minAccuracy / 2),
+                    makeLocationUpdate(at: 1, lat: 1.00001, lon: 1.00001, accuracy: minAccuracy / 3),
+                    makeLocationUpdate(at: 2, lat: 1.00002, lon: 1.00002, accuracy: minAccuracy * 2)
+                ],
+                overlayDelay: 3.0,
+                clock: clock
+            )
+
+            await sut.startTest()
+            await clock.advance(by: .seconds(3.1))
+
+            #expect(sut.warningPopups == [makeInaccurateLocationWarningPopup()])
+        }
+
+        @Test func whenGoodBadGood_thenInaccurateLocationWarningIsHidden() async throws {
+            let minAccuracy: CLLocationDistance = 10
+            let clock = TestClock()
+            let sut = makeSUT(
+                minimumLocationAccuracy: minAccuracy,
+                updates: [
+                    makeLocationUpdate(at: 0, lat: 1, lon: 1, accuracy: minAccuracy / 2),
+                    makeLocationUpdate(at: 1, lat: 1.00001, lon: 1.00001, accuracy: minAccuracy * 2),
+                    makeLocationUpdate(at: 2, lat: 1.00002, lon: 1.00002, accuracy: minAccuracy / 3)
+                ],
+                overlayDelay: 3.0,
+                clock: clock
+            )
+
+            await sut.startTest()
+            await clock.advance(by: .seconds(3.1))
+
+            #expect(sut.warningPopups.isEmpty)
         }
     }
 }
@@ -504,18 +630,22 @@ import CoreTelephony
     locale: Locale = Locale(identifier: "en_US"),
     persistenceService: FencePersistenceServiceSpy = .init(),
     sendResultsService: SendCoverageResultsServiceSpy = .init(),
-    currentTime: @escaping () -> Date = Date.init
+    currentTime: @escaping () -> Date = Date.init,
+    overlayDelay: TimeInterval = 3.0,
+    clock: some Clock<Duration> = ContinuousClock()
 ) -> NetworkCoverageViewModel {
     return NetworkCoverageViewModel(
         fences: fences,
         refreshInterval: refreshInterval,
         minimumLocationAccuracy: minimumLocationAccuracy,
+        locationInaccuracyWarningInitialDelay: overlayDelay,
         updates: { updates.publisher.values },
         currentRadioTechnology: RadioTechnologyServiceStub(),
         sendResultsService: sendResultsService,
         persistenceService: persistenceService,
         locale: locale,
-        timeNow: currentTime
+        timeNow: currentTime,
+        clock: clock
     )
 }
 
@@ -584,6 +714,13 @@ func makeSaveError() -> Error {
     NSError(domain: "test", code: 1, userInfo: nil)
 }
 
+func makeInaccurateLocationWarningPopup() -> NetworkCoverageViewModel.WarningPopupItem {
+    .init(
+        title: "Waiting for GPS",
+        description: "Currently the location accuracy is insufficient. Please measure outdoors."
+    )
+}
+
 @MainActor extension NetworkCoverageViewModel {
     func startTest() async {
         await toggleMeasurement()
@@ -640,10 +777,10 @@ extension FenceItem: @retroactive CustomTestStringConvertible, @retroactive Cust
         let idPrefix = String(id.uuidString.prefix(6))
         let selectedStatus = isSelected ? "selected" : ""
         let currentStatus = isCurrent ? "current" : ""
-        
+
         let statuses = [selectedStatus, currentStatus].filter { !$0.isEmpty }
         let statusString = statuses.isEmpty ? "" : " [\(statuses.joined(separator: ", "))]"
-        
+
         return "FenceItem(\(idPrefix), \(coordinate.latitude),\(coordinate.longitude)\(statusString))"
     }
 }

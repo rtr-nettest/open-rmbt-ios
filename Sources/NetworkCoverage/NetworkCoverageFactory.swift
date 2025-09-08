@@ -30,6 +30,7 @@ final class UserDatabase {
 struct NetworkCoverageFactory {
     static let acceptableSubmitResultsRequestStatusCodes = 200..<300
     static let persistenceMaxAgeInterval: TimeInterval = 7 * 24 * 60 * 60
+    static let locationInaccuracyWarningInitialDelay: TimeInterval = 3
 
     private let database: UserDatabase
     private let maxResendAge: TimeInterval
@@ -73,11 +74,13 @@ struct NetworkCoverageFactory {
             fences: fences,
             refreshInterval: 1.0,
             minimumLocationAccuracy: 10.0,
+            locationInaccuracyWarningInitialDelay: Self.locationInaccuracyWarningInitialDelay,
             updates: { EmptyAsyncSequence().asOpaque() },
             currentRadioTechnology: CTTelephonyRadioTechnologyService(),
             sendResultsService: MockSendCoverageResultsService(),
             persistenceService: MockFencePersistenceService(),
-            locale: .current
+            locale: .current,
+            clock: ContinuousClock()
         )
     }
 
@@ -94,13 +97,15 @@ struct NetworkCoverageFactory {
                 makeSendResultsService(testUUID: testUUID, startDate: startDate)
             }
         )
+        let clock = ContinuousClock()
 
         return NetworkCoverageViewModel(
             fences: fences,
             refreshInterval: 1,
-            minimumLocationAccuracy: 10,
+            minimumLocationAccuracy: 2,
+            locationInaccuracyWarningInitialDelay: Self.locationInaccuracyWarningInitialDelay,
             pingMeasurementService: { PingMeasurementService.pings2(
-                clock: ContinuousClock(),
+                clock: clock,
                 pingSender: UDPPingSession(
                     sessionInitiator: sessionInitializer,
                     udpConnection: UDPConnection(),
@@ -112,7 +117,8 @@ struct NetworkCoverageFactory {
             locationUpdatesService: RealLocationUpdatesService(now: dateNow, canReportLocations: { sessionInitializer.isInitialized }),
             currentRadioTechnology: CTTelephonyRadioTechnologyService(),
             sendResultsService: resultSender,
-            persistenceService: persistenceService
+            persistenceService: persistenceService,
+            clock: clock
         )
     }
 

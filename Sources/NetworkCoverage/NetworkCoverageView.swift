@@ -47,7 +47,20 @@ struct NetworkCoverageView: View {
                     }
                 }
                 .safeAreaInset(edge: .top, spacing: -10) {
-                    CoverageHeader(title: "Network Coverage") { topBarView }
+                    VStack(spacing: 0) {
+                        CoverageHeader(title: "Network Coverage") { topBarView }
+
+                        VStack(alignment: .leading, spacing: 8) {
+                            ForEach(viewModel.warningPopups) { item in
+                                WarningMessageView(title: item.title, description: item.description)
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 8)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .mapOverlay()
+                            }
+                        }
+                        .padding(.horizontal, 4)
+                    }
                 }
 
                 VStack {
@@ -192,6 +205,28 @@ struct NetworkCoverageView: View {
         .frame(maxWidth: .infinity, alignment: .center)
         .padding(.horizontal, 16)
         .padding(.vertical, 8)
+    }
+}
+
+private struct WarningMessageView: View {
+    let title: String
+    let description: String
+
+    var body: some View {
+        HStack(alignment: .center, spacing: 16) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .imageScale(.large)
+                .foregroundStyle(.red)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.headline)
+                    .foregroundStyle(.red)
+                Text(description)
+                    .font(.subheadline)
+                    .foregroundStyle(.red)
+            }
+        }
     }
 }
 
