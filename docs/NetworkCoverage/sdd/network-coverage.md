@@ -103,13 +103,13 @@ struct Fence {
     let startingLocation: CLLocation
     let dateEntered: Date
     var dateExited: Date?
-    let technology: String?
     var pings: [PingResult]
-    
+    var technologies: [String]
+
     // Computed properties
     var coordinate: CLLocationCoordinate2D
-    var averagePing: Duration?
-    var isComplete: Bool
+    /// Average latency in milliseconds
+    var averagePing: Int?
 }
 ```
 
@@ -117,7 +117,7 @@ struct Fence {
 - Geographic radius: 20 meters (configurable)
 - Maximum duration: 4 hours (auto-complete)
 - Minimum ping samples: 1 for validity
-- Location accuracy requirement: ≤10 meters
+- Location accuracy requirement: configurable. Production default 2 meters (read-only preview uses 10m)
 
 #### 3.1.2 PingResult
 Network latency measurement with temporal context:
@@ -126,11 +126,10 @@ Network latency measurement with temporal context:
 struct PingResult {
     let result: PingMeasurementResult
     let timestamp: Date
-    
+
     enum PingMeasurementResult {
         case interval(Duration)
-        case timeout
-        case error(Error)
+        case error
     }
 }
 ```
@@ -156,12 +155,12 @@ SwiftData model for local storage:
 ```swift
 @Model
 final class PersistentFence {
-    @Attribute(.unique) let id: UUID
-    let latitude: Double
-    let longitude: Double
-    let dateEntered: Date
-    var dateExited: Date?
-    // ... additional fields
+    var timestamp: UInt64            // dateEntered in microseconds since epoch
+    var latitude: Double
+    var longitude: Double
+    var avgPingMilliseconds: Int?    // average latency in ms
+    var technology: String?
+    var testUUID: String
 }
 ```
 
@@ -171,14 +170,19 @@ final class PersistentFence {
 Server communication payload:
 
 ```swift
-class SendCoverageResultRequest: Mappable {
-    var fences: [CoverageFence]?
-    
+class SendCoverageResultRequest: BasicRequest {
+    var fences: [CoverageFence]
+    var testUUID: String
+    var clientUUID: String?
+
     class CoverageFence: Mappable {
-        var id: String?
-        var technology: String?
-        var measurements: [Measurement]?
-        var location: Location?
+        var timestampMicroseconds: UInt64
+        var location: Location // latitude, longitude
+        var avgPingMilliseconds: Int?
+        var offsetMs: Int
+        var durationMs: Int?
+        var technology: String?     // radio access technology code
+        var technologyId: Int?      // internal tech ID
     }
 }
 ```
@@ -206,30 +210,37 @@ Service Protocols          Implementations
 **Purpose**: Continuous GPS tracking with accuracy filtering
 **Protocol**:
 ```swift
-protocol LocationUpdatesService {
-    func locationUpdates() -> AsyncStream<LocationUpdate>
+@rethrows protocol LocationsAsyncSequence: AsyncSequence where Element == LocationUpdate { }
+protocol LocationUpdatesService<Sequence> {
+    associatedtype Sequence: LocationsAsyncSequence
+    func locations() -> Sequence
 }
 ```
 **Implementation Details**:
-- Uses Core Location's `CLLocationManager`
-- Filters updates by accuracy threshold (≤10m default)
-- Provides continuous stream of location updates
-- Handles location permission management
+- Uses Core Location’s `CLLocationUpdate.liveUpdates(...)` (iOS 17+)
+- Filters updates by app state (only when measurement session is initialized)
+- Emits `LocationUpdate` with precise timestamping
+- Permission management handled at app level
 
 #### 4.2.2 PingMeasurementService
 **Purpose**: Network latency measurement using RTR protocol
-**Protocol**:
+**API shape**:
 ```swift
-protocol PingMeasurementService {
-    static func pings() -> AsyncStream<PingResult>
+struct PingMeasurementService {
+    static func pings2<T>(
+        clock: some Clock<Duration>,
+        pingSender: some PingSending<T>,
+        now: @escaping () -> Date = Date.init,
+        frequency: Duration
+    ) -> some AsyncSequence<PingResult>
 }
 ```
 **Implementation Details**:
-- UDP-based ping implementation with custom RTR protocol
-- Thread-safe using Actor pattern (`UDPPingSession`)
-- Configurable ping intervals (1 second default)
-- Handles network timeouts and errors gracefully
-- Authentication token management for server communication
+- UDP-based ping over `UDPPingSession` actor (RTR protocol)
+- Configurable ping intervals (100 ms production default)
+- Graceful handling of timeouts/errors (`.error` result)
+- Session credentials obtained via control server initializer
+- Optional HTTP fallback sender available for testing
 
 #### 4.2.3 CurrentRadioTechnologyService
 **Purpose**: Cellular network technology detection (3G/4G/5G)
@@ -245,20 +256,16 @@ protocol CurrentRadioTechnologyService {
 - Handles multiple SIM cards and carrier switching
 
 #### 4.2.4 FencePersistenceService
-**Purpose**: Local data storage and retrieval
+**Purpose**: Local write-through of completed fences
 **Protocol**:
 ```swift
 protocol FencePersistenceService {
     func save(_ fence: Fence) throws
-    func loadUnsentFences() throws -> [Fence]
-    func markAsSent(_ fenceID: UUID) throws
 }
 ```
 **Implementation Details**:
 - SwiftData-based persistence using `ModelContext`
-- Automatic data model migrations
-- Cleanup of old data (7+ days)
-- Transaction safety and error handling
+- Unsent loading and resend handled by dedicated services (below)
 
 #### 4.2.5 SendCoverageResultsService
 **Purpose**: Server communication and data synchronization
@@ -271,17 +278,17 @@ protocol SendCoverageResultsService {
 **Implementation Details**:
 - Integration with existing `RMBTControlServer`
 - ObjectMapper-based JSON serialization
-- Retry logic for failed submissions
-- Background submission queue
+- Reliability handled via persistence + resend (no exponential backoff yet)
+- Invoked on test stop; persisted resend triggered on session start
 
 ### 4.3 Advanced Services
 
 #### 4.3.1 PersistedFencesResender
 **Purpose**: Reliability layer for network failures
-- Automatically retries failed submissions
-- Exponential backoff strategy
-- Age-based cleanup of stale data
-- Background processing support
+- Deletes stale data beyond max age (default 7 days)
+- Resends remaining persisted fences grouped by `testUUID`
+- Deletes successfully sent records
+- Ignores errors during resend (non-blocking)
 
 #### 4.3.2 CoverageMeasurementSession
 **Purpose**: Session lifecycle management
@@ -406,6 +413,7 @@ let mergedUpdates = merge(
 - **Accurate Period**: Location accuracy ≤ threshold → process pings
 - **Inaccurate Window**: Poor GPS → ignore pings, maintain timestamp range
 - **Recovery**: Return to accuracy → resume ping processing
+ - **UI Feedback**: Show "Waiting for GPS" warning while inaccurate
 
 ### 6.3 Data Persistence Flow
 
@@ -445,6 +453,9 @@ Local Cleanup (7+ days)
 - **Map**: SwiftUI map component with annotations
 - **MapCircle**: Geographic circle overlays for fences
 - **UserAnnotation**: Current user location display
+
+#### 7.1.5 Background Activity
+- **CLBackgroundActivitySession**: Keeps measurement alive during background via a global-actor wrapper
 
 ### 7.2 Third-Party Libraries
 
@@ -610,7 +621,7 @@ class FencePersistenceServiceSpy: FencePersistenceService {
 ### 10.2 Network Efficiency
 
 #### 10.2.1 Ping Management
-- **Configurable Intervals**: Balance between accuracy and battery life
+- **Configurable Intervals**: Balance between accuracy and battery life (100 ms default)
 - **Connection Reuse**: UDP session maintained for duration of measurement
 - **Error Backoff**: Reduced frequency during network failures
 
@@ -681,7 +692,7 @@ The modular design enables incremental enhancement and adaptation to evolving re
 
 ---
 
-**Document Version**: 1.0  
-**Last Updated**: 2025-07-21  
+**Document Version**: 1.1  
+**Last Updated**: 2025-09-08  
 **Authors**: Claude Code Analysis  
 **Review Status**: Initial Draft

@@ -31,6 +31,7 @@ struct NetworkCoverageFactory {
     static let acceptableSubmitResultsRequestStatusCodes = 200..<300
     static let persistenceMaxAgeInterval: TimeInterval = 7 * 24 * 60 * 60
     static let locationInaccuracyWarningInitialDelay: TimeInterval = 3
+    static let insufficientAccuracyAutoStopInterval: TimeInterval = 30 * 60
 
     private let database: UserDatabase
     private let maxResendAge: TimeInterval
@@ -75,6 +76,7 @@ struct NetworkCoverageFactory {
             refreshInterval: 1.0,
             minimumLocationAccuracy: 10.0,
             locationInaccuracyWarningInitialDelay: Self.locationInaccuracyWarningInitialDelay,
+            insufficientAccuracyAutoStopInterval: Self.insufficientAccuracyAutoStopInterval,
             updates: { EmptyAsyncSequence().asOpaque() },
             currentRadioTechnology: CTTelephonyRadioTechnologyService(),
             sendResultsService: MockSendCoverageResultsService(),
@@ -104,6 +106,7 @@ struct NetworkCoverageFactory {
             refreshInterval: 1,
             minimumLocationAccuracy: 2,
             locationInaccuracyWarningInitialDelay: Self.locationInaccuracyWarningInitialDelay,
+            insufficientAccuracyAutoStopInterval: Self.insufficientAccuracyAutoStopInterval,
             pingMeasurementService: { PingMeasurementService.pings2(
                 clock: clock,
                 pingSender: UDPPingSession(

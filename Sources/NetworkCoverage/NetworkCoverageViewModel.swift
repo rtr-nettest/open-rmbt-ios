@@ -11,6 +11,11 @@ import CoreLocation
 import AsyncAlgorithms
 import SwiftUI
 
+// Standalone reason type for why a coverage test was stopped
+enum StopTestReason: Equatable, Hashable {
+    case insufficientLocationAccuracy(duration: TimeInterval)
+}
+
 @rethrows private protocol UpdateAsyncIteratorProtocol: AsyncIteratorProtocol where Element == NetworkCoverageViewModel.Update { }
 @rethrows private protocol UpdateAsyncSequence: AsyncSequence where Element == NetworkCoverageViewModel.Update { }
 
@@ -85,6 +90,9 @@ struct FenceDetail: Equatable, Identifiable {
     @ObservationIgnored private let locationInaccuracyWarningInitialDelay: TimeInterval
     @ObservationIgnored private var locationInaccuracyWarningTask: Task<Void, Never>?
     @ObservationIgnored private var canCheckForLocationInaccuracyWarning: Bool = false
+    @ObservationIgnored private let insufficientAccuracyAutoStopInterval: TimeInterval
+    @ObservationIgnored private var autoStopDueToInaccuracyTask: Task<Void, Never>?
+    @ObservationIgnored private var hasEverHadAccurateLocation: Bool = false
 
     // Dependencies
     @ObservationIgnored private let currentRadioTechnology: any CurrentRadioTechnologyService
@@ -119,6 +127,7 @@ struct FenceDetail: Equatable, Identifiable {
     private(set) var fenceItems: [FenceItem] = []
 
     private(set) var warningPopups: [WarningPopupItem] = []
+    private(set) var stopTestReasons: [StopTestReason] = []
 
     var selectedFenceItem: FenceItem? {
         didSet {
@@ -141,6 +150,7 @@ struct FenceDetail: Equatable, Identifiable {
         refreshInterval: TimeInterval,
         minimumLocationAccuracy: CLLocationDistance,
         locationInaccuracyWarningInitialDelay: TimeInterval,
+        insufficientAccuracyAutoStopInterval: TimeInterval,
         updates: @escaping @Sendable () -> some AsynchronousSequence<Update>,
         currentRadioTechnology: some CurrentRadioTechnologyService,
         sendResultsService: some SendCoverageResultsService,
@@ -153,6 +163,7 @@ struct FenceDetail: Equatable, Identifiable {
         self.refreshInterval = refreshInterval
         self.minimumLocationAccuracy = minimumLocationAccuracy
         self.locationInaccuracyWarningInitialDelay = locationInaccuracyWarningInitialDelay
+        self.insufficientAccuracyAutoStopInterval = insufficientAccuracyAutoStopInterval
         self.currentRadioTechnology = currentRadioTechnology
         self.sendResultsService = sendResultsService
         self.persistenceService = persistenceService
@@ -178,6 +189,7 @@ struct FenceDetail: Equatable, Identifiable {
         refreshInterval: TimeInterval,
         minimumLocationAccuracy: CLLocationDistance,
         locationInaccuracyWarningInitialDelay: TimeInterval,
+        insufficientAccuracyAutoStopInterval: TimeInterval,
         pingMeasurementService: @escaping () -> some PingsAsyncSequence,
         locationUpdatesService: some LocationUpdatesService,
         currentRadioTechnology: some CurrentRadioTechnologyService,
@@ -191,6 +203,7 @@ struct FenceDetail: Equatable, Identifiable {
             refreshInterval: refreshInterval,
             minimumLocationAccuracy: minimumLocationAccuracy,
             locationInaccuracyWarningInitialDelay: locationInaccuracyWarningInitialDelay,
+            insufficientAccuracyAutoStopInterval: insufficientAccuracyAutoStopInterval,
             updates: { merge(
                 pingMeasurementService().map { .ping($0) },
                 locationUpdatesService.locations().map { .location($0) }
@@ -255,8 +268,13 @@ struct FenceDetail: Equatable, Identifiable {
             }
             stopInaccurateLocationWindow(at: location.timestamp)
             warningPopups.removeAll { $0 == .inaccurateLocationWarning }
+            if
+                !hasEverHadAccurateLocation,
+                let testStartTime,
+                testStartTime.addingTimeInterval(insufficientAccuracyAutoStopInterval) > location.timestamp {
+                hasEverHadAccurateLocation = true
+            }
 
-            // Handle fence logic...
             let currentFence = currentFence
             if var currentFence {
                 if currentFence.startingLocation.distance(from: location) >= fenceRadius {
@@ -294,14 +312,29 @@ struct FenceDetail: Equatable, Identifiable {
         fences.removeAll()
         locations.removeAll()
         canCheckForLocationInaccuracyWarning = false
+        hasEverHadAccurateLocation = false
+        stopTestReasons.removeAll()
 
         await BackgroundActivityActor.shared.startActivity()
 
         locationInaccuracyWarningTask = Task { @MainActor in
             try? await clock.sleep(for: .seconds(locationInaccuracyWarningInitialDelay))
 
+            guard !Task.isCancelled else { return }
+
             canCheckForLocationInaccuracyWarning = true
             locations.last.map(checkForLocationInaccuracyWarning)
+        }
+
+        autoStopDueToInaccuracyTask = Task { @MainActor in
+            try? await clock.sleep(for: .seconds(insufficientAccuracyAutoStopInterval))
+
+            guard isStarted, !Task.isCancelled else { return }
+
+            if !hasEverHadAccurateLocation {
+                await stop()
+                stopTestReasons.append(.insufficientLocationAccuracy(duration: insufficientAccuracyAutoStopInterval))
+            }
         }
 
         iterationTask = Task { @MainActor in
@@ -322,6 +355,8 @@ struct FenceDetail: Equatable, Identifiable {
         iterationTask = nil
         locationInaccuracyWarningTask?.cancel()
         locationInaccuracyWarningTask = nil
+        autoStopDueToInaccuracyTask?.cancel()
+        autoStopDueToInaccuracyTask = nil
         
         await BackgroundActivityActor.shared.stopActivity()
         
@@ -355,6 +390,7 @@ struct FenceDetail: Equatable, Identifiable {
             await BackgroundActivityActor.shared.stopActivity()
         }
         locationInaccuracyWarningTask?.cancel()
+        autoStopDueToInaccuracyTask?.cancel()
     }
 
     private func isLocationPreciseEnough(_ location: CLLocation) -> Bool {

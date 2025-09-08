@@ -619,6 +619,75 @@ import Clocks
 
             #expect(sut.warningPopups.isEmpty)
         }
+
+        @Test func whenInsufficientAccuracyAutoStopIntervalPassedWithoutSufficientAccuracy_thenAutoStopsAndReportsReason() async throws {
+            let minAccuracy: CLLocationDistance = 10
+            let clock = TestClock()
+            let timeout: TimeInterval = 30 * 60
+            let sut = makeSUT(
+                minimumLocationAccuracy: minAccuracy,
+                updates: [
+                    // Only inaccurate locations during the whole period
+                    makeLocationUpdate(at: 0, lat: 1, lon: 1, accuracy: minAccuracy * 2),
+                    makeLocationUpdate(at: 60, lat: 1, lon: 1, accuracy: minAccuracy * 3),
+                    makeLocationUpdate(at: timeout - 10, lat: 1, lon: 1, accuracy: minAccuracy * 2),
+                    makeLocationUpdate(at: timeout + 10, lat: 1, lon: 1, accuracy: minAccuracy / 2)
+                ],
+                currentTime: { Date(timeIntervalSinceReferenceDate: 0) },
+                clock: clock,
+                insufficientAccuracyAutoStopInterval: timeout
+            )
+
+            await sut.startTest()
+            await clock.advance(by: .seconds(timeout))
+
+            #expect(!sut.isStarted)
+            #expect(sut.stopTestReasons == [.insufficientLocationAccuracy(duration: timeout)])
+        }
+
+        @Test func whenAccurateLocationArrivesBeforeTimeout_thenDoesNotAutoStop() async throws {
+            let minAccuracy: CLLocationDistance = 10
+            let clock = TestClock()
+            let timeout: TimeInterval = 30 * 60
+            let sut = makeSUT(
+                minimumLocationAccuracy: minAccuracy,
+                updates: [
+                    makeLocationUpdate(at: 0, lat: 1, lon: 1, accuracy: minAccuracy * 2),
+                    makeLocationUpdate(at: timeout - 10, lat: 1.00001, lon: 1.00001, accuracy: minAccuracy / 2)
+                ],
+                clock: clock,
+                insufficientAccuracyAutoStopInterval: timeout
+            )
+
+            await sut.startTest()
+            await clock.advance(by: .seconds(timeout))
+
+            #expect(sut.isStarted)
+            #expect(sut.stopTestReasons == [])
+        }
+
+        @Test func whenInaccurateLocationArrivesAfterAccurateOneBeforeTimeout_thenDoesNotAutoStop() async throws {
+            let minAccuracy: CLLocationDistance = 10
+            let clock = TestClock()
+            let timeout: TimeInterval = 30 * 60
+            let sut = makeSUT(
+                minimumLocationAccuracy: minAccuracy,
+                updates: [
+                    makeLocationUpdate(at: 0, lat: 1, lon: 1, accuracy: minAccuracy * 2),
+                    makeLocationUpdate(at: 60, lat: 1.00001, lon: 1.00001, accuracy: minAccuracy / 2),
+                    makeLocationUpdate(at: timeout - 10, lat: 1.00001, lon: 1.00001, accuracy: minAccuracy * 2)
+                ],
+                overlayDelay: 0.0,
+                clock: clock,
+                insufficientAccuracyAutoStopInterval: timeout
+            )
+
+            await sut.startTest()
+            await clock.advance(by: .seconds(timeout))
+
+            #expect(sut.isStarted)
+            #expect(sut.stopTestReasons == [])
+        }
     }
 }
 
@@ -632,13 +701,15 @@ import Clocks
     sendResultsService: SendCoverageResultsServiceSpy = .init(),
     currentTime: @escaping () -> Date = Date.init,
     overlayDelay: TimeInterval = 3.0,
-    clock: some Clock<Duration> = ContinuousClock()
+    clock: some Clock<Duration> = ContinuousClock(),
+    insufficientAccuracyAutoStopInterval: TimeInterval = 30 * 60
 ) -> NetworkCoverageViewModel {
     return NetworkCoverageViewModel(
         fences: fences,
         refreshInterval: refreshInterval,
         minimumLocationAccuracy: minimumLocationAccuracy,
         locationInaccuracyWarningInitialDelay: overlayDelay,
+        insufficientAccuracyAutoStopInterval: insufficientAccuracyAutoStopInterval,
         updates: { updates.publisher.values },
         currentRadioTechnology: RadioTechnologyServiceStub(),
         sendResultsService: sendResultsService,

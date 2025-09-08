@@ -22,6 +22,7 @@ struct NetworkCoverageView: View {
     @State private var showStartTestPopup = false
     @State private var showStopTestPopup = false
     @State private var navigationPath = NavigationPath()
+    @State private var resultStopReasons: [StopTestReason] = []
     @State private var showsSettings = false
     @State private var isExpertMode = false
 
@@ -95,6 +96,7 @@ struct NetworkCoverageView: View {
                 onStopTest: {
                     Task {
                         await viewModel.toggleMeasurement()
+                        resultStopReasons = []
                         navigationPath.append("results")
                     }
                 }
@@ -102,8 +104,18 @@ struct NetworkCoverageView: View {
             .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(for: String.self) { destination in
                 if destination == "results" {
-                    CoverageResultView(onClose: onClose)
+                    CoverageResultView(stopReasons: resultStopReasons, onClose: onClose)
                         .environment(viewModel)
+                }
+            }
+            .onChange(of: viewModel.stopTestReasons) { reasons in
+                // Navigate to results when auto-stop reason for insufficient accuracy is recorded
+                if reasons.contains(where: { reason in
+                    if case .insufficientLocationAccuracy = reason { return true }
+                    return false
+                }) {
+                    resultStopReasons = reasons
+                    navigationPath.append("results")
                 }
             }
         }
@@ -208,7 +220,7 @@ struct NetworkCoverageView: View {
     }
 }
 
-private struct WarningMessageView: View {
+struct WarningMessageView: View {
     let title: String
     let description: String
 

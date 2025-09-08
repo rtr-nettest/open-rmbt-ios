@@ -66,7 +66,7 @@ struct CoverageHistoryDetailView: View {
                     await retry()
                 }
             case (false, .none, .some(let viewModel)):
-                CoverageResultView(onClose: { dismiss() })
+                CoverageResultView(stopReasons: [], onClose: { dismiss() })
                     .environment(viewModel)
             case (false, .none, .none):
                 CoverageEmptyView()
