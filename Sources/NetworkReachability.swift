@@ -49,6 +49,9 @@ import Reachability
     }()
     
     private var blocks: [(_ status: NetworkReachabilityStatus) -> Void] = []
+
+    // Tokenized callbacks to allow removal by clients that need lifecycle management
+    private var tokenizedBlocks: [UUID: (_ status: NetworkReachabilityStatus) -> Void] = [:]
     
     @objc public var isHaveInternet: Bool {
         return self.isWifi || self.isMobile
@@ -81,6 +84,24 @@ import Reachability
     @objc public func addReachabilityCallback(_ block: @escaping (_ status: NetworkReachabilityStatus) -> Void) {
         blocks.append(block)
     }
+
+    // Swift-only API that returns a token to later remove the callback
+    public final class CallbackToken: Hashable {
+        fileprivate let id: UUID
+        fileprivate init(id: UUID) { self.id = id }
+        public static func == (lhs: CallbackToken, rhs: CallbackToken) -> Bool { lhs.id == rhs.id }
+        public func hash(into hasher: inout Hasher) { hasher.combine(id) }
+    }
+
+    public func addReachabilityCallbackReturningToken(_ block: @escaping (_ status: NetworkReachabilityStatus) -> Void) -> CallbackToken {
+        let id = UUID()
+        tokenizedBlocks[id] = block
+        return CallbackToken(id: id)
+    }
+
+    public func removeReachabilityCallback(_ token: CallbackToken) {
+        tokenizedBlocks[token.id] = nil
+    }
     
     private var timer: Timer?
     
@@ -103,6 +124,9 @@ import Reachability
         }
         DispatchQueue.main.async {
             for block in self.blocks {
+                block(status)
+            }
+            for (_, block) in self.tokenizedBlocks {
                 block(status)
             }
         }

@@ -450,7 +450,7 @@ import Clocks
 
             #expect(sut.selectedFenceDetail?.technology == "4G")
             #expect(sut.selectedFenceDetail?.averagePing == "60 ms")
-            #expect(sut.selectedFenceDetail?.color == Color(hex: "#b12a90"))
+            #expect(sut.selectedFenceDetail?.color == Color(red: 0.694, green: 0.165, blue: 0.565)) // #b12a90
             #expect(sut.fenceItems.map(\.isSelected) == [false, true])
         }
 
@@ -689,6 +689,153 @@ import Clocks
             #expect(sut.stopTestReasons == [])
         }
     }
+
+    @MainActor @Suite("Wi‑Fi Connection Warning")
+    struct WiFiConnectionWarningTests {
+        @Test func whenOnCellular_thenMeasurementProcessesUpdatesAndNoWiFiWarning() async throws {
+            let sut = makeSUT(updates: [
+                makeNetworkTypeUpdate   (at: 0, type: .cellular),
+                makeLocationUpdate      (at: 1, lat: 1.0, lon: 1.0),
+                makePingUpdate          (at: 2, ms: 50)
+            ])
+
+            await sut.startTest()
+
+            #expect(sut.fenceItems.count == 1)
+            #expect(!sut.warningPopups.contains(makeWiFiWarningPopup()))
+        }
+
+        @Test func whenSwitchedToWiFi_thenShowWarningAndIgnoreIncomingUpdates() async throws {
+            let sut = makeSUT(updates: [
+                makeLocationUpdate      (at: 0, lat: 1.0, lon: 1.0),
+                makePingUpdate          (at: 1, ms: 50),
+                makeNetworkTypeUpdate   (at: 2, type: .wifi),
+                // These should be ignored while on Wi‑Fi
+                makeLocationUpdate      (at: 3, lat: 3.0, lon: 3.0),
+                makePingUpdate          (at: 4, ms: 999)
+            ])
+
+            await sut.startTest()
+
+            #expect(sut.warningPopups == [makeWiFiWarningPopup()])
+            #expect(sut.fenceItems.count == 1)
+            // Latest ping should remain unchanged (no completed refresh interval)
+            #expect(sut.latestPing == "-")
+            // Locations should be appended while on Wi‑Fi
+            #expect(sut.locations.count == 2)
+        }
+
+        @Test func whenBackToCellular_thenHideWarningAndResumeProcessing() async throws {
+            let sut = makeSUT(updates: [
+                makeLocationUpdate      (at: 0, lat: 1.0, lon: 1.0),
+                makeNetworkTypeUpdate   (at: 1, type: .wifi),
+                // Ignored on Wi‑Fi
+                makeLocationUpdate      (at: 2, lat: 3.0, lon: 3.0),
+                makePingUpdate          (at: 3, ms: 999),
+                // Switch back to cellular
+                makeNetworkTypeUpdate   (at: 4, type: .cellular),
+                // Should be processed again
+                makeLocationUpdate      (at: 5, lat: 5.0, lon: 5.0),
+                makePingUpdate          (at: 6, ms: 100)
+            ])
+
+            await sut.startTest()
+
+            #expect(!sut.warningPopups.contains(makeWiFiWarningPopup()))
+            #expect(sut.fenceItems.count == 2)
+        }
+
+        @Test func whenOnWiFiAndAccuracyIsBad_thenBothWiFiAndGpsWarningsAreShown() async throws {
+            let clock = TestClock()
+            let minAccuracy: CLLocationDistance = 10
+            let sut = makeSUT(
+                minimumLocationAccuracy: minAccuracy,
+                updates: [
+                    makeNetworkTypeUpdate   (at: 0, type: .wifi),
+                    makeLocationUpdate      (at: 2, lat: 1.0, lon: 1.0, accuracy: minAccuracy * 10)
+                ],
+                overlayDelay: 0.1,
+                clock: clock
+            )
+
+            await sut.startTest()
+            await clock.advance(by: .seconds(0.2))
+
+            #expect(sut.warningPopups.contains(makeWiFiWarningPopup()))
+            #expect(sut.warningPopups.contains(makeInaccurateLocationWarningPopup()))
+        }
+        
+        @Test func whenNotStarted_thenWiFiWarningIsNotDisplayed() async throws {
+            let sut = makeSUT(updates: [
+                makeNetworkTypeUpdate   (at: 0, type: .wifi),
+                makeLocationUpdate      (at: 2, lat: 1.0, lon: 1.0)
+            ])
+            
+            // Not started yet
+            #expect(!sut.warningPopups.contains(makeWiFiWarningPopup()))
+        }
+        
+        @Test func whenStartedOnWiFi_thenWarningAppearsImmediately() async throws {
+            let sut = makeSUT(updates: [
+                makeNetworkTypeUpdate(at: 0, type: .wifi)
+            ])
+            
+            await sut.startTest()
+            
+            #expect(sut.warningPopups.contains(makeWiFiWarningPopup()))
+        }
+        
+        @Test func whenMultipleNetworkSwitches_thenWarningTogglesCorrectly() async throws {
+            let sut = makeSUT(updates: [
+                makeLocationUpdate      (at: 0, lat: 1.0, lon: 1.0),
+                makeNetworkTypeUpdate   (at: 1, type: .cellular),
+                makeNetworkTypeUpdate   (at: 2, type: .wifi),
+                makeNetworkTypeUpdate   (at: 3, type: .cellular),
+                makeNetworkTypeUpdate   (at: 4, type: .wifi),
+                makeLocationUpdate      (at: 5, lat: 2.0, lon: 2.0)
+            ])
+            
+            await sut.startTest()
+            
+            #expect(sut.warningPopups.contains(makeWiFiWarningPopup()))
+            #expect(sut.fenceItems.count == 1) // Only initial location processed
+        }
+
+        @Test func whenStayingOnWiFiBeyondInaccuracyTimeout_thenStillAutoStop() async throws {
+            let minAccuracy: CLLocationDistance = 10
+            let clock = TestClock()
+            let timeout: TimeInterval = 30 * 60
+            let sut = makeSUT(
+                minimumLocationAccuracy: minAccuracy,
+                updates: [
+                    makeNetworkTypeUpdate   (at: 0, type: .wifi),
+                    makeLocationUpdate      (at: 0, lat: 1.0, lon: 1.0, accuracy: minAccuracy * 2)
+                ],
+                overlayDelay: 0.0,
+                clock: clock,
+                insufficientAccuracyAutoStopInterval: timeout
+            )
+
+            await sut.startTest()
+            await clock.advance(by: .seconds(timeout))
+
+            #expect(!sut.isStarted)
+            #expect(sut.stopTestReasons == [.insufficientLocationAccuracy(duration: timeout)])
+        }
+
+        @Test func whenNetworkConnectionIsUnknown_thenBehavesAsCellular() async throws {
+            // Since we only have wifi/cellular enum, this tests the default behavior
+            let sut = makeSUT(updates: [
+                makeLocationUpdate  (at: 0, lat: 1.0, lon: 1.0),
+                makePingUpdate      (at: 1, ms: 50)
+            ])
+            
+            await sut.startTest()
+            
+            #expect(!sut.warningPopups.contains(makeWiFiWarningPopup()))
+            #expect(sut.fenceItems.count == 1)
+        }
+    }
 }
 
 @MainActor func makeSUT(
@@ -740,6 +887,13 @@ func makePingUpdate(at timestampOffset: TimeInterval, ms: some BinaryInteger) ->
     .ping(.init(result: .interval(.milliseconds(ms)), timestamp: Date(timeIntervalSinceReferenceDate: timestampOffset)))
 }
 
+func makeNetworkTypeUpdate(
+    at timestampOffset: TimeInterval,
+    type: NetworkTypeUpdate.NetworkConnectionType
+) -> NetworkCoverageViewModel.Update {
+    .networkType(.init(type: type, timestamp: Date(timeIntervalSinceReferenceDate: timestampOffset)))
+}
+
 func makeFence(
     id: UUID = UUID(),
     at lat: CLLocationDegrees,
@@ -789,6 +943,13 @@ func makeInaccurateLocationWarningPopup() -> NetworkCoverageViewModel.WarningPop
     .init(
         title: "Waiting for GPS",
         description: "Currently the location accuracy is insufficient. Please measure outdoors."
+    )
+}
+
+func makeWiFiWarningPopup() -> NetworkCoverageViewModel.WarningPopupItem {
+    .init(
+        title: "Disable Wi‑Fi",
+        description: "Please turn off Wi‑Fi to measure cellular coverage."
     )
 }
 

@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 55;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -669,6 +669,10 @@
 		F620A48D0EF31330DAC04D48 /* Pods-RMBT.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RMBT.release.xcconfig"; path = "Pods/Target Support Files/Pods-RMBT/Pods-RMBT.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		49E6A4D12E70439F00CED0EE /* NetworkType */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = NetworkType; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
+
 /* Begin PBXFrameworksBuildPhase section */
 		C70827FF1CB6792F00F482EB /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
@@ -751,6 +755,7 @@
 		495F7B992CF48FB0003750A3 /* NetworkCoverage */ = {
 			isa = PBXGroup;
 			children = (
+				49E6A4D12E70439F00CED0EE /* NetworkType */,
 				499CF46C2DE9D48200D5DCDE /* NetworkCoverageFactory.swift */,
 				499406DB2D9C0B1900237AC1 /* CurrentRadioTechnology */,
 				49C921432D6CA0D50003EDBC /* CoverageMeasurementSession */,
@@ -1592,6 +1597,9 @@
 			buildRules = (
 			);
 			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				49E6A4D12E70439F00CED0EE /* NetworkType */,
 			);
 			name = RMBT;
 			productName = RMBT;

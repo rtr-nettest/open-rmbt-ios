@@ -16,21 +16,17 @@ enum StopTestReason: Equatable, Hashable {
     case insufficientLocationAccuracy(duration: TimeInterval)
 }
 
-@rethrows private protocol UpdateAsyncIteratorProtocol: AsyncIteratorProtocol where Element == NetworkCoverageViewModel.Update { }
-@rethrows private protocol UpdateAsyncSequence: AsyncSequence where Element == NetworkCoverageViewModel.Update { }
-
 extension AsyncMerge2Sequence: AsynchronousSequence where Element == NetworkCoverageViewModel.Update {}
 
 @rethrows protocol PingsAsyncSequence: AsyncSequence where Element == PingResult { }
-// TODO: decide if we need a protocol here or not
-//protocol PingMeasurementService<Sequence> {
-//    associatedtype Sequence: PingsAsyncSequence
-//
-//    func pings() -> Sequence
-//}
 
 protocol CurrentRadioTechnologyService {
     func technologyCode() -> String?
+}
+
+protocol NetworkConnectionTypeUpdatesService: Sendable {
+    associatedtype SequenceType: AsyncSequence where SequenceType.Element == NetworkTypeUpdate, SequenceType: Sendable
+    func networkConnectionTypes() -> SequenceType
 }
 
 protocol SendCoverageResultsService {
@@ -63,11 +59,11 @@ struct FenceDetail: Equatable, Identifiable {
     enum Update {
         case ping(PingResult)
         case location(LocationUpdate)
+        case networkType(NetworkTypeUpdate)
     }
 
     // Private state
     @ObservationIgnored private var iterationTask: Task<Void, Never>?
-    @ObservationIgnored private var initialLocation: Date?
     @ObservationIgnored private(set) var selectedItemDateFormatter: DateFormatter
     @ObservationIgnored private let refreshInterval: TimeInterval
     @ObservationIgnored private var firstPingTimestamp: Date?
@@ -93,6 +89,7 @@ struct FenceDetail: Equatable, Identifiable {
     @ObservationIgnored private let insufficientAccuracyAutoStopInterval: TimeInterval
     @ObservationIgnored private var autoStopDueToInaccuracyTask: Task<Void, Never>?
     @ObservationIgnored private var hasEverHadAccurateLocation: Bool = false
+    @ObservationIgnored private var isOnWiFi: Bool = false
 
     // Dependencies
     @ObservationIgnored private let currentRadioTechnology: any CurrentRadioTechnologyService
@@ -192,6 +189,7 @@ struct FenceDetail: Equatable, Identifiable {
         insufficientAccuracyAutoStopInterval: TimeInterval,
         pingMeasurementService: @escaping () -> some PingsAsyncSequence,
         locationUpdatesService: some LocationUpdatesService,
+        networkConnectionUpdatesService: some NetworkConnectionTypeUpdatesService,
         currentRadioTechnology: some CurrentRadioTechnologyService,
         sendResultsService: some SendCoverageResultsService,
         persistenceService: some FencePersistenceService,
@@ -204,10 +202,18 @@ struct FenceDetail: Equatable, Identifiable {
             minimumLocationAccuracy: minimumLocationAccuracy,
             locationInaccuracyWarningInitialDelay: locationInaccuracyWarningInitialDelay,
             insufficientAccuracyAutoStopInterval: insufficientAccuracyAutoStopInterval,
-            updates: { merge(
-                pingMeasurementService().map { .ping($0) },
-                locationUpdatesService.locations().map { .location($0) }
-            )},
+            updates: {
+                let merged = merge(
+                    pingMeasurementService().map { NetworkCoverageViewModel.Update.ping($0) },
+                    locationUpdatesService.locations().map { NetworkCoverageViewModel.Update.location($0) }
+                )
+                return merge(
+                    merged,
+                    networkConnectionUpdatesService
+                        .networkConnectionTypes()
+                        .map { NetworkCoverageViewModel.Update.networkType($0) }
+                )
+            },
             currentRadioTechnology: currentRadioTechnology,
             sendResultsService: sendResultsService,
             persistenceService: persistenceService,
@@ -241,6 +247,8 @@ struct FenceDetail: Equatable, Identifiable {
     private func processUpdate(_ update: Update) async {
         switch update {
         case .ping(let pingUpdate):
+            guard !isOnWiFi else { return }
+            
             if firstPingTimestamp == nil {
                 firstPingTimestamp = pingUpdate.timestamp
             }
@@ -256,18 +264,19 @@ struct FenceDetail: Equatable, Identifiable {
             
         case .location(let locationUpdate):
             let location = locationUpdate.location
+            let radioTechnologyCode = currentRadioTechnology.technologyCode()
             locations.append(location)
             locationAccuracy = String(format: "%.2fm", location.horizontalAccuracy)
-            let currentRadioTechnology = currentRadioTechnology.technologyCode()
-            latestTechnology = displayValue(forRadioTechnology: currentRadioTechnology ?? "N/A")
+            latestTechnology = displayValue(forRadioTechnology: radioTechnologyCode ?? "N/A")
 
             guard isLocationPreciseEnough(location) else {
-                startInaccurateLocationWidnowIfNeeded(at: location.timestamp)
+                startInaccurateLocationWindowIfNeeded(at: location.timestamp)
                 checkForLocationInaccuracyWarning(location: location)
                 return
             }
             stopInaccurateLocationWindow(at: location.timestamp)
             warningPopups.removeAll { $0 == .inaccurateLocationWarning }
+
             if
                 !hasEverHadAccurateLocation,
                 let testStartTime,
@@ -275,13 +284,16 @@ struct FenceDetail: Equatable, Identifiable {
                 hasEverHadAccurateLocation = true
             }
 
+            // On Wi‑Fi: update warning/UI only, ignore measurement state/fences
+            guard !isOnWiFi else { return }
+
             let currentFence = currentFence
             if var currentFence {
                 if currentFence.startingLocation.distance(from: location) >= fenceRadius {
                     let newFence = Fence(
                         startingLocation: location,
                         dateEntered: locationUpdate.timestamp,
-                        technology: currentRadioTechnology
+                        technology: radioTechnologyCode
                     )
 
                     currentFence.exit(at: locationUpdate.timestamp)
@@ -292,16 +304,18 @@ struct FenceDetail: Equatable, Identifiable {
                     fences.append(newFence)
                 } else {
                     currentFence.append(location: location)
-                    currentRadioTechnology.map { currentFence.append(technology: $0) }
+                    radioTechnologyCode.map { currentFence.append(technology: $0) }
                     fences[fences.endIndex - 1] = currentFence
                 }
             } else {
                 fences.append(.init(
                     startingLocation: location,
                     dateEntered: locationUpdate.timestamp,
-                    technology: currentRadioTechnology
+                    technology: radioTechnologyCode
                 ))
             }
+        case .networkType(let netUpdate):
+            handleNetworkTypeChange(netUpdate.type)
         }
     }
 
@@ -314,6 +328,7 @@ struct FenceDetail: Equatable, Identifiable {
         canCheckForLocationInaccuracyWarning = false
         hasEverHadAccurateLocation = false
         stopTestReasons.removeAll()
+        isOnWiFi = false
 
         await BackgroundActivityActor.shared.startActivity()
 
@@ -341,6 +356,20 @@ struct FenceDetail: Equatable, Identifiable {
             await iterate(updates())
         }
         await iterationTask?.value
+    }
+    
+    private func handleNetworkTypeChange(_ type: NetworkTypeUpdate.NetworkConnectionType) {
+        let newIsOnWiFi = (type == .wifi)
+        guard newIsOnWiFi != isOnWiFi else { return }
+
+        isOnWiFi = newIsOnWiFi
+        if isOnWiFi {
+            if !warningPopups.contains(where: { $0 == .wifiWarning }) {
+                warningPopups.append(.wifiWarning)
+            }
+        } else {
+            warningPopups.removeAll { $0 == .wifiWarning }
+        }
     }
 
     private func stop() async {
@@ -428,7 +457,7 @@ private extension NetworkCoverageViewModel {
         }
     }
 
-    private func startInaccurateLocationWidnowIfNeeded(at date: Date) {
+    private func startInaccurateLocationWindowIfNeeded(at date: Date) {
         if let lastInterval = inaccurateLocationsWindows.last, lastInterval.end == nil {
             // we are inside "ignore pings window", do nothing
         } else {
@@ -463,6 +492,13 @@ extension NetworkCoverageViewModel {
             .init(
                 title: "Waiting for GPS",
                 description: "Currently the location accuracy is insufficient. Please measure outdoors."
+            )
+        }
+
+        static var wifiWarning: Self {
+            .init(
+                title: "Disable Wi‑Fi",
+                description: "Please turn off Wi‑Fi to measure cellular coverage."
             )
         }
     }
@@ -616,48 +652,15 @@ extension FenceDetail {
 }
 
 extension Color {
-    /// The `technology` should be  String value produced by `RMBTNetworkTypeConstants.NetworkType.radioTechnologyDisplayValue`
+    /// Creates a color for the given radio technology display value
     init(technology: String?) {
-        switch technology {
-        case "2G":
-            self.init(hex: "#fca636")
-        case "3G":
-            self.init(hex: "#e16462")
-        case "4G":
-            self.init(hex: "#b12a90")
-        case "5G NSA":
-            self.init(hex: "#6a00a8")
-        case "5G SA":
-            self.init(hex: "#0d0887")
-        default:
-            self.init(hex: "#d9d9d9")
+        self = switch technology {
+        case "2G": Color(red: 0.988, green: 0.651, blue: 0.212) // #fca636
+        case "3G": Color(red: 0.882, green: 0.392, blue: 0.384) // #e16462  
+        case "4G": Color(red: 0.694, green: 0.165, blue: 0.565) // #b12a90
+        case "5G NSA": Color(red: 0.416, green: 0.0, blue: 0.659) // #6a00a8
+        case "5G SA": Color(red: 0.051, green: 0.031, blue: 0.529) // #0d0887
+        default: Color(red: 0.851, green: 0.851, blue: 0.851) // #d9d9d9
         }
-    }
-
-    init(hex: String) {
-        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
-        var int: UInt64 = 0
-        Scanner(string: hex).scanHexInt64(&int)
-        let a, r, g, b: UInt64
-        switch hex.count {
-        case 3: // RGB (12-bit)
-            (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
-        case 6: // RGB (24-bit)
-            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
-        case 8: // ARGB (32-bit)
-            (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
-        default:
-            (a, r, g, b) = (1, 1, 1, 0)
-        }
-
-        self.init(
-            .sRGB,
-            red: Double(r) / 255,
-            green: Double(g) / 255,
-            blue: Double(b) / 255,
-            opacity: Double(a) / 255
-        )
     }
 }
-
-
