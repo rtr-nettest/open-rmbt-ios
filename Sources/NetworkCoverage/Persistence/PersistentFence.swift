@@ -10,6 +10,9 @@ final class PersistentFence {
     var avgPingMilliseconds: Int?
     var technology: String?
     var testUUID: String
+    // Optional exit timestamp in microseconds since epoch, used to compute duration_ms on resend
+    var exitTimestamp: UInt64?
+    var radiusMeters: CLLocationDistance
 
     init(from fence: Fence, testUUID: String) {
         self.timestamp = UInt64(fence.dateEntered.timeIntervalSince1970 * 1_000_000) // microseconds
@@ -18,6 +21,10 @@ final class PersistentFence {
         self.avgPingMilliseconds = fence.averagePing
         self.technology = fence.significantTechnology
         self.testUUID = testUUID
+        if let dateExited = fence.dateExited {
+            self.exitTimestamp = UInt64(dateExited.timeIntervalSince1970 * 1_000_000)
+        }
+        self.radiusMeters = fence.radiusMeters
     }
 
     init(
@@ -26,7 +33,9 @@ final class PersistentFence {
         latitude: Double,
         longitude: Double,
         avgPingMilliseconds: Int?,
-        technology: String?
+        technology: String?,
+        exitTimestamp: UInt64? = nil,
+        radiusMeters: CLLocationDistance
     ) {
         self.timestamp = timestamp
         self.latitude = latitude
@@ -34,5 +43,7 @@ final class PersistentFence {
         self.avgPingMilliseconds = avgPingMilliseconds
         self.technology = technology
         self.testUUID = testUUID
+        self.exitTimestamp = exitTimestamp
+        self.radiusMeters = radiusMeters
     }
 }

@@ -41,24 +41,36 @@ struct CoverageHistoryDetail {
     }
     
     internal func convertFenceData(_ fenceData: [FenceData]) -> [Fence] {
-        return fenceData.compactMap { data in
-            
+        fenceData.compactMap { data in
             let location = CLLocation(latitude: data.latitude, longitude: data.longitude)
 
-            // offset_ms is milliseconds from test start, so we use it as relative time
-            // For historical data, we can use a base reference time
-            let baseTime = Date().timeIntervalSince1970 - TimeInterval(data.offsetMs) / 1000.0
-            let dateEntered = Date(timeIntervalSince1970: baseTime + TimeInterval(data.offsetMs) / 1000.0)
+            // Historical data provides offset_ms from test start. We don't have the
+            // original test start here, so use a stable reference point (now) just
+            // to construct deterministic Date values for UI ordering.
+            let now = Date()
+            let dateEntered = now
             let technologyString = data.technologyId.radioAccessTechnology
+
+            // Represent average ping using a single PingResult sample so that
+            // existing UI that computes averages over pings works as expected.
+            let pings: [PingResult]
+            if data.avgPingMs > 0 {
+                pings = [PingResult(result: .interval(.milliseconds(Int(data.avgPingMs))),
+                                     timestamp: dateEntered)]
+            } else {
+                pings = []
+            }
 
             var fence = Fence(
                 startingLocation: location,
                 dateEntered: dateEntered,
-                technology: technologyString
+                technology: technologyString,
+                pings: pings,
+                radiusMeters: data.radius
             )
 
             if let durationMs = data.durationMs {
-                let exitDate = Date(timeIntervalSince1970: baseTime + TimeInterval(data.offsetMs + durationMs) / 1000.0)
+                let exitDate = dateEntered.addingTimeInterval(TimeInterval(durationMs) / 1000.0)
                 fence.exit(at: exitDate)
             }
 
