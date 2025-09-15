@@ -20,7 +20,7 @@ struct UDPPingsSequenceTests {
                 pingsFrequency: .milliseconds(500),
                 initiatePingSessionDelays: [("1", .seconds(1.7))],
                 sendPingResults: [
-                   .ms(100)
+                    .ms(100)
                 ]
             ),
             receive: [
@@ -98,111 +98,170 @@ struct UDPPingsSequenceTests {
             with: clock
         )
     }
+
+    @Suite("Session Reinitialization")
+    struct SessionReinitialization {
+        @Test func whenMaxSessionDurationPasses_thenReinitializesSession() async throws {
+            let clock = TestClock()
+            // Two sessions. First starts at t=0 with 0.2s init delay, lasts 2.0s max. Second has 0.3s init delay.
+            try await expect(
+                makeSUT(
+                    clock: clock,
+                    pingsFrequency: .milliseconds(500),
+                    initiatePingSessionDelays: [("1", .seconds(0.2)), ("2", .seconds(0.3))],
+                    sendPingResults: [
+                        .ms(100), .ms(100), .ms(100), .ms(100), .ms(100), // should cover first ~2.5s window
+                        .ms(100), .ms(100)
+                    ],
+                    sessionMaxDurationSeconds: 2.0
+                ),
+                receive: [
+                    // First ping after first init at 0.5s tick, emitted at 0.6s
+                    (at: 0.6, makePingUpdate(ms: 100, startedAt: 0.5)),
+                    (at: 1.1, makePingUpdate(ms: 100, startedAt: 1.0)),
+                    (at: 1.6, makePingUpdate(ms: 100, startedAt: 1.5)),
+                    // At 2.0s session limit reached; we reinit, no emission at 2.0s tick
+                    // Next emission after reinit on 2.5s tick at 2.6s
+                    (at: 2.6, makePingUpdate(ms: 100, startedAt: 2.5)),
+                    (at: 3.1, makePingUpdate(ms: 100, startedAt: 3.0))
+                ],
+                after: .seconds(3.2),
+                with: clock
+            )
+        }
+
+        @Test func whenServerSignalsNeedsReinit_thenReinitializesSession() async throws {
+            let clock = TestClock()
+            try await expect(
+                makeSUT(
+                    clock: clock,
+                    pingsFrequency: .milliseconds(500),
+                    initiatePingSessionDelays: [("1", .seconds(0.2)), ("2", .seconds(0.3))],
+                    sendPingResults: [
+                        .ms(100),
+                        .error(.needsReinitialization), // simulate RE01
+                        .ms(100),
+                        .ms(100)
+                    ]
+                ),
+                receive: [
+                    (at: 0.6, makePingUpdate(ms: 100, startedAt: 0.5)),
+                    // 1.0s tick triggers needsReinit -> no emission at ~1.1s
+                    // reinit at 1.5 tick with 0.3s delay, first emission at next tick (2.0) with 0.1s send -> 2.1
+                    (at: 2.1, makePingUpdate(ms: 100, startedAt: 2.0)),
+                    (at: 2.6, makePingUpdate(ms: 100, startedAt: 2.5))
+                ],
+                after: .seconds(2.7),
+                with: clock
+            )
+        }
+    }
 }
 
-extension UDPPingsSequenceTests {
-    func makeSUT(
-        clock: some Clock<Duration>,
-        firstInitializationDate: Date = Date(timeIntervalSinceReferenceDate: 0),
-        pingsFrequency: Duration,
-        initiatePingSessionDelays: [(PingSenderStub.PingSession, Duration)],
-        sendPingResults: [PingResultType]
-    ) -> some PingsAsyncSequence {
-        let pingSender = PingSenderStub(
-            clock: clock,
-            initiatePingSessionDelays: initiatePingSessionDelays,
-            sendPingResults: sendPingResults.map(makePingResult)
-        )
-        let sut = PingMeasurementService.pings2(
-            clock: clock,
-            pingSender: pingSender,
-            now: { firstInitializationDate },
-            frequency: pingsFrequency
-        )
 
-        return sut
-    }
+func makeSUT(
+    clock: some Clock<Duration>,
+    firstInitializationDate: Date = Date(timeIntervalSinceReferenceDate: 0),
+    pingsFrequency: Duration,
+    initiatePingSessionDelays: [(PingSenderStub.PingSession, Duration)],
+    sendPingResults: [PingResultType],
+    sessionMaxDurationSeconds: TimeInterval? = nil
+) -> some PingsAsyncSequence {
+    let pingSender = PingSenderStub(
+        clock: clock,
+        initiatePingSessionDelays: initiatePingSessionDelays,
+        sendPingResults: sendPingResults.map(makePingResult)
+    )
+    let sut = PingMeasurementService.pings2(
+        clock: clock,
+        pingSender: pingSender,
+        now: { firstInitializationDate },
+        frequency: pingsFrequency,
+        sessionMaxDuration: { sessionMaxDurationSeconds }
+    )
 
-    func expect(
-        _ sut: some PingsAsyncSequence,
-        receive expectedElements: [(at: Double, PingResult)],
-        after totalDuration: Duration,
-        with clock: TestClock<Duration>
-    ) async throws {
-        var capturedElements: [PingResult] = []
-        var capturedInstants: [TestClock<Duration>.Instant] = []
-        await confirmation(expectedCount: expectedElements.count) { confirmation in
-            Task {
-                for try await element in sut {
-                    capturedInstants.append(clock.now)
-                    capturedElements.append(element)
-                    confirmation.confirm()
-                }
-            }
-            await clock.advance(by: totalDuration)
-        }
+    return sut
+}
 
-        #expect(capturedElements == expectedElements.map(\.1))
-        #expect(capturedInstants.isEqual(to: expectedElements.map { TestClock.Instant(offset: Duration.seconds($0.0)) }))
-    }
-
-    final class PingSenderStub: PingSending {
-        typealias SendPingResult = Result<Duration, PingSendingError>
-
-        private let clock: any Clock<Duration>
-        private var initiatePingSessionDelays: [(PingSession, Duration)]
-        private var sendPingResults: [SendPingResult]
-
-        init(
-            clock: any Clock<Duration>,
-            initiatePingSessionDelays: [(PingSession, Duration)],
-            sendPingResults: [SendPingResult]
-        ) {
-            self.clock = clock
-            self.initiatePingSessionDelays = initiatePingSessionDelays
-            self.sendPingResults = sendPingResults
-        }
-
-        func initiatePingSession() async throws -> String {
-            let delay = initiatePingSessionDelays.removeFirst()
-            try await clock.sleep(for: delay.1)
-            return delay.0
-        }
-        
-        func sendPing(in session: String) async throws(PingSendingError) {
-            let delay: Duration
-            if sendPingResults.isEmpty {
-                delay = .seconds(404)
-            } else {
-                delay = try sendPingResults.removeFirst().get()
-            }
-            do {
-                try await clock.sleep(for: delay)
-            } catch is CancellationError {
-                return
-            } catch {
-                return
+func expect(
+    _ sut: some PingsAsyncSequence,
+    receive expectedElements: [(at: Double, PingResult)],
+    after totalDuration: Duration,
+    with clock: TestClock<Duration>
+) async throws {
+    var capturedElements: [PingResult] = []
+    var capturedInstants: [TestClock<Duration>.Instant] = []
+    await confirmation(expectedCount: expectedElements.count) { confirmation in
+        Task {
+            for try await element in sut {
+                capturedInstants.append(clock.now)
+                capturedElements.append(element)
+                confirmation.confirm()
             }
         }
+        await clock.advance(by: totalDuration)
     }
 
-    enum PingResultType {
-        case ms(Int)
-        case error(PingSendingError)
+    #expect(capturedElements == expectedElements.map(\.1))
+    #expect(capturedInstants.isEqual(to: expectedElements.map { TestClock.Instant(offset: Duration.seconds($0.0)) }))
+}
+
+final class PingSenderStub: PingSending {
+    typealias SendPingResult = Result<Duration, PingSendingError>
+
+    private let clock: any Clock<Duration>
+    private var initiatePingSessionDelays: [(PingSession, Duration)]
+    private var sendPingResults: [SendPingResult]
+
+    init(
+        clock: any Clock<Duration>,
+        initiatePingSessionDelays: [(PingSession, Duration)],
+        sendPingResults: [SendPingResult]
+    ) {
+        self.clock = clock
+        self.initiatePingSessionDelays = initiatePingSessionDelays
+        self.sendPingResults = sendPingResults
     }
 
-    func makePingResult(_ result: PingResultType) -> PingSenderStub.SendPingResult {
-        switch result {
-        case .ms(let ms):
-            return .success(.milliseconds(ms))
-        case .error(let error):
-            return .failure(error)
+    func initiatePingSession() async throws -> String {
+        let delay = initiatePingSessionDelays.removeFirst()
+        try await clock.sleep(for: delay.1)
+        return delay.0
+    }
+
+    func sendPing(in session: String) async throws(PingSendingError) {
+        let delay: Duration
+        if sendPingResults.isEmpty {
+            delay = .seconds(404)
+        } else {
+            delay = try sendPingResults.removeFirst().get()
+        }
+        do {
+            try await clock.sleep(for: delay)
+        } catch is CancellationError {
+            return
+        } catch {
+            return
         }
     }
+}
 
-    func makePingUpdate(ms: Int, startedAt timeInterval: TimeInterval) -> PingResult {
-        .init(result: PingResult.Result.interval(.milliseconds(ms)), timestamp: Date(timeIntervalSinceReferenceDate: timeInterval))
+enum PingResultType {
+    case ms(Int)
+    case error(PingSendingError)
+}
+
+func makePingResult(_ result: PingResultType) -> PingSenderStub.SendPingResult {
+    switch result {
+    case .ms(let ms):
+        return .success(.milliseconds(ms))
+    case .error(let error):
+        return .failure(error)
     }
+}
+
+func makePingUpdate(ms: Int, startedAt timeInterval: TimeInterval) -> PingResult {
+    .init(result: PingResult.Result.interval(.milliseconds(ms)), timestamp: Date(timeIntervalSinceReferenceDate: timeInterval))
 }
 
 extension PingResult: @retroactive CustomTestStringConvertible, @retroactive CustomDebugStringConvertible {

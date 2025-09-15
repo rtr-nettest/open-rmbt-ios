@@ -465,6 +465,7 @@ extension RMBTControlServer {
             success: { uuid in
                 request.clientUUID = uuid
                 request.uuid = uuid
+                request.loopUUID = loopUUID
                 self.request(.post, path: "/coverageRequest", requestObject: request, success: success, error: failure)
             },
             error: failure

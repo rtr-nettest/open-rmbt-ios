@@ -8,6 +8,17 @@
 
 import Foundation
 
+protocol CoverageAPIService {
+    func getCoverageRequest(
+        _ request: CoverageRequestRequest,
+        loopUUID: String?,
+        success: @escaping (_ response: SignalRequestResponse) -> (),
+        error failure: @escaping ErrorCallback
+    )
+}
+
+extension RMBTControlServer: CoverageAPIService {}
+
 class CoverageMeasurementSessionInitializer {
     struct SessionCredentials {
         struct UDPPingCredentails {
@@ -21,17 +32,19 @@ class CoverageMeasurementSessionInitializer {
     }
 
     private let now: () -> Date
-    private let controlServer: RMBTControlServer
+    private let coverageAPIService: any CoverageAPIService
     private(set) var lastTestUUID: String?
     private(set) var lastTestStartDate: Date?
+    private(set) var maxCoverageSessionDuration: TimeInterval?
+    private(set) var maxCoverageMeasurementDuration: TimeInterval?
 
     var isInitialized: Bool {
         lastTestUUID != nil && lastTestStartDate != nil
     }
 
-    init(now: @escaping () -> Date, controlServer: RMBTControlServer) {
+    init(now: @escaping () -> Date, coverageAPIService: some CoverageAPIService) {
         self.now = now
-        self.controlServer = controlServer
+        self.coverageAPIService = coverageAPIService
     }
 
     func startNewSession(loopID: String? = nil) async throws -> SessionCredentials {
@@ -39,8 +52,10 @@ class CoverageMeasurementSessionInitializer {
         try? await NetworkCoverageFactory().persistedFencesSender.resendPersistentAreas()
 
         let response = try await withCheckedThrowingContinuation { continuation in
-            controlServer.getCoverageRequest(
-                CoverageRequestRequest(time: Int(now().timeIntervalSince1970 * 1000), measurementType: "dedicated")) { response in
+            coverageAPIService.getCoverageRequest(
+                CoverageRequestRequest(time: Int(now().timeIntervalSince1970 * 1000), measurementType: "dedicated"),
+                loopUUID: loopID
+            ) { response in
                     continuation.resume(returning: response)
                 } error: { error in
                     continuation.resume(throwing: error)
@@ -48,6 +63,12 @@ class CoverageMeasurementSessionInitializer {
         }
         lastTestUUID = response.testUUID
         lastTestStartDate = now()
+        if let maxSessionSec = response.maxCoverageSessionSeconds {
+            maxCoverageSessionDuration = TimeInterval(maxSessionSec)
+        }
+        if let maxMeasurementSec = response.maxCoverageMeasurementSeconds {
+            maxCoverageMeasurementDuration = TimeInterval(maxMeasurementSec)
+        }
 
         return SessionCredentials(
             testID: response.testUUID,
@@ -68,6 +89,7 @@ class CoverageRequestRequest: BasicRequest {
     var time: Int
     var measurementType: String
     var clientUUID: String?
+    var loopUUID: String?
 
     init(time: Int, measurementType: String) {
         self.time = time
@@ -85,6 +107,7 @@ class CoverageRequestRequest: BasicRequest {
         clientUUID <- map["client_uuid"]
         time <- map["time"]
         measurementType <- map["measurement_type_flag"]
+        loopUUID <- map["loop_uuid"]
     }
 }
 
@@ -93,6 +116,9 @@ class SignalRequestResponse: BasicResponse {
     var pingToken: String = ""
     var pingHost: String = ""
     var pingPort: String = ""
+    var ipVersion: Int?
+    var maxCoverageSessionSeconds: Int?
+    var maxCoverageMeasurementSeconds: Int?
 
     override func mapping(map: Map) {
         super.mapping(map: map)
@@ -101,5 +127,8 @@ class SignalRequestResponse: BasicResponse {
         pingToken <- map["ping_token"]
         pingHost <- map["ping_host"]
         pingPort <- map["ping_port"]
+        ipVersion <- map["ip_version"]
+        maxCoverageSessionSeconds <- map["max_coverage_session_seconds"]
+        maxCoverageMeasurementSeconds <- map["max_coverage_measurement_seconds"]
     }
 }

@@ -83,14 +83,15 @@ struct NetworkCoverageFactory {
             sendResultsService: MockSendCoverageResultsService(),
             persistenceService: MockFencePersistenceService(),
             locale: .current,
-            clock: ContinuousClock()
+            clock: ContinuousClock(),
+            maxTestDuration: { 1 }
         )
     }
 
     @MainActor func makeCoverageViewModel(fences: [Fence] = []) -> NetworkCoverageViewModel {
         let sessionInitializer = CoverageMeasurementSessionInitializer(
             now: dateNow,
-            controlServer: RMBTControlServer.shared
+            coverageAPIService: RMBTControlServer.shared
         )
         let (persistenceService, resultSender) = services(
             testUUID: sessionInitializer.lastTestUUID,
@@ -116,14 +117,16 @@ struct NetworkCoverageFactory {
                     timeoutIntervalMs: 1000,
                     now: RMBTHelpers.RMBTCurrentNanos
                 ),
-                frequency: .milliseconds(100)
+                frequency: .milliseconds(100),
+                sessionMaxDuration: { sessionInitializer.maxCoverageMeasurementDuration }
             ) },
             locationUpdatesService: RealLocationUpdatesService(now: dateNow, canReportLocations: { sessionInitializer.isInitialized }),
             networkConnectionUpdatesService: ReachabilityNetworkConnectionTypeUpdatesService(now: dateNow),
             currentRadioTechnology: CTTelephonyRadioTechnologyService(),
             sendResultsService: resultSender,
             persistenceService: persistenceService,
-            clock: clock
+            clock: clock,
+            maxTestDuration: { sessionInitializer.maxCoverageSessionDuration ?? 4*60*60 /* 4 hours */ }
         )
     }
 

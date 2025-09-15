@@ -81,7 +81,7 @@ struct FenceDetail: Equatable, Identifiable {
     @ObservationIgnored private var selectedFence: Fence?
     @ObservationIgnored private var inaccurateLocationsWindows: [InaccurateLocationWindow] = []
     @ObservationIgnored private var testStartTime: Date?
-    @ObservationIgnored private let maxTestDuration: TimeInterval = 4 * 60 * 60 // 4 hours in seconds
+    @ObservationIgnored private let maxTestDuration: () -> TimeInterval
     @ObservationIgnored private let timeNow: () -> Date
     @ObservationIgnored private let locationInaccuracyWarningInitialDelay: TimeInterval
     @ObservationIgnored private var locationInaccuracyWarningTask: Task<Void, Never>?
@@ -154,7 +154,8 @@ struct FenceDetail: Equatable, Identifiable {
         persistenceService: some FencePersistenceService,
         locale: Locale,
         timeNow: @escaping () -> Date = Date.init,
-        clock: some Clock<Duration>
+        clock: some Clock<Duration>,
+        maxTestDuration: @escaping () -> TimeInterval
     ) {
         self.fences = fences
         self.refreshInterval = refreshInterval
@@ -167,6 +168,7 @@ struct FenceDetail: Equatable, Identifiable {
         self.updates = updates
         self.timeNow = timeNow
         self.clock = clock
+        self.maxTestDuration = maxTestDuration
 
         selectedItemDateFormatter = {
             let dateFormatter = DateFormatter()
@@ -194,7 +196,8 @@ struct FenceDetail: Equatable, Identifiable {
         sendResultsService: some SendCoverageResultsService,
         persistenceService: some FencePersistenceService,
         locale: Locale = .autoupdatingCurrent,
-        clock: some Clock<Duration>
+        clock: some Clock<Duration>,
+        maxTestDuration: @escaping () -> TimeInterval
     ) {
         self.init(
             fences: fences,
@@ -218,7 +221,8 @@ struct FenceDetail: Equatable, Identifiable {
             sendResultsService: sendResultsService,
             persistenceService: persistenceService,
             locale: locale,
-            clock: clock
+            clock: clock,
+            maxTestDuration: maxTestDuration
         )
     }
 
@@ -228,7 +232,7 @@ struct FenceDetail: Equatable, Identifiable {
                 try Task.checkCancellation()
                 guard isStarted else { break }
 
-                if let startTime = testStartTime, timeNow().timeIntervalSince(startTime) >= maxTestDuration {
+                if let startTime = testStartTime, timeNow().timeIntervalSince(startTime) >= maxTestDuration() {
                     await stop()
                     break
                 }

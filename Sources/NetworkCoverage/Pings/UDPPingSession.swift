@@ -74,7 +74,11 @@ actor UDPPingSession {
         var message = Data()
         message.append(Const.requestProtocol.data(using: .ascii)!)
         message.append(withUnsafeBytes(of: sequenceNumber.bigEndian) { Data($0) })
-        message.append(Data(base64Encoded: authToken)!)
+
+        guard let tokenBytes = Data(base64Encoded: authToken) else {
+            throw .needsReinitialization
+        }
+        message.append(tokenBytes)
 
         do {
             try await udpConnection.send(data: message)
@@ -86,7 +90,8 @@ actor UDPPingSession {
             try await withCheckedThrowingContinuation { continuation in
                 self.continuations[self.sequenceNumber] = .init(sentAt: self.now(), continuation: continuation)
                 Task {
-                    receivedPingResponse(try await udpConnection.receive())
+                    let response = try await self.udpConnection.receive()
+                    receivedPingResponse(response)
                 }
             }
         } catch let error as PingSendingError {
@@ -106,21 +111,43 @@ actor UDPPingSession {
             $0.load(as: UInt32.self).bigEndian
         }
 
-        guard
-            protocolName == Const.responseProtocol || protocolName == Const.responseErrorProtocol,
-            let sentRequest = continuations[sequenceNumber] else {
-            return
-        }
-        continuations[sequenceNumber] = nil
-
-        if protocolName == Const.responseErrorProtocol {
-            sentRequest.continuation.resume(throwing: PingSendingError.needsReinitialization)
-        } else {
+        switch protocolName {
+        case Const.responseErrorProtocol:
+            if let sentRequest = continuations[sequenceNumber] {
+                continuations[sequenceNumber] = nil
+                sentRequest.continuation.resume(throwing: PingSendingError.needsReinitialization)
+            } else {
+                // Error without a matching sequence (e.g., seq=0x0) — treat as global reinit signal
+                if !continuations.isEmpty {
+                    let pending = continuations
+                    continuations.removeAll()
+                    pending.forEach {
+                        $0.value.continuation.resume(throwing: PingSendingError.needsReinitialization)
+                    }
+                }
+            }
+        case Const.responseProtocol:
+            guard let sentRequest = continuations[sequenceNumber] else { return }
+            continuations[sequenceNumber] = nil
             sentRequest.continuation.resume()
+        default:
+            return
         }
     }
 
     func cleanupExpiredPings() {
-        // walk through `continuations`, use now() to check for request wich are timed out
+        // Walk through `continuations` and resume timed out requests with `.timedOut`.
+        let nowNanos = now()
+        let timeoutNanos = UInt64(max(0, timeoutIntervalMs)) * 1_000_000
+        if timeoutNanos == 0 { return }
+
+        if !continuations.isEmpty {
+            for (seq, request) in continuations {
+                if nowNanos &- request.sentAt >= timeoutNanos {
+                    continuations[seq] = nil
+                    request.continuation.resume(throwing: PingSendingError.timedOut)
+                }
+            }
+        }
     }
 }

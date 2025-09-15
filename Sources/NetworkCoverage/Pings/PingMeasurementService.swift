@@ -40,46 +40,20 @@ struct PingMeasurementService {
         case finished(T)
     }
 
-    static func pings<T>(
-        clock: some Clock<Duration>,
-        pingSender: some PingSending<T>,
-        now: @escaping () -> Date = Date.init,
-        frequency: Duration
-    ) -> some PingsAsyncSequence {
-        var pingSessionState: PingSessionInitiationState<T> = .needsInitiation
-
-        return chain(
-            [clock.now].async,
-            AsyncTimerSequence(interval: frequency, clock: clock)
-        )
-        .flatMap { element in
-            do {
-                switch pingSessionState {
-                case .needsInitiation:
-                    pingSessionState = .inProgress
-                    let session = try await pingSender.initiatePingSession()
-                    pingSessionState = .finished(session)
-                    return [await pingResult(sender: pingSender, session: session, clock: clock, at: now())].async
-                case .finished(let session):
-                    return [await pingResult(sender: pingSender, session: session, clock: clock, at: now())].async
-                case .inProgress:
-                    // session initiation in progress error
-                    return [PingResult(result: .error, timestamp: now())].async
-                }
-            } catch {
-                // TODO: return invalid ping session error
-                return [].async
-            }
-        }
-    }
-
     static func pings2<T>(
         clock: some Clock<Duration>,
         pingSender: some PingSending<T>,
         now: @escaping () -> Date = Date.init,
-        frequency: Duration
+        frequency: Duration,
+        sessionMaxDuration: @escaping () -> TimeInterval? = { nil }
     ) -> some PingsAsyncSequence {
         var pingSessionState: PingSessionInitiationState<T> = .needsInitiation
+        var sessionStartDate: Date?
+
+        func reinitializeSession() {
+            pingSessionState = .needsInitiation
+            sessionStartDate = nil
+        }
 
         return AsyncStream { continuation in
             let start = clock.now
@@ -99,20 +73,33 @@ struct PingMeasurementService {
                         do {
                             try Task.checkCancellation()
 
+                            // Check session timeout
+                            if let limit = sessionMaxDuration(), let sStart = sessionStartDate, currentDate.timeIntervalSince(sStart) >= limit {
+                                reinitializeSession()
+                            }
+
                             switch pingSessionState {
                             case .needsInitiation:
                                 pingSessionState = .inProgress
                                 let session = try await pingSender.initiatePingSession()
                                 pingSessionState = .finished(session)
+                                sessionStartDate = currentDate
                             case .finished(let session):
-                                continuation.yield(await pingResult(sender: pingSender, session: session, clock: clock, at: currentDate))
+                                if let result = await pingResult(
+                                    sender: pingSender,
+                                    session: session,
+                                    clock: clock,
+                                    at: currentDate,
+                                    reinitalizeSession: reinitializeSession
+                                ) {
+                                    continuation.yield(result)
+                                }
                             case .inProgress:
                                 break
                             }
                         } catch is CancellationError {
                             continuation.finish()
                         } catch {
-                            // TODO: differentiate errors and eventually initialize new ping session
                             continuation.yield(PingResult(result: .error, timestamp: currentDate))
                         }
                     }
@@ -165,20 +152,27 @@ struct PingMeasurementService {
         sender: some PingSending<T>,
         session: T,
         clock: some Clock<Duration>,
-        at date: Date
-    ) async -> PingResult {
-        var capturedError: (any Error)? = nil
+        at date: Date,
+        reinitalizeSession: () -> Void
+    ) async -> PingResult? {
+        var capturedError: PingSendingError? = nil
         let elapsed = await clock.measure {
-            do {
+            do throws(PingSendingError) {
                 try await sender.sendPing(in: session)
             } catch {
                 capturedError = error
             }
         }
-        return PingResult(
-            result: capturedError.map { _ in .error } ?? .interval(elapsed),
-            timestamp: date
-        )
+        if let capturedError {
+            if capturedError == .needsReinitialization {
+                reinitalizeSession()
+                return nil
+            } else {
+                return PingResult(result: .error, timestamp: date)
+            }
+        } else {
+            return PingResult(result: .interval(elapsed), timestamp: date)
+        }
     }
 }
 
@@ -197,7 +191,7 @@ extension Duration {
 
 extension CoverageMeasurementSessionInitializer: UDPPingSession.SessionInitiating {
     func initiate() async throws -> UDPPingSession.SessionInitiation {
-        let sessionData = try await startNewSession().udpPing
+        let sessionData = try await startNewSession(loopID: lastTestUUID).udpPing
         return .init(serverAddress: sessionData.pingHost, serverPort: sessionData.pingPort, token: sessionData.pingToken)
     }
 }

@@ -234,7 +234,8 @@ import Clocks
 
         let sut = makeSUT(
             updates: updates,
-            currentTime: { currentTime }
+            currentTime: { currentTime },
+            maxTestDuration: { fourHoursInSeconds }
         )
 
         await sut.startTest()
@@ -263,7 +264,8 @@ import Clocks
 
         let sut = makeSUT(
             updates: updates,
-            currentTime: { currentTime }
+            currentTime: { currentTime },
+            maxTestDuration: { 4 * 60 * 60 }
         )
 
         await sut.startTest()
@@ -849,7 +851,8 @@ import Clocks
     currentTime: @escaping () -> Date = Date.init,
     overlayDelay: TimeInterval = 3.0,
     clock: some Clock<Duration> = ContinuousClock(),
-    insufficientAccuracyAutoStopInterval: TimeInterval = 30 * 60
+    insufficientAccuracyAutoStopInterval: TimeInterval = 30 * 60,
+    maxTestDuration: @escaping () -> TimeInterval = { 4 * 60 * 60 }
 ) -> NetworkCoverageViewModel {
     return NetworkCoverageViewModel(
         fences: fences,
@@ -863,7 +866,8 @@ import Clocks
         persistenceService: persistenceService,
         locale: locale,
         timeNow: currentTime,
-        clock: clock
+        clock: clock,
+        maxTestDuration: maxTestDuration
     )
 }
 
