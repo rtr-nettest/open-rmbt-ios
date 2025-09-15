@@ -106,7 +106,7 @@ struct NetworkCoverageFactory {
         return NetworkCoverageViewModel(
             fences: fences,
             refreshInterval: 1,
-            minimumLocationAccuracy: 2,
+            minimumLocationAccuracy: 5,
             locationInaccuracyWarningInitialDelay: Self.locationInaccuracyWarningInitialDelay,
             insufficientAccuracyAutoStopInterval: Self.insufficientAccuracyAutoStopInterval,
             pingMeasurementService: { PingMeasurementService.pings2(

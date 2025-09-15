@@ -22,6 +22,7 @@ actor UDPPingSession {
         let serverAddress: String
         let serverPort: String
         let token: PingSessionToken
+        let ipVersion: IPVersion?
     }
 
     typealias AbsoluteTimeNanos = UInt64
@@ -63,7 +64,11 @@ actor UDPPingSession {
 
     func initiatePingSession() async throws -> PingSessionToken {
         let sessionInitiation = try await sessionInitiator.initiate()
-        try await udpConnection.start(host: sessionInitiation.serverAddress, port: sessionInitiation.serverPort)
+        try await udpConnection.start(
+            host: sessionInitiation.serverAddress,
+            port: sessionInitiation.serverPort,
+            ipVersion: sessionInitiation.ipVersion
+        )
         return sessionInitiation.token
     }
 

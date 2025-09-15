@@ -8,6 +8,11 @@
 
 import Foundation
 
+enum IPVersion {
+    case IPv4
+    case IPv6
+}
+
 protocol CoverageAPIService {
     func getCoverageRequest(
         _ request: CoverageRequestRequest,
@@ -25,6 +30,7 @@ class CoverageMeasurementSessionInitializer {
             let pingToken: String
             let pingHost: String
             let pingPort: String
+            let ipVersion: IPVersion?
         }
         let testID: String
         let loopID: String?
@@ -69,6 +75,11 @@ class CoverageMeasurementSessionInitializer {
         if let maxMeasurementSec = response.maxCoverageMeasurementSeconds {
             maxCoverageMeasurementDuration = TimeInterval(maxMeasurementSec)
         }
+        let ipVersion: IPVersion? = switch response.ipVersion {
+        case 4: .IPv4
+        case 6: .IPv6
+        default: nil
+        }
 
         return SessionCredentials(
             testID: response.testUUID,
@@ -76,12 +87,12 @@ class CoverageMeasurementSessionInitializer {
             udpPing: .init(
                 pingToken: response.pingToken,
                 pingHost: response.pingHost,
-                pingPort: response.pingPort
+                pingPort: response.pingPort,
+                ipVersion: ipVersion
             )
         )
     }
 }
-
 
 import ObjectMapper
 

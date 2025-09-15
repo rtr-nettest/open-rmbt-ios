@@ -192,7 +192,12 @@ extension Duration {
 extension CoverageMeasurementSessionInitializer: UDPPingSession.SessionInitiating {
     func initiate() async throws -> UDPPingSession.SessionInitiation {
         let sessionData = try await startNewSession(loopID: lastTestUUID).udpPing
-        return .init(serverAddress: sessionData.pingHost, serverPort: sessionData.pingPort, token: sessionData.pingToken)
+        return .init(
+            serverAddress: sessionData.pingHost,
+            serverPort: sessionData.pingPort,
+            token: sessionData.pingToken,
+            ipVersion: sessionData.ipVersion
+        )
     }
 }
 
@@ -201,7 +206,8 @@ struct MockSessionInitiator: UDPPingSession.SessionInitiating {
         return .init(
             serverAddress: "udp.netztest.at",
             serverPort: "444",
-            token: "Z7kKKZqSYU/j7nSGbjoRLw=="
+            token: "Z7kKKZqSYU/j7nSGbjoRLw==",
+            ipVersion: nil
         )
     }
 }

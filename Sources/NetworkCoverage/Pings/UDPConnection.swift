@@ -16,7 +16,7 @@ enum UDPConnectionError: Error {
 }
 
 protocol UDPConnectable {
-    func start(host: String, port: String) async throws(UDPConnectionError)
+    func start(host: String, port: String, ipVersion: IPVersion?) async throws(UDPConnectionError)
     func cancel()
     func send(data: Data) async throws
     func receive() async throws -> Data
@@ -25,10 +25,19 @@ protocol UDPConnectable {
 final class UDPConnection: UDPConnectable {
     private var connection: NWConnection?
 
-    func start(host: String, port: String) async throws(UDPConnectionError) {
+    func start(host: String, port: String, ipVersion: IPVersion?) async throws(UDPConnectionError) {
         let params = NWParameters.udp
         let ip = params.defaultProtocolStack.internetProtocol! as! NWProtocolIP.Options
-        ip.version = .any
+
+        switch ipVersion {
+        case .none:
+            ip.version = .any
+        case .some(.IPv4):
+            ip.version = .v4
+        case .some(.IPv6):
+            ip.version = .v6
+        }
+
         let host = NWEndpoint.Host(host)
         guard let aPort = NWEndpoint.Port(port) else {
             throw .invalidHostOrPort

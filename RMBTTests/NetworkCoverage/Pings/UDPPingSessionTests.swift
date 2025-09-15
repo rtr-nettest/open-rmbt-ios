@@ -11,6 +11,65 @@ import Foundation
 
 @Suite("UDPPingSession Tests")
 struct UDPPingSessionTests {
+    @Suite("Connection Start Tests")
+    struct ConnectionStartTests {
+        @Test("WHEN initiating session THEN starts UDP connection with expected host/port/ip version")
+        func whenInitiatingSession_thenStartsConnectionWithExpectedHostPortAndIpVersion() async throws {
+            let host = "example.org"
+            let port = "444"
+            let ipVersion: IPVersion? = .IPv4
+            let token = "Z7kKKZqSYU/j7nSGbjoRLw=="
+
+            let (sut, udp, returnedToken) = makeSUT(sessionInitiation: .init(
+                serverAddress: host,
+                serverPort: port,
+                token: token,
+                ipVersion: ipVersion
+            ))
+
+            let obtained = try await sut.initiatePingSession()
+            #expect(obtained == returnedToken)
+
+            #expect(udp.capturedStartParameters == [
+                .init(host: host, port: port, ipVersion: ipVersion)
+            ])
+        }
+
+        @Test("WHEN ipVersion is nil THEN starts UDP connection with nil ip version")
+        func whenIpVersionIsNil_thenStartsConnectionWithNilIpVersion() async throws {
+            let initiation = UDPPingSession.SessionInitiation(
+                serverAddress: "ping.rtr.example",
+                serverPort: "1919",
+                token: "dummy-token",
+                ipVersion: nil
+            )
+            let (sut, udp, token) = makeSUT(sessionInitiation: initiation)
+
+            let returned = try await sut.initiatePingSession()
+            #expect(returned == token)
+
+            #expect(udp.capturedStartParameters == [
+                .init(host: "ping.rtr.example", port: "1919", ipVersion: nil)
+            ])
+        }
+
+        @Test("WHEN sending pings after initiation THEN start() is called exactly once")
+        func whenSendingPingsAfterInitiation_thenStartCalledExactlyOnce() async throws {
+            let (sut, udp, _) = makeSUT()
+
+            _ = try await sut.initiatePingSession()
+            #expect(udp.capturedStartParameters.count == 1)
+
+            udp.onSend = { data in
+                udp.nextResponse = makeResponse(protocol: "RR01", sequence: decodeSequence(from: data))
+            }
+
+            try await sut.sendPing(in: "Z7kKKZqSYU/j7nSGbjoRLw==")
+            try await sut.sendPing(in: "Z7kKKZqSYU/j7nSGbjoRLw==")
+
+            #expect(udp.capturedStartParameters.count == 1)
+        }
+    }
     @Suite("Protocol Encoding Tests")
     struct ProtocolEncodingTests {
         @Test("WHEN sending ping THEN payload contains RP01, sequence and token bytes")
@@ -109,10 +168,16 @@ struct UDPPingSessionTests {
 // MARK: - Factory Methods
 
 private func makeSUT(
+    sessionInitiation: UDPPingSession.SessionInitiation = .init(
+        serverAddress: "example.org",
+        serverPort: "444",
+        token: "Z7kKKZqSYU/j7nSGbjoRLw==",
+        ipVersion: .IPv4
+    ),
     timeoutIntervalMs: Int = 1000,
     now: @escaping () -> UInt64 = { 0 }
 ) -> (UDPPingSession, UDPConnectionStub, String) {
-    let initiator = SessionInitiatorStub()
+    let initiator = SessionInitiatorStub(sessionInitiation: sessionInitiation)
     let udp = UDPConnectionStub()
     let session = UDPPingSession(
         sessionInitiator: initiator,
@@ -120,7 +185,7 @@ private func makeSUT(
         timeoutIntervalMs: timeoutIntervalMs,
         now: now
     )
-    return (session, udp, initiator.token)
+    return (session, udp, sessionInitiation.token)
 }
 
 private func makeResponse(protocol proto: String, sequence: UInt32) -> Data {
@@ -138,18 +203,28 @@ private func decodeSequence(from request: Data) -> UInt32 {
 // MARK: - Test Doubles
 
 private final class SessionInitiatorStub: UDPPingSession.SessionInitiating {
-    let token = "Z7kKKZqSYU/j7nSGbjoRLw=="
-    func initiate() async throws -> UDPPingSession.SessionInitiation {
-        .init(serverAddress: "example.org", serverPort: "444", token: token)
+    let sessionInitiation: UDPPingSession.SessionInitiation
+    init(sessionInitiation: UDPPingSession.SessionInitiation) {
+        self.sessionInitiation = sessionInitiation
     }
+    func initiate() async throws -> UDPPingSession.SessionInitiation { sessionInitiation }
 }
 
 private final class UDPConnectionStub: UDPConnectable {
+    struct StartParameters: Equatable {
+        let host: String
+        let port: String
+        let ipVersion: IPVersion?
+    }
+
     var onSend: ((Data) -> Void)?
     var onReceive: (() -> Void)?
     var nextResponse: Data = Data()
+    var capturedStartParameters: [StartParameters] = []
 
-    func start(host: String, port: String) async throws(UDPConnectionError) { }
+    func start(host: String, port: String, ipVersion: IPVersion?) async throws(UDPConnectionError) {
+        capturedStartParameters.append(.init(host: host, port: port, ipVersion: ipVersion))
+    }
     func cancel() { }
     func send(data: Data) async throws { onSend?(data) }
     func receive() async throws -> Data { onReceive?(); return nextResponse }
