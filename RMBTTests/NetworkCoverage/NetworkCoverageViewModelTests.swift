@@ -430,7 +430,7 @@ import Clocks
         @Test("WHEN valid fence ID is selected THEN fence is marked as selected and detail is populated")
         func whenValidFenceIDIsSelected_thenFenceIsMarkedAsSelectedAndDetailIsPopulated() async throws {
             let fence1 = makeFence(at: 1.0, lon: 1.0)
-            let fence2 = makeFenceWithPings(
+            let fence2 = makeFence(
                 at: 2.0,
                 lon: 3.0,
                 dateEntered: Date(timeIntervalSinceReferenceDate: 1000),
@@ -903,27 +903,8 @@ func makeFence(
     at lat: CLLocationDegrees,
     lon: CLLocationDegrees,
     dateEntered: Date = Date(timeIntervalSinceReferenceDate: 0),
-    technology: String? = nil
-) -> Fence {
-    Fence(
-        startingLocation: CLLocation(
-            coordinate: CLLocationCoordinate2D(latitude: lat, longitude: lon),
-            altitude: 0,
-            horizontalAccuracy: 1,
-            verticalAccuracy: 1,
-            timestamp: dateEntered
-        ),
-        dateEntered: dateEntered,
-        technology: technology
-    )
-}
-
-func makeFenceWithPings(
-    at lat: CLLocationDegrees,
-    lon: CLLocationDegrees,
-    dateEntered: Date,
-    technology: String,
-    pings: [PingResult]
+    technology: String? = nil,
+    pings: [PingResult] = []
 ) -> Fence {
     Fence(
         startingLocation: CLLocation(
@@ -935,7 +916,8 @@ func makeFenceWithPings(
         ),
         dateEntered: dateEntered,
         technology: technology,
-        pings: pings
+        pings: pings,
+        radiusMeters: Double.random(in: 1...100)
     )
 }
 

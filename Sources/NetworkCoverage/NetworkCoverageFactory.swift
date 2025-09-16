@@ -103,6 +103,12 @@ struct NetworkCoverageFactory {
         )
         let clock = ContinuousClock()
 
+        #if targetEnvironment(simulator)
+        let networkConnectionUpdatesService = SimulatorNetworkConnectionTypeUpdatesService(now: dateNow)
+        #else
+        let networkConnectionUpdatesService = ReachabilityNetworkConnectionTypeUpdatesService(now: dateNow)
+        #endif
+
         return NetworkCoverageViewModel(
             fences: fences,
             refreshInterval: 1,
@@ -121,7 +127,7 @@ struct NetworkCoverageFactory {
                 sessionMaxDuration: { sessionInitializer.maxCoverageMeasurementDuration }
             ) },
             locationUpdatesService: RealLocationUpdatesService(now: dateNow, canReportLocations: { sessionInitializer.isInitialized }),
-            networkConnectionUpdatesService: ReachabilityNetworkConnectionTypeUpdatesService(now: dateNow),
+            networkConnectionUpdatesService: networkConnectionUpdatesService,
             currentRadioTechnology: CTTelephonyRadioTechnologyService(),
             sendResultsService: resultSender,
             persistenceService: persistenceService,
@@ -168,43 +174,4 @@ private struct EmptyAsyncSequence: AsyncSequence {
     }
     
     func makeAsyncIterator() -> AsyncIterator { AsyncIterator() }
-}
-
-// MARK: - Network Connection Type Updates Service (Reachability-backed)
-
-struct ReachabilityNetworkConnectionTypeUpdatesService: NetworkConnectionTypeUpdatesService {
-    let now: @Sendable () -> Date
-
-    @MainActor
-    func networkConnectionTypes() -> AsyncStream<NetworkTypeUpdate> {
-        AsyncStream { continuation in
-            // Map reachability status to our NetworkConnectionType
-            var lastEmitted: NetworkTypeUpdate.NetworkConnectionType?
-            let callback = { (status: NetworkReachability.NetworkReachabilityStatus) in
-                switch status {
-                case .wifi:
-                    if lastEmitted != .wifi {
-                        lastEmitted = .wifi
-                        continuation.yield(.init(type: .wifi, timestamp: now()))
-                    }
-                case .mobile:
-                    if lastEmitted != .cellular {
-                        lastEmitted = .cellular
-                        continuation.yield(.init(type: .cellular, timestamp: now()))
-                    }
-                default:
-                    break
-                }
-            }
-
-            // Start monitoring and emit initial state immediately on MainActor
-            NetworkReachability.shared.startMonitoring()
-            callback(NetworkReachability.shared.status)
-            let token = NetworkReachability.shared.addReachabilityCallbackReturningToken(callback)
-
-            continuation.onTermination = { _ in
-                NetworkReachability.shared.removeReachabilityCallback(token)
-            }
-        }
-    }
 }

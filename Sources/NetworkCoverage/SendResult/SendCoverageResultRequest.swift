@@ -14,10 +14,18 @@ public class SendCoverageResultRequest: BasicRequest {
         final class Location: Mappable {
             private(set) var latitude: Double
             private(set) var longitude: Double
+            private(set) var accuracy: Double?
+            private(set) var altitude: Double?
+            private(set) var heading: Double?
+            private(set) var speed: Double?
 
-            init(latitude: Double, longitude: Double) {
+            init(latitude: Double, longitude: Double, accuracy: Double?, altitude: Double?, heading: Double?, speed: Double?) {
                 self.latitude = latitude
                 self.longitude = longitude
+                self.accuracy = accuracy
+                self.altitude = altitude
+                self.heading = heading
+                self.speed = speed
             }
 
             required init?(map: Map) {
@@ -27,6 +35,10 @@ public class SendCoverageResultRequest: BasicRequest {
             func mapping(map: Map) {
                 latitude        <- map["latitude"]
                 longitude       <- map["longitude"]
+                accuracy        <- map["accuracy"]
+                altitude        <- map["altitude"]
+                heading         <- map["heading"]
+                speed           <- map["speed"]
             }
         }
 
@@ -37,12 +49,21 @@ public class SendCoverageResultRequest: BasicRequest {
         private(set) var durationMiliseconds: Int?
         private(set) var technology: String?
         private(set) var technology_id: Int?
+        private(set) var radius_m: Int
 
         init(fence: Fence, coverageStartDate: Date) {
             timestamp = UInt64(fence.dateEntered.timeIntervalSince1970 * 1_000_000) // microseconds
+            let loc = fence.startingLocation
+            // Derive optional location extras if available
+            let heading: Double? = loc.course >= 0 ? loc.course : nil
+            let speed: Double? = loc.speed >= 0 ? loc.speed : nil
             location = .init(
-                latitude: fence.startingLocation.coordinate.latitude,
-                longitude: fence.startingLocation.coordinate.longitude
+                latitude: loc.coordinate.latitude,
+                longitude: loc.coordinate.longitude,
+                accuracy: loc.horizontalAccuracy >= 0 ? loc.horizontalAccuracy : nil,
+                altitude: loc.verticalAccuracy >= 0 ? loc.altitude : nil,
+                heading: heading,
+                speed: speed
             )
             avgPingMilliseconds = fence.averagePing
 
@@ -56,6 +77,7 @@ public class SendCoverageResultRequest: BasicRequest {
 
             technology = fence.technologies.last?.radioTechnologyCode
             technology_id = fence.technologies.last?.radioTechnologyTypeID
+            radius_m = Int(fence.radiusMeters)
         }
 
         required init?(map: Map) {
@@ -70,6 +92,7 @@ public class SendCoverageResultRequest: BasicRequest {
             durationMiliseconds <- map["duration_ms"]
             technology          <- map["technology"]
             technology_id       <- map["technology_id"]
+            radius_m            <- map["radius_m"]
         }
     }
 

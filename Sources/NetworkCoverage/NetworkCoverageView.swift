@@ -257,12 +257,19 @@ private extension View {
 }
 
 extension Fence {
-    init(startingLocation: CLLocation, dateEntered: Date, technology: String?, avgPing: Duration) {
+    init(
+        startingLocation: CLLocation,
+        dateEntered: Date,
+        technology: String?,
+        avgPing: Duration,
+        radiusMeters: CLLocationDistance
+    ) {
         self.init(
             startingLocation: startingLocation,
             dateEntered: dateEntered,
             technology: technology,
-            pings: [.init(result: .interval(avgPing), timestamp: dateEntered)]
+            pings: [.init(result: .interval(avgPing), timestamp: dateEntered)],
+            radiusMeters: radiusMeters
         )
     }
 }

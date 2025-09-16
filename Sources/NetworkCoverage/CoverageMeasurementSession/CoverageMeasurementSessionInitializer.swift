@@ -83,7 +83,7 @@ class CoverageMeasurementSessionInitializer {
 
         return SessionCredentials(
             testID: response.testUUID,
-            loopID: nil,
+            loopID: loopID,
             udpPing: .init(
                 pingToken: response.pingToken,
                 pingHost: response.pingHost,
@@ -92,6 +92,7 @@ class CoverageMeasurementSessionInitializer {
             )
         )
     }
+
 }
 
 import ObjectMapper

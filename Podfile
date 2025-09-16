@@ -41,3 +41,10 @@ target 'RMBT' do
     end
   end
 end
+
+# Ensure test target inherits frameworks/search paths from app pods
+target 'RMBTTest' do
+  # Inherit header and framework search paths, build settings, etc.
+  inherit! :search_paths
+  # Add test-only pods here if ever needed (e.g., 'Nimble', 'Quick').
+end

@@ -45,15 +45,20 @@ struct PersistedFencesResender {
         for (groupTestUUID, persistedFences) in sortedGroups {
             let sortedFences = persistedFences.sorted { $0.timestamp < $1.timestamp }
             let fences = sortedFences.map { persistedFence in
-                Fence(
+                var fence = Fence(
                     startingLocation: CLLocation(
                         latitude: persistedFence.latitude,
                         longitude: persistedFence.longitude
                     ),
                     dateEntered: Date(timeIntervalSince1970: Double(persistedFence.timestamp) / 1_000_000),
                     technology: persistedFence.technology,
-                    pings: persistedFence.avgPingMilliseconds.map { [PingResult(result: .interval(.milliseconds($0)), timestamp: Date(timeIntervalSince1970: Double(persistedFence.timestamp) / 1_000_000))] } ?? []
+                    pings: persistedFence.avgPingMilliseconds.map { [PingResult(result: .interval(.milliseconds($0)), timestamp: Date(timeIntervalSince1970: Double(persistedFence.timestamp) / 1_000_000))] } ?? [],
+                    radiusMeters: persistedFence.radiusMeters
                 )
+                if let exitTs = persistedFence.exitTimestamp {
+                    fence.exit(at: Date(timeIntervalSince1970: Double(exitTs) / 1_000_000))
+                }
+                return fence
             }
             guard let startDate = fences.first?.dateEntered  else {
                 return

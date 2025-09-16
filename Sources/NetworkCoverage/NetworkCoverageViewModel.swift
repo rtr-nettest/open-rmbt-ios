@@ -297,7 +297,9 @@ struct FenceDetail: Equatable, Identifiable {
                     let newFence = Fence(
                         startingLocation: location,
                         dateEntered: locationUpdate.timestamp,
-                        technology: radioTechnologyCode
+                        technology: radioTechnologyCode,
+                        pings: [],
+                        radiusMeters: fenceRadius
                     )
 
                     currentFence.exit(at: locationUpdate.timestamp)
@@ -315,7 +317,9 @@ struct FenceDetail: Equatable, Identifiable {
                 fences.append(.init(
                     startingLocation: location,
                     dateEntered: locationUpdate.timestamp,
-                    technology: radioTechnologyCode
+                    technology: radioTechnologyCode,
+                    pings: [],
+                    radiusMeters: fenceRadius
                 ))
             }
         case .networkType(let netUpdate):

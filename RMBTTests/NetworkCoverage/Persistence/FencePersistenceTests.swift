@@ -130,7 +130,8 @@ struct FencePersistenceTests {
                 latitude: expectedLat,
                 longitude: expectedLon,
                 avgPingMilliseconds: expectedPing,
-                technology: expectedTechnology
+                technology: expectedTechnology,
+                radiusMeters: 20
             )
 
             let (sut, _, sendService) = makeSUT(
@@ -332,7 +333,8 @@ private func makeFence(
     var fence = Fence(
         startingLocation: CLLocation(latitude: lat, longitude: lon),
         dateEntered: date,
-        technology: technology
+        technology: technology,
+        radiusMeters: Double.random(in: 1...100)
     )
 
     if let ping = averagePing {
@@ -349,7 +351,8 @@ private func makePersistentFence(testUUID: String, timestamp: UInt64) -> Persist
         latitude: Double.random(in: -90...90),
         longitude: Double.random(in: -180...180),
         avgPingMilliseconds: Int.random(in: 10...500),
-        technology: ["3G", "4G", "5G", "LTE"].randomElement()
+        technology: ["3G", "4G", "5G", "LTE"].randomElement(),
+        radiusMeters: 20
     )
 }
 

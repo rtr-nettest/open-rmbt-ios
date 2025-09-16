@@ -51,7 +51,8 @@ public class FenceData: ImmutableMappable {
     let latitude: Double
     let offsetMs: Int
     let durationMs: Int?
-    let radius: Double?
+    let radius: Double
+    let avgPingMs: Double
 
     required public init(map: Map) throws {
         fenceId = try? map.value("fence_id")
@@ -60,6 +61,7 @@ public class FenceData: ImmutableMappable {
         latitude = try map.value("latitude")
         offsetMs = try map.value("offset_ms")
         durationMs = try? map.value("duration_ms")
-        radius = try? map.value("radius")
+        radius = try map.value("radius")
+        avgPingMs = try map.value("avg_ping_ms")
     }
 }
