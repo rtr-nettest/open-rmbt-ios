@@ -72,7 +72,6 @@ struct CoverageHistoryDetailView: View {
                 CoverageEmptyView()
             }
         }
-        .navigationBarHidden(true)
         .task {
             await loadCoverageData()
         }
