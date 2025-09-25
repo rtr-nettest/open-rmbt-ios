@@ -1,698 +1,276 @@
-# Software Design Document: Network Coverage Feature
+# Software Design Document: Network Coverage (as implemented)
 
-## Table of Contents
-1. [Overview](#1-overview)
-2. [Architecture](#2-architecture)
-3. [Data Models](#3-data-models)
-4. [Service Layer](#4-service-layer)
-5. [User Interface](#5-user-interface)
-6. [Data Flow](#6-data-flow)
-7. [External Dependencies](#7-external-dependencies)
-8. [Testing Strategy](#8-testing-strategy)
-9. [Security Considerations](#9-security-considerations)
-10. [Performance Optimizations](#10-performance-optimizations)
-11. [Future Enhancements](#11-future-enhancements)
+This document reflects the current behavior verified by unit tests in `RMBTTests/NetworkCoverage/` and the production code in `Sources/NetworkCoverage/` (as of the current repository state).
 
----
-
-## 1. Overview
-
-### 1.1 Purpose
-The Network Coverage feature provides real-time network quality measurement across geographic areas, enabling users to map cellular network performance while moving through different locations. The system continuously measures network latency and associates it with precise GPS coordinates to build a comprehensive coverage map.
-
-### 1.2 Scope
-This document covers the iOS implementation of the Network Coverage feature within the Open-RMBT application, including:
-- Real-time GPS tracking and network measurement
-- Geographic fence-based data organization
-- Local data persistence and server synchronization
-- SwiftUI-based user interface with interactive mapping
-
-### 1.3 Key Features
-- **Continuous Measurement**: Automated network latency testing while user moves
-- **Geographic Fencing**: Intelligent grouping of measurements by location (20m radius)
-- **Real-time Visualization**: Interactive map display with technology overlays
-- **Data Persistence**: Local storage with automatic server synchronization
-- **Privacy-First**: Location data processed locally with minimal server transmission
+## Contents
+- Overview
+- Architecture
+- Domain & Transport Models
+- Measurement Lifecycle
+- Ping Subsystem (UDP) and Reinitialization
+- Location Accuracy Handling
+- Wi‑Fi Gating
+- Fence Management
+- Persistence & Result Submission
+- UI Behavior
+- User Stories Coverage
+- External Dependencies
+- Testing Strategy
+- Security
+- Performance Notes
 
 ---
 
-## 2. Architecture
+## Overview
 
-### 2.1 Overall Architecture Pattern
-The Network Coverage feature follows a **MVVM (Model-View-ViewModel)** architecture enhanced with modern Swift patterns:
+- Purpose: Measure network latency while moving and associate the results with geographic “fences” (areas) to visualize coverage.
+- Scope: SwiftUI UI, MVVM logic, UDP ping measurement, Core Location, persistence via SwiftData, and server sync using the existing control server API.
+- Key features:
+  - Continuous ping measurement on a fixed cadence (default 100 ms).
+  - Fence grouping by proximity (default radius 20 m).
+  - Location-accuracy awareness with warning and auto‑stop behavior.
+  - Wi‑Fi connection awareness (blocks measurement on Wi‑Fi).
+  - Reliable result submission with local persistence and resend.
 
-```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   SwiftUI View  │◄───│   ViewModel      │◄───│  Service Layer  │
-│                 │    │  (@Observable)   │    │   (Protocols)   │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
-                                ▲                        ▲
-                                │                        │
-                       ┌─────────────────┐    ┌─────────────────┐
-                       │   Domain        │    │  Infrastructure │
-                       │   Models        │    │   Services      │
-                       └─────────────────┘    └─────────────────┘
-```
-
-### 2.2 Design Patterns
-
-#### 2.2.1 Dependency Injection
-- **Factory Pattern**: `NetworkCoverageFactory` creates configured service instances
-- **Protocol-Oriented**: Services defined by protocols for testability and flexibility
-- **Runtime Configuration**: Dependencies injected through closures for dynamic behavior
-
-#### 2.2.2 Reactive Programming
-- **AsyncSequence**: Streams of location updates and network measurements
-- **Async/Await**: Modern Swift concurrency for non-blocking operations
-- **Observer Pattern**: SwiftUI `@Observable` for UI state management
-
-#### 2.2.3 Domain-Driven Design
-- **Service Layer**: Business logic encapsulated in focused service protocols
-- **Domain Models**: Rich models (`Fence`) containing business rules
-- **Repository Pattern**: Data access abstraction through persistence services
-
-### 2.3 Module Structure
-```
-NetworkCoverage/
-├── Components/               # Reusable UI components
-├── CoverageMeasurementSession/ # Session management
-├── CurrentRadioTechnology/   # Cellular tech detection
-├── Helpers/                 # Utility functions
-├── LocationUpdates/         # GPS tracking services
-├── Persistence/             # Data storage layer
-├── Pings/                   # Network measurement
-├── SendResult/              # Server communication
-├── NetworkCoverageView.swift     # Main UI
-├── NetworkCoverageViewModel.swift # Business logic
-├── NetworkCoverageFactory.swift  # DI container
-└── Fence.swift             # Core domain model
-```
+Defaults (from factory):
+- Fence radius: 20 m.
+- Minimum acceptable location accuracy: production 5 m; read‑only/preview 10 m.
+- Location inaccuracy warning initial delay: 3 s.
+- Auto‑stop if no accurate location ever appears within: 30 minutes.
+- Ping frequency: 100 ms.
+- UDP ping timeout: 1000 ms.
+- Max total coverage session duration: server value when provided, else 4 h.
+- Max per‑ping‑session measurement duration: server value when provided; triggers reinit when reached.
 
 ---
 
-## 3. Data Models
+## Architecture
 
-### 3.1 Core Domain Models
+- Pattern: MVVM with Swift Concurrency and AsyncAlgorithms.
+- Composition: `NetworkCoverageFactory` wires concrete services and constants.
+- Reactive inputs: merged async streams of pings, locations, and network connection type updates.
 
-#### 3.1.1 Fence
-The primary domain model representing a geographic area with network measurements:
-
-```swift
-struct Fence {
-    let id: UUID
-    let startingLocation: CLLocation
-    let dateEntered: Date
-    var dateExited: Date?
-    var pings: [PingResult]
-    var technologies: [String]
-
-    // Computed properties
-    var coordinate: CLLocationCoordinate2D
-    /// Average latency in milliseconds
-    var averagePing: Int?
-}
-```
-
-**Business Rules:**
-- Geographic radius: 20 meters (configurable)
-- Maximum duration: 4 hours (auto-complete)
-- Minimum ping samples: 1 for validity
-- Location accuracy requirement: configurable. Production default 2 meters (read-only preview uses 10m)
-
-#### 3.1.2 PingResult
-Network latency measurement with temporal context:
-
-```swift
-struct PingResult {
-    let result: PingMeasurementResult
-    let timestamp: Date
-
-    enum PingMeasurementResult {
-        case interval(Duration)
-        case error
-    }
-}
-```
-
-#### 3.1.3 LocationUpdate
-GPS position data with measurement context:
-
-```swift
-struct LocationUpdate {
-    let location: CLLocation
-    let timestamp: Date
-    
-    var coordinate: CLLocationCoordinate2D
-    var horizontalAccuracy: CLLocationAccuracy
-}
-```
-
-### 3.2 Persistence Models
-
-#### 3.2.1 PersistentFence
-SwiftData model for local storage:
-
-```swift
-@Model
-final class PersistentFence {
-    var timestamp: UInt64            // dateEntered in microseconds since epoch
-    var latitude: Double
-    var longitude: Double
-    var avgPingMilliseconds: Int?    // average latency in ms
-    var technology: String?
-    var testUUID: String
-}
-```
-
-### 3.3 API Models
-
-#### 3.3.1 SendCoverageResultRequest
-Server communication payload:
-
-```swift
-class SendCoverageResultRequest: BasicRequest {
-    var fences: [CoverageFence]
-    var testUUID: String
-    var clientUUID: String?
-
-    class CoverageFence: Mappable {
-        var timestampMicroseconds: UInt64
-        var location: Location // latitude, longitude
-        var avgPingMilliseconds: Int?
-        var offsetMs: Int
-        var durationMs: Int?
-        var technology: String?     // radio access technology code
-        var technologyId: Int?      // internal tech ID
-    }
-}
-```
+Module layout (selected):
+- View model: `Sources/NetworkCoverage/NetworkCoverageViewModel.swift`.
+- Ping subsystem: `Sources/NetworkCoverage/Pings/` (`PingMeasurementService`, `UDPPingSession`).
+- Location updates: `Sources/NetworkCoverage/LocationUpdates/`.
+- Network type: `Sources/NetworkCoverage/NetworkType/` (Reachability‑based in production, simulator stub in debug).
+- Persistence & resend: `Sources/NetworkCoverage/Persistence/`.
+- Control‑server integration: `Sources/NetworkCoverage/CoverageMeasurementSession/` and `SendResult/`.
 
 ---
 
-## 4. Service Layer
+## Domain & Transport Models
 
-### 4.1 Service Architecture
+Fence (domain):
+- Fields: `startingLocation: CLLocation`, `dateEntered: Date`, `dateExited: Date?`, `pings: [PingResult]`, `technologies: [String]`, `radiusMeters: CLLocationDistance`, `id: UUID`.
+- Derived:
+  - `averagePing: Int?` (ms; average of successful pings in the fence).
+  - `significantTechnology: String?` (last recorded code, if any).
+  - `coordinate: CLLocationCoordinate2D` (from `startingLocation`).
 
-The service layer implements a **protocol-first approach** enabling dependency injection and comprehensive testing:
+PingResult (domain):
+- `result: .interval(Duration) | .error`, `timestamp: Date`.
 
-```
-Service Protocols          Implementations
-├── LocationUpdatesService ─→ RealLocationUpdatesService
-├── PingMeasurementService ─→ UDPPingSession (Actor)
-├── RadioTechnologyService ─→ CTTelephonyRadioTechnologyService
-├── FencePersistenceService─→ SwiftDataFencePersistenceService  
-└── SendCoverageResults   ─→ ControlServerCoverageResultsService
-```
+LocationUpdate (transport):
+- `location: CLLocation`, `timestamp: Date`.
 
-### 4.2 Core Services
+PersistentFence (SwiftData):
+- `timestamp` (µs since epoch of `dateEntered`), `latitude`, `longitude`, `avgPingMilliseconds?`, `technology?`, `testUUID`, `exitTimestamp?` (µs), `radiusMeters`.
 
-#### 4.2.1 LocationUpdatesService
-**Purpose**: Continuous GPS tracking with accuracy filtering
-**Protocol**:
-```swift
-@rethrows protocol LocationsAsyncSequence: AsyncSequence where Element == LocationUpdate { }
-protocol LocationUpdatesService<Sequence> {
-    associatedtype Sequence: LocationsAsyncSequence
-    func locations() -> Sequence
-}
-```
-**Implementation Details**:
-- Uses Core Location’s `CLLocationUpdate.liveUpdates(...)` (iOS 17+)
-- Filters updates by app state (only when measurement session is initialized)
-- Emits `LocationUpdate` with precise timestamping
-- Permission management handled at app level
+SendCoverageResultRequest (API payload):
+- Top level: `fences`, `test_uuid`, `client_uuid?`.
+- Fence item:
+  - `timestamp_microseconds`, `location` (lat, lon, accuracy?, altitude?, heading?, speed?),
+  - `avg_ping_ms?`, `offset_ms`, `duration_ms?`, `technology?`, `technology_id?`, `radius_m`.
 
-#### 4.2.2 PingMeasurementService
-**Purpose**: Network latency measurement using RTR protocol
-**API shape**:
-```swift
-struct PingMeasurementService {
-    static func pings2<T>(
-        clock: some Clock<Duration>,
-        pingSender: some PingSending<T>,
-        now: @escaping () -> Date = Date.init,
-        frequency: Duration
-    ) -> some AsyncSequence<PingResult>
-}
-```
-**Implementation Details**:
-- UDP-based ping over `UDPPingSession` actor (RTR protocol)
-- Configurable ping intervals (100 ms production default)
-- Graceful handling of timeouts/errors (`.error` result)
-- Session credentials obtained via control server initializer
-- Optional HTTP fallback sender available for testing
-
-#### 4.2.3 CurrentRadioTechnologyService
-**Purpose**: Cellular network technology detection (3G/4G/5G)
-**Protocol**:
-```swift
-protocol CurrentRadioTechnologyService {
-    func technologyCode() -> String?
-}
-```
-**Implementation Details**:
-- Uses Core Telephony framework
-- Maps internal technology codes to user-friendly strings
-- Handles multiple SIM cards and carrier switching
-
-#### 4.2.4 FencePersistenceService
-**Purpose**: Local write-through of completed fences
-**Protocol**:
-```swift
-protocol FencePersistenceService {
-    func save(_ fence: Fence) throws
-}
-```
-**Implementation Details**:
-- SwiftData-based persistence using `ModelContext`
-- Unsent loading and resend handled by dedicated services (below)
-
-#### 4.2.5 SendCoverageResultsService
-**Purpose**: Server communication and data synchronization
-**Protocol**:
-```swift
-protocol SendCoverageResultsService {
-    func send(fences: [Fence]) async throws
-}
-```
-**Implementation Details**:
-- Integration with existing `RMBTControlServer`
-- ObjectMapper-based JSON serialization
-- Reliability handled via persistence + resend (no exponential backoff yet)
-- Invoked on test stop; persisted resend triggered on session start
-
-### 4.3 Advanced Services
-
-#### 4.3.1 PersistedFencesResender
-**Purpose**: Reliability layer for network failures
-- Deletes stale data beyond max age (default 7 days)
-- Resends remaining persisted fences grouped by `testUUID`
-- Deletes successfully sent records
-- Ignores errors during resend (non-blocking)
-
-#### 4.3.2 CoverageMeasurementSession
-**Purpose**: Session lifecycle management
-- Initializes measurement credentials
-- Manages UDP session authentication
-- Handles session timeouts and renewals
+Notes:
+- `offset_ms` is relative to coverage session start (`CoverageMeasurementSessionInitializer.lastTestStartDate`).
+- `duration_ms` present only if fence has an exit time.
+- `technology/technology_id` derived from the fence’s last technology code.
 
 ---
 
-## 5. User Interface
+## Measurement Lifecycle
 
-### 5.1 UI Architecture
+1) Start
+- Start background activity; reset state; clear previous fences.
+- Schedule: location inaccuracy warning gate (3 s) and auto‑stop due to prolonged inaccuracy (30 min).
+- Start iteration over merged streams: pings, locations, network type updates.
 
-The user interface is built using **SwiftUI** with a reactive data binding approach:
+2) Iterate updates
+- Enforce overall max duration (server or 4 h) and stop when reached.
+- Handle each update on main actor to keep UI consistent.
 
-```
-NetworkCoverageView (SwiftUI)
-├── MapKit Integration
-│   ├── Fence Visualization (Circles + Annotations)
-│   ├── User Location Tracking
-│   └── Technology Color Coding
-├── Control Panel
-│   ├── Technology Display
-│   ├── Ping Metrics
-│   ├── Location Accuracy
-│   └── Start/Stop Controls
-├── Settings Panel
-│   ├── Expert Mode Toggle
-│   ├── Fence Radius Slider
-│   └── Accuracy Threshold
-└── Modal Components
-    ├── Start Test Popup
-    ├── Stop Test Popup  
-    └── Results View
-```
+3) Stop
+- Close the last open fence (if any), persist, then submit all fences.
+- Cancel background activity and timers.
 
-### 5.2 Key UI Components
-
-#### 5.2.1 Main Coverage View
-- **Interactive Map**: Real-time fence visualization with MapKit
-- **Technology Overlay**: Color-coded circles indicating network type
-- **Control Bar**: Current technology, ping, and location accuracy display
-- **Navigation**: Full-screen modal with close functionality
-
-#### 5.2.2 Fence Visualization
-- **Geographic Circles**: 20m radius circles showing measurement areas
-- **Color Coding**: Technology-specific colors (3G/4G/5G)
-- **Selection State**: Visual feedback for selected fences
-- **Expert Mode**: Additional technical details and GPS accuracy circles
-
-#### 5.2.3 Modal Popups
-- **Generic TestPopup**: Shared component for start/stop confirmations
-- **Configurable Buttons**: Primary/secondary actions with custom styling
-- **Mandatory Interaction**: No background dismissal, button-only navigation
-- **Animation**: Smooth transitions with bottom sheet presentation
-
-#### 5.2.4 Results View
-- **Test Summary**: Completion status and basic metrics
-- **Close Integration**: Full session dismissal back to intro screen
-- **Future Extension Point**: Placeholder for detailed analytics
-
-### 5.3 UI State Management
-
-#### 5.3.1 ViewModel Integration
-```swift
-@Bindable var viewModel: NetworkCoverageViewModel
-```
-- Reactive property binding with SwiftUI
-- Automatic UI updates on state changes
-- Efficient rendering with minimal recomposition
-
-#### 5.3.2 Local State
-- Navigation path management for programmatic navigation
-- Modal presentation state (start/stop popups)
-- Settings panel visibility and configuration
-- Expert mode toggle and advanced displays
+Ping timestamps and cadence
+- Pings are produced on a fixed cadence; the emitted `PingResult.timestamp` corresponds to the scheduled tick time, not the actual network completion time (validated by tests with `TestClock`).
+- Before the first full UI refresh interval completes, the “latest ping” label shows “-”.
+- With no pings at all it shows “N/A”.
 
 ---
 
-## 6. Data Flow
+## Ping Subsystem (UDP) and Reinitialization
 
-### 6.1 Measurement Lifecycle
+High‑level flow
+- `PingMeasurementService.pings2` drives periodic ticks (default 100 ms) using a `Clock`.
+- Each tick either initiates a UDP ping session (if needed) or sends a ping within the current session.
+- Errors yield `.error` pings except when the error requires reinitialization, in which case nothing is emitted on that tick and a reinit is scheduled.
 
-```mermaid
-graph TB
-    A[User Starts Test] --> B[Initialize Session]
-    B --> C[Start Location Updates]
-    B --> D[Start Ping Measurements] 
-    C --> E[Merge Async Streams]
-    D --> E
-    E --> F[Process Updates in ViewModel]
-    F --> G{Location Accurate?}
-    G -->|Yes| H[Update/Create Fence]
-    G -->|No| I[Start Inaccurate Window]
-    H --> J[Persist Fence Locally]
-    J --> K[Send to Server]
-    I --> L[Ignore Ping Updates]
-    L --> M{Accuracy Improved?}
-    M -->|Yes| N[End Inaccurate Window]
-    M -->|No| L
-    N --> H
-```
+UDP session and protocol
+- `UDPPingSession` (actor) encapsulates the RTR UDP ping protocol.
+- Request packet: ASCII `"RP01"` + 32‑bit big‑endian sequence + Base64‑decoded token bytes.
+- Response handling:
+  - `RR01` with matching sequence → ping succeeds.
+  - `RE01` with matching sequence → fail with `needsReinitialization`.
+  - `RE01` with unmatched sequence (incl. seq 0x0) while any ping is pending → treat as global reinit signal; all pending pings fail with `needsReinitialization`.
+- Timeouts: pending pings exceeding `timeoutIntervalMs` (default 1000 ms) are completed with `timedOut`.
+- UDP connection start parameters come from the coverage request (host/port/ip version). `ipVersion` may be nil.
 
-### 6.2 Real-time Processing
+Session reinitialization triggers
+- Per‑session measurement time limit reached (server `max_coverage_measurement_seconds`).
+- UDP server signals `RE01` (as above).
+- On each reinit, `PingMeasurementService` marks the session as needing initiation; the next cadence tick performs `/coverageRequest` and continues.
 
-#### 6.2.1 Stream Merging
-```swift
-let mergedUpdates = merge(
-    locationUpdates.map(Update.location),
-    pingUpdates.map(Update.ping)
-)
-```
-
-#### 6.2.2 Fence Management Algorithm
-1. **New Location**: Check distance from current fence center
-2. **Distance > 20m**: Create new fence, complete previous
-3. **Distance ≤ 20m**: Continue current fence, add ping data
-4. **Time Limit**: Auto-complete fence after 4 hours
-5. **Persistence**: Save completed fences locally and sync to server
-
-#### 6.2.3 Location Accuracy Windows
-- **Accurate Period**: Location accuracy ≤ threshold → process pings
-- **Inaccurate Window**: Poor GPS → ignore pings, maintain timestamp range
-- **Recovery**: Return to accuracy → resume ping processing
- - **UI Feedback**: Show "Waiting for GPS" warning while inaccurate
-
-### 6.3 Data Persistence Flow
-
-```
-Domain Model (Fence) 
-    ↓ (mapping)
-Persistent Model (PersistentFence)
-    ↓ (SwiftData)
-Local SQLite Database
-    ↓ (background sync)
-Server API (SendCoverageResultRequest)
-    ↓ (cleanup)
-Local Cleanup (7+ days)
-```
+Chaining sessions (`loop_uuid`)
+- `CoverageMeasurementSessionInitializer` passes the previous `test_uuid` as the next request’s `loop_uuid` when reinitializing.
+- The initializer also exposes server‑provided limits:
+  - `maxCoverageSessionDuration` (stop everything when reached).
+  - `maxCoverageMeasurementDuration` (reinitialize ping session when reached).
 
 ---
 
-## 7. External Dependencies
+## Location Accuracy Handling
 
-### 7.1 iOS System Frameworks
+Accuracy threshold and windows
+- A location is “precise enough” when `horizontalAccuracy ≤ minimumLocationAccuracy` (prod 5 m).
+- While accuracy is insufficient, the view model opens an “inaccurate location window”; any ping whose timestamp falls within any open window is ignored (not assigned to fences).
+- When accuracy improves, the last open window is closed; subsequent pings are processed normally.
 
-#### 7.1.1 Core Location
-- **CLLocationManager**: GPS tracking and location services
-- **CLLocation**: Geographic coordinate and accuracy data
-- **CLLocationManagerDelegate**: Permission and status handling
-
-#### 7.1.2 Core Telephony  
-- **CTTelephonyNetworkInfo**: Cellular network information
-- **CTRadioAccessTechnology**: Network technology constants
-
-#### 7.1.3 SwiftData
-- **@Model**: Persistent data model declarations
-- **ModelContext**: Database operations and queries
-- **Query**: Reactive data fetching for SwiftUI
-
-#### 7.1.4 MapKit
-- **Map**: SwiftUI map component with annotations
-- **MapCircle**: Geographic circle overlays for fences
-- **UserAnnotation**: Current user location display
-
-#### 7.1.5 Background Activity
-- **CLBackgroundActivitySession**: Keeps measurement alive during background via a global-actor wrapper
-
-### 7.2 Third-Party Libraries
-
-#### 7.2.1 ObjectMapper (External)
-- **Mappable Protocol**: JSON serialization for API communication
-- **Object Mapping**: Bidirectional conversion between Swift objects and JSON
-- **Nested Object Support**: Complex API payload structure handling
-
-#### 7.2.2 AsyncAlgorithms (External)
-- **Merge Operations**: Combining multiple AsyncSequence streams
-- **Stream Utilities**: Advanced async sequence manipulation
-- **Performance**: Optimized stream processing for real-time data
-
-### 7.3 Internal Dependencies
-
-#### 7.3.1 Legacy RMBT Infrastructure
-- **RMBTControlServer**: Existing network communication layer
-- **RMBTSettings**: Global application configuration
-- **RMBTHelpers**: Utility functions and time calculations
-- **Database Integration**: Shared with existing test result storage
-
-#### 7.3.2 Configuration Constants
-- **Server Endpoints**: RTR measurement server URLs
-- **Timing Configuration**: Ping intervals and session timeouts  
-- **Geographic Parameters**: Fence radius and accuracy thresholds
+Warning popup and auto‑stop
+- After an initial delay (default 3 s) following start, if the latest location remains worse than the threshold, the “Waiting for GPS” warning is shown.
+- If no accurate location ever arrives within 30 minutes, measurement auto‑stops and records stop reason `insufficientLocationAccuracy(duration: 30 min)`.
+- Once at least one accurate location is received (within the timeout window), auto‑stop is canceled.
 
 ---
 
-## 8. Testing Strategy
+## Wi‑Fi Gating
 
-### 8.1 Test Architecture
-
-The Network Coverage feature implements comprehensive testing using **Test-Driven Development (TDD)** principles:
-
-```
-Test Types
-├── Unit Tests (NetworkCoverageViewModelTests)
-│   ├── Business Logic Testing
-│   ├── Mock Service Integration  
-│   └── Edge Case Coverage
-├── Integration Tests
-│   ├── Service Layer Testing
-│   └── Data Flow Validation
-└── UI Tests (Future)
-    ├── SwiftUI Component Testing
-    └── User Journey Validation
-```
-
-### 8.2 Testing Framework
-
-#### 8.2.1 Swift Testing Framework
-```swift
-@Suite("Network Coverage Feature")
-struct NetworkCoverageViewModelTests {
-    @Test("Creates fence when entering new area")
-    func testFenceCreation() async throws {
-        // Test implementation
-    }
-}
-```
-
-#### 8.2.2 Dependency Injection for Testing
-- **Mock Services**: Test doubles for all external dependencies
-- **Spy Pattern**: Verification of service method calls
-- **Stub Pattern**: Controlled responses for predictable testing
-
-### 8.3 Test Coverage Areas
-
-#### 8.3.1 Core Business Logic
-- **Fence Creation**: Geographic boundary detection and new fence initiation
-- **Ping Assignment**: Correct association of pings to fences based on timestamps
-- **Location Accuracy**: Proper handling of inaccurate GPS periods
-- **Session Management**: Start/stop behavior and timeout handling
-
-#### 8.3.2 Data Management
-- **Persistence Operations**: Save/load operations with error handling
-- **Server Synchronization**: Network failure resilience and retry logic
-- **Data Cleanup**: Age-based cleanup and memory management
-
-#### 8.3.3 Edge Cases
-- **Concurrent Updates**: Multiple rapid location/ping updates
-- **Memory Constraints**: Large datasets and performance under pressure
-- **Network Failures**: Offline operation and data recovery
-- **Permission Changes**: Location access revocation during operation
-
-### 8.4 Mock Infrastructure
-
-#### 8.4.1 Service Test Doubles
-```swift
-class LocationUpdatesServiceMock: LocationUpdatesService {
-    var locationStream: AsyncStream<LocationUpdate>
-    
-    func locationUpdates() -> AsyncStream<LocationUpdate> {
-        return locationStream
-    }
-}
-```
-
-#### 8.4.2 Spy Services
-```swift  
-class FencePersistenceServiceSpy: FencePersistenceService {
-    var savedFences: [Fence] = []
-    var saveCallCount = 0
-    
-    func save(_ fence: Fence) throws {
-        savedFences.append(fence)
-        saveCallCount += 1
-    }
-}
-```
+- A separate async stream reports network connection type (Reachability in production). Types: `.wifi` and `.cellular`.
+- While on Wi‑Fi:
+  - Show the “Disable Wi‑Fi” warning.
+  - Ignore measurement updates (no fence creation/progression and no ping assignment), but continue UI updates and warnings.
+- When switching back to cellular: hide the Wi‑Fi warning and resume normal processing.
 
 ---
 
-## 9. Security Considerations
+## Fence Management
 
-### 9.1 Location Privacy
+Creation and updates
+- On a precise location update:
+  - If there is no current fence → open a new fence at this location.
+  - Else if `distance(from: startingLocation) ≥ fenceRadius` (default 20 m) → close the current fence at the update timestamp, persist it, and start a new fence at the new location.
+  - Else → append location to the current fence and, if available, append the current technology code.
 
-#### 9.1.1 Data Minimization
-- **Local Processing**: GPS coordinates processed locally, minimal server transmission
-- **Aggregated Data**: Only fence centers and metadata sent to server
-- **No Personal Tracking**: Location history not stored beyond active measurement
+Ping assignment to fences
+- For each successful ping, find the fence active at `ping.timestamp` (entered < t < exited; the last fence is open‑ended) and append the ping there.
+- Pings occurring inside an “inaccurate location window” are ignored.
 
-#### 9.1.2 Permission Management
-- **Explicit Consent**: Clear user permission request with purpose explanation
-- **Graceful Degradation**: Feature unavailable without location access
-- **Permission Monitoring**: Dynamic handling of permission changes
-
-### 9.2 Network Security
-
-#### 9.2.1 Server Communication
-- **HTTPS Enforcement**: All API communication over secure connections
-- **Authentication Tokens**: Session-based authentication for ping measurements
-- **Input Validation**: Server payload validation and sanitization
-
-#### 9.2.2 Local Data Protection
-- **Device Encryption**: SwiftData benefits from iOS device encryption
-- **No Sensitive Storage**: No authentication credentials stored locally
-- **Data Cleanup**: Automatic cleanup prevents long-term data accumulation
-
-### 9.3 Network Measurement Security
-
-#### 9.3.1 RTR Protocol
-- **Token Authentication**: Prevents unauthorized measurement sessions
-- **Session Timeouts**: Limits exposure window for active sessions
-- **Server Validation**: Measurements validated by trusted RTR infrastructure
+Average ping and technology
+- `averagePing` is the mean over successful pings within the fence.
+- The “significant” technology of a fence is the last recorded code; the UI displays mapped labels (2G, 3G, 4G, 5G NSA, 5G SA) and colors.
 
 ---
 
-## 10. Performance Optimizations
+## Persistence & Result Submission
 
-### 10.1 Memory Management
+Persistence
+- Completed fences are persisted to SwiftData immediately when a new fence is opened; the last fence is closed and persisted on stop.
+- Persisted fields include `exitTimestamp` (if closed) and `radiusMeters`.
 
-#### 10.1.1 Stream Processing
-- **Lazy Evaluation**: AsyncSequence streams process data on-demand
-- **Memory Bounds**: Limited retention of ping history per fence
-- **Cleanup Strategy**: Automatic disposal of completed fence data
+Resend on startup / session init
+- Before starting a new coverage session, the app attempts to resend any previously persisted fences.
+- Behavior:
+  - Delete persisted fences older than a configured max age (default 7 days).
+  - Group remaining fences by `testUUID` and send newest groups first (by earliest timestamp in the group, descending).
+  - On success, delete sent records; on failure, keep them for the next attempt.
 
-#### 10.1.2 UI Optimization
-- **SwiftUI Efficiency**: Minimal recomposition through targeted `@Observable` properties
-- **Map Performance**: Optimized annotation rendering for large fence datasets
-- **Background Processing**: Heavy computations moved off main thread
-
-### 10.2 Network Efficiency
-
-#### 10.2.1 Ping Management
-- **Configurable Intervals**: Balance between accuracy and battery life (100 ms default)
-- **Connection Reuse**: UDP session maintained for duration of measurement
-- **Error Backoff**: Reduced frequency during network failures
-
-#### 10.2.2 Data Synchronization
-- **Batch Uploads**: Multiple fences sent in single API call
-- **Background Sync**: Non-blocking server communication
-- **Retry Logic**: Exponential backoff prevents server overload
-
-### 10.3 Battery Optimization
-
-#### 10.3.1 Location Services
-- **Accuracy Tuning**: Best accuracy only when needed for measurements
-- **Background Activity**: iOS background processing support for continued measurement
-- **Power Management**: Automatic session termination after 4 hours
-
-#### 10.3.2 Network Activity
-- **Connection Pooling**: Reuse of network connections where possible
-- **Adaptive Intervals**: Reduced ping frequency during low-activity periods
-- **Cellular Awareness**: Consideration of cellular vs WiFi for battery impact
+Submission
+- Uses `ControlServerCoverageResultsService` → `RMBTControlServer.submitCoverageResult`.
+- Acceptable status codes: 200..<300.
+- Payload includes `radius_m`, location extras (accuracy/altitude/heading/speed when available), `offset_ms`, and optional `duration_ms`.
 
 ---
 
-## 11. Future Enhancements
+## UI Behavior
 
-### 11.1 Short-term Improvements
-
-#### 11.1.1 Enhanced Analytics
-- **Detailed Results View**: Comprehensive measurement statistics and visualizations
-- **Historical Trends**: Long-term coverage pattern analysis
-- **Export Functionality**: Data export in standard formats (CSV, KML)
-
-#### 11.1.2 User Experience
-- **Coverage Prediction**: AI-based prediction of network quality in unmeasured areas
-- **Social Features**: Anonymous coverage data sharing and comparison
-- **Notification System**: Alerts for coverage changes in frequently visited areas
-
-### 11.2 Medium-term Features
-
-#### 11.2.1 Advanced Measurements
-- **Multi-metric Testing**: Bandwidth testing in addition to latency
-- **Quality of Experience**: Application-specific performance metrics
-- **Network Stability**: Connection drop and handover analysis
-
-#### 11.2.2 Platform Expansion
-- **watchOS Integration**: Apple Watch companion for hands-free measurement
-- **CarPlay Support**: Automotive coverage testing during driving
-- **macOS Version**: Desktop application for WiFi coverage analysis
-
-### 11.3 Long-term Vision
-
-#### 11.3.1 Crowdsourced Coverage Database
-- **Global Coverage Map**: Aggregated anonymous data from all users
-- **Real-time Updates**: Live coverage status updates across geographic regions
-- **Carrier Comparison**: Multi-carrier coverage comparison tools
-
-#### 11.3.2 Integration Opportunities
-- **Smart City Integration**: Municipal network planning support
-- **Enterprise Solutions**: Corporate network planning and optimization
-- **Regulatory Reporting**: Automated compliance reporting for telecommunications authorities
+- Map overlay shows fence centers (radius 20 m by default) with technology color coding:
+  - 2G: #fca636, 3G: #e16462, 4G: #b12a90, 5G NSA: #6a00a8, 5G SA: #0d0887, unknown: #d9d9d9.
+- Selection updates a detail panel with date, technology label, and average ping (e.g., “60 ms”).
+- “Latest ping” label:
+  - Shows “-” until one full refresh interval completes.
+  - After each completed interval, shows the average of pings in the last completed interval.
+  - Shows “N/A” if no pings have ever been received.
+- Warnings can stack; Wi‑Fi and GPS accuracy warnings may appear at the same time.
 
 ---
 
-## Conclusion
+## User Stories Coverage
 
-The Network Coverage feature represents a sophisticated implementation of real-time network measurement with geographic correlation. The architecture emphasizes testability, maintainability, and user privacy while providing accurate and comprehensive coverage data.
+UDP pings reinitialization (docs/NetworkCoverage/user-stories/udp-pings-behavior.md)
+- Session init uses `ping_host`, `ping_port`, `ping_token`; remembers `test_uuid` for the current session.
+- Reinit chains sessions by passing the previous `test_uuid` as `loop_uuid`.
+- Timed reinit: when `max_coverage_measurement_seconds` elapses, reinit the UDP session seamlessly (no UI interruption).
+- Stop on `max_coverage_session_seconds` elapse.
+- Protocol mapping: `RP01` request; `RR01` (match) → success; `RE01` (match) → needs reinit; `RE01` (unmatched/0x0) → global reinit of all pending pings.
+- Persist/submit: fences collected under a given `test_uuid` are sent with that `test_uuid`; older persisted sessions are resent, newest groups first.
 
-The modular design enables incremental enhancement and adaptation to evolving requirements, while the robust testing infrastructure ensures reliability in production environments. The feature serves both individual users seeking network quality information and contributes to broader telecommunications infrastructure analysis.
+Location accuracy warning (docs/NetworkCoverage/user-stories/location-accuracy-warning.md)
+- Hidden before start; initial delay of 3 s after start.
+- If after the delay the latest location is worse than 5 m (prod), show “Waiting for GPS”.
+- Hidden when accuracy improves; hidden on stop.
+- Auto‑stop after 30 minutes with no accurate location ever received; records stop reason and ends measurement.
+
+Wi‑Fi connection warning (docs/NetworkCoverage/user-stories/wifi-connection-warning.md)
+- Hidden before start.
+- When on Wi‑Fi: display “Disable Wi‑Fi”, ignore ping and location updates for measurement; fences are not affected.
+- When switching back to cellular: hide the warning and resume.
+- Wi‑Fi and GPS warnings can be shown simultaneously.
 
 ---
 
-**Document Version**: 1.1  
-**Last Updated**: 2025-09-08  
-**Authors**: Claude Code Analysis  
-**Review Status**: Initial Draft
+## External Dependencies
+
+- Core Location: live updates and accuracy.
+- Core Telephony: technology codes mapped to display strings.
+- MapKit: map rendering.
+- SwiftData: persistence.
+- AsyncAlgorithms: merging and scheduling async streams.
+- Reachability (internal): network connection type detection in production; simulator service in debug.
+- RMBTControlServer & ObjectMapper: API requests and mapping.
+
+---
+
+## Testing Strategy
+
+- Unit tests cover ping cadence & timestamps, UDP protocol, session reinit, fence creation/assignment, warnings (GPS/Wi‑Fi), persistence and resend, and request encoding (radius, location extras, offset/duration).
+- The view model and ping sequence are driven by `TestClock` to validate timing semantics deterministically.
+
+---
+
+## Security
+
+- Location privacy: only fence centers and aggregated metrics are transmitted; no raw continuous traces.
+- Transport: HTTPS; UDP ping authenticated by server token.
+- Local data: leverages device encryption; stale persisted data is purged automatically.
+
+---
+
+## Performance Notes
+
+- Ping cadence is timer‑driven and lightweight; UDP payloads are minimal.
+- UI recomposition is constrained by `@Observable` state; map layers use simple annotations.
+- No exponential backoff is implemented for result submission retries; reliability relies on persistence+resend on next session.
