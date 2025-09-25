@@ -364,6 +364,17 @@ extension RMBTControlServer {
     }
     
     @objc(getHistoryOpenDataResultWithUUID:success:error:) func getHistoryOpenDataResult(with uuid: String, success: @escaping (_ response: RMBTOpenDataResponse) -> Void, error: @escaping RMBTErrorBlock) {
+        // Default behaviour: only 2xx considered success
+        getHistoryOpenDataResult(with: uuid, acceptableStatusCodes: 200..<300, success: success, error: error)
+    }
+
+    // Variant that allows customizing acceptable status codes for OpenData endpoint (e.g., include 404)
+    func getHistoryOpenDataResult(
+        with uuid: String,
+        acceptableStatusCodes: some Sequence<Int>,
+        success: @escaping (_ response: RMBTOpenDataResponse) -> Void,
+        error: @escaping RMBTErrorBlock
+    ) {
         ensureClientUuid(
             success: { _ in
                 let path = "/opentests/\(uuid)"
@@ -372,14 +383,16 @@ extension RMBTControlServer {
                     overrideBaseURL: self.statisticServerURL,
                     path: path,
                     requestObject: nil,
+                    acceptableStatusCodes: acceptableStatusCodes,
                     success: success,
                     error: { resultError in
                         error(resultError, nil)
                     })
             },
             error: { resultError in
-            error(resultError, nil)
-        })
+                error(resultError, nil)
+            }
+        )
     }
     
     @objc(getHistoryQoSResultWithUUID:success:error:) func getHistoryQOSResultWithUUID(testUuid: String, success: @escaping (_ response: QosMeasurementResultResponse) -> Void, error failure: @escaping ErrorCallback) {

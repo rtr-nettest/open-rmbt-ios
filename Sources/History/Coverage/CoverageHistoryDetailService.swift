@@ -25,7 +25,9 @@ struct CoverageHistoryDetail {
     
     func loadCoverageDetails(for testUUID: String) async throws -> CoverageHistoryDetail {
         return try await withCheckedThrowingContinuation { continuation in
-            controlServer.getHistoryOpenDataResult(with: testUUID, success: { response in
+            // Some statistic servers may return 404 with a valid JSON body for opentests.
+            // Allow 404 as a successful status for this specific call to remain backward compatible elsewhere.
+            controlServer.getHistoryOpenDataResult(with: testUUID, acceptableStatusCodes: Array(200..<300) + [404], success: { response in
                 let fences = self.convertFenceData(response.fences)
                 let detail = CoverageHistoryDetail(
                     fences: fences,
