@@ -139,6 +139,9 @@ import Foundation
     @objc public dynamic var serverIdentifier: String?
     @objc public dynamic var isOverrideServer: Bool = false
     @objc public dynamic var activeMeasurementId: String?
+    
+    // Feature flags
+    @objc public dynamic var coverageFeatureEnabled: Bool = false
 
     ///
     private override init() {
@@ -232,7 +235,10 @@ import Foundation
             "isDevModeEnabled",
             "serverIdentifier",
             "isOverrideServer",
-            "expertMode"
+            "expertMode",
+
+            // Feature flags
+            "coverageFeatureEnabled"
         ])
     }
 

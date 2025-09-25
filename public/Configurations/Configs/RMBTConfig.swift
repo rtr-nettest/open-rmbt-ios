@@ -38,6 +38,10 @@ public class RMBTConfig {
     static let ACTIVATE_DEV_CODE = "88888888"
     static let DEACTIVATE_DEV_CODE = "00000000"
     
+    // Secret codes to toggle the hidden Network Coverage feature
+    static let ACTIVATE_COVERAGE_FEATURE_CODE = "11223344"
+    static let DEACTIVATE_COVERAGE_FEATURE_CODE = "44332211"
+    
     static let RMBT_TEST_LOOPMODE_MIN_COUNT = 1
     static let RMBT_TEST_LOOPMODE_DEFAULT_COUNT = 50
     static let RMBT_TEST_LOOPMODE_MAX_COUNT = 500

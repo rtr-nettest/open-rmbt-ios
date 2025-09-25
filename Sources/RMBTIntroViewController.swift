@@ -157,6 +157,7 @@ class RMBTIntroViewController: UIViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(didBecomeActive(_:)), name: UIApplication.didBecomeActiveNotification, object: nil)
 
         currentView.updateLoopModeUI()
+        currentView.updateCoverageUI()
         self.updateOrientation(to: UIApplication.shared.windowSize)
 
         NotificationCenter.default.addObserver(self, selector: #selector(forceUpdateNetwork(_:)), name: UIApplication.didBecomeActiveNotification, object: nil)
@@ -194,6 +195,7 @@ class RMBTIntroViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         currentView.updateLoopModeUI()
+        currentView.updateCoverageUI()
         self.connectivityTracker.start()
         RMBTLocationTracker.shared.startAfterDeterminingAuthorizationStatus({
             self.connectivityTracker.forceUpdate()
@@ -524,6 +526,7 @@ class RMBTIntroViewController: UIViewController {
 extension RMBTIntroViewController: RMBTSettingsViewControllerDelegate {
     func settingsDidChanged(in viewController: RMBTSettingsViewController) {
         currentView.updateLoopModeUI()
+        currentView.updateCoverageUI()
     }
 }
 

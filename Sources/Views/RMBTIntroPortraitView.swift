@@ -151,6 +151,9 @@ class RMBTIntroPortraitView: UIView, XibLoadable {
 
         self.coverageTintColor = .ipAvailable
 
+        // Hidden feature: Network Coverage entry point visibility
+        updateCoverageUI()
+
         waveView.startAnimation()
         waveView.direction = .backwards
         wave2View.alpha = 0.2
@@ -166,6 +169,12 @@ class RMBTIntroPortraitView: UIView, XibLoadable {
     func stopAnimation() {
         waveView.stopAnimation()
         wave2View.stopAnimation()
+    }
+
+    // MARK: - Feature flags
+    func updateCoverageUI() {
+        // Hide the Coverage button unless explicitly enabled via secret code
+        self.coverageImageView.isHidden = !RMBTSettings.shared.coverageFeatureEnabled
     }
 
     func updateLoopModeUI() {

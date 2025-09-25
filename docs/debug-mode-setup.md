@@ -67,6 +67,19 @@ To disable debug mode:
 ### Settings Storage
 Debug settings are stored in iOS UserDefaults and are not committed to the repository, making this approach git-safe for temporary configuration changes.
 
+## Network Coverage Feature Flag
+
+The Network Coverage screen is hidden by default and can be enabled via a separate secret code:
+
+- Perform the same 10-tap gesture on the version label in Settings.
+- Enter the coverage activation code defined in `RMBTConfig`:
+  - `RMBTConfig.ACTIVATE_COVERAGE_FEATURE_CODE` to enable
+  - `RMBTConfig.DEACTIVATE_COVERAGE_FEATURE_CODE` to disable
+
+Notes
+- Changes may require restarting the app to reflect on the Intro screen.
+- The coverage entry button on the home screen remains hidden unless this flag is enabled.
+
 ## Security Note
 
 Debug mode provides access to advanced features intended for development and testing. Only enable debug mode when necessary and disable it when not in use.
