@@ -54,6 +54,7 @@ struct CoverageHistoryDetailView: View {
     @State private var coverageViewModel: NetworkCoverageViewModel?
     @State private var isLoading = true
     @State private var error: CoverageHistoryError?
+    @State private var showMoreDetails = false
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
@@ -66,14 +67,35 @@ struct CoverageHistoryDetailView: View {
                     await retry()
                 }
             case (false, .none, .some(let viewModel)):
-                CoverageResultView(stopReasons: [], onClose: { dismiss() })
-                    .environment(viewModel)
+                ZStack {
+                    CoverageResultView(stopReasons: [], onClose: { dismiss() })
+                        .environment(viewModel)
+
+                    // Floating "Test details" button
+                    VStack {
+                        Spacer()
+                        HStack {
+                            Spacer()
+                            Button(NSLocalizedString("Test details", comment: "")) {
+                                showMoreDetails = true
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .tint(.brand)
+                            .padding(16)
+                        }
+                    }
+                }
             case (false, .none, .none):
                 CoverageEmptyView()
             }
         }
         .task {
             await loadCoverageData()
+        }
+        .sheet(isPresented: $showMoreDetails) {
+            NavigationStack {
+                CoverageTestDetailsView(model: CoverageTestDetailsModel(result: coverageResult))
+            }
         }
     }
     

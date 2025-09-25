@@ -62,6 +62,9 @@
 		49C202CB2E0C3E0400CB6520 /* TestPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49C202CA2E0C3E0400CB6520 /* TestPopup.swift */; };
 		49C202CD2E0D3A6800CB6520 /* Color+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49C202CC2E0D3A6600CB6520 /* Color+Ext.swift */; };
 		49C921452D6CA0E80003EDBC /* CoverageMeasurementSessionInitializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49C921442D6CA0E20003EDBC /* CoverageMeasurementSessionInitializer.swift */; };
+		49D632E12E85234300B2BF02 /* CoverageTestDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49D632E02E85234300B2BF02 /* CoverageTestDetailsView.swift */; };
+		49D632E92E856A9900B2BF02 /* CoverageTestDetailsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49D632E82E856A9900B2BF02 /* CoverageTestDetailsModel.swift */; };
+		49D632ED2E856B1800B2BF02 /* CoverageTestDetailsModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49D632EA2E856B1800B2BF02 /* CoverageTestDetailsModelTests.swift */; };
 		49E6A3D72E6B4AB700CED0EE /* CoverageHistoryDetailService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49E6A3D42E6B4AB700CED0EE /* CoverageHistoryDetailService.swift */; };
 		49E6A3D92E6B4AB700CED0EE /* CoverageHistoryDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49E6A3D52E6B4AB700CED0EE /* CoverageHistoryDetailView.swift */; };
 		49F0AA102E70A11100ABCD01 /* UDPPingSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49F0AA0F2E70A11000ABCD01 /* UDPPingSessionTests.swift */; };
@@ -391,6 +394,9 @@
 		49C5E41A2DD74C3E00C537D9 /* libresolv.9.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libresolv.9.tbd; path = usr/lib/libresolv.9.tbd; sourceTree = SDKROOT; };
 		49C86FDC2AFBBF1500663CE2 /* RMBTConfig.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RMBTConfig.swift; sourceTree = "<group>"; };
 		49C921442D6CA0E20003EDBC /* CoverageMeasurementSessionInitializer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverageMeasurementSessionInitializer.swift; sourceTree = "<group>"; };
+		49D632E02E85234300B2BF02 /* CoverageTestDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverageTestDetailsView.swift; sourceTree = "<group>"; };
+		49D632E82E856A9900B2BF02 /* CoverageTestDetailsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverageTestDetailsModel.swift; sourceTree = "<group>"; };
+		49D632EA2E856B1800B2BF02 /* CoverageTestDetailsModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverageTestDetailsModelTests.swift; sourceTree = "<group>"; };
 		49E6A3D42E6B4AB700CED0EE /* CoverageHistoryDetailService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverageHistoryDetailService.swift; sourceTree = "<group>"; };
 		49E6A3D52E6B4AB700CED0EE /* CoverageHistoryDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverageHistoryDetailView.swift; sourceTree = "<group>"; };
 		49F0AA0F2E70A11000ABCD01 /* UDPPingSessionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UDPPingSessionTests.swift; sourceTree = "<group>"; };
@@ -789,6 +795,7 @@
 		498F7F922D352C0400EC975D /* NetworkCoverage */ = {
 			isa = PBXGroup;
 			children = (
+				49D632EC2E856B1800B2BF02 /* History */,
 				4935812F2DEF51DD004A921E /* Persistence */,
 				495288A42D64F8F700C73435 /* Pings */,
 				498F7F932D352C2000EC975D /* NetworkCoverageViewModelTests.swift */,
@@ -849,11 +856,29 @@
 			path = CoverageMeasurementSession;
 			sourceTree = "<group>";
 		};
+		49D632EB2E856B1800B2BF02 /* Coverage */ = {
+			isa = PBXGroup;
+			children = (
+				49D632EA2E856B1800B2BF02 /* CoverageTestDetailsModelTests.swift */,
+			);
+			path = Coverage;
+			sourceTree = "<group>";
+		};
+		49D632EC2E856B1800B2BF02 /* History */ = {
+			isa = PBXGroup;
+			children = (
+				49D632EB2E856B1800B2BF02 /* Coverage */,
+			);
+			path = History;
+			sourceTree = "<group>";
+		};
 		49E6A3D32E6B4A8100CED0EE /* Coverage */ = {
 			isa = PBXGroup;
 			children = (
 				49E6A3D42E6B4AB700CED0EE /* CoverageHistoryDetailService.swift */,
 				49E6A3D52E6B4AB700CED0EE /* CoverageHistoryDetailView.swift */,
+				49D632E02E85234300B2BF02 /* CoverageTestDetailsView.swift */,
+				49D632E82E856A9900B2BF02 /* CoverageTestDetailsModel.swift */,
 			);
 			path = Coverage;
 			sourceTree = "<group>";
@@ -1824,6 +1849,7 @@
 				49F0AA102E70A11100ABCD01 /* UDPPingSessionTests.swift in Sources */,
 				49F0AA132E70A1C600ABCD01 /* CoverageMeasurementSessionInitializerTests.swift in Sources */,
 				E92E07BA277B4DF6008143FE /* RMBTHelpersTest.swift in Sources */,
+				49D632ED2E856B1800B2BF02 /* CoverageTestDetailsModelTests.swift in Sources */,
 				E92E07B6277B4A80008143FE /* RMBTSpeedTest.swift in Sources */,
 				499CF4732DE9DF8300D5DCDE /* FencePersistenceTests.swift in Sources */,
 				498F7F942D352C2000EC975D /* NetworkCoverageViewModelTests.swift in Sources */,
@@ -2028,6 +2054,7 @@
 				E9AA0DEB276361B6003C71D7 /* RMBTQoSWebTest.swift in Sources */,
 				49AC77142DE8B2C100EBFAAE /* SwiftDataFencePersistenceService.swift in Sources */,
 				E946B95026D661730006E1F1 /* RMBTMapOptionsTypesViewController.swift in Sources */,
+				49D632E12E85234300B2BF02 /* CoverageTestDetailsView.swift in Sources */,
 				E9400F2F26BE8CCD0067273A /* WifiInfo.swift in Sources */,
 				E9E993F426EC814900E7EED6 /* QosMeasurementResultRequest.swift in Sources */,
 				E9E993F626EC816800E7EED6 /* QOSTypeDefinition.swift in Sources */,
@@ -2057,6 +2084,7 @@
 				495F7B9B2CF48FC4003750A3 /* NetworkCoverageView.swift in Sources */,
 				499CF46D2DE9D48200D5DCDE /* NetworkCoverageFactory.swift in Sources */,
 				E9824442272FC31600081732 /* RMBTLoopModeSettingsViewController.swift in Sources */,
+				49D632E92E856A9900B2BF02 /* CoverageTestDetailsModel.swift in Sources */,
 				E94ED1CF26C3C22F00B17B25 /* NetworkReachability.swift in Sources */,
 				E9B51CC627240B84006ED0C7 /* UIApplication+Additions.swift in Sources */,
 				499406DD2D9C0B2600237AC1 /* CurrentRadioTechnologyService.swift in Sources */,
