@@ -6,7 +6,9 @@ inhibit_all_warnings!
 use_frameworks!
 
 target 'RMBT' do
-  pod 'Alamofire'
+  # Explicitly pin to the pre-release version that Podfile.lock references
+  # to satisfy CocoaPods' requirement for installing pre-release pods.
+  pod 'Alamofire', '5.0.0-rc.2'
   pod 'AlamofireObjectMapper'
   pod 'XCGLogger'
   pod 'CocoaAsyncSocket'

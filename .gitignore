@@ -19,3 +19,12 @@ Resources/Images.xcassets/AppIcon.appiconset/
 # Claude Code
 .claude/
 
+# Ruby/Bundler artifacts
+# Track only .bundle/config (enforces vendor/bundle path across devs)
+.bundle/*
+!.bundle/config
+vendor/bundle/
+
+# Local build logs
+build.log
+build2.log

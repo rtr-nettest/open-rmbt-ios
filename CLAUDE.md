@@ -35,6 +35,52 @@ pod install
 pod update
 ```
 
+**Toolchain Setup (Ruby + CocoaPods)**
+- Prefer Homebrew Ruby (>= 3.1). The macOS system Ruby 2.6 is too old for modern CocoaPods.
+- Add Homebrew to your shell and prefer its Ruby first on PATH:
+  - `echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile`
+  - `eval "$(/opt/homebrew/bin/brew shellenv)"`
+  - `export PATH="/opt/homebrew/opt/ruby/bin:/opt/homebrew/bin:$PATH"`
+- Install Ruby and CocoaPods if needed:
+  - `brew install ruby cocoapods`
+- Install gems via Bundler (pinned in Gemfile):
+  - `bundle install`
+- Always run CocoaPods via Bundler to ensure the pinned version is used:
+  - `bundle exec pod install --repo-update`
+- If CocoaPods complains about `~/.netrc` permissions:
+  - `chmod 600 ~/.netrc`
+
+**Why Bundler**
+- The Gemfile pins CocoaPods (>= 1.16) to match Xcode 16 project formats. Using `bundle exec` guarantees a consistent gem set across machines and CI.
+
+**Xcode Project Format**
+- The project uses `objectVersion = 77` (Xcode 16). Older CocoaPods/xcodeproj can error with: `Unable to find compatibility version string for object version '70'`. Use CocoaPods >= 1.16 (already enforced by Gemfile).
+
+**First-Time Setup (Fresh Clone)**
+- `git submodule update --init --recursive`
+- `eval "$(/opt/homebrew/bin/brew shellenv)" && export PATH="/opt/homebrew/opt/ruby/bin:/opt/homebrew/bin:$PATH"`
+- `bundle install`
+- `bundle exec pod install --repo-update`
+- Open `RMBT.xcworkspace` (not the `.xcodeproj`).
+
+**Build From CLI**
+- Dev simulator build:
+  - `xcodebuild -workspace RMBT.xcworkspace -scheme RMBT -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.5' build`
+- Pretty output:
+  - `xcodebuild … | bundle exec xcpretty`
+
+**Configuration System Reminder**
+- Private/public configuration files are copied by `Scripts/update_configurations_from_private.sh` at build time.
+- Keep new constants in sync across public and private configs (e.g., `ACTIVATE_COVERAGE_FEATURE_CODE`, `DEACTIVATE_COVERAGE_FEATURE_CODE`) to avoid compile errors.
+
+**Common Troubleshooting**
+- `bundler` version error or system Ruby 2.6 on PATH:
+  - `eval "$(/opt/homebrew/bin/brew shellenv)" && export PATH="/opt/homebrew/opt/ruby/bin:/opt/homebrew/bin:$PATH"`
+  - Re-run: `bundle install` then `bundle exec pod install --repo-update`
+- CDN repo error about `~/.netrc` permissions → `chmod 600 ~/.netrc`
+- Missing Target Support Files → `bundle exec pod deintegrate && bundle exec pod install`
+- Clean build: `xcodebuild -workspace RMBT.xcworkspace -scheme RMBT clean`
+
 ## Configuration System
 
 The project uses a dual configuration system with `private/` and `public/` folders:
