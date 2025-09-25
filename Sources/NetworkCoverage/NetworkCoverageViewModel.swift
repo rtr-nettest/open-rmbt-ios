@@ -97,6 +97,8 @@ struct FenceDetail: Equatable, Identifiable {
     @ObservationIgnored private let updates: () -> any AsynchronousSequence<Update>
     @ObservationIgnored private let persistenceService: any FencePersistenceService
     @ObservationIgnored private let clock: any Clock<Duration>
+    @ObservationIgnored private let ipVersionProvider: () -> IPVersion?
+    @ObservationIgnored private let connectionsCountProvider: () -> Int
 
     @ObservationIgnored private(set) var fences: [Fence] {
         didSet {
@@ -122,6 +124,7 @@ struct FenceDetail: Equatable, Identifiable {
     private(set) var latestTechnology = "N/A"
     private(set) var locationAccuracy = "N/A"
     private(set) var fenceItems: [FenceItem] = []
+    private(set) var connectionFragmentsCount: Int = 1
 
     private(set) var warningPopups: [WarningPopupItem] = []
     private(set) var stopTestReasons: [StopTestReason] = []
@@ -155,7 +158,9 @@ struct FenceDetail: Equatable, Identifiable {
         locale: Locale,
         timeNow: @escaping () -> Date = Date.init,
         clock: some Clock<Duration>,
-        maxTestDuration: @escaping () -> TimeInterval
+        maxTestDuration: @escaping () -> TimeInterval,
+        ipVersionProvider: @escaping () -> IPVersion? = { nil },
+        connectionsCountProvider: @escaping () -> Int = { 1 }
     ) {
         self.fences = fences
         self.refreshInterval = refreshInterval
@@ -169,6 +174,8 @@ struct FenceDetail: Equatable, Identifiable {
         self.timeNow = timeNow
         self.clock = clock
         self.maxTestDuration = maxTestDuration
+        self.ipVersionProvider = ipVersionProvider
+        self.connectionsCountProvider = connectionsCountProvider
 
         selectedItemDateFormatter = {
             let dateFormatter = DateFormatter()
@@ -197,7 +204,9 @@ struct FenceDetail: Equatable, Identifiable {
         persistenceService: some FencePersistenceService,
         locale: Locale = .autoupdatingCurrent,
         clock: some Clock<Duration>,
-        maxTestDuration: @escaping () -> TimeInterval
+        maxTestDuration: @escaping () -> TimeInterval,
+        ipVersionProvider: @escaping () -> IPVersion? = { nil },
+        connectionsCountProvider: @escaping () -> Int = { 1 }
     ) {
         self.init(
             fences: fences,
@@ -222,7 +231,9 @@ struct FenceDetail: Equatable, Identifiable {
             persistenceService: persistenceService,
             locale: locale,
             clock: clock,
-            maxTestDuration: maxTestDuration
+            maxTestDuration: maxTestDuration,
+            ipVersionProvider: ipVersionProvider,
+            connectionsCountProvider: connectionsCountProvider
         )
     }
 
@@ -260,6 +271,7 @@ struct FenceDetail: Equatable, Identifiable {
                 return
             }
             pingResults.append(pingUpdate)
+            connectionFragmentsCount = connectionsCountProvider()
 
             if var (fence, idx) = fences.fence(at: pingUpdate.timestamp) {
                 fence.append(ping: pingUpdate)
@@ -386,6 +398,7 @@ struct FenceDetail: Equatable, Identifiable {
         locationAccuracy = "N/A"
         latestTechnology = "N/A"
         warningPopups.removeAll()
+        connectionFragmentsCount = 1
         
         // Cancel async sequences
         iterationTask?.cancel()
@@ -523,7 +536,7 @@ extension NetworkCoverageViewModel {
     }
 }
 
-private extension NetworkCoverageViewModel {
+fileprivate extension NetworkCoverageViewModel {
     private func fenceItem(from fence: Fence) -> FenceItem {
         .init(
             id: fence.id,
@@ -566,6 +579,18 @@ private extension NetworkCoverageViewModel {
 
     func displayValue(forRadioTechnology technology: String) -> String {
         technology.radioTechnologyDisplayValue ?? technology
+    }
+
+}
+
+extension NetworkCoverageViewModel {
+    var pingProtocolDisplay: String {
+        guard isStarted else { return "-" }
+        switch ipVersionProvider() {
+        case .some(.IPv4): return "IPv4"
+        case .some(.IPv6): return "IPv6"
+        case .none: return "-"
+        }
     }
 }
 

@@ -43,6 +43,8 @@ class CoverageMeasurementSessionInitializer {
     private(set) var lastTestStartDate: Date?
     private(set) var maxCoverageSessionDuration: TimeInterval?
     private(set) var maxCoverageMeasurementDuration: TimeInterval?
+    private(set) var lastIPVersion: IPVersion?
+    private(set) var udpPingSessionCount: Int = 0
 
     var isInitialized: Bool {
         lastTestUUID != nil && lastTestStartDate != nil
@@ -80,6 +82,9 @@ class CoverageMeasurementSessionInitializer {
         case 6: .IPv6
         default: nil
         }
+
+        lastIPVersion = ipVersion
+        udpPingSessionCount += 1
 
         return SessionCredentials(
             testID: response.testUUID,

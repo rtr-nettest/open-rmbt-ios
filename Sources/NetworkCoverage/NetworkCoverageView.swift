@@ -141,6 +141,19 @@ struct NetworkCoverageView: View {
 
             horizontalSeparator()
 
+            HStack {
+                Text("\(viewModel.fences.count) points/\(viewModel.connectionFragmentsCount) connection\(viewModel.connectionFragmentsCount == 1 ? "" : "s")")
+
+                Spacer()
+
+                if viewModel.isStarted {
+                    Text(viewModel.pingProtocolDisplay)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            horizontalSeparator()
+
             VStack(alignment: .leading) {
                 Text("Fence radius: **\(viewModel.fenceRadius, format: .number) m**")
                 Slider(

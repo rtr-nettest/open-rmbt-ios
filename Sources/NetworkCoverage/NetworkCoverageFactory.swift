@@ -132,7 +132,9 @@ struct NetworkCoverageFactory {
             sendResultsService: resultSender,
             persistenceService: persistenceService,
             clock: clock,
-            maxTestDuration: { sessionInitializer.maxCoverageSessionDuration ?? 4*60*60 /* 4 hours */ }
+            maxTestDuration: { sessionInitializer.maxCoverageSessionDuration ?? 4*60*60 /* 4 hours */ },
+            ipVersionProvider: { sessionInitializer.lastIPVersion },
+            connectionsCountProvider: { max(1, sessionInitializer.udpPingSessionCount) }
         )
     }
 
