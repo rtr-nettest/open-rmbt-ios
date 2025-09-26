@@ -543,6 +543,20 @@ extension RMBTSettingsViewController {
             if code == RMBTConfig.ACTIVATE_COVERAGE_FEATURE_CODE || code == RMBTConfig.DEACTIVATE_COVERAGE_FEATURE_CODE {
                 let enableCoverage = code == RMBTConfig.ACTIVATE_COVERAGE_FEATURE_CODE
                 self.settings.coverageFeatureEnabled = enableCoverage
+
+                // Confirmation alert with default system "OK" button
+                let title = NSLocalizedString("Network Coverage", comment: "Alert title for coverage feature toggle")
+                let message = enableCoverage
+                    ? NSLocalizedString("The Network Coverage feature has been enabled.", comment: "Coverage enabled message")
+                    : NSLocalizedString("The Network Coverage feature has been disabled.", comment: "Coverage disabled message")
+
+                _ = UIAlertController.presentAlert(title: title,
+                                                    text: message,
+                                                    cancelTitle: NSLocalizedString("input_setting_dialog_ok", comment: "OK button"),
+                                                    otherTitle: nil,
+                                                    cancelAction: { _ in },
+                                                    otherAction: nil)
+
                 // No immediate UI in Settings depends on this flag; Intro screen updates on return
                 return
             }
