@@ -9,6 +9,7 @@ import SwiftUI
 
 struct CoverageTestDetailsView: View {
     @State var model: CoverageTestDetailsModel
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         Group {
@@ -46,6 +47,13 @@ struct CoverageTestDetailsView: View {
         }
         .navigationTitle(model.title)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button(NSLocalizedString("Close", comment: "")) {
+                    dismiss()
+                }
+            }
+        }
         .onAppear { model.reload() }
     }
 }
