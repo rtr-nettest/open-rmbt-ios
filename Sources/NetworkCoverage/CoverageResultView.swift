@@ -18,7 +18,9 @@ struct CoverageResultView: View {
         @Bindable var viewModel = viewModel
         ZStack {
             FencesMapView(
-                fenceItems: viewModel.fenceItems,
+                visibleFenceItems: viewModel.visibleFenceItems,
+                fencePolylineSegments: viewModel.fencePolylineSegments,
+                mapRenderMode: viewModel.mapRenderMode,
                 locations: viewModel.locations.map { LocationUpdate(location: $0, timestamp: $0.timestamp) },
                 selectedFenceItem: $viewModel.selectedFenceItem,
                 selectedFenceDetail: viewModel.selectedFenceDetail,
@@ -27,7 +29,8 @@ struct CoverageResultView: View {
                 showsSettingsButton: false,
                 showsSettings: false,
                 onSettingsToggle: {},
-                trackUserLocation: false
+                trackUserLocation: false,
+                onVisibleRegionChange: viewModel.updateVisibleRegion(_:)
             )
             .safeAreaInset(edge: .top, spacing: -10) {
                 VStack(spacing: 0) {

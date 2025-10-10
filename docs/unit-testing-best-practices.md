@@ -136,6 +136,38 @@ do {
 4. **Easier Maintenance**: Changes to test infrastructure isolated to helper methods
 5. **Improved Readability**: Tests tell a clear story without technical noise
 
+### Naming Helpers and Fixtures for Readability
+
+When tests describe geospatial behaviour (e.g. map rendering), raw literals such as `0.0015` or `MKCoordinateRegion(center: ..., span: ...)` make scenarios hard to parse. Pair helper methods with **named fixtures** so the test body reads like prose.
+
+- **Prefer descriptive constants** for coordinates or values that encode intent. Example:
+  ```swift
+  private let viennaCoordinate = CLLocationCoordinate2D(latitude: 48.2082, longitude: 16.3738)
+  private let equatorWideRegion = MKCoordinateRegion(
+      center: .init(latitude: 0.0015, longitude: 0.0),
+      span: .init(latitudeDelta: 0.05, longitudeDelta: 0.05)
+  )
+  ```
+  Test readers immediately understand the city/region without decoding raw doubles.
+
+- **Wrap value creation in helpers** when multiple tests share the same pattern. Example:
+  ```swift
+  private func expectFenceItems(
+      _ items: [FenceItem],
+      match fences: [Fence],
+      SourceLocation location: SourceLocation = #_sourceLocation
+  ) {
+      // Compares identifiers, coordinates, and technologies – not just count
+  }
+  ```
+  This keeps assertions focused on behaviour (“the same fences are visible”) and enforces richer checks than `.count` comparisons.
+
+- **Use `SourceLocation = #_sourceLocation`** in helpers that wrap expectations so failures still point to the calling test line. This mirrors `Testing`’s preferred style and avoids sprinkling `file:line:` parameters.
+
+- **Explain intent in naming**: e.g. `farRegion` vs. `nearRegion`, `broadRegion`, `zeroSpanRegion`. The actual values can change, but the behaviour under test remains obvious.
+
+Consistently applying these patterns makes scenario set-up self-documenting and reduces the mental load when maintaining complex suites (map rendering, network coverage, etc.).
+
 ## Test Doubles Strategy
 
 ### Spy Implementation Patterns

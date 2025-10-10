@@ -10,8 +10,15 @@ import SwiftUI
 import CoreLocation
 import MapKit
 
+/// “Dumb” SwiftUI map responsible for visualising network coverage fences.
+///
+/// All rendering decisions—culling, polyline switching, current selection—are
+/// supplied by `NetworkCoverageViewModel`. The map reports camera changes back
+/// so the view model can keep its derived state in sync.
 struct FencesMapView: View {
-    let fenceItems: [FenceItem]
+    let visibleFenceItems: [FenceItem]
+    let fencePolylineSegments: [FencePolylineSegment]
+    let mapRenderMode: FencesRenderMode
     let locations: [LocationUpdate]
     let selectedFenceItem: Binding<FenceItem?>
     let selectedFenceDetail: FenceDetail?
@@ -21,11 +28,16 @@ struct FencesMapView: View {
     let showsSettings: Bool
     let onSettingsToggle: () -> Void
     let trackUserLocation: Bool
+    let onVisibleRegionChange: (MKCoordinateRegion?) -> Void
     
     @State private var position: MapCameraPosition
+    @State private var lastReportedRegion: MKCoordinateRegion?
+    @State private var didCenterOnVisibleItems: Bool
     
     init(
-        fenceItems: [FenceItem],
+        visibleFenceItems: [FenceItem],
+        fencePolylineSegments: [FencePolylineSegment],
+        mapRenderMode: FencesRenderMode,
         locations: [LocationUpdate],
         selectedFenceItem: Binding<FenceItem?>,
         selectedFenceDetail: FenceDetail?,
@@ -34,9 +46,12 @@ struct FencesMapView: View {
         showsSettingsButton: Bool,
         showsSettings: Bool,
         onSettingsToggle: @escaping () -> Void,
-        trackUserLocation: Bool
+        trackUserLocation: Bool,
+        onVisibleRegionChange: @escaping (MKCoordinateRegion?) -> Void
     ) {
-        self.fenceItems = fenceItems
+        self.visibleFenceItems = visibleFenceItems
+        self.fencePolylineSegments = fencePolylineSegments
+        self.mapRenderMode = mapRenderMode
         self.locations = locations
         self.selectedFenceItem = selectedFenceItem
         self.selectedFenceDetail = selectedFenceDetail
@@ -46,18 +61,21 @@ struct FencesMapView: View {
         self.showsSettings = showsSettings
         self.onSettingsToggle = onSettingsToggle
         self.trackUserLocation = trackUserLocation
+        self.onVisibleRegionChange = onVisibleRegionChange
         
         // Calculate initial position to show all fences
         if trackUserLocation {
             _position = State(initialValue: .userLocation(fallback: .automatic))
-        } else if !fenceItems.isEmpty {
-            let coordinates = fenceItems.map { $0.coordinate }
+        } else if !visibleFenceItems.isEmpty {
+            let coordinates = visibleFenceItems.map { $0.coordinate }
             let center = Self.calculateCenter(coordinates: coordinates)
             let span = Self.calculateSpan(coordinates: coordinates)
             _position = State(initialValue: .region(MKCoordinateRegion(center: center, span: span)))
         } else {
             _position = State(initialValue: .automatic)
         }
+        _lastReportedRegion = State(initialValue: nil)
+        _didCenterOnVisibleItems = State(initialValue: trackUserLocation || !visibleFenceItems.isEmpty)
     }
     
     private static func calculateCenter(coordinates: [CLLocationCoordinate2D]) -> CLLocationCoordinate2D {
@@ -87,27 +105,38 @@ struct FencesMapView: View {
         Map(position: $position, selection: selectedFenceItem) {
             UserAnnotation()
 
-            ForEach(fenceItems) { fence in
-                if !isExpertMode && fence.isCurrent {
-                    fenceCircle(for: fence)
-                    fenceAnnotation(for: fence)
-                        .tag(fence)
-                }
-                if isExpertMode {
-                    fenceCircle(for: fence)
+            switch mapRenderMode {
+            case .circles:
+                ForEach(visibleFenceItems) { fence in
+                    if !isExpertMode && fence.isCurrent {
+                        fenceCircle(for: fence)
+                        fenceAnnotation(for: fence)
+                            .tag(fence)
+                    }
+                    if isExpertMode {
+                        fenceCircle(for: fence)
 
-                    Annotation(
-                        coordinate: fence.coordinate,
-                        content: {
-                            Text(fence.technology)
-                                .font(.caption)
-                        },
-                        label: { EmptyView() }
-                    )
-                    .tag(fence)
-                } else {
-                    fenceAnnotation(for: fence)
+                        Annotation(
+                            coordinate: fence.coordinate,
+                            content: {
+                                Text(fence.technology)
+                                    .font(.caption)
+                            },
+                            label: { EmptyView() }
+                        )
                         .tag(fence)
+                    } else {
+                        fenceAnnotation(for: fence)
+                            .tag(fence)
+                    }
+                }
+            case .polylines:
+                ForEach(fencePolylineSegments) { segment in
+                    fencePolyline(for: segment)
+                }
+
+                if let currentFence = visibleFenceItems.first(where: { $0.isCurrent }) {
+                    fenceCircle(for: currentFence)
                 }
             }
 
@@ -119,7 +148,26 @@ struct FencesMapView: View {
                 }
             }
         }
-//        .adjustTopSafeAreaInset()
+        .onMapCameraChange(frequency: .continuous) { context in
+            guard trackUserLocation || didCenterOnVisibleItems else { return }
+            let region = context.region
+            if shouldReportRegionChange(to: region) {
+                lastReportedRegion = region
+                onVisibleRegionChange(region)
+            }
+        }
+        .onChange(of: visibleFenceItems) { newItems in
+            if newItems.isEmpty {
+                didCenterOnVisibleItems = trackUserLocation
+            } else if !didCenterOnVisibleItems, !trackUserLocation {
+                centerMap(on: newItems)
+            }
+        }
+        .onAppear {
+            if !didCenterOnVisibleItems, !trackUserLocation, !visibleFenceItems.isEmpty {
+                centerMap(on: visibleFenceItems)
+            }
+        }
         .mapControls {
             MapScaleView()
             MapCompass()
@@ -150,6 +198,12 @@ struct FencesMapView: View {
         }
     }
     
+    func fencePolyline(for segment: FencePolylineSegment) -> some MapContent {
+        MapPolyline(coordinates: segment.coordinates)
+            .stroke(segment.color.opacity(0.85), lineWidth: 4)
+            .mapOverlayLevel(level: .aboveRoads)
+    }
+
     func fenceCircle(for fence: FenceItem) -> some MapContent {
         MapCircle(center: fence.coordinate, radius: fenceRadius)
             .foregroundStyle(fence.color.opacity(fence.isSelected ? 0.4 : 0.1))
@@ -181,6 +235,27 @@ struct FencesMapView: View {
         Rectangle()
             .fill(Color.gray.opacity(0.2))
             .frame(maxWidth: .infinity, maxHeight: 1, alignment: .center)
+    }
+
+    private func centerMap(on items: [FenceItem]) {
+        guard !items.isEmpty else { return }
+
+        let coordinates = items.map { $0.coordinate }
+        let center = Self.calculateCenter(coordinates: coordinates)
+        let span = Self.calculateSpan(coordinates: coordinates)
+        position = .region(MKCoordinateRegion(center: center, span: span))
+        didCenterOnVisibleItems = true
+    }
+
+    private func shouldReportRegionChange(to region: MKCoordinateRegion) -> Bool {
+        guard let previous = lastReportedRegion else { return true }
+        let centerTolerance: CLLocationDegrees = 0.0002
+        let spanTolerance: CLLocationDegrees = 0.0002
+
+        return abs(region.center.latitude - previous.center.latitude) > centerTolerance ||
+            abs(region.center.longitude - previous.center.longitude) > centerTolerance ||
+            abs(region.span.latitudeDelta - previous.span.latitudeDelta) > spanTolerance ||
+            abs(region.span.longitudeDelta - previous.span.longitudeDelta) > spanTolerance
     }
 
 
@@ -226,7 +301,9 @@ private extension View {
     let viewModel = NetworkCoverageFactory().makeReadOnlyCoverageViewModel(fences: Fence.mockFences)
     
     FencesMapView(
-        fenceItems: viewModel.fenceItems,
+        visibleFenceItems: viewModel.visibleFenceItems,
+        fencePolylineSegments: viewModel.fencePolylineSegments,
+        mapRenderMode: viewModel.mapRenderMode,
         locations: [],
         selectedFenceItem: $selectedFenceItem,
         selectedFenceDetail: nil,
@@ -235,6 +312,7 @@ private extension View {
         showsSettingsButton: true,
         showsSettings: true,
         onSettingsToggle: {},
-        trackUserLocation: false
+        trackUserLocation: false,
+        onVisibleRegionChange: viewModel.updateVisibleRegion(_:)
     )
 }

@@ -10,6 +10,7 @@ import Foundation
 import CoreLocation
 import AsyncAlgorithms
 import SwiftUI
+import MapKit
 
 // Standalone reason type for why a coverage test was stopped
 enum StopTestReason: Equatable, Hashable {
@@ -45,6 +46,47 @@ struct FenceItem: Identifiable, Hashable {
     let isSelected: Bool
     let isCurrent: Bool
     let color: Color
+}
+
+enum FencesRenderMode: Equatable {
+    case circles
+    case polylines
+}
+
+struct FencePolylineSegment: Identifiable, Equatable {
+    typealias ID = String
+
+    let id: ID
+    let technology: String
+    let coordinates: [CLLocationCoordinate2D]
+    let color: Color
+}
+
+/// Configuration that tunes how fences are rendered on the map.
+///
+/// All values are deterministic to keep SwiftUI diffing stable and
+/// should be adjusted carefully because they directly affect
+/// performance on dense coverage measurements.
+struct FencesRenderingConfiguration {
+    /// Maximum number of circle annotations that can be rendered before switching to polylines.
+    /// Lower values trade detail for better rendering performance in zoomed-out states.
+    let maxCircleCountBeforePolyline: Int
+    /// Minimum map span (in degrees) that must be visible before polylines are allowed.
+    /// This avoids switching to polylines while the user is zoomed in very closely.
+    let minimumSpanForPolylineMode: CLLocationDegrees
+    /// Multiplier applied to the visible region when deciding which fences remain rendered.
+    /// Padding helps prevent hard culling when the user pans slightly.
+    let visibleRegionPaddingFactor: Double
+    /// Toggles whether fences outside the padded region should be filtered out.
+    let cullsToVisibleRegion: Bool
+
+    /// Default rendering thresholds tuned for history detail and live measurement screens.
+    static let `default` = FencesRenderingConfiguration(
+        maxCircleCountBeforePolyline: 60,
+        minimumSpanForPolylineMode: 0.03,
+        visibleRegionPaddingFactor: 1.2,
+        cullsToVisibleRegion: true
+    )
 }
 
 struct FenceDetail: Equatable, Identifiable {
@@ -99,6 +141,9 @@ struct FenceDetail: Equatable, Identifiable {
     @ObservationIgnored private let clock: any Clock<Duration>
     @ObservationIgnored private let ipVersionProvider: () -> IPVersion?
     @ObservationIgnored private let connectionsCountProvider: () -> Int
+    @ObservationIgnored private let renderingConfiguration: FencesRenderingConfiguration
+    @ObservationIgnored private var visibleRegion: MKCoordinateRegion?
+    @ObservationIgnored private var isUpdatingRenderedFences = false
 
     @ObservationIgnored private(set) var fences: [Fence] {
         didSet {
@@ -123,7 +168,12 @@ struct FenceDetail: Equatable, Identifiable {
     private(set) var latestPing: String = "N/A"
     private(set) var latestTechnology = "N/A"
     private(set) var locationAccuracy = "N/A"
-    private(set) var fenceItems: [FenceItem] = []
+    private(set) var fenceItems: [FenceItem] = [] {
+        didSet { updateRenderedFencesIfNeeded() }
+    }
+    private(set) var visibleFenceItems: [FenceItem] = []
+    private(set) var fencePolylineSegments: [FencePolylineSegment] = []
+    private(set) var mapRenderMode: FencesRenderMode = .circles
     private(set) var connectionFragmentsCount: Int = 1
 
     private(set) var warningPopups: [WarningPopupItem] = []
@@ -145,6 +195,14 @@ struct FenceDetail: Equatable, Identifiable {
     
     var currentUserLocation: CLLocation? { locations.last }
 
+    func updateVisibleRegion(_ region: MKCoordinateRegion?) {
+        visibleRegion = region.flatMap { region in
+            guard region.span.latitudeDelta > 0, region.span.longitudeDelta > 0 else { return nil }
+            return region
+        }
+        updateRenderedFencesIfNeeded()
+    }
+
     init(
         fences: [Fence] = [],
         refreshInterval: TimeInterval,
@@ -160,9 +218,9 @@ struct FenceDetail: Equatable, Identifiable {
         clock: some Clock<Duration>,
         maxTestDuration: @escaping () -> TimeInterval,
         ipVersionProvider: @escaping () -> IPVersion? = { nil },
-        connectionsCountProvider: @escaping () -> Int = { 1 }
+        connectionsCountProvider: @escaping () -> Int = { 1 },
+        renderingConfiguration: FencesRenderingConfiguration = .default
     ) {
-        self.fences = fences
         self.refreshInterval = refreshInterval
         self.minimumLocationAccuracy = minimumLocationAccuracy
         self.locationInaccuracyWarningInitialDelay = locationInaccuracyWarningInitialDelay
@@ -176,6 +234,7 @@ struct FenceDetail: Equatable, Identifiable {
         self.maxTestDuration = maxTestDuration
         self.ipVersionProvider = ipVersionProvider
         self.connectionsCountProvider = connectionsCountProvider
+        self.renderingConfiguration = renderingConfiguration
 
         selectedItemDateFormatter = {
             let dateFormatter = DateFormatter()
@@ -185,8 +244,13 @@ struct FenceDetail: Equatable, Identifiable {
             return dateFormatter
         }()
 
+        self.fences = fences
+
         if !fences.isEmpty {
-            self.fenceItems = fences.map(fenceItem)
+            let initialFenceItems = fences.map(fenceItem)
+            fenceItems = initialFenceItems
+            visibleFenceItems = initialFenceItems
+            updateRenderedFences()
         }
     }
 
@@ -206,7 +270,8 @@ struct FenceDetail: Equatable, Identifiable {
         clock: some Clock<Duration>,
         maxTestDuration: @escaping () -> TimeInterval,
         ipVersionProvider: @escaping () -> IPVersion? = { nil },
-        connectionsCountProvider: @escaping () -> Int = { 1 }
+        connectionsCountProvider: @escaping () -> Int = { 1 },
+        renderingConfiguration: FencesRenderingConfiguration = .default
     ) {
         self.init(
             fences: fences,
@@ -233,7 +298,8 @@ struct FenceDetail: Equatable, Identifiable {
             clock: clock,
             maxTestDuration: maxTestDuration,
             ipVersionProvider: ipVersionProvider,
-            connectionsCountProvider: connectionsCountProvider
+            connectionsCountProvider: connectionsCountProvider,
+            renderingConfiguration: renderingConfiguration
         )
     }
 
@@ -537,6 +603,171 @@ extension NetworkCoverageViewModel {
 }
 
 fileprivate extension NetworkCoverageViewModel {
+    func updateRenderedFencesIfNeeded() {
+        guard !isUpdatingRenderedFences else { return }
+        isUpdatingRenderedFences = true
+        defer { isUpdatingRenderedFences = false }
+        updateRenderedFences()
+    }
+
+    func updateRenderedFences() {
+        let allItems = fenceItems
+
+        if allItems.isEmpty {
+            if !visibleFenceItems.isEmpty { visibleFenceItems = [] }
+            if !fencePolylineSegments.isEmpty { fencePolylineSegments = [] }
+            if mapRenderMode != .circles { mapRenderMode = .circles }
+            return
+        }
+
+        ensureInitialVisibleRegionIfNeeded(for: allItems)
+
+        let region = visibleRegion
+        let desiredMode: FencesRenderMode = shouldUsePolylineMode(for: allItems, region: region) ? .polylines : .circles
+
+        if mapRenderMode != desiredMode {
+            mapRenderMode = desiredMode
+            if desiredMode == .polylines, selectedFenceItem != nil {
+                selectedFenceItem = nil
+            }
+        }
+
+        let filteredItems = filteredFenceItems(allItems, within: region)
+        if visibleFenceItems != filteredItems {
+            visibleFenceItems = filteredItems
+        }
+
+        if desiredMode == .polylines {
+            let segments = buildPolylineSegments(from: allItems)
+            let filteredSegments = filteredPolylineSegments(segments, within: region)
+            if fencePolylineSegments != filteredSegments {
+                fencePolylineSegments = filteredSegments
+            }
+        } else if !fencePolylineSegments.isEmpty {
+            fencePolylineSegments = []
+        }
+    }
+
+    private func filteredFenceItems(_ items: [FenceItem], within region: MKCoordinateRegion?) -> [FenceItem] {
+        guard renderingConfiguration.cullsToVisibleRegion, let region else { return items }
+        return items.filter { contains($0.coordinate, in: region, paddingFactor: renderingConfiguration.visibleRegionPaddingFactor) }
+    }
+
+    private func filteredPolylineSegments(_ segments: [FencePolylineSegment], within region: MKCoordinateRegion?) -> [FencePolylineSegment] {
+        guard renderingConfiguration.cullsToVisibleRegion, let region else { return segments }
+        return segments.filter { segment in
+            segment.coordinates.contains {
+                contains($0, in: region, paddingFactor: renderingConfiguration.visibleRegionPaddingFactor)
+            }
+        }
+    }
+
+    /// Determines if the map should render polylines instead of circles.
+    ///
+    /// The switch happens only when the amount of rendered circles would exceed
+    /// `maxCircleCountBeforePolyline` **and** the visible map span is large enough.
+    /// Requiring both conditions prevents toggling while zoomed in and keeps
+    /// circle detail when only a few fences are present.
+    private func shouldUsePolylineMode(for items: [FenceItem], region: MKCoordinateRegion?) -> Bool {
+        guard items.count >= renderingConfiguration.maxCircleCountBeforePolyline else { return false }
+        guard let region else { return false }
+        let maxSpan = max(region.span.latitudeDelta, region.span.longitudeDelta)
+        return maxSpan >= renderingConfiguration.minimumSpanForPolylineMode
+    }
+
+    private func buildPolylineSegments(from items: [FenceItem]) -> [FencePolylineSegment] {
+        guard items.count > 1 else { return [] }
+
+        func segmentIdentifier(for technology: String, fenceIds: [UUID]) -> FencePolylineSegment.ID {
+            let joinedIds = fenceIds.map(\.uuidString).joined(separator: ":")
+            return "\(technology)|\(joinedIds)"
+        }
+
+        var segments: [FencePolylineSegment] = []
+        var currentTechnology = items[0].technology
+        var currentColor = items[0].color
+        var coordinates: [CLLocationCoordinate2D] = [items[0].coordinate]
+        var fenceIds: [UUID] = [items[0].id]
+
+        func appendCurrentSegment() {
+            guard coordinates.count >= 2 else { return }
+            segments.append(
+                FencePolylineSegment(
+                    id: segmentIdentifier(for: currentTechnology, fenceIds: fenceIds),
+                    technology: currentTechnology,
+                    coordinates: coordinates,
+                    color: currentColor
+                )
+            )
+        }
+
+        for item in items.dropFirst() {
+            if item.technology == currentTechnology {
+                coordinates.append(item.coordinate)
+                fenceIds.append(item.id)
+            } else {
+                appendCurrentSegment()
+
+                currentTechnology = item.technology
+                currentColor = item.color
+                coordinates = [item.coordinate]
+                fenceIds = [item.id]
+            }
+        }
+
+        appendCurrentSegment()
+
+        return segments
+    }
+
+    private func contains(_ coordinate: CLLocationCoordinate2D, in region: MKCoordinateRegion, paddingFactor: Double) -> Bool {
+        let paddedLatitudeDelta = max(region.span.latitudeDelta * paddingFactor, 0.0001)
+        let paddedLongitudeDelta = max(region.span.longitudeDelta * paddingFactor, 0.0001)
+
+        let halfLat = paddedLatitudeDelta / 2
+        let halfLon = paddedLongitudeDelta / 2
+
+        let minLat = region.center.latitude - halfLat
+        let maxLat = region.center.latitude + halfLat
+        let minLon = region.center.longitude - halfLon
+        let maxLon = region.center.longitude + halfLon
+
+        return coordinate.latitude >= minLat &&
+            coordinate.latitude <= maxLat &&
+            coordinate.longitude >= minLon &&
+            coordinate.longitude <= maxLon
+    }
+
+    /// Seeds the visible region with a bounding box of all fences so read-only views
+    /// display measurements even before the map reports camera updates.
+    private func ensureInitialVisibleRegionIfNeeded(for items: [FenceItem]) {
+        guard visibleRegion == nil, let region = regionEnclosing(items) else { return }
+        visibleRegion = region
+    }
+
+    private func regionEnclosing(_ items: [FenceItem]) -> MKCoordinateRegion? {
+        guard !items.isEmpty else { return nil }
+
+        let latitudes = items.map { $0.coordinate.latitude }
+        let longitudes = items.map { $0.coordinate.longitude }
+
+        guard let minLat = latitudes.min(), let maxLat = latitudes.max(),
+              let minLon = longitudes.min(), let maxLon = longitudes.max() else {
+            return nil
+        }
+
+        let center = CLLocationCoordinate2D(
+            latitude: (minLat + maxLat) / 2,
+            longitude: (minLon + maxLon) / 2
+        )
+
+        let latDelta = max((maxLat - minLat) * 1.5, 0.01)
+        let lonDelta = max((maxLon - minLon) * 1.5, 0.01)
+
+        let span = MKCoordinateSpan(latitudeDelta: latDelta, longitudeDelta: lonDelta)
+        return MKCoordinateRegion(center: center, span: span)
+    }
+
     private func fenceItem(from fence: Fence) -> FenceItem {
         .init(
             id: fence.id,

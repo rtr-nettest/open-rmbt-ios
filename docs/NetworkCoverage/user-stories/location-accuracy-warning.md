@@ -57,6 +57,13 @@ Feature: Location accuracy warning during Network Coverage measurement
     When the latest location accuracy becomes within 10 meters
     Then the "Waiting for GPS" warning is not displayed
 
+  Scenario: Location accuracy warning keeps previously rendered fences visible
+    Given I started a measurement and fences are already rendered on the map
+    And the map render mode is currently "Polyline"
+    When the latest location accuracy becomes worse than 10 meters
+    Then the "Waiting for GPS" warning is displayed
+    And the previously rendered fences remain visible on the map
+
   Scenario: Auto-stop and fail after 30 minutes without sufficient location accuracy
     When I start a measurement
     And 30 minutes pass

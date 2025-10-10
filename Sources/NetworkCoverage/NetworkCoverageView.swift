@@ -30,7 +30,9 @@ struct NetworkCoverageView: View {
         NavigationStack(path: $navigationPath) {
             ZStack {
                 FencesMapView(
-                    fenceItems: viewModel.fenceItems,
+                    visibleFenceItems: viewModel.visibleFenceItems,
+                    fencePolylineSegments: viewModel.fencePolylineSegments,
+                    mapRenderMode: viewModel.mapRenderMode,
                     locations: viewModel.locations.map { LocationUpdate(location: $0, timestamp: $0.timestamp) },
                     selectedFenceItem: $viewModel.selectedFenceItem,
                     selectedFenceDetail: viewModel.selectedFenceDetail,
@@ -39,7 +41,8 @@ struct NetworkCoverageView: View {
                     showsSettingsButton: true,
                     showsSettings: showsSettings,
                     onSettingsToggle: { showsSettings.toggle() },
-                    trackUserLocation: true
+                    trackUserLocation: true,
+                    onVisibleRegionChange: viewModel.updateVisibleRegion(_:)
                 )
                 .contentShape(Rectangle())
                 .onTapGesture {

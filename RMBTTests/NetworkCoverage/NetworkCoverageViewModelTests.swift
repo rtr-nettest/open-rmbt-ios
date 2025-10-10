@@ -10,6 +10,7 @@ import Testing
 @testable import RMBT
 import Combine
 import CoreLocation
+import MapKit
 import SwiftData
 import SwiftUI
 import CoreTelephony
@@ -118,6 +119,163 @@ import Clocks
         await sut.startTest()
 
         #expect(sut.latestPing == "N/A")
+    }
+
+    @MainActor @Suite("Map Rendering")
+    struct MapRenderingTests {
+        private let equatorWideRegion = MKCoordinateRegion(center: .init(latitude: 0.0015, longitude: 0.0), span: .init(latitudeDelta: 0.05, longitudeDelta: 0.05))
+        private let equatorTightRegion = MKCoordinateRegion(center: .init(latitude: 0.0015, longitude: 0.0), span: .init(latitudeDelta: 0.01, longitudeDelta: 0.01))
+        private let midRangeRegion = MKCoordinateRegion(center: .init(latitude: 0.005, longitude: 0.0), span: .init(latitudeDelta: 0.02, longitudeDelta: 0.02))
+        private let broadRegion = MKCoordinateRegion(center: .init(latitude: 0.05, longitude: 0.0), span: .init(latitudeDelta: 0.5, longitudeDelta: 0.5))
+        private let farRegion = MKCoordinateRegion(center: .init(latitude: 0.25, longitude: 0.0), span: .init(latitudeDelta: 1.0, longitudeDelta: 1.0))
+        private let nearRegion = MKCoordinateRegion(center: .init(latitude: 0.02, longitude: 0.0), span: .init(latitudeDelta: 0.2, longitudeDelta: 0.2))
+        private let zeroSpanRegion = MKCoordinateRegion(center: .init(latitude: 0, longitude: 0), span: .init(latitudeDelta: 0, longitudeDelta: 0))
+
+        private let viennaCoordinate = CLLocationCoordinate2D(latitude: 48.2082, longitude: 16.3738)
+        private let bratislavaCoordinate = CLLocationCoordinate2D(latitude: 48.1486, longitude: 17.1077)
+
+        @Test func whenZoomedOutBeyondThreshold_thenSwitchesToPolylineMode() async throws {
+            let fences = [
+                makeFence(lat: 0.0000, lon: 0.0, technology: "4G"),
+                makeFence(lat: 0.0010, lon: 0.0, technology: "4G"),
+                makeFence(lat: 0.0020, lon: 0.0, technology: "5G"),
+                makeFence(lat: 0.0030, lon: 0.0, technology: "5G")
+            ]
+
+            let configuration = FencesRenderingConfiguration(
+                maxCircleCountBeforePolyline: 4,
+                minimumSpanForPolylineMode: 0.02,
+                visibleRegionPaddingFactor: 1.0,
+                cullsToVisibleRegion: false
+            )
+
+            let sut = makeSUT(fences: fences, renderingConfiguration: configuration)
+
+            #expect(sut.mapRenderMode == .circles)
+            #expect(sut.fencePolylineSegments.isEmpty)
+
+            sut.updateVisibleRegion(equatorWideRegion)
+
+            #expect(sut.mapRenderMode == .polylines)
+            #expect(sut.fencePolylineSegments.count == 2)
+            #expect(sut.fencePolylineSegments.map(\.technology) == ["4G", "5G"])
+            expectFenceItems(sut.visibleFenceItems, match: fences)
+
+            sut.updateVisibleRegion(equatorTightRegion)
+
+            #expect(sut.mapRenderMode == .circles)
+            #expect(sut.fencePolylineSegments.isEmpty)
+            expectFenceItems(sut.visibleFenceItems, match: fences)
+        }
+
+        @Test func whenCullingEnabled_thenVisibleFenceItemsAreFilteredToRegion() async throws {
+            let fences = [
+                makeFence(lat: 0.0, lon: 0.0),
+                makeFence(lat: 0.01, lon: 0.0),
+                makeFence(lat: 0.20, lon: 0.0)
+            ]
+
+            let configuration = FencesRenderingConfiguration(
+                maxCircleCountBeforePolyline: Int.max,
+                minimumSpanForPolylineMode: 1.0,
+                visibleRegionPaddingFactor: 1.0,
+                cullsToVisibleRegion: true
+            )
+
+            let sut = makeSUT(fences: fences, renderingConfiguration: configuration)
+
+            expectFenceItems(sut.visibleFenceItems, match: fences)
+
+            sut.updateVisibleRegion(midRangeRegion)
+
+            expectFenceItems(sut.visibleFenceItems, match: Array(fences.prefix(2)))
+
+            sut.updateVisibleRegion(broadRegion)
+
+            expectFenceItems(sut.visibleFenceItems, match: fences)
+        }
+
+        @Test func whenCullingEnabled_thenPolylineSegmentsOutsideRegionAreHidden() async throws {
+            let fences = [
+                makeFence(lat: 0.0, lon: 0.0, technology: "4G"),
+                makeFence(lat: 0.01, lon: 0.0, technology: "4G"),
+                makeFence(lat: 0.5, lon: 0.0, technology: "5G"),
+                makeFence(lat: 0.51, lon: 0.0, technology: "5G")
+            ]
+
+            let configuration = FencesRenderingConfiguration(
+                maxCircleCountBeforePolyline: 4,
+                minimumSpanForPolylineMode: 0.2,
+                visibleRegionPaddingFactor: 1.0,
+                cullsToVisibleRegion: true
+            )
+
+            let sut = makeSUT(fences: fences, renderingConfiguration: configuration)
+
+            sut.updateVisibleRegion(farRegion)
+
+            #expect(sut.mapRenderMode == .polylines)
+            #expect(sut.fencePolylineSegments.count == 2)
+
+            sut.updateVisibleRegion(nearRegion)
+
+            #expect(sut.mapRenderMode == .polylines)
+            #expect(sut.fencePolylineSegments.count == 1)
+            #expect(sut.fencePolylineSegments.first?.technology == "4G")
+        }
+
+        @Test func whenPolylineModeStable_thenSegmentIdentifiersRemainStableAcrossUpdates() async throws {
+            let fences = [
+                makeFence(lat: 0.0000, lon: 0.0, technology: "4G"),
+                makeFence(lat: 0.0010, lon: 0.0, technology: "4G"),
+                makeFence(lat: 0.0020, lon: 0.0, technology: "5G"),
+                makeFence(lat: 0.0030, lon: 0.0, technology: "5G")
+            ]
+
+            let configuration = FencesRenderingConfiguration(
+                maxCircleCountBeforePolyline: 4,
+                minimumSpanForPolylineMode: 0.02,
+                visibleRegionPaddingFactor: 1.0,
+                cullsToVisibleRegion: false
+            )
+
+            let sut = makeSUT(fences: fences, renderingConfiguration: configuration)
+            let region = equatorWideRegion
+
+            sut.updateVisibleRegion(region)
+            let firstIdentifiers = sut.fencePolylineSegments.map(\.id)
+
+            sut.updateVisibleRegion(region)
+
+            #expect(sut.fencePolylineSegments.map(\.id) == firstIdentifiers)
+        }
+
+        @Test func whenInitialized_thenVisibleFenceItemsMatchFences() async throws {
+            let fences = [
+                makeFence(lat: viennaCoordinate.latitude, lon: viennaCoordinate.longitude),
+                makeFence(lat: bratislavaCoordinate.latitude, lon: bratislavaCoordinate.longitude)
+            ]
+
+            let sut = makeSUT(fences: fences)
+
+            expectFenceItems(sut.fenceItems, match: fences)
+            expectFenceItems(sut.visibleFenceItems, match: fences)
+            #expect(sut.mapRenderMode == .circles)
+        }
+
+        @Test func whenRegionWithZeroSpanReported_thenVisibleFencesStayVisible() async throws {
+            let fences = [
+                makeFence(lat: viennaCoordinate.latitude, lon: viennaCoordinate.longitude),
+                makeFence(lat: bratislavaCoordinate.latitude, lon: bratislavaCoordinate.longitude)
+            ]
+
+            let sut = makeSUT(fences: fences)
+
+            sut.updateVisibleRegion(zeroSpanRegion)
+
+            expectFenceItems(sut.visibleFenceItems, match: fences)
+            #expect(sut.mapRenderMode == .circles)
+        }
     }
 
     @Test(arguments: [
@@ -419,7 +577,7 @@ import Clocks
 
         @Test("WHEN initialized with fences THEN no fence is selected initially")
         func whenInitializedWithFences_thenNoFenceIsSelectedInitially() async throws {
-            let fences = [makeFence(at: 1.0, lon: 1.0), makeFence(at: 2.0, lon: 2.0)]
+            let fences = [makeFence(lat: 1.0, lon: 1.0), makeFence(lat: 2.0, lon: 2.0)]
             let sut = makeSUT(fences: fences)
 
             #expect(sut.selectedFenceItem == nil)
@@ -429,9 +587,9 @@ import Clocks
 
         @Test("WHEN valid fence ID is selected THEN fence is marked as selected and detail is populated")
         func whenValidFenceIDIsSelected_thenFenceIsMarkedAsSelectedAndDetailIsPopulated() async throws {
-            let fence1 = makeFence(at: 1.0, lon: 1.0)
+            let fence1 = makeFence(lat: 1.0, lon: 1.0)
             let fence2 = makeFence(
-                at: 2.0,
+                lat: 2.0,
                 lon: 3.0,
                 dateEntered: Date(timeIntervalSinceReferenceDate: 1000),
                 technology: CTRadioAccessTechnologyLTE,
@@ -458,9 +616,9 @@ import Clocks
 
         @Test("WHEN selection is changed to different fence THEN previous fence is deselected and new one is selected")
         func whenSelectionIsChangedToDifferentFence_thenPreviousFenceIsDeselectedAndNewOneIsSelected() async throws {
-            let fence1 = makeFence(at: 1.0, lon: 1.0)
-            let fence2 = makeFence(at: 2.0, lon: 2.0)
-            let fence3 = makeFence(at: 3.0, lon: 3.0)
+            let fence1 = makeFence(lat: 1.0, lon: 1.0)
+            let fence2 = makeFence(lat: 2.0, lon: 2.0)
+            let fence3 = makeFence(lat: 3.0, lon: 3.0)
             let sut = makeSUT(fences: [fence1, fence2, fence3])
 
             sut.simulateSelectFence(fence1)
@@ -471,8 +629,8 @@ import Clocks
 
         @Test("WHEN selection is set to nil THEN all fences are deselected")
         func whenSelectionIsSetToNil_thenAllFencesAreDeselected() async throws {
-            let fence1 = makeFence(at: 1.0, lon: 1.0)
-            let fence2 = makeFence(at: 2.0, lon: 2.0)
+            let fence1 = makeFence(lat: 1.0, lon: 1.0)
+            let fence2 = makeFence(lat: 2.0, lon: 2.0)
             let sut = makeSUT(fences: [fence1, fence2])
 
             sut.simulateSelectFence(fence1)
@@ -485,8 +643,8 @@ import Clocks
 
         @Test("WHEN non-existent fence ID is selected THEN selection remains nil and no fence is marked as selected")
         func whenNonExistentFenceIDIsSelected_thenSelectionRemainsNilAndNoFenceIsMarkedAsSelected() async throws {
-            let fence1 = makeFence(at: 1.0, lon: 1.0)
-            let fence2 = makeFence(at: 2.0, lon: 2.0)
+            let fence1 = makeFence(lat: 1.0, lon: 1.0)
+            let fence2 = makeFence(lat: 2.0, lon: 2.0)
             let sut = makeSUT(fences: [fence1, fence2])
 
             let nonExistentFenceItem = FenceItem(id: UUID(), date: Date(), coordinate: CLLocationCoordinate2D(), technology: "N/A", isSelected: false, isCurrent: false, color: .gray)
@@ -852,7 +1010,8 @@ import Clocks
     overlayDelay: TimeInterval = 3.0,
     clock: some Clock<Duration> = ContinuousClock(),
     insufficientAccuracyAutoStopInterval: TimeInterval = 30 * 60,
-    maxTestDuration: @escaping () -> TimeInterval = { 4 * 60 * 60 }
+    maxTestDuration: @escaping () -> TimeInterval = { 4 * 60 * 60 },
+    renderingConfiguration: FencesRenderingConfiguration = .default
 ) -> NetworkCoverageViewModel {
     return NetworkCoverageViewModel(
         fences: fences,
@@ -867,8 +1026,28 @@ import Clocks
         locale: locale,
         timeNow: currentTime,
         clock: clock,
-        maxTestDuration: maxTestDuration
+        maxTestDuration: maxTestDuration,
+        renderingConfiguration: renderingConfiguration
     )
+}
+
+private func expectFenceItems(
+    _ items: [FenceItem],
+    match fences: [Fence],
+    sourceLocation location: SourceLocation = #_sourceLocation
+) {
+    let sortedItems = items.sorted { $0.id.uuidString < $1.id.uuidString }
+    let sortedFences = fences.sorted { $0.id.uuidString < $1.id.uuidString }
+
+    #expect(sortedItems.count == sortedFences.count, sourceLocation: location)
+
+    for (item, fence) in zip(sortedItems, sortedFences) {
+        #expect(item.id == fence.id, sourceLocation: location)
+        #expect(item.coordinate.latitude == fence.startingLocation.coordinate.latitude, sourceLocation: location)
+        #expect(item.coordinate.longitude == fence.startingLocation.coordinate.longitude, sourceLocation: location)
+        let expectedTechnology = fence.significantTechnology.map { $0.radioTechnologyDisplayValue ?? $0 } ?? "N/A"
+        #expect(item.technology == expectedTechnology, sourceLocation: location)
+    }
 }
 
 func makeLocationUpdate(at timestampOffset: TimeInterval, lat: CLLocationDegrees, lon: CLLocationDegrees, accuracy: CLLocationAccuracy = 1) -> NetworkCoverageViewModel.Update {
@@ -900,7 +1079,7 @@ func makeNetworkTypeUpdate(
 
 func makeFence(
     id: UUID = UUID(),
-    at lat: CLLocationDegrees,
+    lat: CLLocationDegrees,
     lon: CLLocationDegrees,
     dateEntered: Date = Date(timeIntervalSinceReferenceDate: 0),
     technology: String? = nil,
