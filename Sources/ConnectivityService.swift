@@ -145,10 +145,10 @@ open class ConnectivityService: NSObject { // TODO: rewrite with ControlServerNe
         RMBTControlServer.shared.getIpv6( success: { [weak self] response in
             self?.connectivityInfo.ipv6.connectionAvailable = true
             self?.connectivityInfo.ipv6.externalIp = response.ip
-            self?.finishIPv4Check()
+            self?.finishIPv6Check()
         }, error: { [weak self] error in
             self?.connectivityInfo.ipv6.connectionAvailable = false
-            self?.finishIPv4Check()
+            self?.finishIPv6Check()
         })
     }
 

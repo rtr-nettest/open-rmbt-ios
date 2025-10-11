@@ -8,7 +8,7 @@
 import XCGLogger
 
 @objc public class Log: NSObject {
-    public static let logger = XCGLogger.init(identifier: "RMBTClient", includeDefaultDestinations: true)
+    public static let logger = XCGLogger.init(identifier: "RMBTClient", includeDefaultDestinations: false)
     
     @objc static func log(_ string: String) {
         logger.debug(string)

@@ -31,7 +31,8 @@ class ServerHelper {
         configuration.allowsCellularAccess = true
         configuration.httpShouldUsePipelining = true
 
-        let alamofireManager = Alamofire.Session(configuration: configuration)
+        let logger = AFNetworkLogger()
+        let alamofireManager = Alamofire.Session(configuration: configuration, eventMonitors: [logger])
 
         updateHeadersAlamofireManager(alamofireManager)
         // print(Bundle.main.preferredLocalizations)
@@ -40,15 +41,15 @@ class ServerHelper {
     }
     
     class func updateHeadersAlamofireManager(_ alamofireManager: Alamofire.Session) {
-        var headers: [AnyHashable: Any] = [:]
+        var headers: [AnyHashable: Any] = [
+            "Accept": "application/json",
+            "Accept-Language": PREFFERED_LANGUAGE
+        ]
         // Set user agent
         if let userAgent = UserDefaults.getRequestUserAgent() {
-            headers = [
-                "User-Agent": userAgent,
-                "Accept-Language": PREFFERED_LANGUAGE
-            ]
+            headers["User-Agent"] = userAgent
         }
-        
+
         alamofireManager.sessionConfiguration.httpAdditionalHeaders = headers
     }
 
@@ -72,13 +73,6 @@ class ServerHelper {
 
             parameters = reqObj.toJSON() as [String : AnyObject]?
 
-            Log.logger.debug { () -> String in 
-                if let jsonString = Mapper().toJSONString(reqObj, prettyPrint: true) {
-                    return "Requesting \(path) with object: \n\(jsonString)"
-                }
-
-                return "Requesting \(path) with object: <json serialization failed>"
-            }
         }
 
         var encoding: ParameterEncoding = JSONEncoding.default
@@ -89,7 +83,7 @@ class ServerHelper {
         let basePath = (baseUrl != nil ? baseUrl! : "") + path
 
         manager
-            .request(basePath, method: method, parameters: parameters, encoding: encoding, headers: [:])
+            .request(basePath, method: method, parameters: parameters, encoding: encoding, headers: nil)
  // maybe use alamofire router later? (https://grokswift.com/router/)
             .validate(statusCode: acceptableStatusCodes) // https://github.com/Alamofire/Alamofire#validation // need custom code to get body from error (see https://github.com/Alamofire/Alamofire/issues/233)
             /*.responseString { response in
@@ -101,19 +95,9 @@ class ServerHelper {
             .responseArray(completionHandler: { (response: AFDataResponse<[T]>) in
                 switch response.result {
                 case .success(let responseArray):
-                    Log.logger.debug {
-                        debugPrint(response)
-
-                        if let jsonString = Mapper().toJSONString(responseArray, prettyPrint: true) {
-                            return "Response for \(path) with object: \n\(jsonString)"
-                        }
-
-                        return "Response for \(path) with object: <json serialization failed>"
-                    }
-
                     success(responseArray)
                 case .failure(let error):
-                    Log.logger.debug("\(error)") // TODO: error callback
+                    Log.logger.error("Request \(method.rawValue.uppercased()) \(basePath) failed: \(error)")
 
                     /*if let responseObj = response.result.value as? String {
                      Log.logger.debug("error msg from server: \(responseObj)")
@@ -171,14 +155,6 @@ class ServerHelper {
             BasicRequestBuilder.addBasicRequestValues(reqObj)
 
             parameters = reqObj.toJSON() as [String : AnyObject]?
-            
-            Log.logger.debug { () -> String in 
-                if let jsonString = Mapper().toJSONString(reqObj, prettyPrint: true) {
-                    return "Requesting \(path) with object: \n\(jsonString)"
-                }
-
-                return "Requesting \(path) with object: <json serialization failed>"
-            }
         }
         
 
@@ -194,28 +170,15 @@ class ServerHelper {
             .validate(statusCode: acceptableStatusCodes) // https://github.com/Alamofire/Alamofire#validation // need custom code to get body from error (see https://github.com/Alamofire/Alamofire/issues/233)
 
             .responseObject { (response: AFDataResponse<T>) in
-                print(String(data: response.data ?? Data(), encoding: .utf8) ?? "")
                 switch response.result {
                 case .success(let responseObj):
-                    Log.logger.debug {
-                        debugPrint(response)
-
-                        if let jsonString = Mapper().toJSONString(responseObj, prettyPrint: true) {
-                            return "Response for \(path) with object: \n\(jsonString)"
-                        }
-
-                        return "Response for \(path) with object: <json serialization failed>"
-                    }
-
                     success(responseObj)
                 case .failure(let error):
-                    Log.logger.debug("\(error)") // TODO: error callback
-                    debugPrint(response)
+                    Log.logger.error("Request \(method.rawValue.uppercased()) \(url) failed: \(error)") // TODO: error callback
                     var resultError = error
                     if let data = response.data,
                         let jsonObject = try? JSONSerialization.jsonObject(with: data, options: .mutableContainers),
                     let jsonDictionary = jsonObject as? [String: Any] {
-                        print(jsonDictionary)
                         if let errorString = jsonDictionary["error"] as? String {
 //                            NSError().asAFError(orFailWith: errorString)
                             resultError = NSError(domain: "error", code: -1, userInfo: [NSLocalizedDescriptionKey : errorString]).asAFError ?? resultError
@@ -248,14 +211,6 @@ class ServerHelper {
 //                parameters = reqObj.toJSON() as [String : AnyObject]?
 //                break
                 parametersObjects.append(reqObj.toJSON() as [String : AnyObject])
-                
-                Log.logger.debug { () -> String in
-                    if let jsonString = Mapper().toJSONString(reqObj, prettyPrint: true) {
-                        return "Requesting \(path) with object: \n\(jsonString)"
-                    }
-                    
-                    return "Requesting \(path) with object: <json serialization failed>"
-                }
             }
         }
         
@@ -277,20 +232,9 @@ class ServerHelper {
             .responseObject { (response: AFDataResponse<T>) in
                 switch response.result {
                 case .success(let responseObj):
-                    Log.logger.debug {
-                        debugPrint(response)
-                        
-                        if let jsonString = Mapper().toJSONString(responseObj, prettyPrint: true) {
-                            return "Response for \(path) with object: \n\(jsonString)"
-                        }
-                        
-                        return "Response for \(path) with object: <json serialization failed>"
-                    }
-                    
                     success(responseObj)
                 case .failure(let error):
-                    Log.logger.debug("\(error)") // TODO: error callback
-                    debugPrint(response)
+                    Log.logger.error("Request \(method.rawValue.uppercased()) \(url) failed: \(error)") // TODO: error callback
                     /*if let responseObj = response.result.value as? String {
                      Log.logger.debug("error msg from server: \(responseObj)")
                      }*/
@@ -310,14 +254,6 @@ class ServerHelper {
             BasicRequestBuilder.addBasicRequestValues(reqObj)
 
             parameters = reqObj.toJSON() as [String : AnyObject]?
-            
-            Log.logger.debug { () -> String in
-                if let jsonString = Mapper().toJSONString(reqObj, prettyPrint: true) {
-                    return "Requesting \(path) with object: \n\(jsonString)"
-                }
-
-                return "Requesting \(path) with object: <json serialization failed>"
-            }
         }
         
 
@@ -333,28 +269,15 @@ class ServerHelper {
     // maybe use alamofire router later? (https://grokswift.com/router/)
 //            .validate() // https://github.com/Alamofire/Alamofire#validation // need custom code to get body from error (see https://github.com/Alamofire/Alamofire/issues/233)
             .responseArray(completionHandler: { (response: DataResponse<[T], AFError>) in
-                print(String(data: response.data ?? Data(), encoding: .utf8) ?? "")
                 switch response.result {
                 case .success(let responseObj):
-                    Log.logger.debug {
-                        debugPrint(response)
-
-                        if let jsonString = Mapper().toJSONString(responseObj, prettyPrint: true) {
-                            return "Response for \(path) with object: \n\(jsonString)"
-                        }
-
-                        return "Response for \(path) with object: <json serialization failed>"
-                    }
-
                     success(responseObj)
                 case .failure(let error):
-                    Log.logger.debug("\(error)") // TODO: error callback
-                    debugPrint(response)
+                    Log.logger.error("Request \(method.rawValue.uppercased()) \(url) failed: \(error)") // TODO: error callback
                     var resultError = error
                     if let data = response.data,
                         let jsonObject = try? JSONSerialization.jsonObject(with: data, options: .mutableContainers),
                     let jsonDictionary = jsonObject as? [String: Any] {
-                        print(jsonDictionary)
                         if let errorString = jsonDictionary["error"] as? String {
 //                            NSError().asAFError(orFailWith: errorString)
                             resultError = NSError(domain: "error", code: -1, userInfo: [NSLocalizedDescriptionKey : errorString]).asAFError ?? resultError

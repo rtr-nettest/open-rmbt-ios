@@ -120,7 +120,7 @@ import CoreTelephony
 
         let connectivity = RMBTConnectivity(networkType: networkType)
 
-        if connectivity == lastConnectivity { return }
+        if let last = lastConnectivity, last.isEqual(to: connectivity) { return }
 
         Log.logger.debug("New connectivity = \(String(describing: connectivity.testResultDictionary()))")
         

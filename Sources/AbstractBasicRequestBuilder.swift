@@ -29,6 +29,8 @@ public enum RMBTTestStatus: String {
 ///
 class AbstractBasicRequestBuilder {
 
+    private static var lastLoggedTestStatus: String?
+
     ///
     class func addBasicRequestValues(_ basicRequest: BasicRequest) {
         let infoDictionary = Bundle.main.infoDictionary! // !
@@ -39,9 +41,13 @@ class AbstractBasicRequestBuilder {
             basicRequest.language = PREFFERED_LANGUAGE
         }
 
-        Log.logger.debug("ADDING PREVIOUS TEST STATUS: \(String(describing: RMBTSettings.shared.previousTestStatus))")
+        let previousStatus = RMBTSettings.shared.previousTestStatus ?? RMBTTestStatus.None.rawValue
+        if previousStatus != Self.lastLoggedTestStatus {
+            Log.logger.debug("ADDING PREVIOUS TEST STATUS: \(previousStatus)")
+            Self.lastLoggedTestStatus = previousStatus
+        }
 
-        basicRequest.previousTestStatus = RMBTSettings.shared.previousTestStatus ?? RMBTTestStatus.None.rawValue
+        basicRequest.previousTestStatus = previousStatus
         basicRequest.softwareRevision = RMBTHelpers.RMBTBuildInfoString()
         basicRequest.softwareVersion = infoDictionary["CFBundleShortVersionString"] as? String
         basicRequest.softwareVersionCode = Int(infoDictionary["CFBundleVersion"] as? String ?? "0")

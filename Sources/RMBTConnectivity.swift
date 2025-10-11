@@ -104,14 +104,14 @@ class RMBTConnectivity: NSObject {
     }
 
     func isEqual(to connectivity: RMBTConnectivity?) -> Bool {
-        if (connectivity == self) { return true }
-        guard let connectivity = connectivity else {
-            return false
-        }
+        guard let connectivity = connectivity else { return false }
+        if connectivity === self { return true }
 
-        return ((connectivity.networkTypeDescription == self.networkTypeDescription &&
-                 connectivity.dualSim && self.dualSim) ||
-                (connectivity.networkTypeDescription == self.networkTypeDescription && connectivity.networkName == self.networkName))
+        if connectivity.networkType != networkType { return false }
+        if connectivity.networkName != networkName { return false }
+        if connectivity.cellularCode != cellularCode { return false }
+        if connectivity.bssid != bssid { return false }
+        return true
     }
 
     // Gets byte counts from the network interface used for the connectivity.

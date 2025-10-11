@@ -36,6 +36,7 @@
 		495288A32D64D4C600C73435 /* UDPPingSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 495288A22D64D4C600C73435 /* UDPPingSession.swift */; };
 		495288A62D64F9D200C73435 /* UDPPingsSequenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 495288A52D64F9D200C73435 /* UDPPingsSequenceTests.swift */; };
 		495F7B9B2CF48FC4003750A3 /* NetworkCoverageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 495F7B9A2CF48FC4003750A3 /* NetworkCoverageView.swift */; };
+		49A0B1C92F2E1234007ABCDE /* AFNetworkLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A0B1C82F2E1234007ABCDE /* AFNetworkLogger.swift */; };
 		497B42702D0064A40073775A /* AsyncAlgorithms in Frameworks */ = {isa = PBXBuildFile; productRef = 497B426F2D0064A40073775A /* AsyncAlgorithms */; };
 		498220BF2D424F51009A7055 /* UIImage+ResultClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 498220BE2D424F51009A7055 /* UIImage+ResultClass.swift */; };
 		498660252D88425A005E258C /* Clocks in Frameworks */ = {isa = PBXBuildFile; productRef = 498660242D88425A005E258C /* Clocks */; };
@@ -471,6 +472,7 @@
 		E9400EE026BA2F710067273A /* ConnectivityService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConnectivityService.swift; sourceTree = "<group>"; };
 		E9400EE226BA32150067273A /* Log.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Log.swift; sourceTree = "<group>"; };
 		E9400EE326BA32150067273A /* LogConfig.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LogConfig.swift; sourceTree = "<group>"; };
+		49A0B1C82F2E1234007ABCDE /* AFNetworkLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AFNetworkLogger.swift; sourceTree = "<group>"; };
 		E9400EE626BA6A9D0067273A /* SocketUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocketUtils.swift; sourceTree = "<group>"; };
 		E9400EEA26BA6B600067273A /* RMBTControlServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTControlServer.swift; sourceTree = "<group>"; };
 		E9400EEC26BA6BFD0067273A /* RMBTSettings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RMBTSettings.swift; sourceTree = "<group>"; };
@@ -877,6 +879,22 @@
 			path = History;
 			sourceTree = "<group>";
 		};
+		49A0B1C72F2E120E007ABCDE /* Logging */ = {
+			isa = PBXGroup;
+			children = (
+				49A0B1C82F2E1234007ABCDE /* AFNetworkLogger.swift */,
+			);
+			path = Logging;
+			sourceTree = "<group>";
+		};
+		49A0B1C62F2E11F8007ABCDE /* Networking */ = {
+			isa = PBXGroup;
+			children = (
+				49A0B1C72F2E120E007ABCDE /* Logging */,
+			);
+			path = Networking;
+			sourceTree = "<group>";
+		};
 		49E6A3D32E6B4A8100CED0EE /* Coverage */ = {
 			isa = PBXGroup;
 			children = (
@@ -979,6 +997,7 @@
 				E97CF78C276226B40092352C /* RMBTLocationTracker.swift */,
 				E9400EEA26BA6B600067273A /* RMBTControlServer.swift */,
 				E9400F0126BACF340067273A /* ServerHelper.swift */,
+				49A0B1C62F2E11F8007ABCDE /* Networking */,
 				E9A23BEB2764E54F00717814 /* RMBTProgress.swift */,
 				E97CF7882761F8930092352C /* CLLocation+RMBTFormat.swift */,
 			);
@@ -1895,6 +1914,7 @@
 			files = (
 				49F976802B0B3E880098C4CC /* RMBTConfig.swift in Sources */,
 				E9400EE426BA32150067273A /* Log.swift in Sources */,
+				49A0B1C92F2E1234007ABCDE /* AFNetworkLogger.swift in Sources */,
 				499CF46F2DE9DA1700D5DCDE /* PersistenceManagingCoverageResultsService.swift in Sources */,
 				E9BF00EB2760F01F0092371F /* RMBTLoopModeConfirmationViewController.swift in Sources */,
 				E946B94A26D62EAA0006E1F1 /* RMBTBottomPresentSegue.swift in Sources */,

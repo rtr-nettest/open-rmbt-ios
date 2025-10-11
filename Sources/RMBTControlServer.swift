@@ -47,6 +47,10 @@ public typealias HistoryFilterType = [String: [String]]
     
     private var settings: SettingsResponse.Settings?
     
+    private let settingsRequestQueue = DispatchQueue(label: "com.netztest.nettest.settings_request_queue")
+    private var pendingSettingsCallbacks: [(success: EmptyCallback, failure: ErrorCallback)] = []
+    private var settingsRequestInFlight = false
+    
     @objc public var qosTestNames: [AnyHashable: String] {
         return QosMeasurementType.localizedNameDict //settings?.qosMeasurementTypes?.map { $0.testDesc ?? "Unknown" } ?? []
     }
@@ -62,32 +66,36 @@ extension RMBTControlServer {
 
         ///
         @objc func getSettings(_ success: @escaping EmptyCallback, error failure: @escaping ErrorCallback) {
-            
+            settingsRequestQueue.async {
+                self.pendingSettingsCallbacks.append((success: success, failure: failure))
+                guard !self.settingsRequestInFlight else { return }
+                self.settingsRequestInFlight = true
+                self.performSettingsRequest()
+            }
+        }
+
+        private func performSettingsRequest() {
             let settingsRequest = SettingsRequest()
             settingsRequest.termsAndConditionsAccepted = true
             settingsRequest.termsAndConditionsAccepted_Version = RMBTTOS.shared.lastAcceptedVersion
             settingsRequest.uuid = uuid
 
-            let success: (_ response: SettingsResponse) -> () = { response in
-                Log.logger.debug("settings: \(response)")
-                
+            let handleSuccess: (_ response: SettingsResponse) -> Void = { response in
+                Log.logger.info("Control server settings fetched.")
+
                 if let set = response.settings?.first {
                     self.settings = set
-                    
-                    // set uuid
+
                     if let newUUID = set.uuid {
                         self.uuid = newUUID
                     }
-                    
-                    // save uuid
+
                     if let uuidKey = self.uuidKey, let u = self.uuid {
                         KeychainHelper.storeNewUUID(uuidKey: uuidKey, uuid: u)
                     }
-                    
-                    // get history filters
+
                     self.historyFilters = set.history
-                    
-                    // set qos test type desc
+
                     set.qosMeasurementTypes?.forEach({ measurementType in
                         if let theType = measurementType.testType, let theDesc = measurementType.testDesc {
                             if let type = QosMeasurementType(rawValue: theType.lowercased()) {
@@ -95,7 +103,7 @@ extension RMBTControlServer {
                             }
                         }
                     })
-                    
+
                     if let statistics = set.urls?.statistics,
                        let url = URL(string: statistics) {
                         self.statsURL = url
@@ -115,12 +123,12 @@ extension RMBTControlServer {
                        let url = URL(string: "https://\(ipv4Server)\(RMBTConfig.shared.RMBT_CONTROL_SERVER_PATH)") {
                         self.ipv4 = url
                     }
-                    
+
                     if let ipv6Server = set.urls?.ipv6IpOnly,
                        let url = URL(string: "https://\(ipv6Server)\(RMBTConfig.shared.RMBT_CONTROL_SERVER_PATH)") {
                         self.ipv6 = url
                     }
-                    
+
                     if let theOpenTestBase = set.urls?.opendataPrefix {
                         self.openTestBaseURL = theOpenTestBase
                     }
@@ -129,24 +137,42 @@ extension RMBTControlServer {
                        let url = URL(string: checkip4) {
                         self.checkIpv4 = url
                     }
-                    
+
                     if let checkip6 = set.urls?.ipv6IpCheck,
                        let url = URL(string: checkip6) {
                         self.checkIpv6 = url
                     }
-                    
+
                     if let tos = set.termsAndConditions {
                         self.termsAndConditions = tos
                     }
                 }
-                
-                success()
+
+                self.completeSettingsRequest(with: .success(()))
             }
 
-            request(.post, path: "/settings", requestObject: settingsRequest, success: success, error: { error in
-                Log.logger.debug("settings error")
-                failure(error)
+            request(.post, path: "/settings", requestObject: settingsRequest, success: handleSuccess, error: { error in
+                Log.logger.error("settings error: \(error)")
+                self.completeSettingsRequest(with: .failure(error))
             })
+        }
+
+        private func completeSettingsRequest(with result: Result<Void, Error>) {
+            let callbacks = settingsRequestQueue.sync { () -> [(success: EmptyCallback, failure: ErrorCallback)] in
+                self.settingsRequestInFlight = false
+                let callbacks = self.pendingSettingsCallbacks
+                self.pendingSettingsCallbacks.removeAll()
+                return callbacks
+            }
+
+            callbacks.forEach { callback in
+                switch result {
+                case .success:
+                    callback.success()
+                case .failure(let error):
+                    callback.failure(error)
+                }
+            }
         }
     
     ///
