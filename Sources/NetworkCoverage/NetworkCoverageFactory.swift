@@ -72,14 +72,20 @@ struct NetworkCoverageFactory {
     }
 
     @MainActor func makeReadOnlyCoverageViewModel(fences: [Fence] = []) -> NetworkCoverageViewModel {
-        NetworkCoverageViewModel(
+#if targetEnvironment(simulator)
+        // Simulator: use the mocked radio technology service to get meaningful values from CoreTelephony APIs.
+        let radioTechnologyService = SimulatorRadioTechnologyService()
+#else
+        let radioTechnologyService = CTTelephonyRadioTechnologyService()
+#endif
+        return NetworkCoverageViewModel(
             fences: fences,
             refreshInterval: 1.0,
             minimumLocationAccuracy: 10.0,
             locationInaccuracyWarningInitialDelay: Self.locationInaccuracyWarningInitialDelay,
             insufficientAccuracyAutoStopInterval: Self.insufficientAccuracyAutoStopInterval,
             updates: { EmptyAsyncSequence().asOpaque() },
-            currentRadioTechnology: CTTelephonyRadioTechnologyService(),
+            currentRadioTechnology: radioTechnologyService,
             sendResultsService: MockSendCoverageResultsService(),
             persistenceService: MockFencePersistenceService(),
             locale: .current,
@@ -103,11 +109,14 @@ struct NetworkCoverageFactory {
         )
         let clock = ContinuousClock()
 
-        #if targetEnvironment(simulator)
+#if targetEnvironment(simulator)
         let networkConnectionUpdatesService = SimulatorNetworkConnectionTypeUpdatesService(now: dateNow)
-        #else
+        // Simulator: inject the mocked radio technology to complement simulated connection types.
+        let radioTechnologyService = SimulatorRadioTechnologyService()
+#else
         let networkConnectionUpdatesService = ReachabilityNetworkConnectionTypeUpdatesService(now: dateNow)
-        #endif
+        let radioTechnologyService = CTTelephonyRadioTechnologyService()
+#endif
 
         return NetworkCoverageViewModel(
             fences: fences,
@@ -128,7 +137,7 @@ struct NetworkCoverageFactory {
             ) },
             locationUpdatesService: RealLocationUpdatesService(now: dateNow, canReportLocations: { sessionInitializer.isInitialized }),
             networkConnectionUpdatesService: networkConnectionUpdatesService,
-            currentRadioTechnology: CTTelephonyRadioTechnologyService(),
+            currentRadioTechnology: radioTechnologyService,
             sendResultsService: resultSender,
             persistenceService: persistenceService,
             clock: clock,
