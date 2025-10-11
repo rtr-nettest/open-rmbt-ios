@@ -42,6 +42,7 @@ struct FenceItem: Identifiable, Hashable {
     let id: UUID
     let date: Date
     let coordinate: CLLocationCoordinate2D
+    let radiusMeters: CLLocationDistance
     let technology: String
     let isSelected: Bool
     let isCurrent: Bool
@@ -688,6 +689,7 @@ fileprivate extension NetworkCoverageViewModel {
         var currentColor = items[0].color
         var coordinates: [CLLocationCoordinate2D] = [items[0].coordinate]
         var fenceIds: [UUID] = [items[0].id]
+        var previousItem = items[0]
 
         func appendCurrentSegment() {
             guard coordinates.count >= 2 else { return }
@@ -702,22 +704,44 @@ fileprivate extension NetworkCoverageViewModel {
         }
 
         for item in items.dropFirst() {
-            if item.technology == currentTechnology {
-                coordinates.append(item.coordinate)
-                fenceIds.append(item.id)
-            } else {
+            let distance = distanceBetween(previousItem.coordinate, item.coordinate)
+            // it might happen that server returns radius = 0. In this case use default value of 20
+            // otherwise polylines would not be properly rendered
+            let radius = previousItem.radiusMeters > 0 ? previousItem.radiusMeters : 20
+            let gapThreshold = radius * 4
+            let hasGap = distance > gapThreshold
+            let technologyChanged = item.technology != currentTechnology
+
+            if technologyChanged || hasGap {
                 appendCurrentSegment()
 
                 currentTechnology = item.technology
                 currentColor = item.color
-                coordinates = [item.coordinate]
                 fenceIds = [item.id]
+                coordinates = []
+
+                if technologyChanged && !hasGap {
+                    coordinates.append(previousItem.coordinate)
+                }
+
+                coordinates.append(item.coordinate)
+            } else {
+                coordinates.append(item.coordinate)
+                fenceIds.append(item.id)
             }
+
+            previousItem = item
         }
 
         appendCurrentSegment()
 
         return segments
+    }
+
+    private func distanceBetween(_ first: CLLocationCoordinate2D, _ second: CLLocationCoordinate2D) -> CLLocationDistance {
+        let firstLocation = CLLocation(latitude: first.latitude, longitude: first.longitude)
+        let secondLocation = CLLocation(latitude: second.latitude, longitude: second.longitude)
+        return firstLocation.distance(from: secondLocation)
     }
 
     private func contains(_ coordinate: CLLocationCoordinate2D, in region: MKCoordinateRegion, paddingFactor: Double) -> Bool {
@@ -773,6 +797,7 @@ fileprivate extension NetworkCoverageViewModel {
             id: fence.id,
             date: fence.dateEntered,
             coordinate: fence.startingLocation.coordinate,
+            radiusMeters: fence.radiusMeters,
             technology: fence.significantTechnology.map(displayValue) ?? "N/A",
             isSelected: selectedFenceItem?.id == fence.id,
             isCurrent: currentFence?.id == fence.id,

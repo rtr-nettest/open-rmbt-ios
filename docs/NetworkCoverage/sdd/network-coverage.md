@@ -212,6 +212,7 @@ Submission
 - Selection updates a detail panel with date, technology label, and average ping (e.g., “60 ms”).
 - Map rendering strategy is tunable through `FencesRenderingConfiguration` (defaults: `maxCircleCountBeforePolyline = 60`, `minimumSpanForPolylineMode = 0.03`, `visibleRegionPaddingFactor = 1.2`, `cullsToVisibleRegion = true`). The view model maintains derived state (`visibleFenceItems`, `fencePolylineSegments`, `mapRenderMode`) and only recomputes it when fences or the visible map region change, keeping SwiftUI diffs minimal.
 - When `mapRenderMode == .circles`, the map shows per-fence annotations and circles; when line count and zoom span exceed the configured thresholds, it switches to `mapRenderMode == .polylines`, grouping contiguous fences with the same technology into colored polylines while clearing any stale selection.
+- Polyline segments break only when consecutive fences are separated by a data gap (distance greater than twice the previous fence’s diameter); technology transitions without a data gap remain visually connected by sharing their boundary coordinate.
 - The current fence (if any) keeps its circle visible even in polyline mode to retain user context.
 - Visible items are culled to the padded map region when `cullsToVisibleRegion` is enabled, so off-screen fences and polyline coordinates do not inflate overlay churn. `onMapCameraChange` reports region updates back to the view model, and read-only screens seed an initial region enclosing all fences before the first camera callback arrives.
 - “Latest ping” label:

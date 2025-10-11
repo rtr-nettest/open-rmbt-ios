@@ -200,7 +200,7 @@ struct FencesMapView: View {
     
     func fencePolyline(for segment: FencePolylineSegment) -> some MapContent {
         MapPolyline(coordinates: segment.coordinates)
-            .stroke(segment.color.opacity(0.85), lineWidth: 4)
+            .stroke(segment.color.opacity(0.85), lineWidth: 5)
             .mapOverlayLevel(level: .aboveRoads)
     }
 

@@ -137,9 +137,9 @@ import Clocks
         @Test func whenZoomedOutBeyondThreshold_thenSwitchesToPolylineMode() async throws {
             let fences = [
                 makeFence(lat: 0.0000, lon: 0.0, technology: "4G"),
-                makeFence(lat: 0.0010, lon: 0.0, technology: "4G"),
-                makeFence(lat: 0.0020, lon: 0.0, technology: "5G"),
-                makeFence(lat: 0.0030, lon: 0.0, technology: "5G")
+                makeFence(lat: 0.0001, lon: 0.0, technology: "4G"),
+                makeFence(lat: 0.0002, lon: 0.0, technology: "5G"),
+                makeFence(lat: 0.0003, lon: 0.0, technology: "5G")
             ]
 
             let configuration = FencesRenderingConfiguration(
@@ -198,9 +198,9 @@ import Clocks
         @Test func whenCullingEnabled_thenPolylineSegmentsOutsideRegionAreHidden() async throws {
             let fences = [
                 makeFence(lat: 0.0, lon: 0.0, technology: "4G"),
-                makeFence(lat: 0.01, lon: 0.0, technology: "4G"),
+                makeFence(lat: 0.0001, lon: 0.0, technology: "4G"),
                 makeFence(lat: 0.5, lon: 0.0, technology: "5G"),
-                makeFence(lat: 0.51, lon: 0.0, technology: "5G")
+                makeFence(lat: 0.5001, lon: 0.0, technology: "5G")
             ]
 
             let configuration = FencesRenderingConfiguration(
@@ -227,9 +227,9 @@ import Clocks
         @Test func whenPolylineModeStable_thenSegmentIdentifiersRemainStableAcrossUpdates() async throws {
             let fences = [
                 makeFence(lat: 0.0000, lon: 0.0, technology: "4G"),
-                makeFence(lat: 0.0010, lon: 0.0, technology: "4G"),
-                makeFence(lat: 0.0020, lon: 0.0, technology: "5G"),
-                makeFence(lat: 0.0030, lon: 0.0, technology: "5G")
+                makeFence(lat: 0.0001, lon: 0.0, technology: "4G"),
+                makeFence(lat: 0.0002, lon: 0.0, technology: "5G"),
+                makeFence(lat: 0.0003, lon: 0.0, technology: "5G")
             ]
 
             let configuration = FencesRenderingConfiguration(
@@ -248,6 +248,101 @@ import Clocks
             sut.updateVisibleRegion(region)
 
             #expect(sut.fencePolylineSegments.map(\.id) == firstIdentifiers)
+        }
+
+        @Test func whenSameTechnologyDistanceExceedsGapThreshold_thenBreaksPolylineSegment() async throws {
+            let radius: CLLocationDistance = 10
+            let fences = [
+                makeFence(lat: 0.0000, lon: 0.0, technology: "4G", radiusMeters: radius),
+                makeFence(lat: 0.00009, lon: 0.0, technology: "4G", radiusMeters: radius),
+                makeFence(lat: 0.00050, lon: 0.0, technology: "4G", radiusMeters: radius),
+                makeFence(lat: 0.00059, lon: 0.0, technology: "4G", radiusMeters: radius)
+            ]
+
+            let configuration = FencesRenderingConfiguration(
+                maxCircleCountBeforePolyline: 3,
+                minimumSpanForPolylineMode: 0.0001,
+                visibleRegionPaddingFactor: 1.0,
+                cullsToVisibleRegion: false
+            )
+
+            let sut = makeSUT(fences: fences, renderingConfiguration: configuration)
+
+            sut.updateVisibleRegion(equatorWideRegion)
+
+            #expect(sut.mapRenderMode == .polylines)
+            #expect(sut.fencePolylineSegments.count == 2)
+            #expect(sut.fencePolylineSegments.allSatisfy { $0.technology == "4G" })
+
+            let firstSegment = try #require(sut.fencePolylineSegments.first)
+            let secondSegment = try #require(sut.fencePolylineSegments.last)
+
+            #expect(firstSegment.coordinates.count == 2)
+            #expect(secondSegment.coordinates.count == 2)
+            #expect(firstSegment.coordinates.last == fences[1].startingLocation.coordinate)
+            #expect(secondSegment.coordinates.first == fences[2].startingLocation.coordinate)
+        }
+
+        @Test func whenTechnologyChangesWithoutGap_thenSegmentsShareBoundaryCoordinate() async throws {
+            let radius: CLLocationDistance = 10
+            let fences = [
+                makeFence(lat: 0.0000, lon: 0.0, technology: "4G", radiusMeters: radius),
+                makeFence(lat: 0.00009, lon: 0.0, technology: "4G", radiusMeters: radius),
+                makeFence(lat: 0.00018, lon: 0.0, technology: "5G", radiusMeters: radius)
+            ]
+
+            let configuration = FencesRenderingConfiguration(
+                maxCircleCountBeforePolyline: 3,
+                minimumSpanForPolylineMode: 0.0001,
+                visibleRegionPaddingFactor: 1.0,
+                cullsToVisibleRegion: false
+            )
+
+            let sut = makeSUT(fences: fences, renderingConfiguration: configuration)
+
+            sut.updateVisibleRegion(equatorWideRegion)
+
+            #expect(sut.mapRenderMode == .polylines)
+            #expect(sut.fencePolylineSegments.count == 2)
+
+            let firstSegment = try #require(sut.fencePolylineSegments.first)
+            let secondSegment = try #require(sut.fencePolylineSegments.last)
+
+            #expect(firstSegment.technology == "4G")
+            #expect(secondSegment.technology == "5G")
+
+            let boundaryCoordinate = try #require(firstSegment.coordinates.last)
+
+            #expect(boundaryCoordinate == fences[1].startingLocation.coordinate)
+            #expect(secondSegment.coordinates.first == boundaryCoordinate)
+            #expect(secondSegment.coordinates.count == 2)
+            #expect(secondSegment.coordinates.last == fences[2].startingLocation.coordinate)
+            #expect(secondSegment.id.contains(fences[2].id.uuidString))
+            #expect(!secondSegment.id.contains(fences[1].id.uuidString))
+        }
+
+        @Test func whenFenceRadiusIsZero_thenPolylineSegmentsStillRender() async throws {
+            let fences = [
+                makeFence(lat: 0.0000, lon: 0.0, technology: "4G", radiusMeters: 0),
+                makeFence(lat: 0.00005, lon: 0.0, technology: "4G", radiusMeters: 0),
+                makeFence(lat: 0.00010, lon: 0.0, technology: "5G", radiusMeters: 0),
+                makeFence(lat: 0.00015, lon: 0.0, technology: "5G", radiusMeters: 0)
+            ]
+
+            let configuration = FencesRenderingConfiguration(
+                maxCircleCountBeforePolyline: 3,
+                minimumSpanForPolylineMode: 0.0001,
+                visibleRegionPaddingFactor: 1.0,
+                cullsToVisibleRegion: false
+            )
+
+            let sut = makeSUT(fences: fences, renderingConfiguration: configuration)
+
+            sut.updateVisibleRegion(equatorWideRegion)
+
+            #expect(sut.mapRenderMode == .polylines)
+            #expect(sut.fencePolylineSegments.count == 2)
+            #expect(sut.fencePolylineSegments.map(\.technology) == ["4G", "5G"])
         }
 
         @Test func whenInitialized_thenVisibleFenceItemsMatchFences() async throws {
@@ -647,7 +742,16 @@ import Clocks
             let fence2 = makeFence(lat: 2.0, lon: 2.0)
             let sut = makeSUT(fences: [fence1, fence2])
 
-            let nonExistentFenceItem = FenceItem(id: UUID(), date: Date(), coordinate: CLLocationCoordinate2D(), technology: "N/A", isSelected: false, isCurrent: false, color: .gray)
+            let nonExistentFenceItem = FenceItem(
+                id: UUID(),
+                date: Date(),
+                coordinate: CLLocationCoordinate2D(),
+                radiusMeters: 0,
+                technology: "N/A",
+                isSelected: false,
+                isCurrent: false,
+                color: .gray
+            )
             sut.selectedFenceItem = nonExistentFenceItem
 
             #expect(sut.selectedFenceItem?.id == nonExistentFenceItem.id)
@@ -1083,7 +1187,8 @@ func makeFence(
     lon: CLLocationDegrees,
     dateEntered: Date = Date(timeIntervalSinceReferenceDate: 0),
     technology: String? = nil,
-    pings: [PingResult] = []
+    pings: [PingResult] = [],
+    radiusMeters: CLLocationDistance = 20
 ) -> Fence {
     Fence(
         startingLocation: CLLocation(
@@ -1096,7 +1201,7 @@ func makeFence(
         dateEntered: dateEntered,
         technology: technology,
         pings: pings,
-        radiusMeters: Double.random(in: 1...100)
+        radiusMeters: radiusMeters
     )
 }
 

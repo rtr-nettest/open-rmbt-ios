@@ -43,6 +43,20 @@ Feature: Adaptive map rendering for Network Coverage fences
     Then fences outside the padded region are not rendered
     And polyline segments outside the padded region are hidden
 
+  Scenario: Break polyline when fences are separated by a data gap
+    Given the map render mode is "Polyline"
+    And two consecutive fences share the same technology
+    And the distance between their centers exceeds twice the diameter of the previous fence
+    When polyline segments are generated
+    Then the later fence starts a new polyline segment so a gap is visible on the map
+
+  Scenario: Join polylines for consecutive fences with different technologies
+    Given two consecutive fences have different technologies
+    And the distance between their centers does not exceed twice the diameter of the previous fence
+    When polyline segments are generated
+    Then the two segments meet without a visible gap where the technology changes
+    And no connector is drawn if a true data gap is detected
+
   Scenario: Seed the visible region before camera callbacks arrive
     Given I open the read-only coverage history detail screen
     When fences are loaded before any map interaction
