@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to coding agents like Claude Code (claude.ai/code), Codex CLI, Open Code, etc. when working with code in this repository.
 
 ## Project Overview
 
@@ -11,7 +11,7 @@ Open-RMBT iOS App is a network speed testing application developed for the Austr
 ### Development Build
 ```bash
 # Build for iPhone 16 simulator (default)
-xcodebuild -workspace RMBT.xcworkspace -scheme RMBT -destination 'platform=iOS Simulator,name=iPhone 16' build
+xcodebuild -workspace RMBT.xcworkspace -scheme RMBT -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.5' build
 
 # Clean build
 xcodebuild -workspace RMBT.xcworkspace -scheme RMBT clean
@@ -20,10 +20,10 @@ xcodebuild -workspace RMBT.xcworkspace -scheme RMBT clean
 ### Testing
 ```bash
 # Run unit tests
-xcodebuild -workspace RMBT.xcworkspace -scheme RMBT -destination 'platform=iOS Simulator,name=iPhone 16' test
+xcodebuild -workspace RMBT.xcworkspace -scheme RMBT -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.5' test
 
 # Run specific test class
-xcodebuild -workspace RMBT.xcworkspace -scheme RMBT -destination 'platform=iOS Simulator,name=iPhone 16' test -only-testing:RMBTTests/NetworkCoverageViewModelTests
+xcodebuild -workspace RMBT.xcworkspace -scheme RMBT -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.5' test -only-testing:RMBTTests/NetworkCoverageTests
 ```
 
 ### Dependency Management
@@ -154,7 +154,7 @@ The project uses a dual configuration system with `private/` and `public/` folde
 
 ### Minimum Requirements
 - iOS 17.0+ deployment target
-- Xcode 13+ for building
+- Xcode 16+ for building
 - CocoaPods for dependency management
 
 ### Localization

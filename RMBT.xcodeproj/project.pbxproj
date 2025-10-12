@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1B39419CC1DCEC8EB262D80D /* Pods_RMBTTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 325DCBAC5B53C6B203C3C444 /* Pods_RMBTTest.framework */; };
 		361443482732793E00D0FC26 /* RMBTHistorySyncModalViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 361443472732793D00D0FC26 /* RMBTHistorySyncModalViewController.swift */; };
 		3628C539275639E40001E885 /* RMBTHistoryQoSTitledResultCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3628C538275639E40001E885 /* RMBTHistoryQoSTitledResultCell.xib */; };
 		3628C53B27563AA40001E885 /* RMBTHistoryQoSTitledResultCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3628C53A27563AA40001E885 /* RMBTHistoryQoSTitledResultCell.swift */; };
@@ -36,7 +35,6 @@
 		495288A32D64D4C600C73435 /* UDPPingSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 495288A22D64D4C600C73435 /* UDPPingSession.swift */; };
 		495288A62D64F9D200C73435 /* UDPPingsSequenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 495288A52D64F9D200C73435 /* UDPPingsSequenceTests.swift */; };
 		495F7B9B2CF48FC4003750A3 /* NetworkCoverageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 495F7B9A2CF48FC4003750A3 /* NetworkCoverageView.swift */; };
-		49A0B1C92F2E1234007ABCDE /* AFNetworkLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A0B1C82F2E1234007ABCDE /* AFNetworkLogger.swift */; };
 		497B42702D0064A40073775A /* AsyncAlgorithms in Frameworks */ = {isa = PBXBuildFile; productRef = 497B426F2D0064A40073775A /* AsyncAlgorithms */; };
 		498220BF2D424F51009A7055 /* UIImage+ResultClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 498220BE2D424F51009A7055 /* UIImage+ResultClass.swift */; };
 		498660252D88425A005E258C /* Clocks in Frameworks */ = {isa = PBXBuildFile; productRef = 498660242D88425A005E258C /* Clocks */; };
@@ -51,6 +49,7 @@
 		499CF46D2DE9D48200D5DCDE /* NetworkCoverageFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499CF46C2DE9D48200D5DCDE /* NetworkCoverageFactory.swift */; };
 		499CF46F2DE9DA1700D5DCDE /* PersistenceManagingCoverageResultsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499CF46E2DE9DA1700D5DCDE /* PersistenceManagingCoverageResultsService.swift */; };
 		499CF4732DE9DF8300D5DCDE /* FencePersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499CF4722DE9DF8300D5DCDE /* FencePersistenceTests.swift */; };
+		49A0B1C92F2E1234007ABCDE /* AFNetworkLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A0B1C82F2E1234007ABCDE /* AFNetworkLogger.swift */; };
 		49A31C6C2D3A97250039052B /* AsynchronousSequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A31C6B2D3A97250039052B /* AsynchronousSequence.swift */; };
 		49A646BC2E401615007F0F4E /* FencesMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A646BB2E401615007F0F4E /* FencesMapView.swift */; };
 		49ABB8512E2E4AB900583F5E /* CoverageResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49ABB8502E2E4AB900583F5E /* CoverageResultView.swift */; };
@@ -72,6 +71,7 @@
 		49F0AA102E70A11100ABCD01 /* UDPPingSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49F0AA0F2E70A11000ABCD01 /* UDPPingSessionTests.swift */; };
 		49F0AA132E70A1C600ABCD01 /* CoverageMeasurementSessionInitializerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49F0AA122E70A1C600ABCD01 /* CoverageMeasurementSessionInitializerTests.swift */; };
 		49F976802B0B3E880098C4CC /* RMBTConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49C86FDC2AFBBF1500663CE2 /* RMBTConfig.swift */; };
+		7E9819F45E7330372FF7FDF1 /* Pods_RMBTTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34EAAD260B73771684B942BA /* Pods_RMBTTests.framework */; };
 		C573F2A5175281D300C728FC /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C573F2A4175281D300C728FC /* MapKit.framework */; };
 		C573F2B1175294A500C728FC /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C573F2B0175294A500C728FC /* CoreLocation.framework */; };
 		C5DEB476176364B100187C94 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C5DEB475176364B100187C94 /* AVFoundation.framework */; };
@@ -340,9 +340,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		09BF4B6D48151BE0513DA599 /* Pods-RMBTTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RMBTTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-RMBTTests/Pods-RMBTTests.debug.xcconfig"; sourceTree = "<group>"; };
+		1C605E59889E3DF77EFDC8CF /* Pods-RMBTTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RMBTTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-RMBTTests/Pods-RMBTTests.release.xcconfig"; sourceTree = "<group>"; };
 		1F9C078F216F751C00F1FC10 /* RMBT.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RMBT.entitlements; sourceTree = "<group>"; };
-		325DCBAC5B53C6B203C3C444 /* Pods_RMBTTest.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RMBTTest.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		32DE166B881B73366FE005F9 /* Pods_RMBT.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RMBT.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		34EAAD260B73771684B942BA /* Pods_RMBTTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RMBTTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		361443472732793D00D0FC26 /* RMBTHistorySyncModalViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTHistorySyncModalViewController.swift; sourceTree = "<group>"; };
 		3628C538275639E40001E885 /* RMBTHistoryQoSTitledResultCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = RMBTHistoryQoSTitledResultCell.xib; sourceTree = "<group>"; };
 		3628C53A27563AA40001E885 /* RMBTHistoryQoSTitledResultCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTHistoryQoSTitledResultCell.swift; sourceTree = "<group>"; };
@@ -382,6 +384,7 @@
 		499CF46C2DE9D48200D5DCDE /* NetworkCoverageFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkCoverageFactory.swift; sourceTree = "<group>"; };
 		499CF46E2DE9DA1700D5DCDE /* PersistenceManagingCoverageResultsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceManagingCoverageResultsService.swift; sourceTree = "<group>"; };
 		499CF4722DE9DF8300D5DCDE /* FencePersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FencePersistenceTests.swift; sourceTree = "<group>"; };
+		49A0B1C82F2E1234007ABCDE /* AFNetworkLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AFNetworkLogger.swift; sourceTree = "<group>"; };
 		49A31C6B2D3A97250039052B /* AsynchronousSequence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsynchronousSequence.swift; sourceTree = "<group>"; };
 		49A646BB2E401615007F0F4E /* FencesMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FencesMapView.swift; sourceTree = "<group>"; };
 		49ABB8502E2E4AB900583F5E /* CoverageResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverageResultView.swift; sourceTree = "<group>"; };
@@ -419,7 +422,7 @@
 		C5DEB481176364D900187C94 /* libicucore.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libicucore.dylib; path = usr/lib/libicucore.dylib; sourceTree = SDKROOT; };
 		C5DEB483176364DF00187C94 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 		C5DEB485176364E400187C94 /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
-		C70828021CB6792F00F482EB /* RMBTTest.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RMBTTest.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		C70828021CB6792F00F482EB /* RMBTTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RMBTTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C70828061CB6792F00F482EB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = ../RMBTTest/Info.plist; sourceTree = "<group>"; };
 		C70C178B17D7BFC400F55964 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		C741B62B1DD99D7A0097D84D /* libresolv.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libresolv.tbd; path = usr/lib/libresolv.tbd; sourceTree = SDKROOT; };
@@ -472,7 +475,6 @@
 		E9400EE026BA2F710067273A /* ConnectivityService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConnectivityService.swift; sourceTree = "<group>"; };
 		E9400EE226BA32150067273A /* Log.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Log.swift; sourceTree = "<group>"; };
 		E9400EE326BA32150067273A /* LogConfig.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LogConfig.swift; sourceTree = "<group>"; };
-		49A0B1C82F2E1234007ABCDE /* AFNetworkLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AFNetworkLogger.swift; sourceTree = "<group>"; };
 		E9400EE626BA6A9D0067273A /* SocketUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocketUtils.swift; sourceTree = "<group>"; };
 		E9400EEA26BA6B600067273A /* RMBTControlServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTControlServer.swift; sourceTree = "<group>"; };
 		E9400EEC26BA6BFD0067273A /* RMBTSettings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RMBTSettings.swift; sourceTree = "<group>"; };
@@ -686,7 +688,17 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		49E6A4D12E70439F00CED0EE /* NetworkType */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = NetworkType; sourceTree = "<group>"; };
+		49E6A4D12E70439F00CED0EE /* NetworkType */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = NetworkType;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -695,7 +707,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				498660252D88425A005E258C /* Clocks in Frameworks */,
-				1B39419CC1DCEC8EB262D80D /* Pods_RMBTTest.framework in Frameworks */,
+				7E9819F45E7330372FF7FDF1 /* Pods_RMBTTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -836,6 +848,22 @@
 			path = SendResult;
 			sourceTree = "<group>";
 		};
+		49A0B1C62F2E11F8007ABCDE /* Networking */ = {
+			isa = PBXGroup;
+			children = (
+				49A0B1C72F2E120E007ABCDE /* Logging */,
+			);
+			path = Networking;
+			sourceTree = "<group>";
+		};
+		49A0B1C72F2E120E007ABCDE /* Logging */ = {
+			isa = PBXGroup;
+			children = (
+				49A0B1C82F2E1234007ABCDE /* AFNetworkLogger.swift */,
+			);
+			path = Logging;
+			sourceTree = "<group>";
+		};
 		49A31C6A2D3A971B0039052B /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
@@ -879,22 +907,6 @@
 			path = History;
 			sourceTree = "<group>";
 		};
-		49A0B1C72F2E120E007ABCDE /* Logging */ = {
-			isa = PBXGroup;
-			children = (
-				49A0B1C82F2E1234007ABCDE /* AFNetworkLogger.swift */,
-			);
-			path = Logging;
-			sourceTree = "<group>";
-		};
-		49A0B1C62F2E11F8007ABCDE /* Networking */ = {
-			isa = PBXGroup;
-			children = (
-				49A0B1C72F2E120E007ABCDE /* Logging */,
-			);
-			path = Networking;
-			sourceTree = "<group>";
-		};
 		49E6A3D32E6B4A8100CED0EE /* Coverage */ = {
 			isa = PBXGroup;
 			children = (
@@ -913,6 +925,8 @@
 				F620A48D0EF31330DAC04D48 /* Pods-RMBT.release.xcconfig */,
 				A0C545CF605E364BCA4F45EA /* Pods-RMBTTest.debug.xcconfig */,
 				B14EBFEF9713BCFE2072175F /* Pods-RMBTTest.release.xcconfig */,
+				09BF4B6D48151BE0513DA599 /* Pods-RMBTTests.debug.xcconfig */,
+				1C605E59889E3DF77EFDC8CF /* Pods-RMBTTests.release.xcconfig */,
 			);
 			name = Pods;
 			sourceTree = "<group>";
@@ -1124,7 +1138,7 @@
 			isa = PBXGroup;
 			children = (
 				C7DE1478173E8F610079477A /* RMBT.app */,
-				C70828021CB6792F00F482EB /* RMBTTest.xctest */,
+				C70828021CB6792F00F482EB /* RMBTTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1158,7 +1172,7 @@
 				C7DE147F173E8F610079477A /* CoreGraphics.framework */,
 				C7E4672C177CDDB600AAF7F0 /* SenTestingKit.framework */,
 				32DE166B881B73366FE005F9 /* Pods_RMBT.framework */,
-				325DCBAC5B53C6B203C3C444 /* Pods_RMBTTest.framework */,
+				34EAAD260B73771684B942BA /* Pods_RMBTTests.framework */,
 			);
 			name = Frameworks;
 			path = Vendor;
@@ -1621,9 +1635,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		C70828011CB6792F00F482EB /* RMBTTest */ = {
+		C70828011CB6792F00F482EB /* RMBTTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = C70828091CB6792F00F482EB /* Build configuration list for PBXNativeTarget "RMBTTest" */;
+			buildConfigurationList = C70828091CB6792F00F482EB /* Build configuration list for PBXNativeTarget "RMBTTests" */;
 			buildPhases = (
 				6C0A5F677895A3568B7BFB80 /* [CP] Check Pods Manifest.lock */,
 				C70827FE1CB6792F00F482EB /* Sources */,
@@ -1636,9 +1650,9 @@
 				498660232D8833E8005E258C /* PBXTargetDependency */,
 				C70828081CB6792F00F482EB /* PBXTargetDependency */,
 			);
-			name = RMBTTest;
-			productName = RMBTTest;
-			productReference = C70828021CB6792F00F482EB /* RMBTTest.xctest */;
+			name = RMBTTests;
+			productName = RMBTTests;
+			productReference = C70828021CB6792F00F482EB /* RMBTTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 		C7DE1477173E8F610079477A /* RMBT */ = {
@@ -1713,7 +1727,7 @@
 			projectRoot = "";
 			targets = (
 				C7DE1477173E8F610079477A /* RMBT */,
-				C70828011CB6792F00F482EB /* RMBTTest */,
+				C70828011CB6792F00F482EB /* RMBTTests */,
 			);
 		};
 /* End PBXProject section */
@@ -1801,13 +1815,9 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-RMBT/Pods-RMBT-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			inputPaths = (
-			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-RMBT/Pods-RMBT-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -1829,7 +1839,7 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-RMBTTest-checkManifestLockResult.txt",
+				"$(DERIVED_FILE_DIR)/Pods-RMBTTests-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -2213,7 +2223,7 @@
 /* Begin XCBuildConfiguration section */
 		C708280A1CB6792F00F482EB /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = A0C545CF605E364BCA4F45EA /* Pods-RMBTTest.debug.xcconfig */;
+			baseConfigurationReference = 09BF4B6D48151BE0513DA599 /* Pods-RMBTTests.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -2244,10 +2254,122 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/Alamofire\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/AlamofireObjectMapper\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/BCGenieEffect\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/BlocksKit\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/CocoaAsyncSocket\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/KeychainAccess\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/MDFInternationalization\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/MaterialComponents\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/ObjcExceptionBridging\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/ObjectMapper\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/ReachabilitySwift\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/TUSafariActivity\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/XCGLogger\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/libextobjc\"",
+				);
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/Alamofire/Alamofire.framework/Headers\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/AlamofireObjectMapper/AlamofireObjectMapper.framework/Headers\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/BCGenieEffect/BCGenieEffect.framework/Headers\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/BlocksKit/BlocksKit.framework/Headers\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/CocoaAsyncSocket/CocoaAsyncSocket.framework/Headers\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/KeychainAccess/KeychainAccess.framework/Headers\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/MDFInternationalization/MDFInternationalization.framework/Headers\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/MaterialComponents/MaterialComponents.framework/Headers\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/ObjcExceptionBridging/ObjcExceptionBridging.framework/Headers\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/ObjectMapper/ObjectMapper.framework/Headers\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/ReachabilitySwift/Reachability.framework/Headers\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/TUSafariActivity/TUSafariActivity.framework/Headers\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/XCGLogger/XCGLogger.framework/Headers\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/libextobjc/libextobjc.framework/Headers\"",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"${TOOLCHAIN_DIR}/usr/lib/swift/$(PLATFORM_NAME)\"",
+					/usr/lib/swift,
+				);
+				OTHER_CFLAGS = (
+					"$(inherited)",
+					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/Alamofire/Alamofire.framework/Headers\"",
+					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/AlamofireObjectMapper/AlamofireObjectMapper.framework/Headers\"",
+					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/BCGenieEffect/BCGenieEffect.framework/Headers\"",
+					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/BlocksKit/BlocksKit.framework/Headers\"",
+					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/CocoaAsyncSocket/CocoaAsyncSocket.framework/Headers\"",
+					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/KeychainAccess/KeychainAccess.framework/Headers\"",
+					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/MDFInternationalization/MDFInternationalization.framework/Headers\"",
+					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/MaterialComponents/MaterialComponents.framework/Headers\"",
+					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/ObjcExceptionBridging/ObjcExceptionBridging.framework/Headers\"",
+					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/ObjectMapper/ObjectMapper.framework/Headers\"",
+					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/ReachabilitySwift/Reachability.framework/Headers\"",
+					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/TUSafariActivity/TUSafariActivity.framework/Headers\"",
+					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/XCGLogger/XCGLogger.framework/Headers\"",
+					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/libextobjc/libextobjc.framework/Headers\"",
+					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/Alamofire\"",
+					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/AlamofireObjectMapper\"",
+					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/BCGenieEffect\"",
+					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/BlocksKit\"",
+					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/CocoaAsyncSocket\"",
+					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/KeychainAccess\"",
+					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/MDFInternationalization\"",
+					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/MaterialComponents\"",
+					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/ObjcExceptionBridging\"",
+					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/ObjectMapper\"",
+					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/ReachabilitySwift\"",
+					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/TUSafariActivity\"",
+					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/XCGLogger\"",
+					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/libextobjc\"",
+				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-framework",
+					"Alamofire",
+					"-framework",
+					"AlamofireObjectMapper",
+					"-framework",
+					"BCGenieEffect",
+					"-framework",
+					"BlocksKit",
+					"-framework",
+					"CFNetwork",
+					"-framework",
+					"CocoaAsyncSocket",
+					"-framework",
+					"CoreTelephony",
+					"-framework",
+					"KeychainAccess",
+					"-framework",
+					"MDFInternationalization",
+					"-framework",
+					"MaterialComponents",
+					"-framework",
+					"MessageUI",
+					"-framework",
+					"ObjcExceptionBridging",
+					"-framework",
+					"ObjectMapper",
+					"-framework",
+					"Reachability",
+					"-framework",
+					"Security",
+					"-framework",
+					"SystemConfiguration",
+					"-framework",
+					"TUSafariActivity",
+					"-framework",
+					"XCGLogger",
+					"-framework",
+					"libextobjc",
+				);
 				MTL_ENABLE_DEBUG_INFO = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = at.rtr.RMBTTest;
+				PRODUCT_BUNDLE_IDENTIFIER = at.rtr.RMBTTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Sources/RMBT-Bridging-Header.h";
+				OTHER_SWIFT_FLAGS = "$(inherited) -D COCOAPODS";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RMBT.app/RMBT";
@@ -2256,7 +2378,7 @@
 		};
 		C708280B1CB6792F00F482EB /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = B14EBFEF9713BCFE2072175F /* Pods-RMBTTest.release.xcconfig */;
+			baseConfigurationReference = 1C605E59889E3DF77EFDC8CF /* Pods-RMBTTests.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -2285,10 +2407,122 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/Alamofire\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/AlamofireObjectMapper\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/BCGenieEffect\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/BlocksKit\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/CocoaAsyncSocket\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/KeychainAccess\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/MDFInternationalization\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/MaterialComponents\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/ObjcExceptionBridging\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/ObjectMapper\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/ReachabilitySwift\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/TUSafariActivity\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/XCGLogger\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/libextobjc\"",
+				);
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/Alamofire/Alamofire.framework/Headers\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/AlamofireObjectMapper/AlamofireObjectMapper.framework/Headers\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/BCGenieEffect/BCGenieEffect.framework/Headers\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/BlocksKit/BlocksKit.framework/Headers\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/CocoaAsyncSocket/CocoaAsyncSocket.framework/Headers\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/KeychainAccess/KeychainAccess.framework/Headers\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/MDFInternationalization/MDFInternationalization.framework/Headers\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/MaterialComponents/MaterialComponents.framework/Headers\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/ObjcExceptionBridging/ObjcExceptionBridging.framework/Headers\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/ObjectMapper/ObjectMapper.framework/Headers\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/ReachabilitySwift/Reachability.framework/Headers\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/TUSafariActivity/TUSafariActivity.framework/Headers\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/XCGLogger/XCGLogger.framework/Headers\"",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/libextobjc/libextobjc.framework/Headers\"",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"${TOOLCHAIN_DIR}/usr/lib/swift/$(PLATFORM_NAME)\"",
+					/usr/lib/swift,
+				);
+				OTHER_CFLAGS = (
+					"$(inherited)",
+					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/Alamofire/Alamofire.framework/Headers\"",
+					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/AlamofireObjectMapper/AlamofireObjectMapper.framework/Headers\"",
+					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/BCGenieEffect/BCGenieEffect.framework/Headers\"",
+					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/BlocksKit/BlocksKit.framework/Headers\"",
+					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/CocoaAsyncSocket/CocoaAsyncSocket.framework/Headers\"",
+					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/KeychainAccess/KeychainAccess.framework/Headers\"",
+					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/MDFInternationalization/MDFInternationalization.framework/Headers\"",
+					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/MaterialComponents/MaterialComponents.framework/Headers\"",
+					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/ObjcExceptionBridging/ObjcExceptionBridging.framework/Headers\"",
+					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/ObjectMapper/ObjectMapper.framework/Headers\"",
+					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/ReachabilitySwift/Reachability.framework/Headers\"",
+					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/TUSafariActivity/TUSafariActivity.framework/Headers\"",
+					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/XCGLogger/XCGLogger.framework/Headers\"",
+					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/libextobjc/libextobjc.framework/Headers\"",
+					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/Alamofire\"",
+					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/AlamofireObjectMapper\"",
+					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/BCGenieEffect\"",
+					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/BlocksKit\"",
+					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/CocoaAsyncSocket\"",
+					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/KeychainAccess\"",
+					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/MDFInternationalization\"",
+					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/MaterialComponents\"",
+					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/ObjcExceptionBridging\"",
+					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/ObjectMapper\"",
+					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/ReachabilitySwift\"",
+					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/TUSafariActivity\"",
+					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/XCGLogger\"",
+					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/libextobjc\"",
+				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-framework",
+					"Alamofire",
+					"-framework",
+					"AlamofireObjectMapper",
+					"-framework",
+					"BCGenieEffect",
+					"-framework",
+					"BlocksKit",
+					"-framework",
+					"CFNetwork",
+					"-framework",
+					"CocoaAsyncSocket",
+					"-framework",
+					"CoreTelephony",
+					"-framework",
+					"KeychainAccess",
+					"-framework",
+					"MDFInternationalization",
+					"-framework",
+					"MaterialComponents",
+					"-framework",
+					"MessageUI",
+					"-framework",
+					"ObjcExceptionBridging",
+					"-framework",
+					"ObjectMapper",
+					"-framework",
+					"Reachability",
+					"-framework",
+					"Security",
+					"-framework",
+					"SystemConfiguration",
+					"-framework",
+					"TUSafariActivity",
+					"-framework",
+					"XCGLogger",
+					"-framework",
+					"libextobjc",
+				);
 				MTL_ENABLE_DEBUG_INFO = NO;
-				PRODUCT_BUNDLE_IDENTIFIER = at.rtr.RMBTTest;
+				PRODUCT_BUNDLE_IDENTIFIER = at.rtr.RMBTTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Sources/RMBT-Bridging-Header.h";
+				OTHER_SWIFT_FLAGS = "$(inherited) -D COCOAPODS";
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RMBT.app/RMBT";
 			};
@@ -2478,7 +2712,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		C70828091CB6792F00F482EB /* Build configuration list for PBXNativeTarget "RMBTTest" */ = {
+		C70828091CB6792F00F482EB /* Build configuration list for PBXNativeTarget "RMBTTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C708280A1CB6792F00F482EB /* Debug */,
