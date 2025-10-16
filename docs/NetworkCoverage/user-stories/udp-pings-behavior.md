@@ -45,12 +45,6 @@ Feature: UDP ping session behavior for RTR NetTest coverage
     Then the ping is considered failed with needsReinitialization
     And the app shall reinitialize the UDP ping session before continuing
 
-  Scenario: Error ping response (RE01) without matching sequence (e.g., 0x0)
-    Given there is at least one pending ping request awaiting response
-    When the device receives a UDP response with protocol "RE01" and sequence number 0x0
-    Then all pending pings are failed with needsReinitialization
-    And the app shall reinitialize the UDP ping session before continuing
-
   # UI behavior during reinitialization
   Scenario: UI remains uninterrupted during ping session reinitialization
     Given the app must reinitialize the ping session (due to timeout or RE01)

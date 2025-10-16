@@ -42,12 +42,12 @@ actor UDPPingSession {
     private let sessionInitiator: any SessionInitiating
 
     private var udpConnection: any UDPConnectable
-    private var authToken: String?
     private var sequenceNumber: UInt32
     private let timeoutIntervalMs: Int
     private let now: () -> AbsoluteTimeNanos
 
     private var continuations: [UInt32: PingRequest] = [:]
+    private var receiverTask: Task<Void, Never>?
 
     init(
         sessionInitiator: any SessionInitiating,
@@ -76,9 +76,10 @@ actor UDPPingSession {
         cleanupExpiredPings()
 
         sequenceNumber &+= 1
+        let currentSequence = sequenceNumber
         var message = Data()
         message.append(Const.requestProtocol.data(using: .ascii)!)
-        message.append(withUnsafeBytes(of: sequenceNumber.bigEndian) { Data($0) })
+        message.append(withUnsafeBytes(of: currentSequence.bigEndian) { Data($0) })
 
         guard let tokenBytes = Data(base64Encoded: authToken) else {
             throw .needsReinitialization
@@ -92,17 +93,54 @@ actor UDPPingSession {
         }
 
         do {
-            try await withCheckedThrowingContinuation { continuation in
-                self.continuations[self.sequenceNumber] = .init(sentAt: self.now(), continuation: continuation)
-                Task {
-                    let response = try await self.udpConnection.receive()
-                    receivedPingResponse(response)
+            try await withTaskCancellationHandler {
+                try await withCheckedThrowingContinuation { continuation in
+                    self.continuations[currentSequence] = .init(sentAt: self.now(), continuation: continuation)
+                    self.startReceiveLoopIfNeeded()
                 }
+            } onCancel: {
+                Task { await self.cancelContinuation(sequence: currentSequence, error: CancellationError()) }
             }
         } catch let error as PingSendingError {
             throw error
         } catch {
             throw .networkIssue
+        }
+    }
+
+    private func startReceiveLoopIfNeeded() {
+        guard receiverTask == nil else { return }
+        receiverTask = Task { [weak self] in
+            guard let self else { return }
+            await self.receiveResponses()
+        }
+    }
+
+    private func receiveResponses() async {
+        defer { receiverTask = nil }
+        while !Task.isCancelled {
+            do {
+                let response = try await udpConnection.receive()
+                receivedPingResponse(response)
+            } catch is CancellationError {
+                break
+            } catch {
+                failPendingRequests(with: .networkIssue)
+                break
+            }
+        }
+    }
+
+    private func failPendingRequests(with error: PingSendingError) {
+        guard !continuations.isEmpty else { return }
+        let pending = continuations
+        continuations.removeAll()
+        pending.forEach { $0.value.continuation.resume(throwing: error) }
+    }
+
+    private func cancelContinuation(sequence: UInt32, error: Error) async {
+        if let request = continuations.removeValue(forKey: sequence) {
+            request.continuation.resume(throwing: error)
         }
     }
 
@@ -118,21 +156,17 @@ actor UDPPingSession {
 
         switch protocolName {
         case Const.responseErrorProtocol:
-            if let sentRequest = continuations[sequenceNumber] {
-                continuations[sequenceNumber] = nil
-                sentRequest.continuation.resume(throwing: PingSendingError.needsReinitialization)
-            } else {
-                // Error without a matching sequence (e.g., seq=0x0) — treat as global reinit signal
-                if !continuations.isEmpty {
-                    let pending = continuations
-                    continuations.removeAll()
-                    pending.forEach {
-                        $0.value.continuation.resume(throwing: PingSendingError.needsReinitialization)
-                    }
-                }
+            guard let sentRequest = continuations[sequenceNumber] else {
+                Log.logger.debug("UDPPingSession: Ignoring \(protocolName) response for unknown sequence \(sequenceNumber).")
+                return
             }
+            continuations[sequenceNumber] = nil
+            sentRequest.continuation.resume(throwing: PingSendingError.needsReinitialization)
         case Const.responseProtocol:
-            guard let sentRequest = continuations[sequenceNumber] else { return }
+            guard let sentRequest = continuations[sequenceNumber] else {
+                Log.logger.debug("UDPPingSession: Ignoring \(protocolName) response for unknown sequence \(sequenceNumber).")
+                return
+            }
             continuations[sequenceNumber] = nil
             sentRequest.continuation.resume()
         default:
@@ -154,5 +188,10 @@ actor UDPPingSession {
                 }
             }
         }
+    }
+
+    deinit {
+        failPendingRequests(with: .networkIssue)
+        receiverTask?.cancel()
     }
 }
