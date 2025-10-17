@@ -218,6 +218,7 @@ final class RMBTHistoryResultViewController: UIViewController {
         else { return }
         let mapController = navController.topViewController as? RMBTMapViewController
         mapController?.initialLocation = CLLocation(latitude: result.coordinate.latitude, longitude: result.coordinate.longitude)
+        mapController?.initialNetworkType = result.networkTypeServerDescription
 //        mapController?.initialZoom = zoom
         self.present(navController, animated: true, completion: nil)
     }
@@ -279,6 +280,7 @@ extension RMBTHistoryResultViewController: UITableViewDelegate, UITableViewDataS
         switch section {
         case .map:
             let mapCell = tableView.dequeueReusableCell(withIdentifier: RMBTHistoryMapCell.ID, for: indexPath) as! RMBTHistoryMapCell
+            mapCell.networkType = historyResult.networkTypeServerDescription
             mapCell.coordinate = historyResult.coordinate
             mapCell.selectionStyle = .none
             mapCell.onFullScreenHandler = { [weak self] zoom in

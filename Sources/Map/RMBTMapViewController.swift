@@ -65,6 +65,7 @@ class RMBTMapViewController: UIViewController {
     // display a test on the map.
     public var initialLocation: CLLocation?
     public var initialZoom: Double = 12
+    public var initialNetworkType: String?
     
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -137,7 +138,8 @@ class RMBTMapViewController: UIViewController {
         if let initialLocation = initialLocation {
             // If test coordinates were provided, center map at the coordinates:
             self.mapView.setCenter(initialLocation.coordinate, zoom: initialZoom, animated: false)
-            let pin = RMBTMeasurementPin(id: "", title: "Pin", coordinate: initialLocation.coordinate)
+            let icon = HistoryMapIcon.pinIcon(for: initialNetworkType, configuration: .large)
+            let pin = RMBTMeasurementPin(id: "", title: "Pin", coordinate: initialLocation.coordinate, icon: icon)
             self.currentPin = pin
             self.mapView.addAnnotation(pin)
             self.mapView.selectAnnotation(pin, animated: true)
@@ -349,11 +351,13 @@ extension RMBTMapViewController: MKMapViewDelegate {
     }
     
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
-        if annotation is RMBTMeasurementPin {
+        if let measurementPin = annotation as? RMBTMeasurementPin {
             let identifier = "Pin"
-            guard let image = UIImage(named: "map_pin_icon") else { return nil }
+            let fallbackImage = UIImage(named: "map_pin_icon")
+            guard let image = measurementPin.icon ?? fallbackImage else { return nil }
             let annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier) ?? MKAnnotationView(annotation: annotation, reuseIdentifier: identifier)
             
+            annotationView.annotation = annotation
             annotationView.image = image
             annotationView.canShowCallout = false
             annotationView.centerOffset = CGPoint(x: 0, y: -image.size.height / 2)

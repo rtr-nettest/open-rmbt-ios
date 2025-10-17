@@ -13,10 +13,12 @@ class RMBTMeasurementPin: NSObject, MKAnnotation {
     let coordinate: CLLocationCoordinate2D
     let id: String
     let title: String?
+    let icon: UIImage?
     
-    init(id: String, title: String?, coordinate: CLLocationCoordinate2D) {
+    init(id: String, title: String?, coordinate: CLLocationCoordinate2D, icon: UIImage? = nil) {
         self.id = id
         self.title = title
         self.coordinate = coordinate
+        self.icon = icon
     }
 }
