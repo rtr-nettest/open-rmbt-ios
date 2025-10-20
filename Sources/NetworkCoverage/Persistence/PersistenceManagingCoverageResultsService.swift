@@ -45,6 +45,6 @@ struct PersistenceManagingCoverageResultsService: SendCoverageResultsService {
         }
 
         // Resend any remaining persistent fences
-        try await persistentAreasResender.resendPersistentAreas()
+        try await persistentAreasResender.resendPersistentAreas(isLaunched: true)
     }
 }

@@ -39,6 +39,7 @@ class CoverageMeasurementSessionInitializer {
 
     private let now: () -> Date
     private let coverageAPIService: any CoverageAPIService
+    private let database: UserDatabase
     private(set) var lastTestUUID: String?
     private(set) var lastTestStartDate: Date?
     private(set) var maxCoverageSessionDuration: TimeInterval?
@@ -50,14 +51,15 @@ class CoverageMeasurementSessionInitializer {
         lastTestUUID != nil && lastTestStartDate != nil
     }
 
-    init(now: @escaping () -> Date, coverageAPIService: some CoverageAPIService) {
+    init(now: @escaping () -> Date, coverageAPIService: some CoverageAPIService, database: UserDatabase = .shared) {
         self.now = now
         self.coverageAPIService = coverageAPIService
+        self.database = database
     }
 
     func startNewSession(loopID: String? = nil) async throws -> SessionCredentials {
         // before staring new session, try to resend failed-to-be-sent coverage test results, if any
-        try? await NetworkCoverageFactory().persistedFencesSender.resendPersistentAreas()
+        try? await NetworkCoverageFactory(database: database).persistedFencesSender.resendPersistentAreas(isLaunched: true)
 
         let response = try await withCheckedThrowingContinuation { continuation in
             coverageAPIService.getCoverageRequest(

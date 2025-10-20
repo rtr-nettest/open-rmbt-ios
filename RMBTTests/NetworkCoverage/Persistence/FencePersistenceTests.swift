@@ -344,7 +344,7 @@ private func makeFence(
     return fence
 }
 
-private func makePersistentFence(testUUID: String, timestamp: UInt64) -> PersistentFence {
+func makePersistentFence(testUUID: String, timestamp: UInt64) -> PersistentFence {
     PersistentFence(
         testUUID: testUUID,
         timestamp: timestamp,
@@ -360,34 +360,17 @@ private enum TestError: Error {
     case sendFailed
 }
 
-private extension Date {
+extension Date {
     var microsecondsTimestamp: UInt64 {
-        UInt64(timeIntervalSince1970 * 1_000_000)
+        let microseconds = timeIntervalSince1970 * 1_000_000
+        guard microseconds > 0 else { return 0 }
+        return UInt64(microseconds)
     }
 }
 
-private extension UInt64 {
+extension UInt64 {
     var dateFromMicroseconds: Date {
         Date(timeIntervalSince1970: Double(self) / 1_000_000)
-    }
-}
-
-private final class SendCoverageResultsServiceSpyLocal: SendCoverageResultsService {
-    private(set) var capturedSentFences: [[Fence]] = []
-    private let sendResult: Result<Void, Error>
-
-    init(sendResult: Result<Void, Error> = .success(())) {
-        self.sendResult = sendResult
-    }
-
-    func send(fences: [Fence]) async throws {
-        capturedSentFences.append(fences)
-        switch sendResult {
-        case .success:
-            return
-        case .failure(let error):
-            throw error
-        }
     }
 }
 
@@ -400,10 +383,9 @@ private final class SendCoverageResultsServiceFactory {
     }
 
     func createService(for testUUID: String) -> SendCoverageResultsServiceWrapper {
-        let service = SendCoverageResultsServiceSpyLocal(sendResult: sendResults.removeFirst())
+        let service = SendCoverageResultsServiceSpy(sendResult: sendResults.removeFirst())
 
         return SendCoverageResultsServiceWrapper(
-            testUUID: testUUID,
             originalService: service,
             onSend: { [weak self] fences in
                 self?.capturedSendCalls.append(SendCall(testUUID: testUUID, fences: fences))
@@ -412,13 +394,11 @@ private final class SendCoverageResultsServiceFactory {
     }
 }
 
-private final class SendCoverageResultsServiceWrapper: SendCoverageResultsService {
-    private let testUUID: String
-    private let originalService: SendCoverageResultsServiceSpyLocal
+final class SendCoverageResultsServiceWrapper: SendCoverageResultsService {
+    private let originalService: SendCoverageResultsServiceSpy
     private let onSend: ([Fence]) -> Void
 
-    init(testUUID: String, originalService: SendCoverageResultsServiceSpyLocal, onSend: @escaping ([Fence]) -> Void) {
-        self.testUUID = testUUID
+    init(originalService: SendCoverageResultsServiceSpy, onSend: @escaping ([Fence]) -> Void) {
         self.originalService = originalService
         self.onSend = onSend
     }

@@ -121,6 +121,82 @@ import Clocks
         #expect(sut.latestPing == "N/A")
     }
 
+    @MainActor @Suite("Session Lifecycle")
+    struct SessionLifecycleTests {
+        @Test func whenStartNewMeasurement_thenMarksSessionStarted() async throws {
+            let persistenceService = FencePersistenceServiceSpy()
+            let expectedTestUUID = "session-start"
+            var dateNow = Date(timeIntervalSinceReferenceDate: 0)
+            let sut = makeSUT(
+                updates: [makeLocationUpdate(at: 0, lat: 48.2082, lon: 16.3738)],
+                persistenceService: persistenceService,
+                currentTime: { dateNow },
+                testUUID: expectedTestUUID
+            )
+
+            dateNow = Date(timeIntervalSinceReferenceDate: 10)
+            await sut.startTest()
+            await Task.yield()
+
+            #expect(
+                persistenceService.capturedSessionStarts == [.init(
+                    testUUID: expectedTestUUID,
+                    startedAt: Date(timeIntervalSinceReferenceDate: 10)
+                )]
+            )
+        }
+
+        @Test func whenStopMeasurement_thenMarksSessionFinalized() async throws {
+            let persistenceService = FencePersistenceServiceSpy()
+            let expectedTestUUID = "session-finalize"
+            var dateNow = Date(timeIntervalSinceReferenceDate: 0)
+            let sut = makeSUT(
+                updates: [
+                    makeLocationUpdate(at: 0, lat: 48.2082, lon: 16.3738),
+                    makeLocationUpdate(at: 5, lat: 48.2083, lon: 16.3739)
+                ],
+                persistenceService: persistenceService,
+                currentTime: { dateNow },
+                testUUID: expectedTestUUID
+            )
+
+            dateNow = Date(timeIntervalSinceReferenceDate: 20)
+            await sut.startTest()
+            await Task.yield()
+            dateNow = Date(timeIntervalSinceReferenceDate: 30)
+            await sut.stopTest()
+
+            #expect(
+                persistenceService.capturedSessionFinalizations == [.init(
+                    testUUID: expectedTestUUID,
+                    finalizedAt: Date(timeIntervalSinceReferenceDate: 30)
+                )]
+            )
+        }
+
+        @Test func whenStopMeasurement_thenSendsAllFencesOnce() async throws {
+            let sendService = SendCoverageResultsServiceSpy()
+            let expectedTestUUID = "session-send"
+            let sut = makeSUT(
+                updates: [
+                    makeLocationUpdate(at: 0, lat: 48.2082, lon: 16.3738),
+                    makePingUpdate(at: 1, ms: 30),
+                    makeLocationUpdate(at: 2, lat: 48.2084, lon: 16.3740)
+                ],
+                sendResultsService: sendService,
+                testUUID: expectedTestUUID
+            )
+
+            await sut.startTest()
+            let expectedFenceCount = sut.fenceItems.count
+
+            await sut.stopTest()
+
+            #expect(sendService.capturedSentFences == [sut.fences])
+            #expect(sendService.capturedSentFences.first?.count == expectedFenceCount)
+        }
+    }
+
     @MainActor @Suite("Map Rendering")
     struct MapRenderingTests {
         private let equatorWideRegion = MKCoordinateRegion(center: .init(latitude: 0.0015, longitude: 0.0), span: .init(latitudeDelta: 0.05, longitudeDelta: 0.05))
@@ -904,6 +980,7 @@ import Clocks
 
             await sut.startTest()
             await clock.advance(by: .seconds(timeout))
+            await clock.run()
 
             #expect(!sut.isStarted)
             #expect(sut.stopTestReasons == [.insufficientLocationAccuracy(duration: timeout)])
@@ -925,6 +1002,7 @@ import Clocks
 
             await sut.startTest()
             await clock.advance(by: .seconds(timeout))
+            await clock.run()
 
             #expect(sut.isStarted)
             #expect(sut.stopTestReasons == [])
@@ -1115,8 +1193,11 @@ import Clocks
     clock: some Clock<Duration> = ContinuousClock(),
     insufficientAccuracyAutoStopInterval: TimeInterval = 30 * 60,
     maxTestDuration: @escaping () -> TimeInterval = { 4 * 60 * 60 },
+    testUUID: String = "test-uuid",
     renderingConfiguration: FencesRenderingConfiguration = .default
 ) -> NetworkCoverageViewModel {
+    persistenceService.currentTestUUID = testUUID
+
     return NetworkCoverageViewModel(
         fences: fences,
         refreshInterval: refreshInterval,
@@ -1261,12 +1342,33 @@ final class RadioTechnologyServiceStub: CurrentRadioTechnologyService {
 }
 
 final class FencePersistenceServiceSpy: FencePersistenceService {
+    struct SessionStartCall: Equatable {
+        let testUUID: String?
+        let startedAt: Date
+    }
+
+    struct SessionFinalizeCall: Equatable {
+        let testUUID: String?
+        let finalizedAt: Date
+    }
+
+    var currentTestUUID: String?
     private(set) var capturedSavedFences: [Fence] = []
+    private(set) var capturedSessionStarts: [SessionStartCall] = []
+    private(set) var capturedSessionFinalizations: [SessionFinalizeCall] = []
 
     init() {}
 
     func save(_ fence: Fence) throws {
         capturedSavedFences.append(fence)
+    }
+
+    func sessionStarted(at date: Date) throws {
+        capturedSessionStarts.append(SessionStartCall(testUUID: currentTestUUID, startedAt: date))
+    }
+
+    func sessionFinalized(at date: Date) throws {
+        capturedSessionFinalizations.append(SessionFinalizeCall(testUUID: currentTestUUID, finalizedAt: date))
     }
 }
 

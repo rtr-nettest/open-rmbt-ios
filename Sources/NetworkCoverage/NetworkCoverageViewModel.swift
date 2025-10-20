@@ -36,6 +36,8 @@ protocol SendCoverageResultsService {
 
 protocol FencePersistenceService {
     func save(_ fence: Fence) throws
+    func sessionStarted(at date: Date) throws
+    func sessionFinalized(at date: Date) throws
 }
 
 struct FenceItem: Identifiable, Hashable {
@@ -408,14 +410,17 @@ struct FenceDetail: Equatable, Identifiable {
 
     private func start() async {
         guard !isStarted else { return }
+        let sessionStartDate = timeNow()
         isStarted = true
-        testStartTime = timeNow()
+        testStartTime = sessionStartDate
         fences.removeAll()
         locations.removeAll()
         canCheckForLocationInaccuracyWarning = false
         hasEverHadAccurateLocation = false
         stopTestReasons.removeAll()
         isOnWiFi = false
+
+        try? persistenceService.sessionStarted(at: sessionStartDate)
 
         await BackgroundActivityActor.shared.startActivity()
 
@@ -460,6 +465,7 @@ struct FenceDetail: Equatable, Identifiable {
     }
 
     private func stop() async {
+        let finalizationDate = timeNow()
         isStarted = false
         testStartTime = nil
         locationAccuracy = "N/A"
@@ -480,17 +486,21 @@ struct FenceDetail: Equatable, Identifiable {
         // Handle saving and sending results...
         if !fences.isEmpty {
             if var lastFence = fences.last, lastFence.dateExited == nil {
-                lastFence.exit(at: timeNow())
+                lastFence.exit(at: finalizationDate)
                 fences[fences.endIndex - 1] = lastFence
                 try? persistenceService.save(lastFence)
             }
-            
+
             do {
+                Log.logger.info("Stopping coverage test: sending \(fences.count) fences")
+                
                 try await sendResultsService.send(fences: fences)
             } catch {
                 // TODO: display error
             }
         }
+
+        try? persistenceService.sessionFinalized(at: finalizationDate)
     }
 
     func toggleMeasurement() async {

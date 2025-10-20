@@ -73,7 +73,8 @@ struct CoverageMeasurementSessionInitializerTests {
 
 private func makeSUT(testUUIDs: [String], ipVersions: [Int?] = []) -> (CoverageMeasurementSessionInitializer, ControlServerSpy) {
     let spy = ControlServerSpy(enqueuedTestUUIDs: testUUIDs, enqueuedIpVersions: ipVersions)
-    let sut = CoverageMeasurementSessionInitializer(now: { Date() }, coverageAPIService: spy)
+    let database = UserDatabase(useInMemoryStore: true)
+    let sut = CoverageMeasurementSessionInitializer(now: { Date() }, coverageAPIService: spy, database: database)
     return (sut, spy)
 }
 

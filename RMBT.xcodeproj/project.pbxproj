@@ -49,6 +49,7 @@
 		499CF46D2DE9D48200D5DCDE /* NetworkCoverageFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499CF46C2DE9D48200D5DCDE /* NetworkCoverageFactory.swift */; };
 		499CF46F2DE9DA1700D5DCDE /* PersistenceManagingCoverageResultsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499CF46E2DE9DA1700D5DCDE /* PersistenceManagingCoverageResultsService.swift */; };
 		499CF4732DE9DF8300D5DCDE /* FencePersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499CF4722DE9DF8300D5DCDE /* FencePersistenceTests.swift */; };
+		49D22A7D2F0C4F7F00F2A9EF /* PersistedFencesResenderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49D22A7C2F0C4F7F00F2A9EF /* PersistedFencesResenderTests.swift */; };
 		49A0B1C92F2E1234007ABCDE /* AFNetworkLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A0B1C82F2E1234007ABCDE /* AFNetworkLogger.swift */; };
 		49A31C6C2D3A97250039052B /* AsynchronousSequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A31C6B2D3A97250039052B /* AsynchronousSequence.swift */; };
 		49A646BC2E401615007F0F4E /* FencesMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A646BB2E401615007F0F4E /* FencesMapView.swift */; };
@@ -384,6 +385,7 @@
 		499CF46C2DE9D48200D5DCDE /* NetworkCoverageFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkCoverageFactory.swift; sourceTree = "<group>"; };
 		499CF46E2DE9DA1700D5DCDE /* PersistenceManagingCoverageResultsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceManagingCoverageResultsService.swift; sourceTree = "<group>"; };
 		499CF4722DE9DF8300D5DCDE /* FencePersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FencePersistenceTests.swift; sourceTree = "<group>"; };
+		49D22A7C2F0C4F7F00F2A9EF /* PersistedFencesResenderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistedFencesResenderTests.swift; sourceTree = "<group>"; };
 		49A0B1C82F2E1234007ABCDE /* AFNetworkLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AFNetworkLogger.swift; sourceTree = "<group>"; };
 		49A31C6B2D3A97250039052B /* AsynchronousSequence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsynchronousSequence.swift; sourceTree = "<group>"; };
 		49A646BB2E401615007F0F4E /* FencesMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FencesMapView.swift; sourceTree = "<group>"; };
@@ -758,6 +760,7 @@
 			isa = PBXGroup;
 			children = (
 				499CF4722DE9DF8300D5DCDE /* FencePersistenceTests.swift */,
+				49D22A7C2F0C4F7F00F2A9EF /* PersistedFencesResenderTests.swift */,
 			);
 			path = Persistence;
 			sourceTree = "<group>";
@@ -1912,6 +1915,7 @@
 				49D632ED2E856B1800B2BF02 /* CoverageTestDetailsModelTests.swift in Sources */,
 				E92E07B6277B4A80008143FE /* RMBTSpeedTest.swift in Sources */,
 				499CF4732DE9DF8300D5DCDE /* FencePersistenceTests.swift in Sources */,
+				49D22A7D2F0C4F7F00F2A9EF /* PersistedFencesResenderTests.swift in Sources */,
 				498F7F942D352C2000EC975D /* NetworkCoverageViewModelTests.swift in Sources */,
 				E92E07B8277B4B4F008143FE /* RMBTProgressTest.swift in Sources */,
 				E92E07BC277B4E92008143FE /* RMBTThroughputHistoryTest.swift in Sources */,

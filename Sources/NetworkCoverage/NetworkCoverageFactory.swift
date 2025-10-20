@@ -15,11 +15,11 @@ final class UserDatabase {
 
     init(useInMemoryStore: Bool = false) {
         let configuration = ModelConfiguration(
-            for: PersistentFence.self,
+            for: PersistentFence.self, PersistentCoverageSession.self,
             isStoredInMemoryOnly: useInMemoryStore
         )
         container = try! ModelContainer(
-            for: PersistentFence.self,
+            for: PersistentFence.self, PersistentCoverageSession.self,
             configurations: configuration
         )
     }
@@ -36,17 +36,30 @@ struct NetworkCoverageFactory {
 
     private let database: UserDatabase
     private let maxResendAge: TimeInterval
-    private let dateNow: () -> Date = Date.init
+    private let dateNow: () -> Date
 
-    init(database: UserDatabase = .shared, maxResendAge: TimeInterval = Self.persistenceMaxAgeInterval) {
+    init(
+        database: UserDatabase = .shared,
+        maxResendAge: TimeInterval = Self.persistenceMaxAgeInterval,
+        dateNow: @escaping () -> Date = Date.init
+    ) {
         self.database = database
         self.maxResendAge = maxResendAge
+        self.dateNow = dateNow
     }
 
     var persistedFencesSender: PersistedFencesResender {
         persistedFencesResender(sendResultsServiceMaker: { testUUID, startDate in
             makeSendResultsService(testUUID: testUUID, startDate: startDate)
         })
+    }
+
+    func makeResender(
+        sendResultsServiceMaker: @escaping (String, Date?) -> some SendCoverageResultsService
+    ) -> PersistedFencesResender {
+        persistedFencesResender { testUUID, startDate in
+            sendResultsServiceMaker(testUUID, startDate)
+        }
     }
 
     func services(
@@ -61,11 +74,11 @@ struct NetworkCoverageFactory {
             sendResultsService: { testUUID in
                 sendResultsServiceMaker(testUUID, startDate())
             },
-            resender: persistedFencesResender(sendResultsServiceMaker: sendResultsServiceMaker)
+            resender: makeResender(sendResultsServiceMaker: sendResultsServiceMaker)
         )
         let persistenceService = SwiftDataFencePersistenceService(
             modelContext: database.modelContext,
-            testUUID: testUUID()
+            testUUID: testUUID
         )
 
         return (persistenceService, resultSender)
@@ -97,7 +110,8 @@ struct NetworkCoverageFactory {
     @MainActor func makeCoverageViewModel(fences: [Fence] = []) -> NetworkCoverageViewModel {
         let sessionInitializer = CoverageMeasurementSessionInitializer(
             now: dateNow,
-            coverageAPIService: RMBTControlServer.shared
+            coverageAPIService: RMBTControlServer.shared,
+            database: database
         )
         let (persistenceService, resultSender) = services(
             testUUID: sessionInitializer.lastTestUUID,
@@ -175,6 +189,8 @@ private struct MockSendCoverageResultsService: SendCoverageResultsService {
 
 private struct MockFencePersistenceService: FencePersistenceService {
     func save(_ fence: Fence) throws {}
+    func sessionStarted(at date: Date) throws {}
+    func sessionFinalized(at date: Date) throws {}
 }
 
 private struct EmptyAsyncSequence: AsyncSequence {

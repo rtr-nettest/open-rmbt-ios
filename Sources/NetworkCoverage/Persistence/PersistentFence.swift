@@ -47,3 +47,16 @@ final class PersistentFence {
         self.radiusMeters = radiusMeters
     }
 }
+
+@Model
+final class PersistentCoverageSession {
+    @Attribute(.unique) var testUUID: String
+    var startedAt: UInt64
+    var finalizedAt: UInt64?
+
+    init(testUUID: String, startedAt: UInt64, finalizedAt: UInt64? = nil) {
+        self.testUUID = testUUID
+        self.startedAt = startedAt
+        self.finalizedAt = finalizedAt
+    }
+}

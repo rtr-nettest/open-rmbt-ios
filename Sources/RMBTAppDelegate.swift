@@ -52,12 +52,12 @@ final class RMBTAppDelegate: UIResponder, UIApplicationDelegate {
             let tos = RMBTTOS.shared
 
             if tos.isCurrentVersionAccepted(with: RMBTControlServer.shared.termsAndConditions) {
-                self?.checkNews()
+                self?.checkNews(isLaunched: isLaunched)
             } else {
                 // TODO: Remake it
                 tos.bk_addObserver(forKeyPath: "lastAcceptedVersion") { [weak self] sender in
                     Log.logger.debug("TOS accepted, checking news...")
-                    self?.checkNews()
+                    self?.checkNews(isLaunched: isLaunched)
                 }
             }
         } error: {  _ in
@@ -69,10 +69,10 @@ final class RMBTAppDelegate: UIResponder, UIApplicationDelegate {
         _ = RMBTLocationTracker.shared.startIfAuthorized()
     }
 
-    private func checkNews() {
+    private func checkNews(isLaunched: Bool) {
         RMBTControlServer.shared.getSettings {
             Task {
-                try? await NetworkCoverageFactory().persistedFencesSender.resendPersistentAreas()
+                try? await NetworkCoverageFactory().persistedFencesSender.resendPersistentAreas(isLaunched: isLaunched)
             }
         } error: { _ in }
         RMBTControlServer.shared.getNews { [weak self] response in
