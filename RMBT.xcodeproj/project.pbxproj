@@ -49,7 +49,6 @@
 		499CF46D2DE9D48200D5DCDE /* NetworkCoverageFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499CF46C2DE9D48200D5DCDE /* NetworkCoverageFactory.swift */; };
 		499CF46F2DE9DA1700D5DCDE /* PersistenceManagingCoverageResultsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499CF46E2DE9DA1700D5DCDE /* PersistenceManagingCoverageResultsService.swift */; };
 		499CF4732DE9DF8300D5DCDE /* FencePersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499CF4722DE9DF8300D5DCDE /* FencePersistenceTests.swift */; };
-		49D22A7D2F0C4F7F00F2A9EF /* PersistedFencesResenderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49D22A7C2F0C4F7F00F2A9EF /* PersistedFencesResenderTests.swift */; };
 		49A0B1C92F2E1234007ABCDE /* AFNetworkLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A0B1C82F2E1234007ABCDE /* AFNetworkLogger.swift */; };
 		49A31C6C2D3A97250039052B /* AsynchronousSequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A31C6B2D3A97250039052B /* AsynchronousSequence.swift */; };
 		49A646BC2E401615007F0F4E /* FencesMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A646BB2E401615007F0F4E /* FencesMapView.swift */; };
@@ -64,6 +63,7 @@
 		49C202CB2E0C3E0400CB6520 /* TestPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49C202CA2E0C3E0400CB6520 /* TestPopup.swift */; };
 		49C202CD2E0D3A6800CB6520 /* Color+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49C202CC2E0D3A6600CB6520 /* Color+Ext.swift */; };
 		49C921452D6CA0E80003EDBC /* CoverageMeasurementSessionInitializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49C921442D6CA0E20003EDBC /* CoverageMeasurementSessionInitializer.swift */; };
+		49D22A7D2F0C4F7F00F2A9EF /* PersistedFencesResenderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49D22A7C2F0C4F7F00F2A9EF /* PersistedFencesResenderTests.swift */; };
 		49D632E12E85234300B2BF02 /* CoverageTestDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49D632E02E85234300B2BF02 /* CoverageTestDetailsView.swift */; };
 		49D632E92E856A9900B2BF02 /* CoverageTestDetailsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49D632E82E856A9900B2BF02 /* CoverageTestDetailsModel.swift */; };
 		49D632ED2E856B1800B2BF02 /* CoverageTestDetailsModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49D632EA2E856B1800B2BF02 /* CoverageTestDetailsModelTests.swift */; };
@@ -385,7 +385,6 @@
 		499CF46C2DE9D48200D5DCDE /* NetworkCoverageFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkCoverageFactory.swift; sourceTree = "<group>"; };
 		499CF46E2DE9DA1700D5DCDE /* PersistenceManagingCoverageResultsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceManagingCoverageResultsService.swift; sourceTree = "<group>"; };
 		499CF4722DE9DF8300D5DCDE /* FencePersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FencePersistenceTests.swift; sourceTree = "<group>"; };
-		49D22A7C2F0C4F7F00F2A9EF /* PersistedFencesResenderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistedFencesResenderTests.swift; sourceTree = "<group>"; };
 		49A0B1C82F2E1234007ABCDE /* AFNetworkLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AFNetworkLogger.swift; sourceTree = "<group>"; };
 		49A31C6B2D3A97250039052B /* AsynchronousSequence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsynchronousSequence.swift; sourceTree = "<group>"; };
 		49A646BB2E401615007F0F4E /* FencesMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FencesMapView.swift; sourceTree = "<group>"; };
@@ -402,6 +401,7 @@
 		49C5E41A2DD74C3E00C537D9 /* libresolv.9.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libresolv.9.tbd; path = usr/lib/libresolv.9.tbd; sourceTree = SDKROOT; };
 		49C86FDC2AFBBF1500663CE2 /* RMBTConfig.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RMBTConfig.swift; sourceTree = "<group>"; };
 		49C921442D6CA0E20003EDBC /* CoverageMeasurementSessionInitializer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverageMeasurementSessionInitializer.swift; sourceTree = "<group>"; };
+		49D22A7C2F0C4F7F00F2A9EF /* PersistedFencesResenderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistedFencesResenderTests.swift; sourceTree = "<group>"; };
 		49D632E02E85234300B2BF02 /* CoverageTestDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverageTestDetailsView.swift; sourceTree = "<group>"; };
 		49D632E82E856A9900B2BF02 /* CoverageTestDetailsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverageTestDetailsModel.swift; sourceTree = "<group>"; };
 		49D632EA2E856B1800B2BF02 /* CoverageTestDetailsModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverageTestDetailsModelTests.swift; sourceTree = "<group>"; };
@@ -690,17 +690,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		49E6A4D12E70439F00CED0EE /* NetworkType */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
-			path = NetworkType;
-			sourceTree = "<group>";
-		};
+		49E6A4D12E70439F00CED0EE /* NetworkType */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = NetworkType; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1818,9 +1808,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-RMBT/Pods-RMBT-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-RMBT/Pods-RMBT-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -2240,24 +2234,6 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_PREFIX_HEADER = "RMBTTests/RMBTTests-Prefix.pch";
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
-					"$(inherited)",
-				);
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				GCC_WARN_UNUSED_FUNCTION = YES;
-				INFOPLIST_FILE = RMBTTest/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(PODS_CONFIGURATION_BUILD_DIR)/Alamofire\"",
@@ -2275,6 +2251,17 @@
 					"\"$(PODS_CONFIGURATION_BUILD_DIR)/XCGLogger\"",
 					"\"$(PODS_CONFIGURATION_BUILD_DIR)/libextobjc\"",
 				);
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREFIX_HEADER = "RMBTTests/RMBTTests-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(PODS_CONFIGURATION_BUILD_DIR)/Alamofire/Alamofire.framework/Headers\"",
@@ -2292,88 +2279,123 @@
 					"\"$(PODS_CONFIGURATION_BUILD_DIR)/XCGLogger/XCGLogger.framework/Headers\"",
 					"\"$(PODS_CONFIGURATION_BUILD_DIR)/libextobjc/libextobjc.framework/Headers\"",
 				);
+				INFOPLIST_FILE = RMBTTest/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"${TOOLCHAIN_DIR}/usr/lib/swift/$(PLATFORM_NAME)\"",
 					/usr/lib/swift,
 				);
+				MTL_ENABLE_DEBUG_INFO = YES;
 				OTHER_CFLAGS = (
 					"$(inherited)",
-					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/Alamofire/Alamofire.framework/Headers\"",
-					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/AlamofireObjectMapper/AlamofireObjectMapper.framework/Headers\"",
-					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/BCGenieEffect/BCGenieEffect.framework/Headers\"",
-					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/BlocksKit/BlocksKit.framework/Headers\"",
-					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/CocoaAsyncSocket/CocoaAsyncSocket.framework/Headers\"",
-					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/KeychainAccess/KeychainAccess.framework/Headers\"",
-					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/MDFInternationalization/MDFInternationalization.framework/Headers\"",
-					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/MaterialComponents/MaterialComponents.framework/Headers\"",
-					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/ObjcExceptionBridging/ObjcExceptionBridging.framework/Headers\"",
-					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/ObjectMapper/ObjectMapper.framework/Headers\"",
-					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/ReachabilitySwift/Reachability.framework/Headers\"",
-					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/TUSafariActivity/TUSafariActivity.framework/Headers\"",
-					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/XCGLogger/XCGLogger.framework/Headers\"",
-					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/libextobjc/libextobjc.framework/Headers\"",
-					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/Alamofire\"",
-					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/AlamofireObjectMapper\"",
-					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/BCGenieEffect\"",
-					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/BlocksKit\"",
-					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/CocoaAsyncSocket\"",
-					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/KeychainAccess\"",
-					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/MDFInternationalization\"",
-					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/MaterialComponents\"",
-					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/ObjcExceptionBridging\"",
-					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/ObjectMapper\"",
-					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/ReachabilitySwift\"",
-					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/TUSafariActivity\"",
-					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/XCGLogger\"",
-					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/libextobjc\"",
+					"-isystem",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/Alamofire/Alamofire.framework/Headers\"",
+					"-isystem",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/AlamofireObjectMapper/AlamofireObjectMapper.framework/Headers\"",
+					"-isystem",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/BCGenieEffect/BCGenieEffect.framework/Headers\"",
+					"-isystem",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/BlocksKit/BlocksKit.framework/Headers\"",
+					"-isystem",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/CocoaAsyncSocket/CocoaAsyncSocket.framework/Headers\"",
+					"-isystem",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/KeychainAccess/KeychainAccess.framework/Headers\"",
+					"-isystem",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/MDFInternationalization/MDFInternationalization.framework/Headers\"",
+					"-isystem",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/MaterialComponents/MaterialComponents.framework/Headers\"",
+					"-isystem",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/ObjcExceptionBridging/ObjcExceptionBridging.framework/Headers\"",
+					"-isystem",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/ObjectMapper/ObjectMapper.framework/Headers\"",
+					"-isystem",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/ReachabilitySwift/Reachability.framework/Headers\"",
+					"-isystem",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/TUSafariActivity/TUSafariActivity.framework/Headers\"",
+					"-isystem",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/XCGLogger/XCGLogger.framework/Headers\"",
+					"-isystem",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/libextobjc/libextobjc.framework/Headers\"",
+					"-iframework",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/Alamofire\"",
+					"-iframework",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/AlamofireObjectMapper\"",
+					"-iframework",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/BCGenieEffect\"",
+					"-iframework",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/BlocksKit\"",
+					"-iframework",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/CocoaAsyncSocket\"",
+					"-iframework",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/KeychainAccess\"",
+					"-iframework",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/MDFInternationalization\"",
+					"-iframework",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/MaterialComponents\"",
+					"-iframework",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/ObjcExceptionBridging\"",
+					"-iframework",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/ObjectMapper\"",
+					"-iframework",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/ReachabilitySwift\"",
+					"-iframework",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/TUSafariActivity\"",
+					"-iframework",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/XCGLogger\"",
+					"-iframework",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/libextobjc\"",
 				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-framework",
-					"Alamofire",
+					Alamofire,
 					"-framework",
-					"AlamofireObjectMapper",
+					AlamofireObjectMapper,
 					"-framework",
-					"BCGenieEffect",
+					BCGenieEffect,
 					"-framework",
-					"BlocksKit",
+					BlocksKit,
 					"-framework",
-					"CFNetwork",
+					CFNetwork,
 					"-framework",
-					"CocoaAsyncSocket",
+					CocoaAsyncSocket,
 					"-framework",
-					"CoreTelephony",
+					CoreTelephony,
 					"-framework",
-					"KeychainAccess",
+					KeychainAccess,
 					"-framework",
-					"MDFInternationalization",
+					MDFInternationalization,
 					"-framework",
-					"MaterialComponents",
+					MaterialComponents,
 					"-framework",
-					"MessageUI",
+					MessageUI,
 					"-framework",
-					"ObjcExceptionBridging",
+					ObjcExceptionBridging,
 					"-framework",
-					"ObjectMapper",
+					ObjectMapper,
 					"-framework",
-					"Reachability",
+					Reachability,
 					"-framework",
-					"Security",
+					Security,
 					"-framework",
-					"SystemConfiguration",
+					SystemConfiguration,
 					"-framework",
-					"TUSafariActivity",
+					TUSafariActivity,
 					"-framework",
-					"XCGLogger",
+					XCGLogger,
 					"-framework",
-					"libextobjc",
+					libextobjc,
 				);
-				MTL_ENABLE_DEBUG_INFO = YES;
+				OTHER_SWIFT_FLAGS = "$(inherited) -D COCOAPODS";
 				PRODUCT_BUNDLE_IDENTIFIER = at.rtr.RMBTTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Sources/RMBT-Bridging-Header.h";
-				OTHER_SWIFT_FLAGS = "$(inherited) -D COCOAPODS";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RMBT.app/RMBT";
@@ -2397,20 +2419,6 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_PREFIX_HEADER = "RMBTTests/RMBTTests-Prefix.pch";
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				GCC_WARN_UNUSED_FUNCTION = YES;
-				INFOPLIST_FILE = RMBTTest/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(PODS_CONFIGURATION_BUILD_DIR)/Alamofire\"",
@@ -2428,6 +2436,13 @@
 					"\"$(PODS_CONFIGURATION_BUILD_DIR)/XCGLogger\"",
 					"\"$(PODS_CONFIGURATION_BUILD_DIR)/libextobjc\"",
 				);
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREFIX_HEADER = "RMBTTests/RMBTTests-Prefix.pch";
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(PODS_CONFIGURATION_BUILD_DIR)/Alamofire/Alamofire.framework/Headers\"",
@@ -2445,88 +2460,123 @@
 					"\"$(PODS_CONFIGURATION_BUILD_DIR)/XCGLogger/XCGLogger.framework/Headers\"",
 					"\"$(PODS_CONFIGURATION_BUILD_DIR)/libextobjc/libextobjc.framework/Headers\"",
 				);
+				INFOPLIST_FILE = RMBTTest/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"${TOOLCHAIN_DIR}/usr/lib/swift/$(PLATFORM_NAME)\"",
 					/usr/lib/swift,
 				);
+				MTL_ENABLE_DEBUG_INFO = NO;
 				OTHER_CFLAGS = (
 					"$(inherited)",
-					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/Alamofire/Alamofire.framework/Headers\"",
-					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/AlamofireObjectMapper/AlamofireObjectMapper.framework/Headers\"",
-					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/BCGenieEffect/BCGenieEffect.framework/Headers\"",
-					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/BlocksKit/BlocksKit.framework/Headers\"",
-					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/CocoaAsyncSocket/CocoaAsyncSocket.framework/Headers\"",
-					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/KeychainAccess/KeychainAccess.framework/Headers\"",
-					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/MDFInternationalization/MDFInternationalization.framework/Headers\"",
-					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/MaterialComponents/MaterialComponents.framework/Headers\"",
-					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/ObjcExceptionBridging/ObjcExceptionBridging.framework/Headers\"",
-					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/ObjectMapper/ObjectMapper.framework/Headers\"",
-					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/ReachabilitySwift/Reachability.framework/Headers\"",
-					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/TUSafariActivity/TUSafariActivity.framework/Headers\"",
-					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/XCGLogger/XCGLogger.framework/Headers\"",
-					"-isystem \"$(PODS_CONFIGURATION_BUILD_DIR)/libextobjc/libextobjc.framework/Headers\"",
-					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/Alamofire\"",
-					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/AlamofireObjectMapper\"",
-					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/BCGenieEffect\"",
-					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/BlocksKit\"",
-					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/CocoaAsyncSocket\"",
-					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/KeychainAccess\"",
-					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/MDFInternationalization\"",
-					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/MaterialComponents\"",
-					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/ObjcExceptionBridging\"",
-					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/ObjectMapper\"",
-					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/ReachabilitySwift\"",
-					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/TUSafariActivity\"",
-					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/XCGLogger\"",
-					"-iframework \"$(PODS_CONFIGURATION_BUILD_DIR)/libextobjc\"",
+					"-isystem",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/Alamofire/Alamofire.framework/Headers\"",
+					"-isystem",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/AlamofireObjectMapper/AlamofireObjectMapper.framework/Headers\"",
+					"-isystem",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/BCGenieEffect/BCGenieEffect.framework/Headers\"",
+					"-isystem",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/BlocksKit/BlocksKit.framework/Headers\"",
+					"-isystem",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/CocoaAsyncSocket/CocoaAsyncSocket.framework/Headers\"",
+					"-isystem",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/KeychainAccess/KeychainAccess.framework/Headers\"",
+					"-isystem",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/MDFInternationalization/MDFInternationalization.framework/Headers\"",
+					"-isystem",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/MaterialComponents/MaterialComponents.framework/Headers\"",
+					"-isystem",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/ObjcExceptionBridging/ObjcExceptionBridging.framework/Headers\"",
+					"-isystem",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/ObjectMapper/ObjectMapper.framework/Headers\"",
+					"-isystem",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/ReachabilitySwift/Reachability.framework/Headers\"",
+					"-isystem",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/TUSafariActivity/TUSafariActivity.framework/Headers\"",
+					"-isystem",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/XCGLogger/XCGLogger.framework/Headers\"",
+					"-isystem",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/libextobjc/libextobjc.framework/Headers\"",
+					"-iframework",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/Alamofire\"",
+					"-iframework",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/AlamofireObjectMapper\"",
+					"-iframework",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/BCGenieEffect\"",
+					"-iframework",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/BlocksKit\"",
+					"-iframework",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/CocoaAsyncSocket\"",
+					"-iframework",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/KeychainAccess\"",
+					"-iframework",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/MDFInternationalization\"",
+					"-iframework",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/MaterialComponents\"",
+					"-iframework",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/ObjcExceptionBridging\"",
+					"-iframework",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/ObjectMapper\"",
+					"-iframework",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/ReachabilitySwift\"",
+					"-iframework",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/TUSafariActivity\"",
+					"-iframework",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/XCGLogger\"",
+					"-iframework",
+					"\"$(PODS_CONFIGURATION_BUILD_DIR)/libextobjc\"",
 				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-framework",
-					"Alamofire",
+					Alamofire,
 					"-framework",
-					"AlamofireObjectMapper",
+					AlamofireObjectMapper,
 					"-framework",
-					"BCGenieEffect",
+					BCGenieEffect,
 					"-framework",
-					"BlocksKit",
+					BlocksKit,
 					"-framework",
-					"CFNetwork",
+					CFNetwork,
 					"-framework",
-					"CocoaAsyncSocket",
+					CocoaAsyncSocket,
 					"-framework",
-					"CoreTelephony",
+					CoreTelephony,
 					"-framework",
-					"KeychainAccess",
+					KeychainAccess,
 					"-framework",
-					"MDFInternationalization",
+					MDFInternationalization,
 					"-framework",
-					"MaterialComponents",
+					MaterialComponents,
 					"-framework",
-					"MessageUI",
+					MessageUI,
 					"-framework",
-					"ObjcExceptionBridging",
+					ObjcExceptionBridging,
 					"-framework",
-					"ObjectMapper",
+					ObjectMapper,
 					"-framework",
-					"Reachability",
+					Reachability,
 					"-framework",
-					"Security",
+					Security,
 					"-framework",
-					"SystemConfiguration",
+					SystemConfiguration,
 					"-framework",
-					"TUSafariActivity",
+					TUSafariActivity,
 					"-framework",
-					"XCGLogger",
+					XCGLogger,
 					"-framework",
-					"libextobjc",
+					libextobjc,
 				);
-				MTL_ENABLE_DEBUG_INFO = NO;
+				OTHER_SWIFT_FLAGS = "$(inherited) -D COCOAPODS";
 				PRODUCT_BUNDLE_IDENTIFIER = at.rtr.RMBTTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Sources/RMBT-Bridging-Header.h";
-				OTHER_SWIFT_FLAGS = "$(inherited) -D COCOAPODS";
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RMBT.app/RMBT";
 			};
@@ -2645,7 +2695,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 16;
+				CURRENT_PROJECT_VERSION = 17;
 				DEVELOPMENT_TEAM = T7Y947AEPK;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -2687,7 +2737,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 16;
+				CURRENT_PROJECT_VERSION = 17;
 				DEVELOPMENT_TEAM = T7Y947AEPK;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
