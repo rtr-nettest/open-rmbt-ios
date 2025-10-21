@@ -107,7 +107,7 @@ struct NetworkCoverageView: View {
             .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(for: String.self) { destination in
                 if destination == "results" {
-                    CoverageResultView(stopReasons: resultStopReasons, onClose: onClose)
+                    CoverageResultView(stopReasons: resultStopReasons)
                         .environment(viewModel)
                 }
             }

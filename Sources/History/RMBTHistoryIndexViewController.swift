@@ -351,6 +351,7 @@ final class RMBTHistoryIndexViewController: UIViewController {
          let coverageDetailView = CoverageHistoryDetailView(coverageResult: coverageResult)
          let hostingController = UIHostingController(rootView: coverageDetailView)
          hostingController.modalPresentationStyle = .fullScreen
+         navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
          navigationController?.pushViewController(hostingController, animated: true)
      }
 }

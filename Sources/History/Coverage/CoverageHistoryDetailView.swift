@@ -68,7 +68,7 @@ struct CoverageHistoryDetailView: View {
                 }
             case (false, .none, .some(let viewModel)):
                 ZStack {
-                    CoverageResultView(stopReasons: [], onClose: { dismiss() })
+                    CoverageResultView(stopReasons: [])
                         .environment(viewModel)
 
                     // Floating "Test details" button
