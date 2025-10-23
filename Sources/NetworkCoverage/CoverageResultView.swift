@@ -34,8 +34,6 @@ struct CoverageResultView: View {
         .safeAreaInset(edge: .top, spacing: 0) {
             stopReasonBanner()
         }
-        .navigationTitle(NSLocalizedString("Coverage Test Results", comment: ""))
-        .navigationBarTitleDisplayMode(.inline)
     }
 
     @ViewBuilder
