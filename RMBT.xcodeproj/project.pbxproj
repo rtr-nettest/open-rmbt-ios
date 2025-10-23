@@ -69,6 +69,7 @@
 		49D632ED2E856B1800B2BF02 /* CoverageTestDetailsModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49D632EA2E856B1800B2BF02 /* CoverageTestDetailsModelTests.swift */; };
 		49E6A3D72E6B4AB700CED0EE /* CoverageHistoryDetailService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49E6A3D42E6B4AB700CED0EE /* CoverageHistoryDetailService.swift */; };
 		49E6A3D92E6B4AB700CED0EE /* CoverageHistoryDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49E6A3D52E6B4AB700CED0EE /* CoverageHistoryDetailView.swift */; };
+		49EDC72B2EAA2B690009D9A6 /* ConnectivityServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC7292EAA2B690009D9A6 /* ConnectivityServiceTests.swift */; };
 		49F0AA102E70A11100ABCD01 /* UDPPingSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49F0AA0F2E70A11000ABCD01 /* UDPPingSessionTests.swift */; };
 		49F0AA132E70A1C600ABCD01 /* CoverageMeasurementSessionInitializerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49F0AA122E70A1C600ABCD01 /* CoverageMeasurementSessionInitializerTests.swift */; };
 		49F976802B0B3E880098C4CC /* RMBTConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49C86FDC2AFBBF1500663CE2 /* RMBTConfig.swift */; };
@@ -407,6 +408,7 @@
 		49D632EA2E856B1800B2BF02 /* CoverageTestDetailsModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverageTestDetailsModelTests.swift; sourceTree = "<group>"; };
 		49E6A3D42E6B4AB700CED0EE /* CoverageHistoryDetailService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverageHistoryDetailService.swift; sourceTree = "<group>"; };
 		49E6A3D52E6B4AB700CED0EE /* CoverageHistoryDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverageHistoryDetailView.swift; sourceTree = "<group>"; };
+		49EDC7292EAA2B690009D9A6 /* ConnectivityServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectivityServiceTests.swift; sourceTree = "<group>"; };
 		49F0AA0F2E70A11000ABCD01 /* UDPPingSessionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UDPPingSessionTests.swift; sourceTree = "<group>"; };
 		49F0AA122E70A1C600ABCD01 /* CoverageMeasurementSessionInitializerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverageMeasurementSessionInitializerTests.swift; sourceTree = "<group>"; };
 		89CA21386C488DD817CA1DC2 /* Pods-RMBT.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RMBT.debug.xcconfig"; path = "Pods/Target Support Files/Pods-RMBT/Pods-RMBT.debug.xcconfig"; sourceTree = "<group>"; };
@@ -911,6 +913,14 @@
 			path = Coverage;
 			sourceTree = "<group>";
 		};
+		49EDC72A2EAA2B690009D9A6 /* Connectivity */ = {
+			isa = PBXGroup;
+			children = (
+				49EDC7292EAA2B690009D9A6 /* ConnectivityServiceTests.swift */,
+			);
+			path = Connectivity;
+			sourceTree = "<group>";
+		};
 		B5AF762C1C3DE54BD04B4440 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
@@ -1202,6 +1212,7 @@
 		C7E46730177CDDB600AAF7F0 /* Unit Tests */ = {
 			isa = PBXGroup;
 			children = (
+				49EDC72A2EAA2B690009D9A6 /* Connectivity */,
 				498F7F922D352C0400EC975D /* NetworkCoverage */,
 				E92E07BB277B4E92008143FE /* RMBTThroughputHistoryTest.swift */,
 				E92E07B5277B4A80008143FE /* RMBTSpeedTest.swift */,
@@ -1902,6 +1913,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				49EDC72B2EAA2B690009D9A6 /* ConnectivityServiceTests.swift in Sources */,
 				495288A62D64F9D200C73435 /* UDPPingsSequenceTests.swift in Sources */,
 				49F0AA102E70A11100ABCD01 /* UDPPingSessionTests.swift in Sources */,
 				49F0AA132E70A1C600ABCD01 /* CoverageMeasurementSessionInitializerTests.swift in Sources */,

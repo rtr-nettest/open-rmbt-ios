@@ -89,8 +89,18 @@ import CoreTelephony
     @objc func radioDidChange(_ notification: Notification) {
         queue.async { [weak self] in
             guard let self = self else { return }
-            // Note:Sometimes iOS delivers multiple notification w/o radio technology actually changing
-            if (notification.object as? NSObject) == (self.lastRadioAccessTechnology as? NSObject) { return }
+            let summarizedPayload: String
+            if let dict = notification.object as? [String: Any] {
+                summarizedPayload = dict.map { "\($0.key)=\($0.value)" }.sorted().joined(separator: ",")
+            } else {
+                summarizedPayload = String(describing: notification.object)
+            }
+            Log.logger.debug("radioDidChange payload \(summarizedPayload)")
+            // Sometimes iOS delivers multiple notifications without a real radio change.
+            if (notification.object as? NSObject) == (self.lastRadioAccessTechnology as? NSObject) {
+                Log.logger.debug("radioDidChange duplicate payload ignored")
+                return
+            }
             self.lastRadioAccessTechnology = notification.object
             self.reachabilityDidChange(to: NetworkReachability.shared.status)
         }

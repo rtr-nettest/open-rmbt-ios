@@ -61,6 +61,8 @@ public typealias HistoryFilterType = [String: [String]]
     private var lastNewsUid: Int = UserDefaults.lastNewsUidPreference()
 }
 
+extension RMBTControlServer: ControlServerProviding {}
+
 extension RMBTControlServer {
     // MARK: Settings
 

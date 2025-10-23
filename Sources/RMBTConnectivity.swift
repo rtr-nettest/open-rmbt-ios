@@ -189,6 +189,9 @@ class RMBTConnectivity: NSObject {
         
         if let dataIndetifier = netinfo.dataServiceIdentifier {
             radioAccessTechnology = netinfo.serviceCurrentRadioAccessTechnology?[dataIndetifier]
+            Log.logger.debug("updateCellularInfo service=\(dataIndetifier) radio=\(radioAccessTechnology ?? "nil")")
+        } else {
+            Log.logger.debug("updateCellularInfo service identifier missing")
         }
 
         networkName = nil
@@ -197,6 +200,9 @@ class RMBTConnectivity: NSObject {
         if let radioAccessTechnology {
             cellularCode = cellularCodeForCTValue(radioAccessTechnology)
             cellularCodeDescription = cellularCodeDescriptionForCTValue(radioAccessTechnology)
+            Log.logger.debug("updateCellularInfo resolved radio=\(radioAccessTechnology) code=\(cellularCode.map(String.init) ?? "nil") desc=\(cellularCodeDescription ?? "nil")")
+        } else {
+            Log.logger.debug("updateCellularInfo radio value unavailable")
         }
     }
     

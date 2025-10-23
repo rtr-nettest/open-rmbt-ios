@@ -448,7 +448,9 @@ class RMBTIntroViewController: UIViewController {
         }
 
 
-        self.connectivityService.checkConnectivity { [weak self] connectivityInfo in
+        self.connectivityService.updateActiveNetworkType(connectivity.networkType)
+
+        connectivityService.checkConnectivity(refresh: true) { [weak self] connectivityInfo in
             DispatchQueue.main.async {
                 self?.connectivityInfo = connectivityInfo
             }
@@ -463,6 +465,7 @@ class RMBTIntroViewController: UIViewController {
     }
 
     private func noConnectionState() {
+        self.connectivityService.updateActiveNetworkType(nil)
         self.connectivityInfo = nil
         currentView.networkNotAvailable()
         self.setNeedsStatusBarAppearanceUpdate()
