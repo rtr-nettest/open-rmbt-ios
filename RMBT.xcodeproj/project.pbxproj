@@ -10,7 +10,6 @@
 		361443482732793E00D0FC26 /* RMBTHistorySyncModalViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 361443472732793D00D0FC26 /* RMBTHistorySyncModalViewController.swift */; };
 		3628C539275639E40001E885 /* RMBTHistoryQoSTitledResultCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3628C538275639E40001E885 /* RMBTHistoryQoSTitledResultCell.xib */; };
 		3628C53B27563AA40001E885 /* RMBTHistoryQoSTitledResultCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3628C53A27563AA40001E885 /* RMBTHistoryQoSTitledResultCell.swift */; };
-		366B18D978CE48A48F1B40E0 /* BackgroundActivityActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E56C483896C4F3DBA48DD18 /* BackgroundActivityActor.swift */; };
 		3678AA7D291E35D70059D6CB /* RMBT-InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 3678AA7F291E35D70059D6CB /* RMBT-InfoPlist.strings */; };
 		367B46832923857400D84E87 /* A11y.swift in Sources */ = {isa = PBXBuildFile; fileRef = 367B46822923857400D84E87 /* A11y.swift */; };
 		36933A73274E68B4009A52BE /* UIColor+ResultClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36933A72274E68B4009A52BE /* UIColor+ResultClass.swift */; };
@@ -25,55 +24,63 @@
 		36B75A212739692C006F4CB3 /* RMBTMaterialTextFieldState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36B75A202739692C006F4CB3 /* RMBTMaterialTextFieldState.swift */; };
 		36B75A27273EA096006F4CB3 /* RMBTHistoryLoopCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 36B75A26273EA096006F4CB3 /* RMBTHistoryLoopCell.xib */; };
 		36B75A29273EA73C006F4CB3 /* RMBTHistoryLoopCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36B75A28273EA73C006F4CB3 /* RMBTHistoryLoopCell.swift */; };
-		4909C2D32DE4A6D0003F3AB6 /* PersistentFence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4909C2D12DE4A6D0003F3AB6 /* PersistentFence.swift */; };
-		49106D022E4250D8007B6156 /* CoverageHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49106D012E4250D8007B6156 /* CoverageHeader.swift */; };
-		491471362D1062DD00885B82 /* SendCoverageResultRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 491471352D1062DD00885B82 /* SendCoverageResultRequest.swift */; };
 		49312C752BE91CC2001AA226 /* RMBTHistoryDownloadViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49312C742BE91CC2001AA226 /* RMBTHistoryDownloadViewController.swift */; };
 		493D514C2DD7526200CC3473 /* libresolv.9.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 49C5E41A2DD74C3E00C537D9 /* libresolv.9.tbd */; };
 		494998E32B7E353C0067B3D8 /* TopPopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 494998E22B7E353C0067B3D8 /* TopPopoverView.swift */; };
-		495288A12D64D49400C73435 /* UDPConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 495288A02D64D49400C73435 /* UDPConnection.swift */; };
-		495288A32D64D4C600C73435 /* UDPPingSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 495288A22D64D4C600C73435 /* UDPPingSession.swift */; };
-		495288A62D64F9D200C73435 /* UDPPingsSequenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 495288A52D64F9D200C73435 /* UDPPingsSequenceTests.swift */; };
-		495F7B9B2CF48FC4003750A3 /* NetworkCoverageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 495F7B9A2CF48FC4003750A3 /* NetworkCoverageView.swift */; };
+		49643ED02EAD6F6E001E3B01 /* CleanupDuringMeasurementTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49643ECF2EAD6F6D001E3B01 /* CleanupDuringMeasurementTests.swift */; };
 		497B42702D0064A40073775A /* AsyncAlgorithms in Frameworks */ = {isa = PBXBuildFile; productRef = 497B426F2D0064A40073775A /* AsyncAlgorithms */; };
 		498220BF2D424F51009A7055 /* UIImage+ResultClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 498220BE2D424F51009A7055 /* UIImage+ResultClass.swift */; };
 		4985815F2EAA792B008C11A7 /* HistoryCoverageResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4985815E2EAA792B008C11A7 /* HistoryCoverageResultView.swift */; };
 		498581612EAA7982008C11A7 /* TestCoverageResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 498581602EAA7982008C11A7 /* TestCoverageResultView.swift */; };
+		498581632EAB4F41008C11A7 /* FencePersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 498581622EAB4F41008C11A7 /* FencePersistenceTests.swift */; };
+		498581DB2EAD0564008C11A7 /* CleanupDuringMeasurementTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 498581DA2EAD0564008C11A7 /* CleanupDuringMeasurementTests.swift */; };
 		498660252D88425A005E258C /* Clocks in Frameworks */ = {isa = PBXBuildFile; productRef = 498660242D88425A005E258C /* Clocks */; };
-		498EF31A2D0B0CD7003A79EB /* NetworkCoverageViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 498EF3192D0B0CD7003A79EB /* NetworkCoverageViewModel.swift */; };
-		498EF31C2D0B0CFF003A79EB /* PingMeasurementService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 498EF31B2D0B0CFF003A79EB /* PingMeasurementService.swift */; };
-		498EF31E2D0B0D70003A79EB /* Fence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 498EF31D2D0B0D70003A79EB /* Fence.swift */; };
-		498F7F942D352C2000EC975D /* NetworkCoverageViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 498F7F932D352C2000EC975D /* NetworkCoverageViewModelTests.swift */; };
-		499406DD2D9C0B2600237AC1 /* CurrentRadioTechnologyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499406DC2D9C0B2600237AC1 /* CurrentRadioTechnologyService.swift */; };
-		499406E02D9D1C8A00237AC1 /* LocationUpdatesService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499406DF2D9D1C8A00237AC1 /* LocationUpdatesService.swift */; };
-		499406E22D9D1CD600237AC1 /* LocationUpdate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499406E12D9D1CD600237AC1 /* LocationUpdate.swift */; };
-		49965DA82DEF984A00D93737 /* PersistedFencesResender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49965DA72DEF984A00D93737 /* PersistedFencesResender.swift */; };
-		499CF46D2DE9D48200D5DCDE /* NetworkCoverageFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499CF46C2DE9D48200D5DCDE /* NetworkCoverageFactory.swift */; };
-		499CF46F2DE9DA1700D5DCDE /* PersistenceManagingCoverageResultsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499CF46E2DE9DA1700D5DCDE /* PersistenceManagingCoverageResultsService.swift */; };
-		499CF4732DE9DF8300D5DCDE /* FencePersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499CF4722DE9DF8300D5DCDE /* FencePersistenceTests.swift */; };
 		49A0B1C92F2E1234007ABCDE /* AFNetworkLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A0B1C82F2E1234007ABCDE /* AFNetworkLogger.swift */; };
-		49A31C6C2D3A97250039052B /* AsynchronousSequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A31C6B2D3A97250039052B /* AsynchronousSequence.swift */; };
-		49A646BC2E401615007F0F4E /* FencesMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A646BB2E401615007F0F4E /* FencesMapView.swift */; };
-		49ABB8512E2E4AB900583F5E /* CoverageResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49ABB8502E2E4AB900583F5E /* CoverageResultView.swift */; };
-		49AC77142DE8B2C100EBFAAE /* SwiftDataFencePersistenceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49AC77132DE8B2C100EBFAAE /* SwiftDataFencePersistenceService.swift */; };
 		49B28C762BA09D6A00697BB4 /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49B28C752BA09D6A00697BB4 /* Keychain.swift */; };
 		49B28C792BA1914E00697BB4 /* RMBTTestExportCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 49B28C782BA1914E00697BB4 /* RMBTTestExportCell.xib */; };
 		49B28C7A2BA1914E00697BB4 /* RMBTTestExportCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49B28C772BA1914E00697BB4 /* RMBTTestExportCell.swift */; };
 		49B28C7C2BA19C5400697BB4 /* RMBTFilePreviewViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49B28C7B2BA19C5400697BB4 /* RMBTFilePreviewViewController.swift */; };
 		49B28C7E2BA4238700697BB4 /* TestExportFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49B28C7D2BA4238700697BB4 /* TestExportFormat.swift */; };
-		49B4A4792D677407007C6A17 /* HTTPPingSender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49B4A4782D677407007C6A17 /* HTTPPingSender.swift */; };
-		49C202CB2E0C3E0400CB6520 /* TestPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49C202CA2E0C3E0400CB6520 /* TestPopup.swift */; };
-		49C202CD2E0D3A6800CB6520 /* Color+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49C202CC2E0D3A6600CB6520 /* Color+Ext.swift */; };
-		49C921452D6CA0E80003EDBC /* CoverageMeasurementSessionInitializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49C921442D6CA0E20003EDBC /* CoverageMeasurementSessionInitializer.swift */; };
-		49D22A7D2F0C4F7F00F2A9EF /* PersistedFencesResenderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49D22A7C2F0C4F7F00F2A9EF /* PersistedFencesResenderTests.swift */; };
 		49D632E12E85234300B2BF02 /* CoverageTestDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49D632E02E85234300B2BF02 /* CoverageTestDetailsView.swift */; };
 		49D632E92E856A9900B2BF02 /* CoverageTestDetailsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49D632E82E856A9900B2BF02 /* CoverageTestDetailsModel.swift */; };
-		49D632ED2E856B1800B2BF02 /* CoverageTestDetailsModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49D632EA2E856B1800B2BF02 /* CoverageTestDetailsModelTests.swift */; };
 		49E6A3D72E6B4AB700CED0EE /* CoverageHistoryDetailService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49E6A3D42E6B4AB700CED0EE /* CoverageHistoryDetailService.swift */; };
 		49E6A3D92E6B4AB700CED0EE /* CoverageHistoryDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49E6A3D52E6B4AB700CED0EE /* CoverageHistoryDetailView.swift */; };
 		49EDC72B2EAA2B690009D9A6 /* ConnectivityServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC7292EAA2B690009D9A6 /* ConnectivityServiceTests.swift */; };
-		49F0AA102E70A11100ABCD01 /* UDPPingSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49F0AA0F2E70A11000ABCD01 /* UDPPingSessionTests.swift */; };
-		49F0AA132E70A1C600ABCD01 /* CoverageMeasurementSessionInitializerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49F0AA122E70A1C600ABCD01 /* CoverageMeasurementSessionInitializerTests.swift */; };
+		49EDC73F2EAA2E000009D9A6 /* CoverageTestDetailsModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC7322EAA2E000009D9A6 /* CoverageTestDetailsModelTests.swift */; };
+		49EDC7402EAA2E000009D9A6 /* SendCoverageResultRequestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC73D2EAA2E000009D9A6 /* SendCoverageResultRequestTests.swift */; };
+		49EDC7412EAA2E000009D9A6 /* UDPPingsSequenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC7392EAA2E000009D9A6 /* UDPPingsSequenceTests.swift */; };
+		49EDC7422EAA2E000009D9A6 /* ResenderSessionBasedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC7362EAA2E000009D9A6 /* ResenderSessionBasedTests.swift */; };
+		49EDC7432EAA2E000009D9A6 /* NetworkCoverageViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC73C2EAA2E000009D9A6 /* NetworkCoverageViewModelTests.swift */; };
+		49EDC7452EAA2E000009D9A6 /* CoverageMeasurementSessionInitializerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC73B2EAA2E000009D9A6 /* CoverageMeasurementSessionInitializerTests.swift */; };
+		49EDC7462EAA2E000009D9A6 /* UDPPingSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC7382EAA2E000009D9A6 /* UDPPingSessionTests.swift */; };
+		49EDC7852EAA35630009D9A6 /* CurrentRadioTechnologyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC7632EAA35630009D9A6 /* CurrentRadioTechnologyService.swift */; };
+		49EDC7862EAA35630009D9A6 /* CoverageResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC77F2EAA35630009D9A6 /* CoverageResultView.swift */; };
+		49EDC7872EAA35630009D9A6 /* PingMeasurementService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC7762EAA35630009D9A6 /* PingMeasurementService.swift */; };
+		49EDC7882EAA35630009D9A6 /* OnlineStatusService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC77A2EAA35630009D9A6 /* OnlineStatusService.swift */; };
+		49EDC7892EAA35630009D9A6 /* ReachabilityNetworkConnectionTypeUpdatesService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC76B2EAA35630009D9A6 /* ReachabilityNetworkConnectionTypeUpdatesService.swift */; };
+		49EDC78A2EAA35630009D9A6 /* LocationUpdatesService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC7682EAA35630009D9A6 /* LocationUpdatesService.swift */; };
+		49EDC78B2EAA35630009D9A6 /* TestPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC75F2EAA35630009D9A6 /* TestPopup.swift */; };
+		49EDC78C2EAA35630009D9A6 /* FencesMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC75E2EAA35630009D9A6 /* FencesMapView.swift */; };
+		49EDC78D2EAA35630009D9A6 /* CoverageMeasurementSessionInitializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC7612EAA35630009D9A6 /* CoverageMeasurementSessionInitializer.swift */; };
+		49EDC78E2EAA35630009D9A6 /* UDPPingSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC7782EAA35630009D9A6 /* UDPPingSession.swift */; };
+		49EDC78F2EAA35630009D9A6 /* NetworkCoverageFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC7812EAA35630009D9A6 /* NetworkCoverageFactory.swift */; };
+		49EDC7902EAA35630009D9A6 /* NetworkCoverageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC7822EAA35630009D9A6 /* NetworkCoverageView.swift */; };
+		49EDC7922EAA35630009D9A6 /* PersistenceServiceActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC7702EAA35630009D9A6 /* PersistenceServiceActor.swift */; };
+		49EDC7932EAA35630009D9A6 /* SimulatorNetworkConnectionTypeUpdatesService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC76C2EAA35630009D9A6 /* SimulatorNetworkConnectionTypeUpdatesService.swift */; };
+		49EDC7942EAA35630009D9A6 /* PersistentFence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC7722EAA35630009D9A6 /* PersistentFence.swift */; };
+		49EDC7952EAA35630009D9A6 /* Fence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC7802EAA35630009D9A6 /* Fence.swift */; };
+		49EDC7962EAA35630009D9A6 /* SendCoverageResultRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC77C2EAA35630009D9A6 /* SendCoverageResultRequest.swift */; };
+		49EDC7972EAA35630009D9A6 /* NetworkConnectionType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC76A2EAA35630009D9A6 /* NetworkConnectionType.swift */; };
+		49EDC7982EAA35630009D9A6 /* NetworkCoverageViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC7832EAA35630009D9A6 /* NetworkCoverageViewModel.swift */; };
+		49EDC7992EAA35630009D9A6 /* PersistenceManagingCoverageResultsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC76F2EAA35630009D9A6 /* PersistenceManagingCoverageResultsService.swift */; };
+		49EDC79A2EAA35630009D9A6 /* BackgroundActivityActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC77E2EAA35630009D9A6 /* BackgroundActivityActor.swift */; };
+		49EDC79B2EAA35630009D9A6 /* LocationUpdate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC7672EAA35630009D9A6 /* LocationUpdate.swift */; };
+		49EDC79C2EAA35630009D9A6 /* PersistedFencesResender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC76E2EAA35630009D9A6 /* PersistedFencesResender.swift */; };
+		49EDC79D2EAA35630009D9A6 /* Color+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC75C2EAA35630009D9A6 /* Color+Ext.swift */; };
+		49EDC79F2EAA35630009D9A6 /* HTTPPingSender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC7752EAA35630009D9A6 /* HTTPPingSender.swift */; };
+		49EDC7A02EAA35630009D9A6 /* UDPConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC7772EAA35630009D9A6 /* UDPConnection.swift */; };
+		49EDC7A12EAA35630009D9A6 /* AsynchronousSequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC7652EAA35630009D9A6 /* AsynchronousSequence.swift */; };
+		49EDC7A22EAA35630009D9A6 /* CoverageHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC75D2EAA35630009D9A6 /* CoverageHeader.swift */; };
 		49F976802B0B3E880098C4CC /* RMBTConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49C86FDC2AFBBF1500663CE2 /* RMBTConfig.swift */; };
 		7E9819F45E7330372FF7FDF1 /* Pods_RMBTTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34EAAD260B73771684B942BA /* Pods_RMBTTests.framework */; };
 		C573F2A5175281D300C728FC /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C573F2A4175281D300C728FC /* MapKit.framework */; };
@@ -367,56 +374,63 @@
 		36B75A202739692C006F4CB3 /* RMBTMaterialTextFieldState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTMaterialTextFieldState.swift; sourceTree = "<group>"; };
 		36B75A26273EA096006F4CB3 /* RMBTHistoryLoopCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = RMBTHistoryLoopCell.xib; sourceTree = "<group>"; };
 		36B75A28273EA73C006F4CB3 /* RMBTHistoryLoopCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTHistoryLoopCell.swift; sourceTree = "<group>"; };
-		4909C2D12DE4A6D0003F3AB6 /* PersistentFence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistentFence.swift; sourceTree = "<group>"; };
-		49106D012E4250D8007B6156 /* CoverageHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverageHeader.swift; sourceTree = "<group>"; };
-		491471352D1062DD00885B82 /* SendCoverageResultRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendCoverageResultRequest.swift; sourceTree = "<group>"; };
 		49312C742BE91CC2001AA226 /* RMBTHistoryDownloadViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTHistoryDownloadViewController.swift; sourceTree = "<group>"; };
 		494998E22B7E353C0067B3D8 /* TopPopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopPopoverView.swift; sourceTree = "<group>"; };
-		495288A02D64D49400C73435 /* UDPConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UDPConnection.swift; sourceTree = "<group>"; };
-		495288A22D64D4C600C73435 /* UDPPingSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UDPPingSession.swift; sourceTree = "<group>"; };
-		495288A52D64F9D200C73435 /* UDPPingsSequenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UDPPingsSequenceTests.swift; sourceTree = "<group>"; };
-		495F7B9A2CF48FC4003750A3 /* NetworkCoverageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkCoverageView.swift; sourceTree = "<group>"; };
+		49643ECF2EAD6F6D001E3B01 /* CleanupDuringMeasurementTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleanupDuringMeasurementTests.swift; sourceTree = "<group>"; };
 		498220BE2D424F51009A7055 /* UIImage+ResultClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+ResultClass.swift"; sourceTree = "<group>"; };
 		4985815E2EAA792B008C11A7 /* HistoryCoverageResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryCoverageResultView.swift; sourceTree = "<group>"; };
 		498581602EAA7982008C11A7 /* TestCoverageResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestCoverageResultView.swift; sourceTree = "<group>"; };
-		498EF3192D0B0CD7003A79EB /* NetworkCoverageViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkCoverageViewModel.swift; sourceTree = "<group>"; };
-		498EF31B2D0B0CFF003A79EB /* PingMeasurementService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PingMeasurementService.swift; sourceTree = "<group>"; };
-		498EF31D2D0B0D70003A79EB /* Fence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fence.swift; sourceTree = "<group>"; };
-		498F7F932D352C2000EC975D /* NetworkCoverageViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkCoverageViewModelTests.swift; sourceTree = "<group>"; };
-		499406DC2D9C0B2600237AC1 /* CurrentRadioTechnologyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentRadioTechnologyService.swift; sourceTree = "<group>"; };
-		499406DF2D9D1C8A00237AC1 /* LocationUpdatesService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationUpdatesService.swift; sourceTree = "<group>"; };
-		499406E12D9D1CD600237AC1 /* LocationUpdate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationUpdate.swift; sourceTree = "<group>"; };
-		49965DA72DEF984A00D93737 /* PersistedFencesResender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistedFencesResender.swift; sourceTree = "<group>"; };
-		499CF46C2DE9D48200D5DCDE /* NetworkCoverageFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkCoverageFactory.swift; sourceTree = "<group>"; };
-		499CF46E2DE9DA1700D5DCDE /* PersistenceManagingCoverageResultsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceManagingCoverageResultsService.swift; sourceTree = "<group>"; };
-		499CF4722DE9DF8300D5DCDE /* FencePersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FencePersistenceTests.swift; sourceTree = "<group>"; };
+		498581622EAB4F41008C11A7 /* FencePersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FencePersistenceTests.swift; sourceTree = "<group>"; };
+		498581DA2EAD0564008C11A7 /* CleanupDuringMeasurementTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleanupDuringMeasurementTests.swift; sourceTree = "<group>"; };
 		49A0B1C82F2E1234007ABCDE /* AFNetworkLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AFNetworkLogger.swift; sourceTree = "<group>"; };
-		49A31C6B2D3A97250039052B /* AsynchronousSequence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsynchronousSequence.swift; sourceTree = "<group>"; };
-		49A646BB2E401615007F0F4E /* FencesMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FencesMapView.swift; sourceTree = "<group>"; };
-		49ABB8502E2E4AB900583F5E /* CoverageResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverageResultView.swift; sourceTree = "<group>"; };
-		49AC77132DE8B2C100EBFAAE /* SwiftDataFencePersistenceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftDataFencePersistenceService.swift; sourceTree = "<group>"; };
 		49B28C752BA09D6A00697BB4 /* Keychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Keychain.swift; sourceTree = "<group>"; };
 		49B28C772BA1914E00697BB4 /* RMBTTestExportCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTTestExportCell.swift; sourceTree = "<group>"; };
 		49B28C782BA1914E00697BB4 /* RMBTTestExportCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = RMBTTestExportCell.xib; sourceTree = "<group>"; };
 		49B28C7B2BA19C5400697BB4 /* RMBTFilePreviewViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTFilePreviewViewController.swift; sourceTree = "<group>"; };
 		49B28C7D2BA4238700697BB4 /* TestExportFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestExportFormat.swift; sourceTree = "<group>"; };
-		49B4A4782D677407007C6A17 /* HTTPPingSender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPPingSender.swift; sourceTree = "<group>"; };
-		49C202CA2E0C3E0400CB6520 /* TestPopup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestPopup.swift; sourceTree = "<group>"; };
-		49C202CC2E0D3A6600CB6520 /* Color+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Ext.swift"; sourceTree = "<group>"; };
 		49C5E41A2DD74C3E00C537D9 /* libresolv.9.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libresolv.9.tbd; path = usr/lib/libresolv.9.tbd; sourceTree = SDKROOT; };
 		49C86FDC2AFBBF1500663CE2 /* RMBTConfig.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RMBTConfig.swift; sourceTree = "<group>"; };
-		49C921442D6CA0E20003EDBC /* CoverageMeasurementSessionInitializer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverageMeasurementSessionInitializer.swift; sourceTree = "<group>"; };
-		49D22A7C2F0C4F7F00F2A9EF /* PersistedFencesResenderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistedFencesResenderTests.swift; sourceTree = "<group>"; };
 		49D632E02E85234300B2BF02 /* CoverageTestDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverageTestDetailsView.swift; sourceTree = "<group>"; };
 		49D632E82E856A9900B2BF02 /* CoverageTestDetailsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverageTestDetailsModel.swift; sourceTree = "<group>"; };
-		49D632EA2E856B1800B2BF02 /* CoverageTestDetailsModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverageTestDetailsModelTests.swift; sourceTree = "<group>"; };
 		49E6A3D42E6B4AB700CED0EE /* CoverageHistoryDetailService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverageHistoryDetailService.swift; sourceTree = "<group>"; };
 		49E6A3D52E6B4AB700CED0EE /* CoverageHistoryDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverageHistoryDetailView.swift; sourceTree = "<group>"; };
 		49EDC7292EAA2B690009D9A6 /* ConnectivityServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectivityServiceTests.swift; sourceTree = "<group>"; };
-		49F0AA0F2E70A11000ABCD01 /* UDPPingSessionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UDPPingSessionTests.swift; sourceTree = "<group>"; };
-		49F0AA122E70A1C600ABCD01 /* CoverageMeasurementSessionInitializerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverageMeasurementSessionInitializerTests.swift; sourceTree = "<group>"; };
+		49EDC7322EAA2E000009D9A6 /* CoverageTestDetailsModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverageTestDetailsModelTests.swift; sourceTree = "<group>"; };
+		49EDC7362EAA2E000009D9A6 /* ResenderSessionBasedTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResenderSessionBasedTests.swift; sourceTree = "<group>"; };
+		49EDC7382EAA2E000009D9A6 /* UDPPingSessionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UDPPingSessionTests.swift; sourceTree = "<group>"; };
+		49EDC7392EAA2E000009D9A6 /* UDPPingsSequenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UDPPingsSequenceTests.swift; sourceTree = "<group>"; };
+		49EDC73B2EAA2E000009D9A6 /* CoverageMeasurementSessionInitializerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverageMeasurementSessionInitializerTests.swift; sourceTree = "<group>"; };
+		49EDC73C2EAA2E000009D9A6 /* NetworkCoverageViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkCoverageViewModelTests.swift; sourceTree = "<group>"; };
+		49EDC73D2EAA2E000009D9A6 /* SendCoverageResultRequestTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendCoverageResultRequestTests.swift; sourceTree = "<group>"; };
+		49EDC75C2EAA35630009D9A6 /* Color+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Ext.swift"; sourceTree = "<group>"; };
+		49EDC75D2EAA35630009D9A6 /* CoverageHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverageHeader.swift; sourceTree = "<group>"; };
+		49EDC75E2EAA35630009D9A6 /* FencesMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FencesMapView.swift; sourceTree = "<group>"; };
+		49EDC75F2EAA35630009D9A6 /* TestPopup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestPopup.swift; sourceTree = "<group>"; };
+		49EDC7612EAA35630009D9A6 /* CoverageMeasurementSessionInitializer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverageMeasurementSessionInitializer.swift; sourceTree = "<group>"; };
+		49EDC7632EAA35630009D9A6 /* CurrentRadioTechnologyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentRadioTechnologyService.swift; sourceTree = "<group>"; };
+		49EDC7652EAA35630009D9A6 /* AsynchronousSequence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsynchronousSequence.swift; sourceTree = "<group>"; };
+		49EDC7672EAA35630009D9A6 /* LocationUpdate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationUpdate.swift; sourceTree = "<group>"; };
+		49EDC7682EAA35630009D9A6 /* LocationUpdatesService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationUpdatesService.swift; sourceTree = "<group>"; };
+		49EDC76A2EAA35630009D9A6 /* NetworkConnectionType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkConnectionType.swift; sourceTree = "<group>"; };
+		49EDC76B2EAA35630009D9A6 /* ReachabilityNetworkConnectionTypeUpdatesService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReachabilityNetworkConnectionTypeUpdatesService.swift; sourceTree = "<group>"; };
+		49EDC76C2EAA35630009D9A6 /* SimulatorNetworkConnectionTypeUpdatesService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimulatorNetworkConnectionTypeUpdatesService.swift; sourceTree = "<group>"; };
+		49EDC76E2EAA35630009D9A6 /* PersistedFencesResender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistedFencesResender.swift; sourceTree = "<group>"; };
+		49EDC76F2EAA35630009D9A6 /* PersistenceManagingCoverageResultsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceManagingCoverageResultsService.swift; sourceTree = "<group>"; };
+		49EDC7702EAA35630009D9A6 /* PersistenceServiceActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceServiceActor.swift; sourceTree = "<group>"; };
+		49EDC7722EAA35630009D9A6 /* PersistentFence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistentFence.swift; sourceTree = "<group>"; };
+		49EDC7752EAA35630009D9A6 /* HTTPPingSender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPPingSender.swift; sourceTree = "<group>"; };
+		49EDC7762EAA35630009D9A6 /* PingMeasurementService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PingMeasurementService.swift; sourceTree = "<group>"; };
+		49EDC7772EAA35630009D9A6 /* UDPConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UDPConnection.swift; sourceTree = "<group>"; };
+		49EDC7782EAA35630009D9A6 /* UDPPingSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UDPPingSession.swift; sourceTree = "<group>"; };
+		49EDC77A2EAA35630009D9A6 /* OnlineStatusService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnlineStatusService.swift; sourceTree = "<group>"; };
+		49EDC77C2EAA35630009D9A6 /* SendCoverageResultRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendCoverageResultRequest.swift; sourceTree = "<group>"; };
+		49EDC77E2EAA35630009D9A6 /* BackgroundActivityActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundActivityActor.swift; sourceTree = "<group>"; };
+		49EDC77F2EAA35630009D9A6 /* CoverageResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverageResultView.swift; sourceTree = "<group>"; };
+		49EDC7802EAA35630009D9A6 /* Fence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fence.swift; sourceTree = "<group>"; };
+		49EDC7812EAA35630009D9A6 /* NetworkCoverageFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkCoverageFactory.swift; sourceTree = "<group>"; };
+		49EDC7822EAA35630009D9A6 /* NetworkCoverageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkCoverageView.swift; sourceTree = "<group>"; };
+		49EDC7832EAA35630009D9A6 /* NetworkCoverageViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkCoverageViewModel.swift; sourceTree = "<group>"; };
 		89CA21386C488DD817CA1DC2 /* Pods-RMBT.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RMBT.debug.xcconfig"; path = "Pods/Target Support Files/Pods-RMBT/Pods-RMBT.debug.xcconfig"; sourceTree = "<group>"; };
-		8E56C483896C4F3DBA48DD18 /* BackgroundActivityActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundActivityActor.swift; sourceTree = "<group>"; };
 		A0C545CF605E364BCA4F45EA /* Pods-RMBTTest.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RMBTTest.debug.xcconfig"; path = "Pods/Target Support Files/Pods-RMBTTest/Pods-RMBTTest.debug.xcconfig"; sourceTree = "<group>"; };
 		B14EBFEF9713BCFE2072175F /* Pods-RMBTTest.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RMBTTest.release.xcconfig"; path = "Pods/Target Support Files/Pods-RMBTTest/Pods-RMBTTest.release.xcconfig"; sourceTree = "<group>"; };
 		C573F2A4175281D300C728FC /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
@@ -695,10 +709,6 @@
 		F620A48D0EF31330DAC04D48 /* Pods-RMBT.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RMBT.release.xcconfig"; path = "Pods/Target Support Files/Pods-RMBT/Pods-RMBT.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedRootGroup section */
-		49E6A4D12E70439F00CED0EE /* NetworkType */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = NetworkType; sourceTree = "<group>"; };
-/* End PBXFileSystemSynchronizedRootGroup section */
-
 /* Begin PBXFrameworksBuildPhase section */
 		C70827FF1CB6792F00F482EB /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
@@ -741,111 +751,11 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		4909C2D22DE4A6D0003F3AB6 /* Persistence */ = {
-			isa = PBXGroup;
-			children = (
-				499CF46E2DE9DA1700D5DCDE /* PersistenceManagingCoverageResultsService.swift */,
-				49AC77132DE8B2C100EBFAAE /* SwiftDataFencePersistenceService.swift */,
-				49965DA72DEF984A00D93737 /* PersistedFencesResender.swift */,
-				4909C2D12DE4A6D0003F3AB6 /* PersistentFence.swift */,
-			);
-			path = Persistence;
-			sourceTree = "<group>";
-		};
-		4935812F2DEF51DD004A921E /* Persistence */ = {
-			isa = PBXGroup;
-			children = (
-				499CF4722DE9DF8300D5DCDE /* FencePersistenceTests.swift */,
-				49D22A7C2F0C4F7F00F2A9EF /* PersistedFencesResenderTests.swift */,
-			);
-			path = Persistence;
-			sourceTree = "<group>";
-		};
-		4952889F2D64D45200C73435 /* Pings */ = {
-			isa = PBXGroup;
-			children = (
-				498EF31B2D0B0CFF003A79EB /* PingMeasurementService.swift */,
-				49B4A4782D677407007C6A17 /* HTTPPingSender.swift */,
-				495288A22D64D4C600C73435 /* UDPPingSession.swift */,
-				495288A02D64D49400C73435 /* UDPConnection.swift */,
-			);
-			path = Pings;
-			sourceTree = "<group>";
-		};
-		495288A42D64F8F700C73435 /* Pings */ = {
-			isa = PBXGroup;
-			children = (
-				495288A52D64F9D200C73435 /* UDPPingsSequenceTests.swift */,
-				49F0AA0F2E70A11000ABCD01 /* UDPPingSessionTests.swift */,
-			);
-			path = Pings;
-			sourceTree = "<group>";
-		};
-		495F7B992CF48FB0003750A3 /* NetworkCoverage */ = {
-			isa = PBXGroup;
-			children = (
-				499CF46C2DE9D48200D5DCDE /* NetworkCoverageFactory.swift */,
-				49E6A4D12E70439F00CED0EE /* NetworkType */,
-				499406DB2D9C0B1900237AC1 /* CurrentRadioTechnology */,
-				49C921432D6CA0D50003EDBC /* CoverageMeasurementSession */,
-				4952889F2D64D45200C73435 /* Pings */,
-				499406DE2D9D1C6D00237AC1 /* LocationUpdates */,
-				4909C2D22DE4A6D0003F3AB6 /* Persistence */,
-				49A31C6A2D3A971B0039052B /* Helpers */,
-				49C202C92E0C3DF300CB6520 /* Components */,
-				499E9F9C2E15115A00A6744B /* SendResult */,
-				495F7B9A2CF48FC4003750A3 /* NetworkCoverageView.swift */,
-				49ABB8502E2E4AB900583F5E /* CoverageResultView.swift */,
-				498EF3192D0B0CD7003A79EB /* NetworkCoverageViewModel.swift */,
-				8E56C483896C4F3DBA48DD18 /* BackgroundActivityActor.swift */,
-				498581602EAA7982008C11A7 /* TestCoverageResultView.swift */,
-				498EF31D2D0B0D70003A79EB /* Fence.swift */,
-			);
-			path = NetworkCoverage;
-			sourceTree = "<group>";
-		};
 		4987C42A2E548B6F0047219C /* Recovered References */ = {
 			isa = PBXGroup;
 			children = (
 			);
 			name = "Recovered References";
-			sourceTree = "<group>";
-		};
-		498F7F922D352C0400EC975D /* NetworkCoverage */ = {
-			isa = PBXGroup;
-			children = (
-				49D632EC2E856B1800B2BF02 /* History */,
-				4935812F2DEF51DD004A921E /* Persistence */,
-				495288A42D64F8F700C73435 /* Pings */,
-				498F7F932D352C2000EC975D /* NetworkCoverageViewModelTests.swift */,
-				49F0AA122E70A1C600ABCD01 /* CoverageMeasurementSessionInitializerTests.swift */,
-			);
-			path = NetworkCoverage;
-			sourceTree = "<group>";
-		};
-		499406DB2D9C0B1900237AC1 /* CurrentRadioTechnology */ = {
-			isa = PBXGroup;
-			children = (
-				499406DC2D9C0B2600237AC1 /* CurrentRadioTechnologyService.swift */,
-			);
-			path = CurrentRadioTechnology;
-			sourceTree = "<group>";
-		};
-		499406DE2D9D1C6D00237AC1 /* LocationUpdates */ = {
-			isa = PBXGroup;
-			children = (
-				499406E12D9D1CD600237AC1 /* LocationUpdate.swift */,
-				499406DF2D9D1C8A00237AC1 /* LocationUpdatesService.swift */,
-			);
-			path = LocationUpdates;
-			sourceTree = "<group>";
-		};
-		499E9F9C2E15115A00A6744B /* SendResult */ = {
-			isa = PBXGroup;
-			children = (
-				491471352D1062DD00885B82 /* SendCoverageResultRequest.swift */,
-			);
-			path = SendResult;
 			sourceTree = "<group>";
 		};
 		49A0B1C62F2E11F8007ABCDE /* Networking */ = {
@@ -864,57 +774,14 @@
 			path = Logging;
 			sourceTree = "<group>";
 		};
-		49A31C6A2D3A971B0039052B /* Helpers */ = {
-			isa = PBXGroup;
-			children = (
-				49A31C6B2D3A97250039052B /* AsynchronousSequence.swift */,
-			);
-			path = Helpers;
-			sourceTree = "<group>";
-		};
-		49C202C92E0C3DF300CB6520 /* Components */ = {
-			isa = PBXGroup;
-			children = (
-				49C202CC2E0D3A6600CB6520 /* Color+Ext.swift */,
-				49A646BB2E401615007F0F4E /* FencesMapView.swift */,
-				49C202CA2E0C3E0400CB6520 /* TestPopup.swift */,
-				49106D012E4250D8007B6156 /* CoverageHeader.swift */,
-			);
-			path = Components;
-			sourceTree = "<group>";
-		};
-		49C921432D6CA0D50003EDBC /* CoverageMeasurementSession */ = {
-			isa = PBXGroup;
-			children = (
-				49C921442D6CA0E20003EDBC /* CoverageMeasurementSessionInitializer.swift */,
-			);
-			path = CoverageMeasurementSession;
-			sourceTree = "<group>";
-		};
-		49D632EB2E856B1800B2BF02 /* Coverage */ = {
-			isa = PBXGroup;
-			children = (
-				49D632EA2E856B1800B2BF02 /* CoverageTestDetailsModelTests.swift */,
-			);
-			path = Coverage;
-			sourceTree = "<group>";
-		};
-		49D632EC2E856B1800B2BF02 /* History */ = {
-			isa = PBXGroup;
-			children = (
-				49D632EB2E856B1800B2BF02 /* Coverage */,
-			);
-			path = History;
-			sourceTree = "<group>";
-		};
 		49E6A3D32E6B4A8100CED0EE /* Coverage */ = {
 			isa = PBXGroup;
 			children = (
 				49E6A3D42E6B4AB700CED0EE /* CoverageHistoryDetailService.swift */,
 				49E6A3D52E6B4AB700CED0EE /* CoverageHistoryDetailView.swift */,
+				4985815E2EAA792B008C11A7 /* HistoryCoverageResultView.swift */,
 				49D632E02E85234300B2BF02 /* CoverageTestDetailsView.swift */,
 				49D632E82E856A9900B2BF02 /* CoverageTestDetailsModel.swift */,
-				4985815E2EAA792B008C11A7 /* HistoryCoverageResultView.swift */,
 			);
 			path = Coverage;
 			sourceTree = "<group>";
@@ -925,6 +792,171 @@
 				49EDC7292EAA2B690009D9A6 /* ConnectivityServiceTests.swift */,
 			);
 			path = Connectivity;
+			sourceTree = "<group>";
+		};
+		49EDC7332EAA2E000009D9A6 /* Coverage */ = {
+			isa = PBXGroup;
+			children = (
+				49EDC7322EAA2E000009D9A6 /* CoverageTestDetailsModelTests.swift */,
+			);
+			path = Coverage;
+			sourceTree = "<group>";
+		};
+		49EDC7342EAA2E000009D9A6 /* History */ = {
+			isa = PBXGroup;
+			children = (
+				49EDC7332EAA2E000009D9A6 /* Coverage */,
+			);
+			path = History;
+			sourceTree = "<group>";
+		};
+		49EDC7372EAA2E000009D9A6 /* Persistence */ = {
+			isa = PBXGroup;
+			children = (
+				49643ECF2EAD6F6D001E3B01 /* CleanupDuringMeasurementTests.swift */,
+				498581622EAB4F41008C11A7 /* FencePersistenceTests.swift */,
+				498581DA2EAD0564008C11A7 /* CleanupDuringMeasurementTests.swift */,
+				49EDC7362EAA2E000009D9A6 /* ResenderSessionBasedTests.swift */,
+			);
+			path = Persistence;
+			sourceTree = "<group>";
+		};
+		49EDC73A2EAA2E000009D9A6 /* Pings */ = {
+			isa = PBXGroup;
+			children = (
+				49EDC7382EAA2E000009D9A6 /* UDPPingSessionTests.swift */,
+				49EDC7392EAA2E000009D9A6 /* UDPPingsSequenceTests.swift */,
+			);
+			path = Pings;
+			sourceTree = "<group>";
+		};
+		49EDC73E2EAA2E000009D9A6 /* NetworkCoverage */ = {
+			isa = PBXGroup;
+			children = (
+				49EDC7342EAA2E000009D9A6 /* History */,
+				49EDC7372EAA2E000009D9A6 /* Persistence */,
+				49EDC73A2EAA2E000009D9A6 /* Pings */,
+				49EDC73B2EAA2E000009D9A6 /* CoverageMeasurementSessionInitializerTests.swift */,
+				49EDC73C2EAA2E000009D9A6 /* NetworkCoverageViewModelTests.swift */,
+				49EDC73D2EAA2E000009D9A6 /* SendCoverageResultRequestTests.swift */,
+			);
+			path = NetworkCoverage;
+			sourceTree = "<group>";
+		};
+		49EDC7602EAA35630009D9A6 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				49EDC75C2EAA35630009D9A6 /* Color+Ext.swift */,
+				49EDC75D2EAA35630009D9A6 /* CoverageHeader.swift */,
+				49EDC75E2EAA35630009D9A6 /* FencesMapView.swift */,
+				49EDC75F2EAA35630009D9A6 /* TestPopup.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		49EDC7622EAA35630009D9A6 /* CoverageMeasurementSession */ = {
+			isa = PBXGroup;
+			children = (
+				49EDC7612EAA35630009D9A6 /* CoverageMeasurementSessionInitializer.swift */,
+			);
+			path = CoverageMeasurementSession;
+			sourceTree = "<group>";
+		};
+		49EDC7642EAA35630009D9A6 /* CurrentRadioTechnology */ = {
+			isa = PBXGroup;
+			children = (
+				49EDC7632EAA35630009D9A6 /* CurrentRadioTechnologyService.swift */,
+			);
+			path = CurrentRadioTechnology;
+			sourceTree = "<group>";
+		};
+		49EDC7662EAA35630009D9A6 /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				49EDC7652EAA35630009D9A6 /* AsynchronousSequence.swift */,
+			);
+			path = Helpers;
+			sourceTree = "<group>";
+		};
+		49EDC7692EAA35630009D9A6 /* LocationUpdates */ = {
+			isa = PBXGroup;
+			children = (
+				49EDC7672EAA35630009D9A6 /* LocationUpdate.swift */,
+				49EDC7682EAA35630009D9A6 /* LocationUpdatesService.swift */,
+			);
+			path = LocationUpdates;
+			sourceTree = "<group>";
+		};
+		49EDC76D2EAA35630009D9A6 /* NetworkType */ = {
+			isa = PBXGroup;
+			children = (
+				49EDC76A2EAA35630009D9A6 /* NetworkConnectionType.swift */,
+				49EDC76B2EAA35630009D9A6 /* ReachabilityNetworkConnectionTypeUpdatesService.swift */,
+				49EDC76C2EAA35630009D9A6 /* SimulatorNetworkConnectionTypeUpdatesService.swift */,
+			);
+			path = NetworkType;
+			sourceTree = "<group>";
+		};
+		49EDC7742EAA35630009D9A6 /* Persistence */ = {
+			isa = PBXGroup;
+			children = (
+				49EDC76E2EAA35630009D9A6 /* PersistedFencesResender.swift */,
+				49EDC76F2EAA35630009D9A6 /* PersistenceManagingCoverageResultsService.swift */,
+				49EDC7702EAA35630009D9A6 /* PersistenceServiceActor.swift */,
+				49EDC7722EAA35630009D9A6 /* PersistentFence.swift */,
+			);
+			path = Persistence;
+			sourceTree = "<group>";
+		};
+		49EDC7792EAA35630009D9A6 /* Pings */ = {
+			isa = PBXGroup;
+			children = (
+				49EDC7752EAA35630009D9A6 /* HTTPPingSender.swift */,
+				49EDC7762EAA35630009D9A6 /* PingMeasurementService.swift */,
+				49EDC7772EAA35630009D9A6 /* UDPConnection.swift */,
+				49EDC7782EAA35630009D9A6 /* UDPPingSession.swift */,
+			);
+			path = Pings;
+			sourceTree = "<group>";
+		};
+		49EDC77B2EAA35630009D9A6 /* Reachability */ = {
+			isa = PBXGroup;
+			children = (
+				49EDC77A2EAA35630009D9A6 /* OnlineStatusService.swift */,
+			);
+			path = Reachability;
+			sourceTree = "<group>";
+		};
+		49EDC77D2EAA35630009D9A6 /* SendResult */ = {
+			isa = PBXGroup;
+			children = (
+				49EDC77C2EAA35630009D9A6 /* SendCoverageResultRequest.swift */,
+			);
+			path = SendResult;
+			sourceTree = "<group>";
+		};
+		49EDC7842EAA35630009D9A6 /* NetworkCoverage */ = {
+			isa = PBXGroup;
+			children = (
+				49EDC7602EAA35630009D9A6 /* Components */,
+				49EDC7622EAA35630009D9A6 /* CoverageMeasurementSession */,
+				49EDC7642EAA35630009D9A6 /* CurrentRadioTechnology */,
+				49EDC7662EAA35630009D9A6 /* Helpers */,
+				49EDC7692EAA35630009D9A6 /* LocationUpdates */,
+				49EDC76D2EAA35630009D9A6 /* NetworkType */,
+				49EDC7742EAA35630009D9A6 /* Persistence */,
+				49EDC7792EAA35630009D9A6 /* Pings */,
+				49EDC77B2EAA35630009D9A6 /* Reachability */,
+				49EDC77D2EAA35630009D9A6 /* SendResult */,
+				49EDC77E2EAA35630009D9A6 /* BackgroundActivityActor.swift */,
+				49EDC77F2EAA35630009D9A6 /* CoverageResultView.swift */,
+				498581602EAA7982008C11A7 /* TestCoverageResultView.swift */,
+				49EDC7802EAA35630009D9A6 /* Fence.swift */,
+				49EDC7812EAA35630009D9A6 /* NetworkCoverageFactory.swift */,
+				49EDC7822EAA35630009D9A6 /* NetworkCoverageView.swift */,
+				49EDC7832EAA35630009D9A6 /* NetworkCoverageViewModel.swift */,
+			);
+			path = NetworkCoverage;
 			sourceTree = "<group>";
 		};
 		B5AF762C1C3DE54BD04B4440 /* Pods */ = {
@@ -1190,7 +1222,7 @@
 		C7DE1481173E8F610079477A /* Sources */ = {
 			isa = PBXGroup;
 			children = (
-				495F7B992CF48FB0003750A3 /* NetworkCoverage */,
+				49EDC7842EAA35630009D9A6 /* NetworkCoverage */,
 				E9C4BA282714110D00D6FAE8 /* Intro */,
 				E93FB10426F4BCD200DD24CD /* Network */,
 				E93FB10026F4BA5E00DD24CD /* Test */,
@@ -1219,7 +1251,7 @@
 			isa = PBXGroup;
 			children = (
 				49EDC72A2EAA2B690009D9A6 /* Connectivity */,
-				498F7F922D352C0400EC975D /* NetworkCoverage */,
+				49EDC73E2EAA2E000009D9A6 /* NetworkCoverage */,
 				E92E07BB277B4E92008143FE /* RMBTThroughputHistoryTest.swift */,
 				E92E07B5277B4A80008143FE /* RMBTSpeedTest.swift */,
 				E92E07B9277B4DF6008143FE /* RMBTHelpersTest.swift */,
@@ -1681,9 +1713,6 @@
 			);
 			dependencies = (
 			);
-			fileSystemSynchronizedGroups = (
-				49E6A4D12E70439F00CED0EE /* NetworkType */,
-			);
 			name = RMBT;
 			productName = RMBT;
 			productReference = C7DE1478173E8F610079477A /* RMBT.app */;
@@ -1919,18 +1948,21 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				49EDC72B2EAA2B690009D9A6 /* ConnectivityServiceTests.swift in Sources */,
-				495288A62D64F9D200C73435 /* UDPPingsSequenceTests.swift in Sources */,
-				49F0AA102E70A11100ABCD01 /* UDPPingSessionTests.swift in Sources */,
-				49F0AA132E70A1C600ABCD01 /* CoverageMeasurementSessionInitializerTests.swift in Sources */,
 				E92E07BA277B4DF6008143FE /* RMBTHelpersTest.swift in Sources */,
-				49D632ED2E856B1800B2BF02 /* CoverageTestDetailsModelTests.swift in Sources */,
 				E92E07B6277B4A80008143FE /* RMBTSpeedTest.swift in Sources */,
-				499CF4732DE9DF8300D5DCDE /* FencePersistenceTests.swift in Sources */,
-				49D22A7D2F0C4F7F00F2A9EF /* PersistedFencesResenderTests.swift in Sources */,
-				498F7F942D352C2000EC975D /* NetworkCoverageViewModelTests.swift in Sources */,
+				49643ED02EAD6F6E001E3B01 /* CleanupDuringMeasurementTests.swift in Sources */,
+				49EDC73F2EAA2E000009D9A6 /* CoverageTestDetailsModelTests.swift in Sources */,
+				49EDC7402EAA2E000009D9A6 /* SendCoverageResultRequestTests.swift in Sources */,
+				498581DB2EAD0564008C11A7 /* CleanupDuringMeasurementTests.swift in Sources */,
+				49EDC7412EAA2E000009D9A6 /* UDPPingsSequenceTests.swift in Sources */,
+				49EDC7422EAA2E000009D9A6 /* ResenderSessionBasedTests.swift in Sources */,
+				49EDC72B2EAA2B690009D9A6 /* ConnectivityServiceTests.swift in Sources */,
+				49EDC7432EAA2E000009D9A6 /* NetworkCoverageViewModelTests.swift in Sources */,
+				49EDC7452EAA2E000009D9A6 /* CoverageMeasurementSessionInitializerTests.swift in Sources */,
+				49EDC7462EAA2E000009D9A6 /* UDPPingSessionTests.swift in Sources */,
 				E92E07B8277B4B4F008143FE /* RMBTProgressTest.swift in Sources */,
 				E92E07BC277B4E92008143FE /* RMBTThroughputHistoryTest.swift in Sources */,
+				498581632EAB4F41008C11A7 /* FencePersistenceTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1941,13 +1973,11 @@
 				49F976802B0B3E880098C4CC /* RMBTConfig.swift in Sources */,
 				E9400EE426BA32150067273A /* Log.swift in Sources */,
 				49A0B1C92F2E1234007ABCDE /* AFNetworkLogger.swift in Sources */,
-				499CF46F2DE9DA1700D5DCDE /* PersistenceManagingCoverageResultsService.swift in Sources */,
 				E9BF00EB2760F01F0092371F /* RMBTLoopModeConfirmationViewController.swift in Sources */,
 				E946B94A26D62EAA0006E1F1 /* RMBTBottomPresentSegue.swift in Sources */,
 				E939AAAB26DB98E900D73F0B /* RMBTMapResultsListViewController.swift in Sources */,
 				E9400F3526BE8D250067273A /* MeasurementSpeedRawItem.swift in Sources */,
 				E94ED1D326C63C7400B17B25 /* RMBTGaugeView.swift in Sources */,
-				49C202CB2E0C3E0400CB6520 /* TestPopup.swift in Sources */,
 				E930769B26CE3AA80046A17B /* RMBTMapOptionsViewController.swift in Sources */,
 				E9AA0DE727635CF9003C71D7 /* Data+MD5.swift in Sources */,
 				E959547826E38AF7004EA6D9 /* RMBTHistoryIndexViewController.swift in Sources */,
@@ -1967,8 +1997,6 @@
 				E9400F1226BE707C0067273A /* RMBTMapServer.swift in Sources */,
 				E9E993BA26EA398500E7EED6 /* RMBTHistoryMapCell.swift in Sources */,
 				E97CF78B2761FC5B0092352C /* RMBTHelpers.swift in Sources */,
-				4909C2D32DE4A6D0003F3AB6 /* PersistentFence.swift in Sources */,
-				49C202CD2E0D3A6800CB6520 /* Color+Ext.swift in Sources */,
 				49B28C7A2BA1914E00697BB4 /* RMBTTestExportCell.swift in Sources */,
 				E93FB0F226F39A8C00DD24CD /* RMBTHistoryQoSSingleResultCell.swift in Sources */,
 				E926C2F4276A3345009FCF12 /* RMBTQoSTestRunner.swift in Sources */,
@@ -1977,8 +2005,6 @@
 				E94EC06F276E193000DB0B21 /* RMBTQosWebTestURLProtocol.swift in Sources */,
 				E9400EE126BA2F710067273A /* ConnectivityService.swift in Sources */,
 				E9A23BF22764F14000717814 /* RMBTHistorySpeedGraph.swift in Sources */,
-				498EF31A2D0B0CD7003A79EB /* NetworkCoverageViewModel.swift in Sources */,
-				366B18D978CE48A48F1B40E0 /* BackgroundActivityActor.swift in Sources */,
 				E946B95326D66C5B0006E1F1 /* RMBTMapOptionsFilterCell.swift in Sources */,
 				E9A23BE62764DCA600717814 /* RMBTQoSProgressViewController.swift in Sources */,
 				E9A23BEA2764DE4700717814 /* UIView+Position.swift in Sources */,
@@ -1987,12 +2013,10 @@
 				E91316B626ADC2C100368DCD /* UIViewController+ModalBrowser.swift in Sources */,
 				E9A23BE42764AC3100717814 /* RMBTQoSTestGroup.swift in Sources */,
 				E9400EF826BA752D0067273A /* MapOptionResponse.swift in Sources */,
-				498581612EAA7982008C11A7 /* TestCoverageResultView.swift in Sources */,
 				E9400F3926BE8D850067273A /* Speed.swift in Sources */,
 				E9E9940026EC9CB100E7EED6 /* RMBTHistoryQoSSingleViewController.swift in Sources */,
 				36B75A212739692C006F4CB3 /* RMBTMaterialTextFieldState.swift in Sources */,
 				49312C752BE91CC2001AA226 /* RMBTHistoryDownloadViewController.swift in Sources */,
-				49C921452D6CA0E80003EDBC /* CoverageMeasurementSessionInitializer.swift in Sources */,
 				E9A23BE22764A76600717814 /* RMBTQoSNonTransparentProxyTest.swift in Sources */,
 				E95954B426E62E34004EA6D9 /* RMBTHistoryViewCell.swift in Sources */,
 				36B75A1F2739395D006F4CB3 /* RMBTMaterialTextField.swift in Sources */,
@@ -2001,18 +2025,13 @@
 				E9400F0026BA79310067273A /* GeoLocation.swift in Sources */,
 				E9C4BA2727140B8F00D6FAE8 /* CLLocation+Additions.swift in Sources */,
 				E959547F26E3B74B004EA6D9 /* RMBTHistoryIndexCell.swift in Sources */,
-				491471362D1062DD00885B82 /* SendCoverageResultRequest.swift in Sources */,
-				49A646BC2E401615007F0F4E /* FencesMapView.swift in Sources */,
 				E9400EFC26BA78FD0067273A /* Requests.swift in Sources */,
 				E9400F0226BACF340067273A /* ServerHelper.swift in Sources */,
-				495288A32D64D4C600C73435 /* UDPPingSession.swift in Sources */,
 				E9AA0DED27639862003C71D7 /* RMBTQoSTCPTest.swift in Sources */,
-				49A31C6C2D3A97250039052B /* AsynchronousSequence.swift in Sources */,
 				E91316B426ADB1E000368DCD /* RMBTStatsViewController.swift in Sources */,
 				E982444627317FDD00081732 /* RMBTLoopModeCompleteViewController.swift in Sources */,
 				E9E993D826EB185300E7EED6 /* RMBTQOEItemCell.swift in Sources */,
 				36933A73274E68B4009A52BE /* UIColor+ResultClass.swift in Sources */,
-				49ABB8512E2E4AB900583F5E /* CoverageResultView.swift in Sources */,
 				E9400EFA26BA758F0067273A /* OperatorsResponse.swift in Sources */,
 				E94EC066276DEF4600DB0B21 /* RMBTMapOptionsSubtype.swift in Sources */,
 				E97CF793276255C00092352C /* RMBTQoSControlConnectionParams.swift in Sources */,
@@ -2020,6 +2039,35 @@
 				E9400F2326BE8C690067273A /* SpeedMeasurementJPLResult.swift in Sources */,
 				E9E993C626EA49D200E7EED6 /* RMBTHistorySpeedGrapshCell.swift in Sources */,
 				E9400F2926BE8C990067273A /* SpeedRawItem.swift in Sources */,
+				49EDC7852EAA35630009D9A6 /* CurrentRadioTechnologyService.swift in Sources */,
+				49EDC7862EAA35630009D9A6 /* CoverageResultView.swift in Sources */,
+				498581612EAA7982008C11A7 /* TestCoverageResultView.swift in Sources */,
+				49EDC7872EAA35630009D9A6 /* PingMeasurementService.swift in Sources */,
+				49EDC7882EAA35630009D9A6 /* OnlineStatusService.swift in Sources */,
+				49EDC7892EAA35630009D9A6 /* ReachabilityNetworkConnectionTypeUpdatesService.swift in Sources */,
+				49EDC78A2EAA35630009D9A6 /* LocationUpdatesService.swift in Sources */,
+				49EDC78B2EAA35630009D9A6 /* TestPopup.swift in Sources */,
+				49EDC78C2EAA35630009D9A6 /* FencesMapView.swift in Sources */,
+				49EDC78D2EAA35630009D9A6 /* CoverageMeasurementSessionInitializer.swift in Sources */,
+				49EDC78E2EAA35630009D9A6 /* UDPPingSession.swift in Sources */,
+				49EDC78F2EAA35630009D9A6 /* NetworkCoverageFactory.swift in Sources */,
+				49EDC7902EAA35630009D9A6 /* NetworkCoverageView.swift in Sources */,
+				49EDC7922EAA35630009D9A6 /* PersistenceServiceActor.swift in Sources */,
+				49EDC7932EAA35630009D9A6 /* SimulatorNetworkConnectionTypeUpdatesService.swift in Sources */,
+				49EDC7942EAA35630009D9A6 /* PersistentFence.swift in Sources */,
+				49EDC7952EAA35630009D9A6 /* Fence.swift in Sources */,
+				49EDC7962EAA35630009D9A6 /* SendCoverageResultRequest.swift in Sources */,
+				49EDC7972EAA35630009D9A6 /* NetworkConnectionType.swift in Sources */,
+				49EDC7982EAA35630009D9A6 /* NetworkCoverageViewModel.swift in Sources */,
+				49EDC7992EAA35630009D9A6 /* PersistenceManagingCoverageResultsService.swift in Sources */,
+				49EDC79A2EAA35630009D9A6 /* BackgroundActivityActor.swift in Sources */,
+				49EDC79B2EAA35630009D9A6 /* LocationUpdate.swift in Sources */,
+				49EDC79C2EAA35630009D9A6 /* PersistedFencesResender.swift in Sources */,
+				49EDC79D2EAA35630009D9A6 /* Color+Ext.swift in Sources */,
+				49EDC79F2EAA35630009D9A6 /* HTTPPingSender.swift in Sources */,
+				49EDC7A02EAA35630009D9A6 /* UDPConnection.swift in Sources */,
+				49EDC7A12EAA35630009D9A6 /* AsynchronousSequence.swift in Sources */,
+				49EDC7A22EAA35630009D9A6 /* CoverageHeader.swift in Sources */,
 				E9E993D426EB0E4700E7EED6 /* RMBTQOEListCell.swift in Sources */,
 				E94ED1D126C615F500B17B25 /* RMBTPopupViewController.swift in Sources */,
 				E9AA0DE927635FED003C71D7 /* RMBTQoSIPTest.swift in Sources */,
@@ -2051,7 +2099,6 @@
 				E99F23362771ECB400BFDA09 /* RMBTTestRunner.swift in Sources */,
 				E9400F0826BAD10C0067273A /* AbstractBasicRequestBuilder.swift in Sources */,
 				E9400F1D26BE87450067273A /* ObjectMapperHelper.swift in Sources */,
-				49B4A4792D677407007C6A17 /* HTTPPingSender.swift in Sources */,
 				E9DF4E5D27B135E900EF6E29 /* NewsRequest.swift in Sources */,
 				E9AA641D275DCEEE0079E5A1 /* RMBTHistoryPingGraph.swift in Sources */,
 				E93FB0FC26F3A1DD00DD24CD /* RMBTHistoryResultPercentView.swift in Sources */,
@@ -2066,8 +2113,6 @@
 				E94EC064276DECC000DB0B21 /* RMBTMapOptionsType.swift in Sources */,
 				E9E993CD26EA617200E7EED6 /* RMBTOpenDataResponse.swift in Sources */,
 				36933A77274FCA96009A52BE /* RMBTHistoryTestDetailsViewController.swift in Sources */,
-				499406E22D9D1CD600237AC1 /* LocationUpdate.swift in Sources */,
-				4985815F2EAA792B008C11A7 /* HistoryCoverageResultView.swift in Sources */,
 				36A9DF3F272C4E190099A57C /* UILabel.swift in Sources */,
 				E926C2F2276A1EDC009FCF12 /* RMBTBaseTestViewController.swift in Sources */,
 				E9881C82270C1190008EFDF6 /* RMBTLoaderView.swift in Sources */,
@@ -2077,9 +2122,7 @@
 				E94EC06B276E038800DB0B21 /* RMBTMapOptions.swift in Sources */,
 				E9400EE526BA32150067273A /* LogConfig.swift in Sources */,
 				49B28C762BA09D6A00697BB4 /* Keychain.swift in Sources */,
-				499406E02D9D1C8A00237AC1 /* LocationUpdatesService.swift in Sources */,
 				E95954AF26E602EC004EA6D9 /* RMBTHistoryFilter2ViewController.swift in Sources */,
-				495288A12D64D49400C73435 /* UDPConnection.swift in Sources */,
 				E9AA0DE127634EF1003C71D7 /* RMBTQoSDNSTest.swift in Sources */,
 				E91316AE26AD72F200368DCD /* RMBTTOSViewController.swift in Sources */,
 				E91316D626B3E98900368DCD /* RMBTWaveView.swift in Sources */,
@@ -2115,13 +2158,13 @@
 				E9C4BA2C2714112600D6FAE8 /* RMBTPopupCollectionView.swift in Sources */,
 				49E6A3D72E6B4AB700CED0EE /* CoverageHistoryDetailService.swift in Sources */,
 				49E6A3D92E6B4AB700CED0EE /* CoverageHistoryDetailView.swift in Sources */,
+				4985815F2EAA792B008C11A7 /* HistoryCoverageResultView.swift in Sources */,
 				E930769F26CE83200046A17B /* RMBTMapOptionsLayoutViewController.swift in Sources */,
 				E9E993BE26EA3DD600E7EED6 /* RMBTHistoryNetworkCell.swift in Sources */,
 				E9E993FD26EC951200E7EED6 /* RMBTHistoryQoSGroupResultCell.swift in Sources */,
 				E9400F1626BE71EE0067273A /* MapMeasurementRequest.swift in Sources */,
 				E9A23BF42764F62200717814 /* RMBTHistoryQoSSingleResult.swift in Sources */,
 				E9AA6420275DD6FA0079E5A1 /* RMBTHistoryPingGraphCell.swift in Sources */,
-				498EF31E2D0B0D70003A79EB /* Fence.swift in Sources */,
 				E959547C26E3B5DF004EA6D9 /* RMBTHistoryLoadingCell.swift in Sources */,
 				E9400F1F26BE89440067273A /* QosMeasurementResultResponse.swift in Sources */,
 				494998E32B7E353C0067B3D8 /* TopPopoverView.swift in Sources */,
@@ -2131,7 +2174,6 @@
 				49B28C7E2BA4238700697BB4 /* TestExportFormat.swift in Sources */,
 				E9E993E026EB24AE00E7EED6 /* RMBTNetInfoListCell.swift in Sources */,
 				E9AA0DEB276361B6003C71D7 /* RMBTQoSWebTest.swift in Sources */,
-				49AC77142DE8B2C100EBFAAE /* SwiftDataFencePersistenceService.swift in Sources */,
 				E946B95026D661730006E1F1 /* RMBTMapOptionsTypesViewController.swift in Sources */,
 				49D632E12E85234300B2BF02 /* CoverageTestDetailsView.swift in Sources */,
 				E9400F2F26BE8CCD0067273A /* WifiInfo.swift in Sources */,
@@ -2140,12 +2182,10 @@
 				367B46832923857400D84E87 /* A11y.swift in Sources */,
 				E9A23BE82764DCD600717814 /* RMBTQoSProgressCell.swift in Sources */,
 				E9E993B726E9FE0C00E7EED6 /* RMBTHistoryResultViewController.swift in Sources */,
-				49106D022E4250D8007B6156 /* CoverageHeader.swift in Sources */,
 				E9400F2B26BE8CB70067273A /* Signal.swift in Sources */,
 				E95954AB26E60287004EA6D9 /* RMBTHistoryFilterTitleCell.swift in Sources */,
 				E946B93F26D28BA20006E1F1 /* RMBTMapOptionsCell.swift in Sources */,
 				E9E993C226EA435200E7EED6 /* RMBTHistoryBasicInfoCell.swift in Sources */,
-				49965DA82DEF984A00D93737 /* PersistedFencesResender.swift in Sources */,
 				E93FB10926F4C41600DD24CD /* RMBTVerticalTransitionController.swift in Sources */,
 				E946B94E26D65F0D0006E1F1 /* RMBTMapOptionsFilterViewController.swift in Sources */,
 				E9A9A9AD27687A03002671C0 /* RMBTHistoryResult.swift in Sources */,
@@ -2154,19 +2194,15 @@
 				E9400EED26BA6BFD0067273A /* RMBTSettings.swift in Sources */,
 				E93FB0F726F39E0200DD24CD /* RMBTHistoryQoSSingleResultViewController.swift in Sources */,
 				E981D280271E892400CD970A /* RMBTLocationPopupViewController.swift in Sources */,
-				498EF31C2D0B0CFF003A79EB /* PingMeasurementService.swift in Sources */,
 				E9400EF126BA6E2E0067273A /* IpResponse.swift in Sources */,
 				E94EC068276E031C00DB0B21 /* RMBTMapOptionsFilter.swift in Sources */,
 				E939AAA926DB8B0800D73F0B /* RMBTMeasurementPin.swift in Sources */,
 				E9E9E90327429B6C005EB393 /* RMBTTestLandscapeView.swift in Sources */,
 				E9E9E9012742685E005EB393 /* UIView+XibLoadable.swift in Sources */,
-				495F7B9B2CF48FC4003750A3 /* NetworkCoverageView.swift in Sources */,
-				499CF46D2DE9D48200D5DCDE /* NetworkCoverageFactory.swift in Sources */,
 				E9824442272FC31600081732 /* RMBTLoopModeSettingsViewController.swift in Sources */,
 				49D632E92E856A9900B2BF02 /* CoverageTestDetailsModel.swift in Sources */,
 				E94ED1CF26C3C22F00B17B25 /* NetworkReachability.swift in Sources */,
 				E9B51CC627240B84006ED0C7 /* UIApplication+Additions.swift in Sources */,
-				499406DD2D9C0B2600237AC1 /* CurrentRadioTechnologyService.swift in Sources */,
 				E930769926CE247F0046A17B /* RMBTMapViewController.swift in Sources */,
 				36933A75274FBF00009A52BE /* RMBTTestDetailCell.swift in Sources */,
 			);

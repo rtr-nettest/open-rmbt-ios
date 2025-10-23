@@ -34,10 +34,12 @@ protocol SendCoverageResultsService {
     func send(fences: [Fence]) async throws
 }
 
-protocol FencePersistenceService {
+protocol FencePersistenceService: Actor {
     func save(_ fence: Fence) throws
     func sessionStarted(at date: Date) throws
     func sessionFinalized(at date: Date) throws
+    func assignTestUUIDAndAnchor(_ uuid: String, anchorNow: Date) throws
+    func deleteFinalizedNilUUIDSessions() throws
 }
 
 struct FenceItem: Identifiable, Hashable {
@@ -100,11 +102,17 @@ struct FenceDetail: Equatable, Identifiable {
     let color: Color
 }
 
+struct SessionInitializedUpdate: Hashable {
+    let timestamp: Date
+    let sessionID: String
+}
+
 @Observable @MainActor class NetworkCoverageViewModel {
     enum Update {
         case ping(PingResult)
         case location(LocationUpdate)
         case networkType(NetworkTypeUpdate)
+        case sessionInitialized(SessionInitializedUpdate)
     }
 
     // Private state
@@ -330,6 +338,12 @@ struct FenceDetail: Equatable, Identifiable {
     @MainActor
     private func processUpdate(_ update: Update) async {
         switch update {
+        case .sessionInitialized(let sessionUpdate):
+            try? await persistenceService.assignTestUUIDAndAnchor(
+                sessionUpdate.sessionID,
+                anchorNow: sessionUpdate.timestamp
+            )
+
         case .ping(let pingUpdate):
             guard !isOnWiFi else { return }
             
@@ -386,7 +400,7 @@ struct FenceDetail: Equatable, Identifiable {
                     currentFence.exit(at: locationUpdate.timestamp)
                     fences[fences.endIndex - 1] = currentFence
 
-                    try? persistenceService.save(currentFence)
+                    try? await persistenceService.save(currentFence)
 
                     fences.append(newFence)
                 } else {
@@ -420,7 +434,7 @@ struct FenceDetail: Equatable, Identifiable {
         stopTestReasons.removeAll()
         isOnWiFi = false
 
-        try? persistenceService.sessionStarted(at: sessionStartDate)
+        try? await persistenceService.sessionStarted(at: sessionStartDate)
 
         await BackgroundActivityActor.shared.startActivity()
 
@@ -472,7 +486,7 @@ struct FenceDetail: Equatable, Identifiable {
         latestTechnology = "N/A"
         warningPopups.removeAll()
         connectionFragmentsCount = 1
-        
+
         // Cancel async sequences
         iterationTask?.cancel()
         iterationTask = nil
@@ -488,7 +502,7 @@ struct FenceDetail: Equatable, Identifiable {
             if var lastFence = fences.last, lastFence.dateExited == nil {
                 lastFence.exit(at: finalizationDate)
                 fences[fences.endIndex - 1] = lastFence
-                try? persistenceService.save(lastFence)
+                try? await persistenceService.save(lastFence)
             }
 
             do {
@@ -500,7 +514,8 @@ struct FenceDetail: Equatable, Identifiable {
             }
         }
 
-        try? persistenceService.sessionFinalized(at: finalizationDate)
+        try? await persistenceService.sessionFinalized(at: finalizationDate)
+        try? await persistenceService.deleteFinalizedNilUUIDSessions()
     }
 
     func toggleMeasurement() async {

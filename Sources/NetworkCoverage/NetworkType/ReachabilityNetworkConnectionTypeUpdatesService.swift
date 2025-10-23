@@ -11,7 +11,6 @@ import Foundation
 struct ReachabilityNetworkConnectionTypeUpdatesService: NetworkConnectionTypeUpdatesService {
     let now: @Sendable () -> Date
 
-    @MainActor
     func networkConnectionTypes() -> AsyncStream<NetworkTypeUpdate> {
         AsyncStream { continuation in
             // Map reachability status to our NetworkConnectionType
@@ -33,13 +32,15 @@ struct ReachabilityNetworkConnectionTypeUpdatesService: NetworkConnectionTypeUpd
                 }
             }
 
-            // Start monitoring and emit initial state immediately on MainActor
-            NetworkReachability.shared.startMonitoring()
-            callback(NetworkReachability.shared.status)
-            let token = NetworkReachability.shared.addReachabilityCallbackReturningToken(callback)
+            // Start monitoring and emit initial state on the main actor
+            Task { @MainActor in
+                NetworkReachability.shared.startMonitoring()
+                callback(NetworkReachability.shared.status)
+                let token = NetworkReachability.shared.addReachabilityCallbackReturningToken(callback)
 
-            continuation.onTermination = { _ in
-                NetworkReachability.shared.removeReachabilityCallback(token)
+                continuation.onTermination = { _ in
+                    NetworkReachability.shared.removeReachabilityCallback(token)
+                }
             }
         }
     }

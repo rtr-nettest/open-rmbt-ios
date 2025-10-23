@@ -11,7 +11,7 @@ Open-RMBT iOS App is a network speed testing application developed for the Austr
 ### Development Build
 ```bash
 # Build for iPhone 16 simulator (default)
-xcodebuild -workspace RMBT.xcworkspace -scheme RMBT -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.5' build
+xcodebuild -workspace RMBT.xcworkspace -scheme RMBT -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.0' build
 
 # Clean build
 xcodebuild -workspace RMBT.xcworkspace -scheme RMBT clean
@@ -20,10 +20,10 @@ xcodebuild -workspace RMBT.xcworkspace -scheme RMBT clean
 ### Testing
 ```bash
 # Run unit tests
-xcodebuild -workspace RMBT.xcworkspace -scheme RMBT -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.5' test
+xcodebuild -workspace RMBT.xcworkspace -scheme RMBT -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.0' test
 
 # Run specific test class
-xcodebuild -workspace RMBT.xcworkspace -scheme RMBT -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.5' test -only-testing:RMBTTests/NetworkCoverageTests
+xcodebuild -workspace RMBT.xcworkspace -scheme RMBT -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.0' test -only-testing:RMBTTests/NetworkCoverageTests
 ```
 
 ### Dependency Management

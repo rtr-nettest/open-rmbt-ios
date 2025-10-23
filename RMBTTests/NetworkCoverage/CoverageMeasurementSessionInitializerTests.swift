@@ -67,6 +67,42 @@ struct CoverageMeasurementSessionInitializerTests {
         let (sut2, _) = makeSUT(testUUIDs: ["B"]) 
         #expect(sut2.udpPingSessionCount == 0)
     }
+
+    @Test("WHEN offline THEN emits sessionInitialized after going online")
+    func whenOfflineStart_andOnlineBecomesAvailable_thenInitializerEmitsSessionInitialized() async throws {
+        let spy = OfflineThenOnlineControlServerSpy(firstError: NSError(domain: "offline", code: -1009))
+        let db = UserDatabase(useInMemoryStore: true)
+        let online = OnlineStatusServiceStub()
+
+        let core = CoreSessionInitializer(now: { Date() }, coverageAPIService: spy)
+        let withPersistence = PersistenceAwareSessionInitializer(wrapped: core, database: db)
+        let sut = OnlineAwareSessionInitializer(wrapped: withPersistence, onlineStatusService: online, now: { Date() })
+
+        // Prepare event capture
+        var receivedUUID: String?
+        let task = Task {
+            for await update in sut.sessionInitializedEvents() {
+                receivedUUID = update.sessionID
+                break
+            }
+        }
+
+        // Trigger start in background (will wait for online)
+        Task { _ = try? await sut.startNewSession(loopID: nil) }
+
+        // Give the initializer time to fail and start listening to online events
+        try await Task.sleep(nanoseconds: 10_000_000)
+
+        // Simulate online
+        online.emit(false)
+        online.emit(true)
+
+        // Wait for the event to be processed
+        try await Task.sleep(nanoseconds: 100_000_000)
+        task.cancel()
+
+        #expect(receivedUUID == "ONLINE-UUID")
+    }
 }
 
 // MARK: - Test Helpers
@@ -74,8 +110,15 @@ struct CoverageMeasurementSessionInitializerTests {
 private func makeSUT(testUUIDs: [String], ipVersions: [Int?] = []) -> (CoverageMeasurementSessionInitializer, ControlServerSpy) {
     let spy = ControlServerSpy(enqueuedTestUUIDs: testUUIDs, enqueuedIpVersions: ipVersions)
     let database = UserDatabase(useInMemoryStore: true)
-    let sut = CoverageMeasurementSessionInitializer(now: { Date() }, coverageAPIService: spy, database: database)
-    return (sut, spy)
+    let factory = NetworkCoverageFactory(database: database, dateNow: { Date() })
+    let sut = factory.makeSessionInitializer(onlineStatusService: nil)
+
+    // Replace the core initializer's API service with our spy by creating a new composition
+    let core = CoreSessionInitializer(now: { Date() }, coverageAPIService: spy)
+    let withPersistence = PersistenceAwareSessionInitializer(wrapped: core, database: database)
+    let withOnline = OnlineAwareSessionInitializer(wrapped: withPersistence, onlineStatusService: nil, now: { Date() })
+
+    return (withOnline, spy)
 }
 
 private final class ControlServerSpy: CoverageAPIService {
@@ -103,4 +146,29 @@ private final class ControlServerSpy: CoverageAPIService {
         response.ipVersion = enqueuedIpVersions.isEmpty ? nil : enqueuedIpVersions.removeFirst()
         success(response)
     }
+}
+
+private final class OfflineThenOnlineControlServerSpy: CoverageAPIService {
+    let firstError: Error
+    private var didError = false
+    init(firstError: Error) { self.firstError = firstError }
+    func getCoverageRequest(_ request: CoverageRequestRequest, loopUUID: String?, success: @escaping (SignalRequestResponse) -> (), error failure: @escaping ErrorCallback) {
+        if !didError {
+            didError = true
+            failure(firstError)
+            return
+        }
+        let response = SignalRequestResponse()
+        response.testUUID = "ONLINE-UUID"
+        response.pingHost = "host"
+        response.pingPort = "444"
+        response.pingToken = "Z7kKKZqSYU/j7nSGbjoRLw=="
+        success(response)
+    }
+}
+
+private final class OnlineStatusServiceStub: OnlineStatusService {
+    private var continuation: AsyncStream<Bool>.Continuation!
+    func online() -> AsyncStream<Bool> { AsyncStream { c in self.continuation = c } }
+    func emit(_ value: Bool) { continuation?.yield(value) }
 }

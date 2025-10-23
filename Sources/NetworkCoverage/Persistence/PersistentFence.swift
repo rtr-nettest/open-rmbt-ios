@@ -9,18 +9,16 @@ final class PersistentFence {
     var longitude: Double
     var avgPingMilliseconds: Int?
     var technology: String?
-    var testUUID: String
     // Optional exit timestamp in microseconds since epoch, used to compute duration_ms on resend
     var exitTimestamp: UInt64?
     var radiusMeters: CLLocationDistance
 
-    init(from fence: Fence, testUUID: String) {
+    init(from fence: Fence) {
         self.timestamp = UInt64(fence.dateEntered.timeIntervalSince1970 * 1_000_000) // microseconds
         self.latitude = fence.startingLocation.coordinate.latitude
         self.longitude = fence.startingLocation.coordinate.longitude
         self.avgPingMilliseconds = fence.averagePing
         self.technology = fence.significantTechnology
-        self.testUUID = testUUID
         if let dateExited = fence.dateExited {
             self.exitTimestamp = UInt64(dateExited.timeIntervalSince1970 * 1_000_000)
         }
@@ -28,7 +26,6 @@ final class PersistentFence {
     }
 
     init(
-        testUUID: String,
         timestamp: UInt64,
         latitude: Double,
         longitude: Double,
@@ -42,7 +39,6 @@ final class PersistentFence {
         self.longitude = longitude
         self.avgPingMilliseconds = avgPingMilliseconds
         self.technology = technology
-        self.testUUID = testUUID
         self.exitTimestamp = exitTimestamp
         self.radiusMeters = radiusMeters
     }
@@ -50,13 +46,19 @@ final class PersistentFence {
 
 @Model
 final class PersistentCoverageSession {
-    @Attribute(.unique) var testUUID: String
+    // Unique when non-nil; SwiftData doesn't support conditional uniqueness, so we rely on app logic.
+    @Attribute(.unique) var testUUID: String?
+    var loopUUID: String?
     var startedAt: UInt64
+    var anchorAt: UInt64?
     var finalizedAt: UInt64?
+    @Relationship(deleteRule: .cascade) var fences: [PersistentFence] = []
 
-    init(testUUID: String, startedAt: UInt64, finalizedAt: UInt64? = nil) {
+    init(testUUID: String? = nil, loopUUID: String? = nil, startedAt: UInt64, anchorAt: UInt64? = nil, finalizedAt: UInt64? = nil) {
         self.testUUID = testUUID
+        self.loopUUID = loopUUID
         self.startedAt = startedAt
+        self.anchorAt = anchorAt
         self.finalizedAt = finalizedAt
     }
 }

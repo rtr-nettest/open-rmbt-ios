@@ -12,11 +12,9 @@ import Foundation
 struct SimulatorNetworkConnectionTypeUpdatesService: NetworkConnectionTypeUpdatesService {
     let now: @Sendable () -> Date
 
-    @MainActor
     func networkConnectionTypes() -> AsyncStream<NetworkTypeUpdate> {
         AsyncStream { continuation in
             continuation.yield(.init(type: .cellular, timestamp: now()))
         }
     }
 }
-

@@ -121,82 +121,6 @@ import Clocks
         #expect(sut.latestPing == "N/A")
     }
 
-    @MainActor @Suite("Session Lifecycle")
-    struct SessionLifecycleTests {
-        @Test func whenStartNewMeasurement_thenMarksSessionStarted() async throws {
-            let persistenceService = FencePersistenceServiceSpy()
-            let expectedTestUUID = "session-start"
-            var dateNow = Date(timeIntervalSinceReferenceDate: 0)
-            let sut = makeSUT(
-                updates: [makeLocationUpdate(at: 0, lat: 48.2082, lon: 16.3738)],
-                persistenceService: persistenceService,
-                currentTime: { dateNow },
-                testUUID: expectedTestUUID
-            )
-
-            dateNow = Date(timeIntervalSinceReferenceDate: 10)
-            await sut.startTest()
-            await Task.yield()
-
-            #expect(
-                persistenceService.capturedSessionStarts == [.init(
-                    testUUID: expectedTestUUID,
-                    startedAt: Date(timeIntervalSinceReferenceDate: 10)
-                )]
-            )
-        }
-
-        @Test func whenStopMeasurement_thenMarksSessionFinalized() async throws {
-            let persistenceService = FencePersistenceServiceSpy()
-            let expectedTestUUID = "session-finalize"
-            var dateNow = Date(timeIntervalSinceReferenceDate: 0)
-            let sut = makeSUT(
-                updates: [
-                    makeLocationUpdate(at: 0, lat: 48.2082, lon: 16.3738),
-                    makeLocationUpdate(at: 5, lat: 48.2083, lon: 16.3739)
-                ],
-                persistenceService: persistenceService,
-                currentTime: { dateNow },
-                testUUID: expectedTestUUID
-            )
-
-            dateNow = Date(timeIntervalSinceReferenceDate: 20)
-            await sut.startTest()
-            await Task.yield()
-            dateNow = Date(timeIntervalSinceReferenceDate: 30)
-            await sut.stopTest()
-
-            #expect(
-                persistenceService.capturedSessionFinalizations == [.init(
-                    testUUID: expectedTestUUID,
-                    finalizedAt: Date(timeIntervalSinceReferenceDate: 30)
-                )]
-            )
-        }
-
-        @Test func whenStopMeasurement_thenSendsAllFencesOnce() async throws {
-            let sendService = SendCoverageResultsServiceSpy()
-            let expectedTestUUID = "session-send"
-            let sut = makeSUT(
-                updates: [
-                    makeLocationUpdate(at: 0, lat: 48.2082, lon: 16.3738),
-                    makePingUpdate(at: 1, ms: 30),
-                    makeLocationUpdate(at: 2, lat: 48.2084, lon: 16.3740)
-                ],
-                sendResultsService: sendService,
-                testUUID: expectedTestUUID
-            )
-
-            await sut.startTest()
-            let expectedFenceCount = sut.fenceItems.count
-
-            await sut.stopTest()
-
-            #expect(sendService.capturedSentFences == [sut.fences])
-            #expect(sendService.capturedSentFences.first?.count == expectedFenceCount)
-        }
-    }
-
     @MainActor @Suite("Map Rendering")
     struct MapRenderingTests {
         private let equatorWideRegion = MKCoordinateRegion(center: .init(latitude: 0.0015, longitude: 0.0), span: .init(latitudeDelta: 0.05, longitudeDelta: 0.05))
@@ -470,6 +394,7 @@ import Clocks
         await sut.startTest()
         #expect(sut.latestPing == "-")
     }
+
     @Test(arguments: [
         ([ // first interval, pings received withing the same fence
             // refresh interval 0-9
@@ -700,7 +625,177 @@ import Clocks
 
     @MainActor @Suite("Persistence")
     struct Persistence {
-        @Test func whenReceivingLocationUpdatesAndPings_thenPersistedFencesIntoPersistenceLayer() async throws {
+        @Test func whenStartedNewMeasurement_thenMarksSessionStartedWithoutTestUUID() async throws {
+            let persistenceService = FencePersistenceServiceSpy()
+            var dateNow = makeDate(offset: 0)
+            let sut = makeSUT(
+                updates: [makeLocationUpdate(at: 0, lat: 1.0, lon: 1.0)],
+                persistenceService: persistenceService,
+                currentTime: { dateNow }
+            )
+
+            dateNow = makeDate(offset: 10)
+            await sut.startTest()
+
+            let capturedMessages = await persistenceService.capturedMessages
+            #expect(capturedMessages == [.sessionStarted(date: dateNow)])
+        }
+
+        @Test func whenReceivedSessionInitialization_thenAssignesTestUUIDAsSessionID() async throws {
+            let persistenceService = FencePersistenceServiceSpy()
+            let dateNow = makeDate(offset: 0)
+            let sessionInitilalizedOffset: TimeInterval = 20
+            let sessionID = "session-1"
+            let sut = makeSUT(
+                updates: [
+                    makeLocationUpdate          (at: 1, lat: 1.0, lon: 1.0),
+                    makeLocationUpdate          (at: 2, lat: 1.0, lon: 1.0000001),
+                    makeLocationUpdate          (at: 3, lat: 2.0, lon: 1.0), // new fence starts -> previous gets saved
+                    makeLocationUpdate          (at: 4, lat: 2.0, lon: 1.0000001),
+                    makeLocationUpdate          (at: 5, lat: 3.0, lon: 1.0), // new fence starts -> previous gets saved
+                    makeSessionInitializedUpdate(at: 6, sessionID: sessionID),
+                    makeLocationUpdate          (at: 7, lat: 3.0, lon: 1.000001),
+                    makeLocationUpdate          (at: 8, lat: 4.0, lon: 1.0),  // new fence starts -> previous gets saved
+                ],
+                persistenceService: persistenceService,
+                currentTime: { dateNow }
+            )
+
+            await sut.startTest()
+
+            let capturedMessages = await persistenceService.capturedMessages
+            let fences = sut.fences
+            try #require(fences.count == 4)
+
+            #expect(capturedMessages == [
+                .sessionStarted(date: dateNow),
+                .save(fence: fences[0]),
+                .save(fence: fences[1]),
+                .assign(testUUID: sessionID, anchorDate: makeDate(offset: 6)),
+                .save(fence: fences[2]),
+            ])
+        }
+
+        @Test func whenRecordedFencesBeforeSessionInitialized_thenFencesAreStillSaved() async throws {
+            let persistenceService = FencePersistenceServiceSpy()
+            var dateNow = makeDate(offset: 0)
+            let sessionInitilalizedOffset: TimeInterval = 20
+            let sessionID = "session-1"
+            let sut = makeSUT(
+                updates: [
+                    makeSessionInitializedUpdate(at: sessionInitilalizedOffset, sessionID: sessionID)
+                ],
+                persistenceService: persistenceService,
+                currentTime: { dateNow }
+            )
+
+            dateNow = makeDate(offset: 10)
+            await sut.startTest()
+
+            let capturedMessages = await persistenceService.capturedMessages
+            #expect(capturedMessages == [
+                .sessionStarted(date: dateNow),
+                .assign(testUUID: sessionID, anchorDate: makeDate(offset: sessionInitilalizedOffset))
+            ])
+        }
+        @Test func whenStoppedMeasurement_thenMarksSessionFinalized() async throws {
+            let sessionID = "session-finalize"
+            let persistenceService = FencePersistenceServiceSpy()
+            var dateNow = makeDate(offset: 0)
+            let sut = makeSUT(
+                updates: [
+                    makeSessionInitializedUpdate(at: 1, sessionID: sessionID),
+                    makeLocationUpdate          (at: 2, lat: 1.0, lon: 1.0),
+                    makeLocationUpdate          (at: 3, lat: 1.0, lon: 1.000001)
+                ],
+                persistenceService: persistenceService,
+                currentTime: { dateNow }
+            )
+
+            await sut.startTest()
+            dateNow = makeDate(offset: 5)
+            await sut.stopTest()
+
+            let capturedMessages = await persistenceService.capturedMessages
+            let savedFece = try #require(sut.fences.first)
+
+            #expect(capturedMessages == [
+                .sessionStarted(date: makeDate(offset: 0)),
+                .assign(testUUID: sessionID, anchorDate: makeDate(offset: 1)),
+                .save(fence: savedFece),
+                .sessionFinalized(date: makeDate(offset: 5)),
+                .deleteFinalizedNilUUIDSessions
+            ])
+        }
+
+        @Test func whenSubsequentSessionInitialized_thenCreatesNewSession() async throws {
+            let persistenceService = FencePersistenceServiceSpy()
+            let uuid1 = "uuid-1"
+            let uuid2 = "uuid-2"
+            let dateNow = makeDate(offset: 0)
+            let sut = makeSUT(
+                updates: [
+                    makeSessionInitializedUpdate(at: 1, sessionID: uuid1),
+                    makeLocationUpdate          (at: 2, lat: 1, lon: 1),
+                    makeSessionInitializedUpdate(at: 3, sessionID: uuid2)
+                ],
+                persistenceService: persistenceService,
+                currentTime: { dateNow }
+            )
+
+            await sut.startTest()
+
+            let capturedMessages = await persistenceService.capturedMessages
+            #expect(capturedMessages == [
+                .sessionStarted(date: dateNow),
+                .assign(testUUID: uuid1, anchorDate: makeDate(offset: 1)),
+                .assign(testUUID: uuid2, anchorDate: makeDate(offset: 3)),
+            ])
+        }
+
+        @Test func whenStopMeasurement_thenSendsAllFencesOnce() async throws {
+            let expectedTestUUID = "session-send"
+            let persistenceService = FencePersistenceServiceSpy()
+            let sendService = SendCoverageResultsServiceSpy()
+            let sut = makeSUT(
+                updates: [
+                    makeLocationUpdate(at: 0, lat: 48.2082, lon: 16.3738),
+                    makePingUpdate(at: 1, ms: 30),
+                    makeLocationUpdate(at: 2, lat: 48.2084, lon: 16.3740)
+                ],
+                persistenceService: persistenceService,
+                sendResultsService: sendService
+            )
+
+            await sut.startTest()
+            let expectedFenceCount = sut.fenceItems.count
+
+            await sut.stopTest()
+
+            #expect(sendService.capturedSentFences == [sut.fences])
+            #expect(sendService.capturedSentFences.first?.count == expectedFenceCount)
+        }
+
+        @Test func whenStop_andCurrentSessionHasNoUUID_thenPersistenceServiceDeletesFinalizedNilUUIDSessions() async throws {
+            let persistenceService = FencePersistenceServiceSpy()
+            var dateNow = Date(timeIntervalSinceReferenceDate: 0)
+            let sut = makeSUT(
+                updates: [makeLocationUpdate(at: 0, lat: 48.2082, lon: 16.3738)],
+                persistenceService: persistenceService,
+                currentTime: { dateNow }
+            )
+
+            dateNow = Date(timeIntervalSinceReferenceDate: 5)
+            await sut.startTest()
+            await Task.yield()
+            dateNow = Date(timeIntervalSinceReferenceDate: 10)
+            await sut.stopTest()
+
+            let capturedMessages = await persistenceService.capturedMessages
+            #expect(capturedMessages.contains(.deleteFinalizedNilUUIDSessions))
+        }
+
+        @Test func whenReceivingLocationUpdatesAndPings_thenPersistsFencesIntoPersistenceLayer() async throws {
             let persistenceService = FencePersistenceServiceSpy()
             let sut = makeSUT(
                 updates: [
@@ -717,7 +812,7 @@ import Clocks
             )
             await sut.startTest()
 
-            let savedFences = persistenceService.capturedSavedFences
+            let savedFences = await persistenceService.capturedSavedFences
 
             try #require(savedFences.count == 2)
 
@@ -1193,12 +1288,9 @@ import Clocks
     clock: some Clock<Duration> = ContinuousClock(),
     insufficientAccuracyAutoStopInterval: TimeInterval = 30 * 60,
     maxTestDuration: @escaping () -> TimeInterval = { 4 * 60 * 60 },
-    testUUID: String = "test-uuid",
     renderingConfiguration: FencesRenderingConfiguration = .default
 ) -> NetworkCoverageViewModel {
-    persistenceService.currentTestUUID = testUUID
-
-    return NetworkCoverageViewModel(
+    .init(
         fences: fences,
         refreshInterval: refreshInterval,
         minimumLocationAccuracy: minimumLocationAccuracy,
@@ -1236,7 +1328,7 @@ private func expectFenceItems(
 }
 
 func makeLocationUpdate(at timestampOffset: TimeInterval, lat: CLLocationDegrees, lon: CLLocationDegrees, accuracy: CLLocationAccuracy = 1) -> NetworkCoverageViewModel.Update {
-    let timestamp = Date(timeIntervalSinceReferenceDate: timestampOffset)
+    let timestamp = makeDate(offset: timestampOffset)
     return .location(
         LocationUpdate(
             location: .init(
@@ -1252,21 +1344,28 @@ func makeLocationUpdate(at timestampOffset: TimeInterval, lat: CLLocationDegrees
 }
 
 func makePingUpdate(at timestampOffset: TimeInterval, ms: some BinaryInteger) -> NetworkCoverageViewModel.Update {
-    .ping(.init(result: .interval(.milliseconds(ms)), timestamp: Date(timeIntervalSinceReferenceDate: timestampOffset)))
+    .ping(.init(result: .interval(.milliseconds(ms)), timestamp: makeDate(offset: timestampOffset)))
 }
 
 func makeNetworkTypeUpdate(
     at timestampOffset: TimeInterval,
     type: NetworkTypeUpdate.NetworkConnectionType
 ) -> NetworkCoverageViewModel.Update {
-    .networkType(.init(type: type, timestamp: Date(timeIntervalSinceReferenceDate: timestampOffset)))
+    .networkType(.init(type: type, timestamp: makeDate(offset: timestampOffset)))
+}
+
+func makeSessionInitializedUpdate(
+    at timestampOffset: TimeInterval,
+    sessionID: String
+) -> NetworkCoverageViewModel.Update {
+    .sessionInitialized(.init(timestamp: makeDate(offset: timestampOffset), sessionID: sessionID))
 }
 
 func makeFence(
     id: UUID = UUID(),
     lat: CLLocationDegrees,
     lon: CLLocationDegrees,
-    dateEntered: Date = Date(timeIntervalSinceReferenceDate: 0),
+    dateEntered: Date = makeDate(offset: 0),
     technology: String? = nil,
     pings: [PingResult] = [],
     radiusMeters: CLLocationDistance = 20
@@ -1288,6 +1387,10 @@ func makeFence(
 
 func makeSaveError() -> Error {
     NSError(domain: "test", code: 1, userInfo: nil)
+}
+
+func makeDate(offset: TimeInterval) -> Date {
+    Date(timeIntervalSinceReferenceDate: offset)
 }
 
 func makeInaccurateLocationWarningPopup() -> NetworkCoverageViewModel.WarningPopupItem {
@@ -1341,34 +1444,43 @@ final class RadioTechnologyServiceStub: CurrentRadioTechnologyService {
     }
 }
 
-final class FencePersistenceServiceSpy: FencePersistenceService {
-    struct SessionStartCall: Equatable {
-        let testUUID: String?
-        let startedAt: Date
+final actor FencePersistenceServiceSpy: FencePersistenceService {
+    enum CapturedMessage: Equatable {
+        case save(fence: Fence)
+        case sessionStarted(date: Date)
+        case sessionFinalized(date: Date)
+        case assign(testUUID: String, anchorDate: Date)
+        case finalizeCurrentSession(date: Date)
+        case deleteFinalizedNilUUIDSessions
     }
 
-    struct SessionFinalizeCall: Equatable {
-        let testUUID: String?
-        let finalizedAt: Date
-    }
-
-    var currentTestUUID: String?
     private(set) var capturedSavedFences: [Fence] = []
-    private(set) var capturedSessionStarts: [SessionStartCall] = []
-    private(set) var capturedSessionFinalizations: [SessionFinalizeCall] = []
 
-    init() {}
+    private(set) var capturedMessages: [CapturedMessage] = []
 
     func save(_ fence: Fence) throws {
         capturedSavedFences.append(fence)
+        capturedMessages.append(.save(fence: fence))
     }
 
     func sessionStarted(at date: Date) throws {
-        capturedSessionStarts.append(SessionStartCall(testUUID: currentTestUUID, startedAt: date))
+        capturedMessages.append(.sessionStarted(date: date))
     }
 
     func sessionFinalized(at date: Date) throws {
-        capturedSessionFinalizations.append(SessionFinalizeCall(testUUID: currentTestUUID, finalizedAt: date))
+        capturedMessages.append(.sessionFinalized(date: date))
+    }
+
+    func assignTestUUIDAndAnchor(_ uuid: String, anchorNow: Date) throws {
+        capturedMessages.append(.assign(testUUID: uuid, anchorDate: anchorNow))
+    }
+
+    func finalizeCurrentSession(at date: Date) throws {
+        capturedMessages.append(.finalizeCurrentSession(date: date))
+    }
+
+    func deleteFinalizedNilUUIDSessions() throws {
+        capturedMessages.append(.deleteFinalizedNilUUIDSessions)
     }
 }
 
@@ -1395,5 +1507,27 @@ extension FenceDetail: @retroactive CustomTestStringConvertible, @retroactive Cu
     public var testDescription: String {
         let idPrefix = String(id.uuidString.prefix(6))
         return "FenceDetail(\(idPrefix), \(technology), \(averagePing))"
+    }
+}
+
+extension FencePersistenceServiceSpy.CapturedMessage: @retroactive CustomTestStringConvertible, @retroactive CustomDebugStringConvertible {
+    public var debugDescription: String { testDescription }
+
+    public var testDescription: String {
+        switch self {
+
+        case .save(fence: let fence):
+            ".save(fence: \(fence))"
+        case .sessionStarted(date: let date):
+            ".sessionStarted(date: \(date))"
+        case .sessionFinalized(date: let date):
+            ".sessionFinalized(date: let \(date))"
+        case .assign(testUUID: let testUUID, anchorDate: let anchorDate):
+            ".assign(testUUID: \(testUUID), anchorDate: \(anchorDate))"
+        case .finalizeCurrentSession(date: let date):
+            ".finalizeCurrentSession(date: \(date))"
+        case .deleteFinalizedNilUUIDSessions:
+            ".deleteFinalizedNilUUIDSessions"
+        }
     }
 }

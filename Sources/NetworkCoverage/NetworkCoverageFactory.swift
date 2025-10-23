@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftData
+import AsyncAlgorithms
 
 final class UserDatabase {
     static let shared = UserDatabase()
@@ -49,17 +50,27 @@ struct NetworkCoverageFactory {
     }
 
     var persistedFencesSender: PersistedFencesResender {
-        persistedFencesResender(sendResultsServiceMaker: { testUUID, startDate in
-            makeSendResultsService(testUUID: testUUID, startDate: startDate)
-        })
+        let persistenceActor = PersistenceServiceActor(modelContainer: database.container)
+        return PersistedFencesResender(
+            persistence: persistenceActor,
+            sendResultsService: { testUUID, startDate in
+                self.makeSendResultsService(testUUID: testUUID, startDate: startDate)
+            },
+            maxResendAge: maxResendAge,
+            dateNow: dateNow
+        )
     }
 
     func makeResender(
         sendResultsServiceMaker: @escaping (String, Date?) -> some SendCoverageResultsService
     ) -> PersistedFencesResender {
-        persistedFencesResender { testUUID, startDate in
-            sendResultsServiceMaker(testUUID, startDate)
-        }
+        let persistence = PersistenceServiceActor(modelContainer: database.container)
+        return PersistedFencesResender(
+            persistence: persistence,
+            sendResultsService: { uuid, start in sendResultsServiceMaker(uuid, start) },
+            maxResendAge: maxResendAge,
+            dateNow: dateNow
+        )
     }
 
     func services(
@@ -68,6 +79,7 @@ struct NetworkCoverageFactory {
         dateNow: @escaping () -> Date,
         sendResultsServiceMaker: @escaping (String, Date?) -> some SendCoverageResultsService
     ) -> (some FencePersistenceService, some SendCoverageResultsService) {
+        let persistenceActor = PersistenceServiceActor(modelContainer: database.container)
         let resultSender = PersistenceManagingCoverageResultsService(
             modelContext: database.modelContext,
             testUUID: testUUID(),
@@ -76,12 +88,8 @@ struct NetworkCoverageFactory {
             },
             resender: makeResender(sendResultsServiceMaker: sendResultsServiceMaker)
         )
-        let persistenceService = SwiftDataFencePersistenceService(
-            modelContext: database.modelContext,
-            testUUID: testUUID
-        )
 
-        return (persistenceService, resultSender)
+        return (persistenceActor, resultSender)
     }
 
     @MainActor func makeReadOnlyCoverageViewModel(fences: [Fence] = []) -> NetworkCoverageViewModel {
@@ -107,12 +115,25 @@ struct NetworkCoverageFactory {
         )
     }
 
-    @MainActor func makeCoverageViewModel(fences: [Fence] = []) -> NetworkCoverageViewModel {
-        let sessionInitializer = CoverageMeasurementSessionInitializer(
+    func makeSessionInitializer(onlineStatusService: OnlineStatusService? = nil) -> OnlineAwareSessionInitializer {
+        let core = CoreSessionInitializer(
             now: dateNow,
-            coverageAPIService: RMBTControlServer.shared,
+            coverageAPIService: RMBTControlServer.shared
+        )
+        let withPersistence = PersistenceAwareSessionInitializer(
+            wrapped: core,
             database: database
         )
+        let withOnline = OnlineAwareSessionInitializer(
+            wrapped: withPersistence,
+            onlineStatusService: onlineStatusService,
+            now: dateNow
+        )
+        return withOnline
+    }
+
+    @MainActor func makeCoverageViewModel(fences: [Fence] = []) -> NetworkCoverageViewModel {
+        let sessionInitializer = makeSessionInitializer()
         let (persistenceService, resultSender) = services(
             testUUID: sessionInitializer.lastTestUUID,
             startDate: sessionInitializer.lastTestStartDate,
@@ -132,43 +153,54 @@ struct NetworkCoverageFactory {
         let radioTechnologyService = CTTelephonyRadioTechnologyService()
 #endif
 
+        let pingSeq = { PingMeasurementService.pings2(
+            clock: clock,
+            pingSender: UDPPingSession(
+                sessionInitiator: sessionInitializer,
+                udpConnection: UDPConnection(),
+                timeoutIntervalMs: 1000,
+                now: RMBTHelpers.RMBTCurrentNanos
+            ),
+            frequency: .milliseconds(100),
+            sessionMaxDuration: { sessionInitializer.maxCoverageMeasurementDuration }
+        ) }
+
+        // Allow location updates regardless of initialization to support offline start
+        let locationService = RealLocationUpdatesService(now: dateNow, canReportLocations: { true })
+
+
         return NetworkCoverageViewModel(
             fences: fences,
             refreshInterval: 1,
             minimumLocationAccuracy: 5,
             locationInaccuracyWarningInitialDelay: Self.locationInaccuracyWarningInitialDelay,
             insufficientAccuracyAutoStopInterval: Self.insufficientAccuracyAutoStopInterval,
-            pingMeasurementService: { PingMeasurementService.pings2(
-                clock: clock,
-                pingSender: UDPPingSession(
-                    sessionInitiator: sessionInitializer,
-                    udpConnection: UDPConnection(),
-                    timeoutIntervalMs: 1000,
-                    now: RMBTHelpers.RMBTCurrentNanos
-                ),
-                frequency: .milliseconds(100),
-                sessionMaxDuration: { sessionInitializer.maxCoverageMeasurementDuration }
-            ) },
-            locationUpdatesService: RealLocationUpdatesService(now: dateNow, canReportLocations: { sessionInitializer.isInitialized }),
-            networkConnectionUpdatesService: networkConnectionUpdatesService,
+            updates: {
+                let merged = merge(
+                    pingSeq().map { NetworkCoverageViewModel.Update.ping($0) },
+                    locationService.locations().map { NetworkCoverageViewModel.Update.location($0) }
+                )
+                let withNetwork = merge(
+                    merged,
+                    networkConnectionUpdatesService
+                        .networkConnectionTypes()
+                        .map { NetworkCoverageViewModel.Update.networkType($0) }
+                )
+                let sessionEvents = sessionInitializer
+                    .sessionInitializedEvents()
+                    .map { NetworkCoverageViewModel.Update.sessionInitialized($0) }
+
+                let all = merge(withNetwork, sessionEvents).map { (u: NetworkCoverageViewModel.Update) in u }
+                return _AsyncSequenceWrapper(base: all)
+            },
             currentRadioTechnology: radioTechnologyService,
             sendResultsService: resultSender,
             persistenceService: persistenceService,
+            locale: .autoupdatingCurrent,
             clock: clock,
             maxTestDuration: { sessionInitializer.maxCoverageSessionDuration ?? 4*60*60 /* 4 hours */ },
             ipVersionProvider: { sessionInitializer.lastIPVersion },
             connectionsCountProvider: { max(1, sessionInitializer.udpPingSessionCount) }
-        )
-    }
-
-    private func persistedFencesResender(
-        sendResultsServiceMaker: @escaping (String, Date) -> some SendCoverageResultsService
-    ) -> PersistedFencesResender {
-        PersistedFencesResender(
-            modelContext: database.modelContext,
-            sendResultsService: sendResultsServiceMaker,
-            maxResendAge: maxResendAge,
-            dateNow: dateNow
         )
     }
 
@@ -187,10 +219,14 @@ private struct MockSendCoverageResultsService: SendCoverageResultsService {
     func send(fences: [Fence]) async throws {}
 }
 
-private struct MockFencePersistenceService: FencePersistenceService {
+private actor MockFencePersistenceService: FencePersistenceService {
     func save(_ fence: Fence) throws {}
     func sessionStarted(at date: Date) throws {}
     func sessionFinalized(at date: Date) throws {}
+    func beginSession(startedAt: Date, loopUUID: String?) throws {}
+    func assignTestUUIDAndAnchor(_ uuid: String, anchorNow: Date) throws {}
+    func finalizeCurrentSession(at date: Date) throws {}
+    func deleteFinalizedNilUUIDSessions() throws {}
 }
 
 private struct EmptyAsyncSequence: AsyncSequence {

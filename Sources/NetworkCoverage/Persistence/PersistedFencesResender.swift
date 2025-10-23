@@ -7,130 +7,65 @@
 //
 
 import Foundation
-import SwiftData
 import CoreLocation
 
 struct PersistedFencesResender {
-    private let modelContext: ModelContext
+    private let persistence: PersistenceServiceActor
     private let sendResultsService: (String, Date) -> any SendCoverageResultsService
     private let maxResendAge: TimeInterval
     private let dateNow: () -> Date
+
     init(
-        modelContext: ModelContext,
+        persistence: PersistenceServiceActor,
         sendResultsService: @escaping (String, Date) -> some SendCoverageResultsService,
         maxResendAge: TimeInterval,
         dateNow: @escaping () -> Date = Date.init
     ) {
-        self.modelContext = modelContext
+        self.persistence = persistence
         self.sendResultsService = sendResultsService
         self.maxResendAge = maxResendAge
         self.dateNow = dateNow
     }
 
     func resendPersistentAreas(isLaunched: Bool) async throws {
-        let sessions = try modelContext.fetch(FetchDescriptor<PersistentCoverageSession>())
-        let unfinishedUUIDs = Set(sessions.filter { $0.finalizedAt == nil }.map(\.testUUID))
+        Log.logger.info("Starting resend operation, mode: \(isLaunched ? "cold start" : "warm start")")
+        try? await persistence.cleanupOldSessionsAndOrphans(maxAge: maxResendAge, now: dateNow(), isLaunched: isLaunched)
 
-        try deleteOldPersistentFences(ignoring: unfinishedUUIDs)
+        let sessions: [PersistentCoverageSession] = try await {
+            if isLaunched {
+                return try await persistence.sessionsToSubmitCold()
+            } else {
+                return try await persistence.sessionsToSubmitWarm()
+            }
+        }()
 
-        let remainingFences = try modelContext.fetch(FetchDescriptor<PersistentFence>())
-        guard !remainingFences.isEmpty else {
-            try cleanupSessions()
-            return
-        }
+        Log.logger.info("Found \(sessions.count) session(s) to resend")
 
-        let groupedFences = Dictionary(grouping: remainingFences, by: \.testUUID)
-        let sortedGroups = groupedFences.sorted { groupA, groupB in
-            let earliestA = groupA.value.min { $0.timestamp < $1.timestamp }?.timestamp ?? 0
-            let earliestB = groupB.value.min { $0.timestamp < $1.timestamp }?.timestamp ?? 0
-            return earliestA > earliestB
-        }
+        // Submit oldest first (FIFO order)
+        for (index, session) in sessions.reversed().enumerated() {
+            let startedAtDate = Date(timeIntervalSince1970: Double(session.startedAt) / 1_000_000)
+            let anchorAtDate = session.anchorAt.map { Date(timeIntervalSince1970: Double($0) / 1_000_000) }
+            let finalizedAtDate = session.finalizedAt.map { Date(timeIntervalSince1970: Double($0) / 1_000_000) }
 
-        let sessionsByUUID = Dictionary(uniqueKeysWithValues: sessions.map { ($0.testUUID, $0) })
+            Log.logger.info("Session[\(index)]: testUUID=\(session.testUUID ?? "nil"), loopUUID=\(session.loopUUID ?? "nil"), fenceCount=\(session.fences.count), startedAt=\(startedAtDate), anchorAt=\(anchorAtDate?.description ?? "nil"), finalizedAt=\(finalizedAtDate?.description ?? "nil")")
 
-        for (testUUID, persistedGroup) in sortedGroups {
-            guard shouldResend(for: sessionsByUUID[testUUID], isLaunched: isLaunched) else {
+            guard let uuid = session.testUUID, let anchorAt = session.anchorAt else {
+                Log.logger.warning("Skipping session without UUID or anchor: testUUID=\(session.testUUID ?? "nil"), anchorAt=\(session.anchorAt?.description ?? "nil")")
                 continue
             }
-
-            let fencesToSend = persistedGroup
-                .sorted { $0.timestamp < $1.timestamp }
-                .map(makeFence)
-
-            guard let startDate = fencesToSend.first?.dateEntered else { continue }
-
-            let service = sendResultsService(testUUID, startDate)
+            let fencesToSend = session.fences.map(makeFence).sorted(by: { $0.dateEntered < $1.dateEntered })
+            let anchorDate = Date(timeIntervalSince1970: Double(anchorAt) / 1_000_000)
+            Log.logger.info("Resending session: uuid=\(uuid), fenceCount=\(fencesToSend.count)")
+            let service = sendResultsService(uuid, anchorDate)
             do {
                 try await service.send(fences: fencesToSend)
-
-                persistedGroup.forEach { modelContext.delete($0) }
-
-                try modelContext.save()
+                try await persistence.delete([session])
+                Log.logger.info("[Successfully resent and deleted session: \(uuid)")
             } catch {
-                Log.logger.error("Persisted fences resend failed for \(testUUID): \(error.localizedDescription)")
+                Log.logger.error("Resend failed for \(uuid): \(error.localizedDescription)")
             }
         }
-
-        try cleanupSessions()
-    }
-
-    private func deleteOldPersistentFences(ignoring unfinishedTestUUIDs: Set<String>) throws {
-        guard maxResendAge > 0 else { return }
-        let cutoffTimestamp = UInt64(max(0, (dateNow().timeIntervalSince1970 - maxResendAge) * 1_000_000))
-        let descriptor = FetchDescriptor<PersistentFence>(predicate: #Predicate { $0.timestamp < cutoffTimestamp })
-        let oldFences = try modelContext.fetch(descriptor)
-        var didDelete = false
-
-        for fence in oldFences where !unfinishedTestUUIDs.contains(fence.testUUID) {
-            modelContext.delete(fence)
-            didDelete = true
-        }
-
-        if didDelete {
-            try modelContext.save()
-        }
-    }
-
-    private func cleanupSessions() throws {
-        let sessions = try modelContext.fetch(FetchDescriptor<PersistentCoverageSession>())
-        guard !sessions.isEmpty else { return }
-
-        let fences = try modelContext.fetch(FetchDescriptor<PersistentFence>())
-        let fencesByUUID = Dictionary(grouping: fences, by: \.testUUID)
-
-        let cutoffTimestamp = UInt64(max(0, (dateNow().timeIntervalSince1970 - maxResendAge) * 1_000_000))
-        var didDelete = false
-
-        for session in sessions {
-            let hasFences = !(fencesByUUID[session.testUUID]?.isEmpty ?? true)
-            if hasFences { continue }
-
-            let referenceTimestamp = session.finalizedAt ?? session.startedAt
-            let isOlderThanMaxAge = referenceTimestamp < cutoffTimestamp
-            let isFinalized = session.finalizedAt != nil
-
-            if isFinalized || isOlderThanMaxAge {
-                modelContext.delete(session)
-                didDelete = true
-            }
-        }
-
-        if didDelete {
-            try modelContext.save()
-        }
-    }
-
-    private func shouldResend(
-        for session: PersistentCoverageSession?,
-        isLaunched: Bool
-    ) -> Bool {
-        guard let session else {
-            return true
-        }
-        if session.finalizedAt != nil {
-            return true
-        }
-        return isLaunched
+        Log.logger.info("Resend operation completed")
     }
 
     private func makeFence(from persistedFence: PersistentFence) -> Fence {

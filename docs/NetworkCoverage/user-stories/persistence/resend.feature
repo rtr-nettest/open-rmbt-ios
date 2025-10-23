@@ -46,6 +46,5 @@ Feature: Retrying submission of persisted fences
   # References:
   # - Sources/RMBTAppDelegate.swift: onStart/checkNews → resend
   # - Sources/NetworkCoverage/CoverageMeasurementSession/CoverageMeasurementSessionInitializer.swift:59–66 (resend before new session)
-  # - Sources/NetworkCoverage/Persistence/PersistedFencesResender.swift (delete-old, grouping, ordering, send/delete)
-  # - RMBTTests/NetworkCoverage/Persistence/FencePersistenceTests.swift
-
+  # - Sources/NetworkCoverage/Persistence/PersistedFencesResender.swift (session-based resend with TTL cleanup)
+  # - RMBTTests/NetworkCoverage/Persistence/ResenderSessionBasedTests.swift

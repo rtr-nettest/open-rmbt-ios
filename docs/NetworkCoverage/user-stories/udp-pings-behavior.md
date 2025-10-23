@@ -59,5 +59,33 @@ Feature: UDP ping session behavior for RTR NetTest coverage
     And a reinitialization starts a new session with test_uuid "T2"
     When sending results
     Then fences collected under "T1" are submitted with test_uuid "T1"
-    And any persisted fences from older sessions are resent in order of most recent first
+    And any persisted fences from older sessions are resent in order of most recent finalization time first
 
+  # Offline start & anchored offsets (new)
+  Scenario: Start measurement offline and anchor offsets when session initializes
+    Given the app starts a coverage measurement while offline
+    And the app collects some fences before it can initialize with the server
+    When the app later goes online and /coverageRequest succeeds with test_uuid "T3"
+    Then the app anchors time zero at the moment of this initialization
+    And fences collected before that moment are submitted with negative offset_ms
+    And fences collected after that moment are submitted with positive offset_ms
+    And all fences are submitted with test_uuid "T3"
+    And if initialization fails again, the app retries automatically when connectivity is stable
+
+  # Multiple sub-sessions submission (new)
+  Scenario: Submit multiple sub-sessions in one user-visible measurement
+    Given a coverage measurement runs long enough to reinitialize twice
+    And the app obtains test_uuid values "T4", then "T5"
+    When sending results
+    Then the app submits two coverageResult requests
+    And the first request contains fences belonging to "T4" with offsets relative to its own initialization
+    And the second request contains fences belonging to "T5" with offsets relative to its own initialization
+    And the current unfinalized session (if any) is not submitted until it is finalized
+
+  # Finalized offline session without test_uuid (new)
+  Scenario: Discard a finalized session that never obtained test_uuid
+    Given the user stops a coverage measurement while the device never went online
+    And the app never obtained a test_uuid for that session
+    When stopping the measurement
+    Then the session and its fences are discarded locally
+    And no results are submitted for that session

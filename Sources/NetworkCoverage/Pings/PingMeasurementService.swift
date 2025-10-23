@@ -189,7 +189,7 @@ extension Duration {
     }
 }
 
-extension CoverageMeasurementSessionInitializer: UDPPingSession.SessionInitiating {
+extension OnlineAwareSessionInitializer: UDPPingSession.SessionInitiating {
     func initiate() async throws -> UDPPingSession.SessionInitiation {
         let sessionData = try await startNewSession(loopID: lastTestUUID).udpPing
         return .init(
