@@ -61,13 +61,12 @@ struct CleanupDuringMeasurementTests {
         let now = Date()
         let (sut, sendSpy, persistence) = makeSUT(dateNow: { now })
 
-        // Create session that got UUID but send failed (e.g., 406 error)
         try await persistence.sessionStarted(at: now.advanced(by: -100))
         try await persistence.assignTestUUIDAndAnchor("failed-session", anchorNow: now.advanced(by: -90))
         try await persistence.save(makeFence(date: now.advanced(by: -80)))
         try await persistence.sessionFinalized(at: now.advanced(by: -70))
 
-        // Make send fail
+        // Make send fail, leads to status code 501 error
         sendSpy.shouldFail = true
 
         // Try to resend
@@ -289,7 +288,7 @@ class CleanupTestSendServiceSpy: SendCoverageResultsService {
 
     func send(fences: [Fence]) async throws {
         if shouldFail {
-            throw NSError(domain: "TestError", code: 406, userInfo: [NSLocalizedDescriptionKey: "Not Acceptable"])
+            throw NSError(domain: "TestError", code: 501, userInfo: [NSLocalizedDescriptionKey: "Not Acceptable"])
         }
 
         guard let uuid = testUUID, let anchorDate = anchorDate else {

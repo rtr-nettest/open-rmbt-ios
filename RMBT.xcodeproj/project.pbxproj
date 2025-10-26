@@ -70,6 +70,7 @@
 		49EDC7942EAA35630009D9A6 /* PersistentFence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC7722EAA35630009D9A6 /* PersistentFence.swift */; };
 		49EDC7952EAA35630009D9A6 /* Fence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC7802EAA35630009D9A6 /* Fence.swift */; };
 		49EDC7962EAA35630009D9A6 /* SendCoverageResultRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC77C2EAA35630009D9A6 /* SendCoverageResultRequest.swift */; };
+		FFF3D1FA2C16447FB06BDD35 /* AcceptableStatusCodeSendCoverageResultsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 011858BA6C01475DA0CBB31B /* AcceptableStatusCodeSendCoverageResultsService.swift */; };
 		49EDC7972EAA35630009D9A6 /* NetworkConnectionType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC76A2EAA35630009D9A6 /* NetworkConnectionType.swift */; };
 		49EDC7982EAA35630009D9A6 /* NetworkCoverageViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC7832EAA35630009D9A6 /* NetworkCoverageViewModel.swift */; };
 		49EDC7992EAA35630009D9A6 /* PersistenceManagingCoverageResultsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC76F2EAA35630009D9A6 /* PersistenceManagingCoverageResultsService.swift */; };
@@ -424,6 +425,7 @@
 		49EDC7782EAA35630009D9A6 /* UDPPingSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UDPPingSession.swift; sourceTree = "<group>"; };
 		49EDC77A2EAA35630009D9A6 /* OnlineStatusService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnlineStatusService.swift; sourceTree = "<group>"; };
 		49EDC77C2EAA35630009D9A6 /* SendCoverageResultRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendCoverageResultRequest.swift; sourceTree = "<group>"; };
+		011858BA6C01475DA0CBB31B /* AcceptableStatusCodeSendCoverageResultsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AcceptableStatusCodeSendCoverageResultsService.swift; sourceTree = "<group>"; };
 		49EDC77E2EAA35630009D9A6 /* BackgroundActivityActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundActivityActor.swift; sourceTree = "<group>"; };
 		49EDC77F2EAA35630009D9A6 /* CoverageResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverageResultView.swift; sourceTree = "<group>"; };
 		49EDC7802EAA35630009D9A6 /* Fence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fence.swift; sourceTree = "<group>"; };
@@ -931,6 +933,7 @@
 			isa = PBXGroup;
 			children = (
 				49EDC77C2EAA35630009D9A6 /* SendCoverageResultRequest.swift */,
+				011858BA6C01475DA0CBB31B /* AcceptableStatusCodeSendCoverageResultsService.swift */,
 			);
 			path = SendResult;
 			sourceTree = "<group>";
@@ -2057,6 +2060,7 @@
 				49EDC7942EAA35630009D9A6 /* PersistentFence.swift in Sources */,
 				49EDC7952EAA35630009D9A6 /* Fence.swift in Sources */,
 				49EDC7962EAA35630009D9A6 /* SendCoverageResultRequest.swift in Sources */,
+				FFF3D1FA2C16447FB06BDD35 /* AcceptableStatusCodeSendCoverageResultsService.swift in Sources */,
 				49EDC7972EAA35630009D9A6 /* NetworkConnectionType.swift in Sources */,
 				49EDC7982EAA35630009D9A6 /* NetworkCoverageViewModel.swift in Sources */,
 				49EDC7992EAA35630009D9A6 /* PersistenceManagingCoverageResultsService.swift in Sources */,
