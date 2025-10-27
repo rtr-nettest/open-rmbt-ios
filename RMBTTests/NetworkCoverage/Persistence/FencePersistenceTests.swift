@@ -384,6 +384,177 @@ struct FencePersistenceTests {
             #expect(unfinalizedSessions.first?.testUUID == "C-unfinished")
         }
     }
+
+    @Suite("TestUUID Assignment")
+    struct TestUUIDAssignment {
+        @Test func whenAssigningTestUUIDToSessionWithNoUUID_thenUUIDIsAssigned() async throws {
+            let baseTime = makeDate(offset: 100)
+            let testUUID = "test-uuid-123"
+            let (sut, persistence, _) = makeSUT(testUUID: nil)
+
+            // Create session without UUID
+            try await sut.beginSession(startedAt: baseTime)
+
+            // Assign UUID
+            try await sut.assignTestUUIDAndAnchor(testUUID, anchorNow: baseTime)
+
+            // Verify UUID was assigned
+            let sessions = try persistence.allPersistedSessions()
+            try #require(sessions.count == 1)
+            #expect(sessions.first?.testUUID == testUUID)
+            #expect(sessions.first?.anchorAt == baseTime.microsecondsTimestamp)
+        }
+
+        @Test func whenAssigningSameTestUUIDAgain_thenNoNewSessionIsCreated() async throws {
+            let baseTime = makeDate(offset: 100)
+            let testUUID = "test-uuid-123"
+            let (sut, persistence, _) = makeSUT(testUUID: nil)
+
+            // Create session and assign UUID
+            try await sut.beginSession(startedAt: baseTime)
+            try await sut.assignTestUUIDAndAnchor(testUUID, anchorNow: baseTime)
+
+            // Assign same UUID again
+            try await sut.assignTestUUIDAndAnchor(testUUID, anchorNow: baseTime.addingTimeInterval(10))
+
+            // Verify no duplicate session was created
+            let sessions = try persistence.allPersistedSessions()
+            #expect(sessions.count == 1)
+            #expect(sessions.first?.testUUID == testUUID)
+        }
+
+        @Test func whenAssigningDifferentTestUUIDToExistingSession_thenNewSessionIsCreatedAtomically() async throws {
+            let baseTime = makeDate(offset: 100)
+            let firstUUID = "uuid-A"
+            let secondUUID = "uuid-B"
+            let (sut, persistence, _) = makeSUT(testUUID: nil)
+
+            // Create session with first UUID
+            try await sut.beginSession(startedAt: baseTime)
+            try await sut.assignTestUUIDAndAnchor(firstUUID, anchorNow: baseTime)
+
+            // Assign DIFFERENT UUID - should create NEW session atomically
+            try await sut.assignTestUUIDAndAnchor(secondUUID, anchorNow: baseTime.addingTimeInterval(60))
+
+            // Verify TWO sessions exist
+            let sessions = try persistence.allPersistedSessions()
+            #expect(sessions.count == 2, "Expected 2 sessions but got \(sessions.count) - UUID was overwritten instead of creating new session!")
+
+            let expectedFinalizationTimestamp = baseTime.addingTimeInterval(60).microsecondsTimestamp
+
+            // Verify original session unchanged
+            let originalSession = sessions.first { $0.testUUID == firstUUID }
+            try #require(originalSession != nil, "Original session with UUID '\(firstUUID)' was lost!")
+            #expect(originalSession?.testUUID == firstUUID)
+            #expect(originalSession?.finalizedAt == expectedFinalizationTimestamp, "Original session must be finalized with timestamp \(expectedFinalizationTimestamp)")
+
+            // Verify new session created
+            let newSession = sessions.first { $0.testUUID == secondUUID }
+            try #require(newSession != nil, "New session with UUID '\(secondUUID)' was not created!")
+            #expect(newSession?.testUUID == secondUUID)
+            #expect(newSession?.finalizedAt == nil, "New session should not be finalized immediately")
+        }
+
+        @Test func whenAssigningDifferentTestUUIDWithFences_thenNewSessionIsCreatedAndFencesRemainWithOriginal() async throws {
+            let baseTime = makeDate(offset: 100)
+            let firstUUID = "uuid-with-fences"
+            let secondUUID = "uuid-new-empty"
+            let (sut, persistence, _) = makeSUT(testUUID: nil)
+
+            // Create session with first UUID and add fences
+            try await sut.beginSession(startedAt: baseTime)
+            try await sut.assignTestUUIDAndAnchor(firstUUID, anchorNow: baseTime)
+
+            // Add fences to first session
+            let fencesInFirstSession = [
+                makeFence(lat: 1.0, lon: 1.0, date: baseTime.addingTimeInterval(1)),
+                makeFence(lat: 2.0, lon: 2.0, date: baseTime.addingTimeInterval(2)),
+                makeFence(lat: 3.0, lon: 3.0, date: baseTime.addingTimeInterval(3)),
+                makeFence(lat: 4.0, lon: 4.0, date: baseTime.addingTimeInterval(4)),
+                makeFence(lat: 5.0, lon: 5.0, date: baseTime.addingTimeInterval(5))
+            ]
+            try await sut.persist(fences: fencesInFirstSession)
+
+            // Assign DIFFERENT UUID - should create NEW session WITHOUT stealing fences
+            try await sut.assignTestUUIDAndAnchor(secondUUID, anchorNow: baseTime.addingTimeInterval(60))
+
+            // Verify TWO sessions exist
+            let sessions = try persistence.allPersistedSessions()
+            #expect(sessions.count == 2, "Expected 2 sessions but got \(sessions.count)")
+
+            let expectedFinalizationTimestamp = baseTime.addingTimeInterval(60).microsecondsTimestamp
+
+            // Verify original session STILL has its fences
+            let originalSession = sessions.first { $0.testUUID == firstUUID }
+            try #require(originalSession != nil, "Original session was lost!")
+            #expect(originalSession?.fences.count == 5, "Original session lost its fences! Expected 5, got \(originalSession?.fences.count ?? 0)")
+            #expect(originalSession?.finalizedAt == expectedFinalizationTimestamp, "Original session must be finalized with timestamp \(expectedFinalizationTimestamp)")
+
+            // Verify new session has NO fences (starts fresh)
+            let newSession = sessions.first { $0.testUUID == secondUUID }
+            try #require(newSession != nil, "New session was not created!")
+            #expect(newSession?.fences.count == 0, "New session should start with 0 fences, got \(newSession?.fences.count ?? 0)")
+            #expect(newSession?.finalizedAt == nil, "New session should not be finalized immediately")
+
+            // Verify total fence count
+            let allFences = try persistence.allPersistedFences()
+            #expect(allFences.count == 5, "Fences were lost or duplicated! Expected 5, got \(allFences.count)")
+        }
+
+        @Test func whenReceivingHourlyTestUUIDUpdates_thenCreatesMultipleSeparateSessions() async throws {
+            let baseTime = Date(timeIntervalSinceReferenceDate: 1000)
+            let (sut, persistence, _) = makeSUT(testUUID: nil)
+
+            // Simulate real log behavior: hourly UUID reassignments
+            // Hour 1: Create session and assign first UUID
+            try await sut.beginSession(startedAt: baseTime)
+            try await sut.assignTestUUIDAndAnchor("uuid-hour-1", anchorNow: baseTime)
+
+            // Add fences during hour 1
+            let fencesHour1 = (0..<222).map { i in
+                makeFence(lat: Double(i), lon: Double(i), date: baseTime.addingTimeInterval(Double(i)))
+            }
+            try await sut.persist(fences: fencesHour1)
+
+            // Hour 2: Assign different UUID (should create NEW session)
+            let hour2Time = baseTime.addingTimeInterval(3600)
+            try await sut.assignTestUUIDAndAnchor("uuid-hour-2", anchorNow: hour2Time)
+
+            // Add fences during hour 2
+            let fencesHour2 = (0..<7).map { i in
+                makeFence(lat: 50.0 + Double(i), lon: 50.0 + Double(i), date: hour2Time.addingTimeInterval(Double(i)))
+            }
+            try await sut.persist(fences: fencesHour2)
+
+            // Hour 3: Assign yet another different UUID (should create ANOTHER new session)
+            let hour3Time = baseTime.addingTimeInterval(7200)
+            try await sut.assignTestUUIDAndAnchor("uuid-hour-3", anchorNow: hour3Time)
+
+            // Verify THREE separate sessions exist
+            let sessions = try persistence.allPersistedSessions()
+            #expect(sessions.count == 3, "Expected 3 separate sessions but got \(sessions.count) - UUIDs were overwritten!")
+
+            // Verify each session has correct UUID
+            let session1 = sessions.first { $0.testUUID == "uuid-hour-1" }
+            let session2 = sessions.first { $0.testUUID == "uuid-hour-2" }
+            let session3 = sessions.first { $0.testUUID == "uuid-hour-3" }
+
+            try #require(session1 != nil, "Session 1 was lost!")
+            try #require(session2 != nil, "Session 2 was not created!")
+            try #require(session3 != nil, "Session 3 was not created!")
+
+            let expectedHour1Finalization = hour2Time.microsecondsTimestamp
+            let expectedHour2Finalization = hour3Time.microsecondsTimestamp
+            #expect(session1?.finalizedAt == expectedHour1Finalization, "Session 1 must be finalized at \(expectedHour1Finalization)")
+            #expect(session2?.finalizedAt == expectedHour2Finalization, "Session 2 must be finalized at \(expectedHour2Finalization)")
+            #expect(session3?.finalizedAt == nil, "Latest session should stay unfinished")
+
+            // Verify fence distribution
+            #expect(session1?.fences.count == 222, "Session 1 should have 222 fences, got \(session1?.fences.count ?? 0)")
+            #expect(session2?.fences.count == 7, "Session 2 should have 7 fences, got \(session2?.fences.count ?? 0)")
+            #expect(session3?.fences.count == 0, "Session 3 should have 0 fences, got \(session3?.fences.count ?? 0)")
+        }
+    }
 }
 
 // MARK: - Test Helpers
@@ -621,4 +792,3 @@ final class SendCoverageResultsServiceWrapper: SendCoverageResultsService {
         try await originalService.send(fences: fences)
     }
 }
-

@@ -48,17 +48,39 @@ actor PersistenceServiceActor: FencePersistenceService {
     }
 
     func assignTestUUIDAndAnchor(_ testUUID: String, anchorNow date: Date) throws {
+        let anchorTimestamp = date.microsecondsTimestamp
+
         if let session = try latestUnfinishedSession() {
-            Log.logger.info("Assigning UUID to existing session: \(testUUID), fences: \(session.fences.count)")
-            session.testUUID = testUUID
-            session.anchorAt = date.microsecondsTimestamp
+            switch session.testUUID {
+            case nil:
+                Log.logger.info("Assigning UUID to existing session: \(testUUID), fences: \(session.fences.count)")
+                session.testUUID = testUUID
+                session.anchorAt = anchorTimestamp
+            case testUUID?:
+                Log.logger.info("Reassigning same UUID \(testUUID) to existing session; updating anchor timestamp.")
+                session.anchorAt = anchorTimestamp
+            default:
+                let previousUUID = session.testUUID ?? "nil"
+                Log.logger.info("Received new UUID \(testUUID) while session \(previousUUID) is unfinished. Finalizing current session and creating a new one.")
+                if session.finalizedAt == nil {
+                    session.finalizedAt = anchorTimestamp
+                }
+                let newSession = PersistentCoverageSession(
+                    testUUID: testUUID,
+                    loopUUID: nil,
+                    startedAt: anchorTimestamp,
+                    anchorAt: anchorTimestamp,
+                    finalizedAt: nil
+                )
+                modelContext.insert(newSession)
+            }
         } else {
             Log.logger.info("Creating new session with UUID: \(testUUID)")
             let session = PersistentCoverageSession(
                 testUUID: testUUID,
                 loopUUID: nil,
-                startedAt: date.microsecondsTimestamp,
-                anchorAt: nil,
+                startedAt: anchorTimestamp,
+                anchorAt: anchorTimestamp,
                 finalizedAt: nil
             )
             modelContext.insert(session)
