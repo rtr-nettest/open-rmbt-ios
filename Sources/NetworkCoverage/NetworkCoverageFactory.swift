@@ -6,27 +6,7 @@
 //  Copyright 2025 appscape gmbh. All rights reserved.
 
 import Foundation
-import SwiftData
 import AsyncAlgorithms
-
-final class UserDatabase {
-    static let shared = UserDatabase()
-
-    let container: ModelContainer
-
-    init(useInMemoryStore: Bool = false) {
-        let configuration = ModelConfiguration(
-            for: PersistentFence.self, PersistentCoverageSession.self,
-            isStoredInMemoryOnly: useInMemoryStore
-        )
-        container = try! ModelContainer(
-            for: PersistentFence.self, PersistentCoverageSession.self,
-            configurations: configuration
-        )
-    }
-
-    lazy var modelContext: ModelContext = .init(container)
-}
 
 struct NetworkCoverageFactory {
     // MARK: - Constants
