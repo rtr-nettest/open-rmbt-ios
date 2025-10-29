@@ -14,6 +14,6 @@ Feature: Grouping and ordering for resend
     When resend runs for test A
     Then the fences are sent in ascending timestamp order [t1, t2, t3]
 
-  # References:
-  # - Sources/NetworkCoverage/Persistence/PersistedFencesResender.swift: sortedGroups and per-group sort
+References:
+- Sources/NetworkCoverage/Persistence/PersistedFencesResender.swift: sortedGroups and per-group sort
 

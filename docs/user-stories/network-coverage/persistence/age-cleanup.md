@@ -28,8 +28,8 @@ Feature: Cleanup of stale persisted fences and session records
     When cleanup runs as part of resend
     Then fences for test_uuid T MUST NOT be deleted
 
-  # References:
-  # - Sources/NetworkCoverage/NetworkCoverageFactory.swift: acceptableSubmitResultsRequestStatusCodes, persistenceMaxAgeInterval = 7 days
-  # - Sources/NetworkCoverage/Persistence/PersistedFencesResender.swift: deleteOldPersistentFences()
-  # - New helper: deleteOldPersistentCoverageSessions() to prune old/orphan sessions
-  # - RMBTTests/NetworkCoverage/Persistence/FencePersistenceTests.swift (older-than-max-age deletion)
+References:
+ - Sources/NetworkCoverage/NetworkCoverageFactory.swift: acceptableSubmitResultsRequestStatusCodes, persistenceMaxAgeInterval = 7 days
+ - Sources/NetworkCoverage/Persistence/PersistedFencesResender.swift: deleteOldPersistentFences()
+ - New helper: deleteOldPersistentCoverageSessions() to prune old/orphan sessions
+ - RMBTTests/NetworkCoverage/Persistence/FencePersistenceTests.swift (older-than-max-age deletion)

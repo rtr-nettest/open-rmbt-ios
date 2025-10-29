@@ -14,7 +14,7 @@ Feature: Handling of HTTP status codes for /coverageResult
     Then the submission is considered failed
     And persisted fences remain for future retry
 
-  # References:
-  # - Sources/NetworkCoverage/NetworkCoverageFactory.swift: acceptableSubmitResultsRequestStatusCodes = 200..<300
-  # - Sources/RMBTControlServer.swift: submitCoverageResult(...acceptableStatusCodes:)
+References:
+- Sources/NetworkCoverage/NetworkCoverageFactory.swift: acceptableSubmitResultsRequestStatusCodes = 200..<300
+- Sources/RMBTControlServer.swift: submitCoverageResult(...acceptableStatusCodes:)
 

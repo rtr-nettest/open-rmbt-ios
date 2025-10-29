@@ -43,8 +43,8 @@ Feature: Retrying submission of persisted fences
     Given the server responds with non-2xx or a transport error for a group
     Then persisted fences for that group remain for future retries
 
-  # References:
-  # - Sources/RMBTAppDelegate.swift: onStart/checkNews → resend
-  # - Sources/NetworkCoverage/CoverageMeasurementSession/CoverageMeasurementSessionInitializer.swift:59–66 (resend before new session)
-  # - Sources/NetworkCoverage/Persistence/PersistedFencesResender.swift (session-based resend with TTL cleanup)
-  # - RMBTTests/NetworkCoverage/Persistence/ResenderSessionBasedTests.swift
+References:
+- Sources/RMBTAppDelegate.swift: onStart/checkNews → resend
+- Sources/NetworkCoverage/CoverageMeasurementSession/CoverageMeasurementSessionInitializer.swift:59–66 (resend before new session)
+- Sources/NetworkCoverage/Persistence/PersistedFencesResender.swift (session-based resend with TTL cleanup)
+- RMBTTests/NetworkCoverage/Persistence/ResenderSessionBasedTests.swift
