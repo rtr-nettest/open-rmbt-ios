@@ -405,6 +405,8 @@
 "preferences_about" = "Über die App";
 "preferences_developed_by" = "Entwickelt von";
 "preferences_source_code" = "Source Code";
+"preferences_export_logs" = "Protokolle exportieren";
+"preferences_export_logs_error" = "Protokolldatei für heute konnte nicht vorbereitet werden.";
 
 "preferences_debug_options" = "Debug-Optionen";
 "preferences_ipv6_only" = "Nur IPv6";

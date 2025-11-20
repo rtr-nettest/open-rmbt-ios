@@ -926,8 +926,42 @@
                                             <constraint firstAttribute="trailing" secondItem="9RJ-mJ-SUw" secondAttribute="trailing" constant="20" id="zUw-o9-y4V"/>
                                         </constraints>
                                     </tableViewCell>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="u6G-Ex-L0G">
+                                        <rect key="frame" x="0.0" y="1143.3333301544189" width="390" height="56"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" ambiguous="YES" tableViewCell="u6G-Ex-L0G" id="Y2L-OG-pCV">
+                                            <rect key="frame" x="0.0" y="0.0" width="390" height="56"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <label opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="left" ambiguous="YES" text="Export Logs" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="xLO-gs-LBL">
+                                                    <rect key="frame" x="20" y="18.666666666666668" width="804" height="19.000000000000004"/>
+                                                    <fontDescription key="fontDescription" name="Roboto-Regular" family="Roboto" pointSize="16"/>
+                                                    <color key="textColor" red="0.25882352939999997" green="0.25882352939999997" blue="0.25882352939999997" alpha="1" colorSpace="calibratedRGB"/>
+                                                    <nil key="highlightedColor"/>
+                                                    <userDefinedRuntimeAttributes>
+                                                        <userDefinedRuntimeAttribute type="string" keyPath="localizableText" value="preferences_export_logs"/>
+                                                    </userDefinedRuntimeAttributes>
+                                                </label>
+                                                <view contentMode="scaleToFill" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="sEP-ar-At3">
+                                                    <rect key="frame" x="20" y="55" width="804" height="1"/>
+                                                    <color key="backgroundColor" red="0.93333333330000001" green="0.93333333330000001" blue="0.93333333330000001" alpha="1" colorSpace="calibratedRGB"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="height" constant="1" id="zrW-py-FiG"/>
+                                                    </constraints>
+                                                </view>
+                                            </subviews>
+                                        </tableViewCellContentView>
+                                        <constraints>
+                                            <constraint firstAttribute="trailing" secondItem="sEP-ar-At3" secondAttribute="trailing" constant="20" id="0L2-J7-6w3"/>
+                                            <constraint firstItem="xLO-gs-LBL" firstAttribute="centerY" secondItem="u6G-Ex-L0G" secondAttribute="centerY" id="2nr-Hz-0cZ"/>
+                                            <constraint firstAttribute="bottom" secondItem="sEP-ar-At3" secondAttribute="bottom" id="4pS-Jh-Lt0"/>
+                                            <constraint firstItem="sEP-ar-At3" firstAttribute="leading" secondItem="u6G-Ex-L0G" secondAttribute="leading" constant="20" id="Qej-3G-fMS"/>
+                                            <constraint firstAttribute="trailingMargin" secondItem="xLO-gs-LBL" secondAttribute="trailing" id="c6B-jp-8Vc"/>
+                                            <constraint firstItem="xLO-gs-LBL" firstAttribute="leading" secondItem="u6G-Ex-L0G" secondAttribute="leadingMargin" id="q5O-Jy-QWd"/>
+                                        </constraints>
+                                    </tableViewCell>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="vlP-2z-OK7">
-                                        <rect key="frame" x="0.0" y="1087.3333301544189" width="390" height="56"/>
+                                        <rect key="frame" x="0.0" y="1199.3333301544189" width="390" height="56"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" ambiguous="YES" tableViewCell="vlP-2z-OK7" id="hkZ-f8-7B8">
                                             <rect key="frame" x="0.0" y="0.0" width="390" height="56"/>

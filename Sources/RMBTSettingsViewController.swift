@@ -481,6 +481,8 @@ class RMBTSettingsViewController: UITableViewController {
                        let url = URL(string: tosUrl) {
                        self.openURL(url)
                    }
+            case 3:
+                presentLogShareSheet(from: indexPath)
             default: break
             }
         }
@@ -493,6 +495,39 @@ class RMBTSettingsViewController: UITableViewController {
         }
 
         tableView.deselectRow(at: indexPath, animated: true)
+    }
+
+    private func presentLogShareSheet(from indexPath: IndexPath) {
+        let logPath = LogConfig.getCurrentLogFilePath()
+        let logURL = URL(fileURLWithPath: logPath)
+        let fileManager = FileManager.default
+
+        do {
+            let directory = (logPath as NSString).deletingLastPathComponent
+            try fileManager.createDirectory(atPath: directory, withIntermediateDirectories: true)
+
+            if !fileManager.fileExists(atPath: logPath) {
+                let placeholder = "Log file created on \(ISO8601DateFormatter().string(from: Date()))\n"
+                try placeholder.data(using: .utf8)?.write(to: logURL)
+            }
+        } catch {
+            _ = UIAlertController.presentAlert(
+                title: NSLocalizedString("preferences_export_logs", comment: ""),
+                text: NSLocalizedString("preferences_export_logs_error", comment: ""),
+                cancelTitle: NSLocalizedString("input_setting_dialog_ok", comment: ""),
+                otherTitle: nil,
+                cancelAction: { _ in },
+                otherAction: nil
+            )
+            return
+        }
+
+        let activityVC = UIActivityViewController(activityItems: [logURL], applicationActivities: nil)
+        if let popover = activityVC.popoverPresentationController {
+            popover.sourceView = tableView
+            popover.sourceRect = tableView.rectForRow(at: indexPath)
+        }
+        present(activityVC, animated: true)
     }
     
     // MARK: - Tableview actions (copying UUID)
