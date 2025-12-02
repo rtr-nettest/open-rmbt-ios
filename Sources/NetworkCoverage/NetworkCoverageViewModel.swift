@@ -143,6 +143,7 @@ struct SessionInitializedUpdate: Hashable {
     @ObservationIgnored private var autoStopDueToInaccuracyTask: Task<Void, Never>?
     @ObservationIgnored private var hasEverHadAccurateLocation: Bool = false
     @ObservationIgnored private var isOnWiFi: Bool = false
+    @ObservationIgnored private var currentTestUUID: String?
 
     // Dependencies
     @ObservationIgnored private let currentRadioTechnology: any CurrentRadioTechnologyService
@@ -339,10 +340,36 @@ struct SessionInitializedUpdate: Hashable {
     private func processUpdate(_ update: Update) async {
         switch update {
         case .sessionInitialized(let sessionUpdate):
+            let newUUID = sessionUpdate.sessionID
+            let previousUUID = currentTestUUID
+            currentTestUUID = newUUID
+
+            if let prev = previousUUID {
+                Log.logger.info("Session reinitialized: \(prev) → \(newUUID)")
+            } else {
+                Log.logger.info("Session initialized with UUID: \(newUUID)")
+            }
+
             try? await persistenceService.assignTestUUIDAndAnchor(
                 sessionUpdate.sessionID,
                 anchorNow: sessionUpdate.timestamp
             )
+
+            // Retro-tag any nil-tagged fences (offline start, delayed first UUID, or reinit before first UUID)
+            let nilFenceIndices = fences.indices.filter { fences[$0].sessionUUID == nil }
+            if !nilFenceIndices.isEmpty {
+                for idx in nilFenceIndices {
+                    fences[idx].sessionUUID = newUUID
+                }
+                Log.logger.info("Retro-tagged \(nilFenceIndices.count) fence(s) with UUID: \(newUUID)")
+            }
+
+            // Reassign the active fence to the new session (no forced close)
+            if var lastFence = fences.last, lastFence.dateExited == nil {
+                lastFence.sessionUUID = newUUID
+                fences[fences.endIndex - 1] = lastFence
+                Log.logger.info("Reassigned active fence to new session UUID: \(newUUID)")
+            }
 
         case .ping(let pingUpdate):
             guard !isOnWiFi else { return }
@@ -394,7 +421,8 @@ struct SessionInitializedUpdate: Hashable {
                         dateEntered: locationUpdate.timestamp,
                         technology: radioTechnologyCode,
                         pings: [],
-                        radiusMeters: fenceRadius
+                        radiusMeters: fenceRadius,
+                        sessionUUID: currentTestUUID
                     )
 
                     currentFence.exit(at: locationUpdate.timestamp)
@@ -414,7 +442,8 @@ struct SessionInitializedUpdate: Hashable {
                     dateEntered: locationUpdate.timestamp,
                     technology: radioTechnologyCode,
                     pings: [],
-                    radiusMeters: fenceRadius
+                    radiusMeters: fenceRadius,
+                    sessionUUID: currentTestUUID
                 ))
             }
         case .networkType(let netUpdate):
@@ -433,6 +462,7 @@ struct SessionInitializedUpdate: Hashable {
         hasEverHadAccurateLocation = false
         stopTestReasons.removeAll()
         isOnWiFi = false
+        currentTestUUID = nil
 
         try? await persistenceService.sessionStarted(at: sessionStartDate)
 

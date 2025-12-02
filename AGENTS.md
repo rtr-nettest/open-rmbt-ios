@@ -19,9 +19,9 @@ Explain clearly your reasoning behind your decisions and pros/cons of chosen sol
 - **Private data**: Secrets and branded assets live under `private/`; never commit them publicly.
 
 ## Commands
-- Build (simulator default): `xcodebuild -workspace RMBT.xcworkspace -scheme RMBT -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.0' build`
+- Build (simulator default): `xcodebuild -workspace RMBT.xcworkspace -scheme RMBT -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.1' build`
 - Clean build: `xcodebuild -workspace RMBT.xcworkspace -scheme RMBT clean`
-- Unit tests: `xcodebuild -workspace RMBT.xcworkspace -scheme RMBT -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.0' test`
+- Unit tests: `xcodebuild -workspace RMBT.xcworkspace -scheme RMBT -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.1' test`
 - Focused tests: append `-only-testing:RMBTTests/<TestClass>`
 - CocoaPods (bundled): `bundle install` → `bundle exec pod install --repo-update`
 - Pretty build logs: pipe any `xcodebuild` invocation to `| bundle exec xcpretty`
@@ -66,7 +66,7 @@ Explain clearly your reasoning behind your decisions and pros/cons of chosen sol
 ## Environment
 - Use Homebrew Ruby ≥ 3.1; update PATH via `eval "$(/opt/homebrew/bin/brew shellenv)"` then prepend `/opt/homebrew/opt/ruby/bin`.
 - CocoaPods must run through Bundler to match the pinned version in `Gemfile.lock`.
-- Xcode 26+, iOS deployment target 17.0+. Simulator defaults to iPhone 17 Pro / iOS 26.0 (visionOS style naming by Apple).
+- Xcode 26+, iOS deployment target 17.0+. Simulator defaults to iPhone 17 Pro / iOS 26.1 (visionOS style naming by Apple).
 
 ## Special Notes
 - Do not mutate files outside the workspace root without explicit approval

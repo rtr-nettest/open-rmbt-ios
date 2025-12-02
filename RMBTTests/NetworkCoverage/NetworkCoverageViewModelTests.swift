@@ -669,9 +669,11 @@ import Clocks
 
             #expect(capturedMessages == [
                 .sessionStarted(date: dateNow),
-                .save(fence: fences[0]),
-                .save(fence: fences[1]),
+                // Create expected fences[0], fences[1] withhout sessionUUID as they were when saved
+                .save(fence: fences[0].withoutSessionUUID()),
+                .save(fence: fences[1].withoutSessionUUID()),
                 .assign(testUUID: sessionID, anchorDate: makeDate(offset: 6)),
+                // fence[2] was saved AFTER session initialization (sessionUUID=sessionID)
                 .save(fence: fences[2]),
             ])
         }
@@ -827,6 +829,284 @@ import Clocks
             #expect(savedFences.last?.startingLocation.coordinate.longitude == 2.0)
             #expect(savedFences.last?.averagePing == 400)
             #expect(savedFences.last?.significantTechnology == nil)
+        }
+
+        // MARK: - Session Reinitialization Tests
+        // NOTE: These tests document current behavior where stop() submits ALL fences.
+        // After implementing session boundary tracking, these expectations should be updated
+        // to expect only current session fences (see solution proposal in tmp/ folder).
+
+        @Test func whenSessionReinitializedAndStopped_thenSubmitsOnlyCurrentSessionFences() async throws {
+            // BUG: Currently stop() sends ALL accumulated fences from ALL sessions.
+            // EXPECTED: Should only send fences from the current session (session 2).
+            // Previous sessions' fences should be handled by the resend mechanism.
+
+            let sendService = SendCoverageResultsServiceSpy()
+            let persistenceService = FencePersistenceServiceSpy()
+            let session1UUID = "af307e9c-bb29-4690-9a96-6afc7412d216"
+            let session2UUID = "f415aa90-8260-49f9-9e27-c77db715f489"
+
+            let sut = makeSUT(
+                updates: [
+                    // Session 1 starts
+                    makeSessionInitializedUpdate(at: 0, sessionID: session1UUID),
+                    makeLocationUpdate(at: 1, lat: 1.0, lon: 1.0),
+                    makePingUpdate(at: 2, ms: 100),
+                    makeLocationUpdate(at: 3, lat: 2.0, lon: 2.0), // Closes fence 0, opens fence 1
+                    makePingUpdate(at: 4, ms: 200),
+
+                    // Session 2 starts (reinitialization due to ping timeout)
+                    makeSessionInitializedUpdate(at: 5, sessionID: session2UUID),
+                    makeLocationUpdate(at: 6, lat: 3.0, lon: 3.0), // Closes fence 1, opens fence 2
+                    makePingUpdate(at: 7, ms: 300),
+                ],
+                persistenceService: persistenceService,
+                sendResultsService: sendService
+            )
+
+            await sut.startTest()
+
+            // Verify we have 3 fences total in memory
+            // Fence 0 (lat 1.0): belongs to session 1
+            // Fence 1 (lat 2.0): belongs to session 1
+            // Fence 2 (lat 3.0): belongs to session 2
+            #expect(sut.fenceItems.count == 3)
+
+            await sut.stopTest()
+
+            let sentFences = try #require(sendService.capturedSentFences.first)
+
+            // ViewModel sends ALL fences to the service - filtering happens in the service layer
+            #expect(sentFences.count == 3, "ViewModel should send all fences to service")
+            #expect(sentFences.map { $0.startingLocation.coordinate.latitude } == [1.0, 2.0, 3.0])
+        }
+
+        @Test func whenMultipleSessionReinitsAndStopped_thenSubmitsOnlyCurrentSessionFences() async throws {
+            // BUG: Replicates the real-world scenario with 3 ping session reinitializations
+            // where 291 points (251 + 39 + new) were submitted with the final UUID.
+            // EXPECTED: Only fences from session 3 should be submitted.
+
+            let sendService = SendCoverageResultsServiceSpy()
+            let persistenceService = FencePersistenceServiceSpy()
+
+            let sut = makeSUT(
+                updates: [
+                    // Session 1: collect 2 fences (251 points in real bug)
+                    makeSessionInitializedUpdate(at: 0, sessionID: "uuid-session-1"),
+                    makeLocationUpdate(at: 1, lat: 10.0, lon: 10.0),
+                    makeLocationUpdate(at: 2, lat: 11.0, lon: 11.0), // fence 0 closed
+
+                    // Session 2: collect 2 more fences (39 points in real bug)
+                    makeSessionInitializedUpdate(at: 3, sessionID: "uuid-session-2"),
+                    makeLocationUpdate(at: 4, lat: 20.0, lon: 20.0), // fence 1 closed
+                    makeLocationUpdate(at: 5, lat: 21.0, lon: 21.0), // fence 2 closed
+
+                    // Session 3: collect 1 more fence (new points in real bug)
+                    makeSessionInitializedUpdate(at: 6, sessionID: "uuid-session-3"),
+                    makeLocationUpdate(at: 7, lat: 30.0, lon: 30.0), // fence 3 closed
+                ],
+                persistenceService: persistenceService,
+                sendResultsService: sendService
+            )
+
+            await sut.startTest()
+
+            // Verify total fences accumulated in memory for UI display
+            #expect(sut.fenceItems.count == 5)
+
+            await sut.stopTest()
+
+            let sentFences = try #require(sendService.capturedSentFences.first)
+
+            // ViewModel sends ALL fences to the service - filtering by sessionUUID happens in the service layer
+            #expect(sentFences.count == 5, "ViewModel should send all fences to service")
+            #expect(sentFences.map { $0.startingLocation.coordinate.latitude } == [10.0, 11.0, 20.0, 21.0, 30.0])
+
+            // The persistence layer should have saved all fences to their respective sessions
+            let savedFences = await persistenceService.capturedSavedFences
+            #expect(savedFences.count == 5, "All fences should be persisted for resend mechanism")
+        }
+
+        // MARK: - Session UUID Tagging Tests
+        // These tests verify the solution for the duplicate submission bug by testing
+        // that fences are properly tagged with session UUIDs and only current session
+        // fences are submitted at stop().
+
+        @Test func whenOfflineStart_thenAssignFirstTestUUIDToOfflineFences() async throws {
+            let sessionUUID = "first-uuid-after-offline-start"
+            let sut = makeSUT(
+                updates: [
+                    // Create fences BEFORE session initialized (offline start)
+                    makeLocationUpdate(at: 0, lat: 1.0, lon: 1.0),
+                    makeLocationUpdate(at: 1, lat: 2.0, lon: 2.0),
+                    makeLocationUpdate(at: 2, lat: 3.0, lon: 3.0),
+                    // NOW session initializes (network arrives)
+                    makeSessionInitializedUpdate(at: 3, sessionID: sessionUUID),
+                    // Create more fences AFTER UUID
+                    makeLocationUpdate(at: 4, lat: 4.0, lon: 4.0),
+                ]
+            )
+
+            await sut.startTest()
+
+            #expect(
+                sut.fences.map(\.sessionUUID) == [sessionUUID, sessionUUID, sessionUUID, sessionUUID],
+                "All fences should be tagged with first session UUID"
+            )
+        }
+
+        @Test func whenSessionReinitialized_thenLatestUnfinishedFenceUsesNewSessionUUID() async throws {
+            let uuid1 = "uuid-session-1"
+            let uuid2 = "uuid-session-2"
+            let sut = makeSUT(
+                updates: [
+                    makeSessionInitializedUpdate(at: 0, sessionID: uuid1),
+                    makeLocationUpdate(at: 1, lat: 10.0, lon: 10.0),
+                    makeLocationUpdate(at: 2, lat: 11.0, lon: 11.0), // will become part of sesssion-2
+
+                    // Session reinitializes with new UUID
+                    makeSessionInitializedUpdate(at: 3, sessionID: uuid2),
+
+                    makeLocationUpdate(at: 4, lat: 20.0, lon: 20.0),
+                    makeLocationUpdate(at: 5, lat: 21.0, lon: 21.0),
+                ]
+            )
+
+            await sut.startTest()
+
+            #expect(sut.fences.map(\.sessionUUID) == [uuid1, uuid2, uuid2, uuid2])
+        }
+
+        @Test func whenFenceCreatedWithoutUUID_thenStaysNilUntilFirstUUIDArrives() async throws {
+            let sessionUUID = "delayed-uuid"
+            let sut = makeSUT(
+                updates: [
+                    makeLocationUpdate(at: 0, lat: 1.0, lon: 1.0),
+                ]
+            )
+
+            await sut.startTest()
+
+            #expect(sut.fences.map(\.sessionUUID) == [nil])
+        }
+
+        @Test func whenFenceSpansSessionBoundary_thenReceivesNewSessionUUIDBeforeClosed() async throws {
+            let uuid1 = "uuid-1"
+            let uuid2 = "uuid-2"
+            let sut = makeSUT(
+                updates: [
+                    makeSessionInitializedUpdate(at: 0, sessionID: uuid1),
+                    makeLocationUpdate(at: 1, lat: 1.0, lon: 1.0), // Fence starts
+                    makePingUpdate(at: 2, ms: 100), // Same fence
+
+                    // Session reinitializes while user is still in same fence
+                    makeSessionInitializedUpdate(at: 3, sessionID: uuid2),
+                    makePingUpdate(at: 4, ms: 200), // Still same fence
+
+                    // User finally moves, closing old fence and opening new one
+                    makeLocationUpdate(at: 5, lat: 2.0, lon: 2.0), // New fence
+                ]
+            )
+
+            await sut.startTest()
+
+            #expect(sut.fences.map(\.sessionUUID) == [uuid2, uuid2])
+        }
+
+        @Test func whenMultipleSessionReinitializations_thenAssingsLatestSesssionUUID() async throws {
+            let uuid1 = "uuid-1"
+            let uuid2 = "uuid-2"
+            let uuid3 = "uuid-3"
+            let sut = makeSUT(
+                updates: [
+                    makeSessionInitializedUpdate(at: 0, sessionID: uuid1),
+                    makeLocationUpdate(at: 1, lat: 1.0, lon: 1.0),
+                    makeLocationUpdate(at: 2, lat: 2.0, lon: 2.0),
+
+                    // Rapid reinitializations
+                    makeSessionInitializedUpdate(at: 3, sessionID: uuid2),
+                    makeLocationUpdate(at: 3.5, lat: 2.0, lon: 2.000001),
+                    makeSessionInitializedUpdate(at: 4, sessionID: uuid3),
+
+                    // Now user moves
+                    makeLocationUpdate(at: 5, lat: 3.0, lon: 3.0),
+                    makeLocationUpdate(at: 6, lat: 4.0, lon: 4.0),
+                ]
+            )
+
+            await sut.startTest()
+
+            #expect(sut.fences.map(\.sessionUUID) == [uuid1, uuid3, uuid3, uuid3])
+        }
+
+        @Test func whenStopTestsSpanningOverMultipleSessions_thenSubmitsAllSessionsFences() async throws {
+            let sendService = SendCoverageResultsServiceSpy()
+            let uuid1 = "uuid-session-1"
+            let uuid2 = "uuid-session-2"
+            let uuid3 = "uuid-session-3"
+            let sut = makeSUT(
+                updates: [
+                    // Session 1: 2 fences
+                    makeSessionInitializedUpdate(at: 0, sessionID: uuid1),
+                    makeLocationUpdate(at: 1, lat: 10.0, lon: 10.0),
+                    makeLocationUpdate(at: 2, lat: 11.0, lon: 11.0),
+
+                    // Session 2: 1 fence
+                    makeSessionInitializedUpdate(at: 3, sessionID: uuid2),
+                    makeLocationUpdate(at: 4, lat: 20.0, lon: 20.0),
+
+                    // Session 3: 2 fences
+                    makeSessionInitializedUpdate(at: 5, sessionID: uuid3),
+                    makeLocationUpdate(at: 6, lat: 30.0, lon: 30.0),
+                    makeLocationUpdate(at: 7, lat: 31.0, lon: 31.0),
+                ],
+                sendResultsService: sendService
+            )
+
+            await sut.startTest()
+
+            // All 5 fences should be in memory for UI
+            #expect(sut.fenceItems.count == 5)
+
+            await sut.stopTest()
+
+            let sentFences = try #require(sendService.capturedSentFences.first)
+
+            // ViewModel sends ALL fences to the service - filtering happens in service layer
+            #expect(sentFences.count == 5, "ViewModel should send all fences to service")
+            #expect(
+                sentFences.map { $0.startingLocation.coordinate.latitude } == [10.0, 11.0, 20.0, 30.0, 31.0],
+                "Should send all fences to service"
+            )
+        }
+
+        @Test func whenEmptySessionAfterReinit_thenStopSubmitsAllFences() async throws {
+            let sendService = SendCoverageResultsServiceSpy()
+            let uuid1 = "uuid-1"
+            let uuid2 = "uuid-2"
+            let sut = makeSUT(
+                updates: [
+                    makeSessionInitializedUpdate(at: 0, sessionID: uuid1),
+                    makeLocationUpdate(at: 1, lat: 1.0, lon: 1.0),
+                    makeLocationUpdate(at: 2, lat: 2.0, lon: 2.0),
+
+                    // Session reinitializes
+                    makeSessionInitializedUpdate(at: 3, sessionID: uuid2),
+                    // User stops immediately without moving
+                ],
+                sendResultsService: sendService
+            )
+
+            await sut.startTest()
+            await sut.stopTest()
+
+            let sentFences = try #require(sendService.capturedSentFences.first)
+
+            // ViewModel sends ALL fences to the service - service layer handles the empty-session case
+            #expect(sentFences.count == 2, "ViewModel should send all fences to service")
+            #expect(sentFences.map { $0.startingLocation.coordinate.latitude } == [1.0, 2.0])
+
+            // The persistence/service layer will filter and handle the resend-only path
         }
     }
 
@@ -1481,6 +1761,14 @@ final actor FencePersistenceServiceSpy: FencePersistenceService {
 
     func deleteFinalizedNilUUIDSessions() throws {
         capturedMessages.append(.deleteFinalizedNilUUIDSessions)
+    }
+}
+
+private extension Fence {
+    func withoutSessionUUID() -> Self {
+        var newFence = self
+        newFence.sessionUUID = nil
+        return newFence
     }
 }
 

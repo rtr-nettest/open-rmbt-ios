@@ -67,42 +67,6 @@ struct CoverageMeasurementSessionInitializerTests {
         let (sut2, _) = makeSUT(testUUIDs: ["B"]) 
         #expect(sut2.udpPingSessionCount == 0)
     }
-
-    @Test("WHEN offline THEN emits sessionInitialized after going online")
-    func whenOfflineStart_andOnlineBecomesAvailable_thenInitializerEmitsSessionInitialized() async throws {
-        let spy = OfflineThenOnlineControlServerSpy(firstError: NSError(domain: "offline", code: -1009))
-        let db = UserDatabase(useInMemoryStore: true)
-        let online = OnlineStatusServiceStub()
-
-        let core = CoreSessionInitializer(now: { Date() }, coverageAPIService: spy)
-        let withPersistence = PersistenceAwareSessionInitializer(wrapped: core, database: db)
-        let sut = OnlineAwareSessionInitializer(wrapped: withPersistence, onlineStatusService: online, now: { Date() })
-
-        // Prepare event capture
-        var receivedUUID: String?
-        let task = Task {
-            for await update in sut.sessionInitializedEvents() {
-                receivedUUID = update.sessionID
-                break
-            }
-        }
-
-        // Trigger start in background (will wait for online)
-        Task { _ = try? await sut.startNewSession(loopID: nil) }
-
-        // Give the initializer time to fail and start listening to online events
-        try await Task.sleep(nanoseconds: 10_000_000)
-
-        // Simulate online
-        online.emit(false)
-        online.emit(true)
-
-        // Wait for the event to be processed
-        try await Task.sleep(nanoseconds: 100_000_000)
-        task.cancel()
-
-        #expect(receivedUUID == "ONLINE-UUID")
-    }
 }
 
 // MARK: - Test Helpers

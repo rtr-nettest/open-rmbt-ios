@@ -18,7 +18,7 @@ actor PersistenceServiceActor: FencePersistenceService {
 
         modelContext.insert(persistedFence)
         try modelContext.save()
-        Log.logger.info("Saved fence to session (testUUID: \(session.testUUID ?? "nil"), total fences: \(session.fences.count))")
+        Log.logger.info("Saved fence to session (testUUID: \(session.testUUID ?? "nil"), finalized: \(session.finalizedAt != nil), total fences: \(session.fences.count))")
     }
 
     func sessionStarted(at date: Date) throws {

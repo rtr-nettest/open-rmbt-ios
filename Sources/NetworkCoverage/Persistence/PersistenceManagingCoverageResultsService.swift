@@ -38,12 +38,23 @@ struct PersistenceManagingCoverageResultsService: SendCoverageResultsService {
             throw ServiceError.missingTestUUID
         }
 
-        Log.logger.info("Sending \(fences.count) fence(s) for testUUID: \(currentTestUUID)")
+        // Filter to only include fences from the current session
+        let fencesForCurrentSession = fences.filter { $0.sessionUUID == currentTestUUID }
 
-        // Send current fences using the main service
+        Log.logger.info("Received \(fences.count) total fence(s), \(fencesForCurrentSession.count) match current session UUID: \(currentTestUUID)")
+
+        guard !fencesForCurrentSession.isEmpty else {
+            Log.logger.info("No fences for current session; running resend-only path for session: \(currentTestUUID)")
+            try await triggerResendOnly()
+            return
+        }
+
+        Log.logger.info("Sending \(fencesForCurrentSession.count) fence(s) for testUUID: \(currentTestUUID)")
+
+        // Send current session fences using the main service
         let mainService = sendResultsService(currentTestUUID)
         do {
-            try await mainService.send(fences: fences)
+            try await mainService.send(fences: fencesForCurrentSession)
             Log.logger.info("Successfully sent fences, deleting session: \(currentTestUUID)")
 
             // Remove the just-submitted session by its UUID
@@ -58,6 +69,13 @@ struct PersistenceManagingCoverageResultsService: SendCoverageResultsService {
         Log.logger.info("Triggering resend of remaining persistent fences")
 
         // Resend any remaining persistent fences
+        try await persistentAreasResender.resendPersistentAreas(isLaunched: false)
+    }
+
+    private func triggerResendOnly() async throws {
+        // Finalization and cleanup already happened in ViewModel's stop()
+        // Just trigger the resend mechanism for previously finalized sessions
+        Log.logger.info("Executing resend-only path: triggering resend for all persistent sessions")
         try await persistentAreasResender.resendPersistentAreas(isLaunched: false)
     }
 }

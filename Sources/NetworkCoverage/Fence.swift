@@ -15,19 +15,21 @@ struct Fence: Identifiable, Hashable {
     private(set) var pings: [PingResult]
     private(set) var technologies: [String]
     private(set) var radiusMeters: CLLocationDistance
+    var sessionUUID: String?
 
     let startingLocation: CLLocation
     let id: UUID = UUID()
     let dateEntered: Date
     private(set) var dateExited: Date?
 
-    init(startingLocation: CLLocation, dateEntered: Date, technology: String?, pings: [PingResult] = [], radiusMeters: CLLocationDistance) {
+    init(startingLocation: CLLocation, dateEntered: Date, technology: String?, pings: [PingResult] = [], radiusMeters: CLLocationDistance, sessionUUID: String? = nil) {
         self.dateEntered = dateEntered
         self.startingLocation = startingLocation
         self.locations = [startingLocation]
         self.pings = pings
         technologies = technology.map { [$0] } ?? []
         self.radiusMeters = radiusMeters
+        self.sessionUUID = sessionUUID
     }
 
     mutating func append(location: CLLocation) {
