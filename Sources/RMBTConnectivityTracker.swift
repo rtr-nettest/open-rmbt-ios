@@ -8,6 +8,7 @@
 
 import UIKit
 import CoreTelephony
+import NetworkExtension
 
 @objc protocol RMBTConnectivityTrackerDelegate: AnyObject {
     func connectivityTracker(_ tracker: RMBTConnectivityTracker, didDetect connectivity: RMBTConnectivity)
@@ -15,6 +16,24 @@ import CoreTelephony
     func connectivityTrackerDidDetectNoConnectivity(_ tracker: RMBTConnectivityTracker)
     
     @objc optional func connectivityTracker(_ tracker: RMBTConnectivityTracker, didStopAndDetectIncompatibleConnectivity connectivity: RMBTConnectivity)
+}
+
+protocol WiFiInfoProviding {
+    typealias WiFiInfo = (ssid: String, bssid: String?)
+
+    func fetchCurrent(completion: @escaping (WiFiInfo?) -> Void)
+}
+
+struct SystemWiFiInfoProvider: WiFiInfoProviding {
+    func fetchCurrent(completion: @escaping (WiFiInfo?) -> Void) {
+        NEHotspotNetwork.fetchCurrent { network in
+            guard let network else {
+                completion(nil)
+                return
+            }
+            completion((ssid: network.ssid, bssid: network.bssid))
+        }
+    }
 }
 
 
@@ -30,6 +49,9 @@ import CoreTelephony
     private var lastConnectivity: RMBTConnectivity?
     private var stopOnMixed: Bool = false
     private var started: Bool = false
+    private var reachabilityChangeToken: UInt = 0
+
+    var wifiInfoProvider: any WiFiInfoProviding = SystemWiFiInfoProvider()
     
     deinit {
         NotificationCenter.default.removeObserver(self)
@@ -107,6 +129,12 @@ import CoreTelephony
     }
     
     func reachabilityDidChange(to status: NetworkReachability.NetworkReachabilityStatus) {
+        queue.async { [weak self] in
+            self?._reachabilityDidChange(to: status)
+        }
+    }
+
+    private func _reachabilityDidChange(to status: NetworkReachability.NetworkReachabilityStatus) {
         let networkType: RMBTNetworkType
         switch status {
         case .notReachability, .unknown:
@@ -121,6 +149,9 @@ import CoreTelephony
             return
         }
 
+        reachabilityChangeToken &+= 1
+        let token = reachabilityChangeToken
+
         if (networkType == .none) {
             Log.logger.debug("No connectivity detected.")
             self.lastConnectivity = nil
@@ -128,8 +159,35 @@ import CoreTelephony
             return
         }
 
-        let connectivity = RMBTConnectivity(networkType: networkType)
+        if networkType == .wifi {
+            wifiInfoProvider.fetchCurrent { [weak self] wifiInfo in
+                guard let self else { return }
+                self.queue.async { [weak self] in
+                    guard let self else { return }
+                    guard self.reachabilityChangeToken == token else {
+                        Log.logger.debug("Wi-Fi info resolved for stale reachability update, ignoring.")
+                        return
+                    }
 
+                    let connectivity = RMBTConnectivity(networkType: networkType)
+                    if let wifiInfo {
+                        let formattedBssid = wifiInfo.bssid.map(RMBTHelpers.RMBTReformatHexIdentifier)
+                        connectivity.updateWiFiInfo(ssid: wifiInfo.ssid, bssid: formattedBssid)
+                    } else {
+                        Log.logger.debug("Wi-Fi info unavailable (SSID/BSSID nil).")
+                    }
+
+                    self.handleNewConnectivity(connectivity)
+                }
+            }
+            return
+        }
+
+        let connectivity = RMBTConnectivity(networkType: networkType)
+        handleNewConnectivity(connectivity)
+    }
+
+    private func handleNewConnectivity(_ connectivity: RMBTConnectivity) {
         if let last = lastConnectivity, last.isEqual(to: connectivity) { return }
 
         Log.logger.debug("New connectivity = \(String(describing: connectivity.testResultDictionary()))")

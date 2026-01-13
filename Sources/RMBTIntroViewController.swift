@@ -434,10 +434,7 @@ class RMBTIntroViewController: UIViewController {
     }
 
     private var networkName: String? {
-        if connectivity?.networkType == .cellular {
-            return connectivity?.networkName
-        }
-        return connectivity?.networkName ?? .unknown
+        connectivity?.networkName
     }
 
     private func updateStates() {

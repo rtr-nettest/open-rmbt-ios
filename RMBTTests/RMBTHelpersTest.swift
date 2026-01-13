@@ -31,4 +31,37 @@ class RMBTHelpersTest: XCTestCase {
         XCTAssertEqual(RMBTHelpers.RMBTPercent(3, 9), 33)
     }
 
+    func testResolveNetworkLabels_whenWifiSSIDMissing_thenShowsWLANOnly() {
+        let resolved = RMBTIntroPortraitView.resolveNetworkLabels(
+            networkType: .wifi,
+            networkName: nil,
+            networkDescription: "WLAN"
+        )
+
+        XCTAssertEqual(resolved.networkName, "WLAN")
+        XCTAssertNil(resolved.networkDescription)
+    }
+
+    func testResolveNetworkLabels_whenWifiSSIDAvailable_thenShowsSSIDAndWLAN() {
+        let resolved = RMBTIntroPortraitView.resolveNetworkLabels(
+            networkType: .wifi,
+            networkName: "DZ SlowInternet",
+            networkDescription: "WLAN"
+        )
+
+        XCTAssertEqual(resolved.networkName, "DZ SlowInternet")
+        XCTAssertEqual(resolved.networkDescription, "WLAN")
+    }
+
+    func testResolveNetworkLabels_whenCellular_thenShowsTechnologyOnly() {
+        let resolved = RMBTIntroPortraitView.resolveNetworkLabels(
+            networkType: .cellular,
+            networkName: "Carrier",
+            networkDescription: "4G/LTE"
+        )
+
+        XCTAssertEqual(resolved.networkName, "4G/LTE")
+        XCTAssertNil(resolved.networkDescription)
+    }
+
 }

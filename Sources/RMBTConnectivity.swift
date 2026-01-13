@@ -8,7 +8,6 @@
 
 import UIKit
 import CoreTelephony
-import SystemConfiguration.CaptiveNetwork
 
 enum RMBTNetworkType: Int {
     case unknown  = -1
@@ -79,7 +78,12 @@ class RMBTConnectivity: NSObject {
         super.init()
         self.getNetworkDetails()
     }
-    
+
+    func updateWiFiInfo(ssid: String?, bssid: String?) {
+        self.networkName = ssid
+        self.bssid = bssid
+    }
+
     func testResultDictionary() -> [String: Any] {
         var result: [String: Any] = [:]
         
@@ -206,19 +210,6 @@ class RMBTConnectivity: NSObject {
         }
     }
     
-    private func getWiFiParameters() -> (ssid: String, bssid: String)? {
-        if let interfaces = CNCopySupportedInterfaces() as? [CFString] {
-            for interface in interfaces {
-                if let interfaceData = CNCopyCurrentNetworkInfo(interface) as? [CFString: Any],
-                let currentSSID = interfaceData[kCNNetworkInfoKeySSID] as? String,
-                let currentBSSID = interfaceData[kCNNetworkInfoKeyBSSID] as? String {
-                    return (ssid: currentSSID, bssid: RMBTReformatHexIdentifier(currentBSSID))
-                }
-            }
-        }
-        return nil
-    }
-    
     private func getNetworkDetails() {
         self.networkName = nil
         self.bssid = nil
@@ -229,11 +220,8 @@ class RMBTConnectivity: NSObject {
         switch networkType {
         case .cellular: self.updateCellularInfo()
         case .wifi:
-            // If WLAN, then show SSID as network name. Fetching SSID does not work on the simulator.
-            if let wifiParams = getWiFiParameters() {
-                networkName = wifiParams.ssid
-                bssid = wifiParams.bssid
-            }
+            // Wi-Fi SSID/BSSID is resolved by `RMBTConnectivityTracker` (async via NetworkExtension).
+            break
         case .none: break
         default:
             assert(false, "Invalid network type \(networkType)")

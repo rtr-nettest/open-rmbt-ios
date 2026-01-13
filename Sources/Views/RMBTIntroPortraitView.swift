@@ -187,18 +187,16 @@ class RMBTIntroPortraitView: UIView, XibLoadable {
     }
 
     func networkAvailable(_ networkType: RMBTNetworkType, networkName: String?, networkDescription: String?) {
-        var networkName = networkName
-        var networkDescription = networkDescription
-
-        if networkType == .cellular {
-            networkName = networkDescription
-            networkDescription = nil
-        }
+        let resolved = Self.resolveNetworkLabels(
+            networkType: networkType,
+            networkName: networkName,
+            networkDescription: networkDescription
+        )
 
         self.loopIconImageView.isHidden = !RMBTSettings.shared.loopMode
         self.startTestButton.isHidden = false
-        self.networkNameLabel.text = networkName
-        self.networkTypeLabel.text = networkDescription
+        self.networkNameLabel.text = resolved.networkName
+        self.networkTypeLabel.text = resolved.networkDescription
         self.networkWifiTypeImageView.image = .wifiAvailable
         if (networkType == .wifi) {
             self.networkWifiView.isHidden = false
@@ -221,6 +219,25 @@ class RMBTIntroPortraitView: UIView, XibLoadable {
             self.waveView.startAnimation()
             self.wave2View.startAnimation()
         }
+    }
+
+    static func resolveNetworkLabels(
+        networkType: RMBTNetworkType,
+        networkName: String?,
+        networkDescription: String?
+    ) -> (networkName: String?, networkDescription: String?) {
+        var networkName = networkName
+        var networkDescription = networkDescription
+
+        if networkType == .cellular {
+            networkName = networkDescription
+            networkDescription = nil
+        } else if networkType == .wifi, (networkName ?? "").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            networkName = networkDescription
+            networkDescription = nil
+        }
+
+        return (networkName: networkName, networkDescription: networkDescription)
     }
 
     func networkNotAvailable() {

@@ -337,6 +337,127 @@ final class ConnectivityServiceTests: XCTestCase {
     }
 }
 
+final class ConnectivityTrackerWiFiTests: XCTestCase {
+
+    func test_whenWiFiSSIDResolves_thenDelegateReceivesConnectivityWithSSID() {
+        let (sut, delegate, wifiProvider) = makeSUT()
+
+        let didFetchWiFi = expectation(description: "wifi info fetch invoked")
+        wifiProvider.onFetch = { didFetchWiFi.fulfill() }
+
+        let didDetect = expectation(description: "connectivity detected")
+        delegate.onDetect = { connectivity in
+            guard connectivity.networkType == .wifi else { return }
+            XCTAssertEqual(connectivity.networkName, "Mock SSID")
+            XCTAssertEqual(connectivity.bssid, "00:00:fb:01")
+            didDetect.fulfill()
+        }
+
+        sut.reachabilityDidChange(to: .wifi)
+        wait(for: [didFetchWiFi], timeout: 1.0)
+
+        wifiProvider.complete(with: (ssid: "Mock SSID", bssid: "0:0:fb:1"))
+        wait(for: [didDetect], timeout: 1.0)
+    }
+
+    func test_whenWiFiSSIDUnavailable_thenDelegateReceivesConnectivityWithoutSSID() {
+        let (sut, delegate, wifiProvider) = makeSUT()
+
+        let didFetchWiFi = expectation(description: "wifi info fetch invoked")
+        wifiProvider.onFetch = { didFetchWiFi.fulfill() }
+
+        let didDetect = expectation(description: "connectivity detected")
+        delegate.onDetect = { connectivity in
+            guard connectivity.networkType == .wifi else { return }
+            XCTAssertNil(connectivity.networkName)
+            XCTAssertNil(connectivity.bssid)
+            didDetect.fulfill()
+        }
+
+        sut.reachabilityDidChange(to: .wifi)
+        wait(for: [didFetchWiFi], timeout: 1.0)
+
+        wifiProvider.complete(with: nil)
+        wait(for: [didDetect], timeout: 1.0)
+    }
+
+    func test_whenWiFiCompletionIsStale_thenItIsIgnored() {
+        let (sut, delegate, wifiProvider) = makeSUT()
+
+        let didFetchWiFi = expectation(description: "wifi info fetch invoked")
+        wifiProvider.onFetch = { didFetchWiFi.fulfill() }
+
+        let didDetectCellular = expectation(description: "cellular detected")
+        delegate.onDetect = { connectivity in
+            if connectivity.networkType == .cellular {
+                didDetectCellular.fulfill()
+            }
+        }
+
+        let didDetectWiFi = expectation(description: "wifi detected (should not happen)")
+        didDetectWiFi.isInverted = true
+        delegate.onDetect = { connectivity in
+            if connectivity.networkType == .wifi {
+                didDetectWiFi.fulfill()
+            } else if connectivity.networkType == .cellular {
+                didDetectCellular.fulfill()
+            }
+        }
+
+        sut.reachabilityDidChange(to: .wifi)
+        wait(for: [didFetchWiFi], timeout: 1.0)
+
+        sut.reachabilityDidChange(to: .mobile)
+        wait(for: [didDetectCellular], timeout: 1.0)
+
+        // This completion belongs to the first reachability update and must be ignored.
+        wifiProvider.complete(with: (ssid: "StaleWiFi", bssid: "00:11:22:33:44:55"))
+
+        wait(for: [didDetectWiFi], timeout: 0.3)
+    }
+
+    // MARK: - Helpers
+
+    private func makeSUT(
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) -> (sut: RMBTConnectivityTracker, delegate: DelegateSpy, wifiProvider: WiFiInfoProviderSpy) {
+        let delegate = DelegateSpy()
+        let sut = RMBTConnectivityTracker(delegate: delegate, stopOnMixed: false)
+        let wifiProvider = WiFiInfoProviderSpy()
+        sut.wifiInfoProvider = wifiProvider
+
+        return (sut, delegate, wifiProvider)
+    }
+
+    private final class DelegateSpy: NSObject, RMBTConnectivityTrackerDelegate {
+        var onDetect: ((RMBTConnectivity) -> Void)?
+        var onNoConnectivity: (() -> Void)?
+
+        func connectivityTracker(_ tracker: RMBTConnectivityTracker, didDetect connectivity: RMBTConnectivity) {
+            onDetect?(connectivity)
+        }
+
+        func connectivityTrackerDidDetectNoConnectivity(_ tracker: RMBTConnectivityTracker) {
+            onNoConnectivity?()
+        }
+    }
+
+    private final class WiFiInfoProviderSpy: WiFiInfoProviding {
+        var onFetch: (() -> Void)?
+        private var completions: [(WiFiInfo?) -> Void] = []
+
+        func fetchCurrent(completion: @escaping (WiFiInfo?) -> Void) {
+            onFetch?()
+            completions.append(completion)
+        }
+
+        func complete(with info: WiFiInfo?, at index: Int = 0) {
+            completions[index](info)
+        }
+    }
+}
+
 // MARK: - Test Doubles
 
 private final class ControlServerSpy: ControlServerProviding {
