@@ -10,7 +10,6 @@ import AsyncAlgorithms
 
 struct NetworkCoverageFactory {
     // MARK: - Constants
-    // FIXME: Temporary workaround - server returns 406 even on successful submissions
     static let acceptableSubmitResultsRequestStatusCodes = 200..<300
     static let persistenceMaxAgeInterval: TimeInterval = 7 * 24 * 60 * 60
     static let locationInaccuracyWarningInitialDelay: TimeInterval = 3
@@ -186,15 +185,10 @@ struct NetworkCoverageFactory {
     }
 
     private func makeSendResultsService(testUUID: String, startDate: Date?) -> some SendCoverageResultsService {
-        let baseService = ControlServerCoverageResultsService(
+        ControlServerCoverageResultsService(
             controlServer: RMBTControlServer.shared,
             testUUID: testUUID,
             startDate: startDate
-        )
-        // FIXME: temporarily accept 406 failure as success
-        return AcceptableStatusCodeSendCoverageResultsService(
-            base: baseService,
-            acceptableStatusCodes: Self.acceptableSubmitResultsRequestStatusCodes + [406]
         )
     }
 }

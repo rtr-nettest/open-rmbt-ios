@@ -340,7 +340,6 @@
 		E9E9E90327429B6C005EB393 /* RMBTTestLandscapeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9E9E90227429B6B005EB393 /* RMBTTestLandscapeView.swift */; };
 		E9E9E90527429B90005EB393 /* RMBTTestLandscapeView.xib in Resources */ = {isa = PBXBuildFile; fileRef = E9E9E90427429B90005EB393 /* RMBTTestLandscapeView.xib */; };
 		F71B138A4E5F6DC41FF14268 /* Pods_RMBT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 32DE166B881B73366FE005F9 /* Pods_RMBT.framework */; };
-		FFF3D1FA2C16447FB06BDD35 /* AcceptableStatusCodeSendCoverageResultsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 011858BA6C01475DA0CBB31B /* AcceptableStatusCodeSendCoverageResultsService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -354,7 +353,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		011858BA6C01475DA0CBB31B /* AcceptableStatusCodeSendCoverageResultsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AcceptableStatusCodeSendCoverageResultsService.swift; sourceTree = "<group>"; };
 		09BF4B6D48151BE0513DA599 /* Pods-RMBTTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RMBTTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-RMBTTests/Pods-RMBTTests.debug.xcconfig"; sourceTree = "<group>"; };
 		1C605E59889E3DF77EFDC8CF /* Pods-RMBTTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RMBTTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-RMBTTests/Pods-RMBTTests.release.xcconfig"; sourceTree = "<group>"; };
 		1F9C078F216F751C00F1FC10 /* RMBT.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RMBT.entitlements; sourceTree = "<group>"; };
@@ -939,7 +937,6 @@
 			isa = PBXGroup;
 			children = (
 				49EDC77C2EAA35630009D9A6 /* SendCoverageResultRequest.swift */,
-				011858BA6C01475DA0CBB31B /* AcceptableStatusCodeSendCoverageResultsService.swift */,
 			);
 			path = SendResult;
 			sourceTree = "<group>";
@@ -2067,7 +2064,6 @@
 				49EDC7942EAA35630009D9A6 /* PersistentFence.swift in Sources */,
 				49EDC7952EAA35630009D9A6 /* Fence.swift in Sources */,
 				49EDC7962EAA35630009D9A6 /* SendCoverageResultRequest.swift in Sources */,
-				FFF3D1FA2C16447FB06BDD35 /* AcceptableStatusCodeSendCoverageResultsService.swift in Sources */,
 				49EDC7972EAA35630009D9A6 /* NetworkConnectionType.swift in Sources */,
 				49EDC7982EAA35630009D9A6 /* NetworkCoverageViewModel.swift in Sources */,
 				49EDC7992EAA35630009D9A6 /* PersistenceManagingCoverageResultsService.swift in Sources */,
