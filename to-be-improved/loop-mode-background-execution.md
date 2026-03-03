@@ -1,64 +1,30 @@
-# Loop Mode Background Execution: Constraints and Solutions
+# Loop Mode Background Execution: Corrected Constraints, Reliable Plan, and Experiment Path
 
-## Overview
+## Goal
 
-Loop Mode performs repeated network speed tests with configurable waiting periods between tests (time-based and/or distance-based). Unlike Network Coverage, which measures lightweight pings continuously, Loop Mode runs full throughput tests (ping, download, upload, QoS) that involve sustained multi-threaded socket I/O. This document explains why Loop Mode tests cannot run in the background and proposes a minimal, App Review-compliant solution that allows the waiting period to progress while backgrounded.
+Determine whether Loop Mode can run reliably when the app goes to background, and define:
 
----
-
-## Why Loop Mode Tests Cannot Run in Background
-
-### 1. Technical Constraints: Socket Connection Lifecycle
-
-Loop Mode's measurement architecture (`RMBTTestRunner`, `RMBTTestWorker`) relies on:
-
-- **CocoaAsyncSocket** for TCP connections to measurement servers
-- **Multiple parallel worker threads** (typically 3–4) for concurrent downloads/uploads
-- **Sustained high-bandwidth transfers** lasting 7–10 seconds per phase
-- **Stateful socket connections** that must remain open throughout measurement
-
-| Aspect | Foreground | Background (even with `CLBackgroundActivitySession`) |
-|--------|------------|------------------------------------------------------|
-| Socket lifecycle | Full control; connections persist | iOS throttles/tears down connections |
-| Thread scheduling | Workers run continuously | Threads suspended or deprioritized |
-| Bandwidth allocation | Full radio budget | Duty-cycled; throttled to save power |
-| Test reliability | High | **Low: frequent failures, corrupted results** |
-
-**Technical reality:** iOS routinely terminates or throttles long-running socket connections in the background, even when an app holds `CLBackgroundActivitySession`. Background modes are designed for lightweight tasks (location updates, small network requests), not sustained throughput measurements.
-
-### 2. App Store Policy: Abuse of Background Location
-
-The app already declares `UIBackgroundModes = ["location"]` for Network Coverage, which is legitimate because:
-
-- **Primary purpose:** Location tracking (WHERE the user is)
-- **Secondary network activity:** Small ICMP pings (~64 bytes, periodic)
-- **Intent alignment:** Measuring cellular coverage at different locations
-
-If Loop Mode were to run speed tests in the background:
-
-- **Primary purpose:** Network throughput testing (NOT location-based)
-- **Network activity:** Megabytes of sustained TCP transfers
-- **Intent mismatch:** Using location mode as a loophole to run bandwidth tests
-
-**App Review risk:** Apple rejects apps that abuse background location for non-location purposes. Running multi-megabyte speed tests while claiming "location-based service" is a clear violation.
-
-### 3. Comparison to Network Coverage
-
-| Feature | Network Coverage | Loop Mode Speed Tests |
-|---------|------------------|----------------------|
-| **Network load** | ~64 bytes per ping, every 2s | Megabytes per test, sustained |
-| **Connection type** | UDP (connectionless) | TCP (stateful, multi-threaded) |
-| **Duration** | Continuous background OK | 7–10s bursts, foreground only |
-| **iOS compatibility** | ✅ Works with `CLBackgroundActivitySession` | ❌ iOS kills sockets |
-| **App Review legitimacy** | ✅ Location-based service | ❌ Network testing disguised as location |
-
-**Key insight:** The Network Coverage implementation (Sources/NetworkCoverage/) cannot be directly applied to Loop Mode because the underlying workload is fundamentally different.
+1. A production-safe solution.
+2. A low-effort experiment to measure real background degradation in the current implementation.
 
 ---
 
-## Current Behavior (Foreground-Only)
+## Executive Summary
 
-### Implementation (Sources/RMBTTestRunner.swift:568-573)
+- Full Loop Mode throughput tests in background are **not reliably supportable** on iOS with this architecture.
+- Trying to force it via unrelated background modes (for example `voip`) is **not acceptable** and is App Review risk.
+- The production-safe design is:
+  - **Foreground only:** ping/download/upload/QoS execution.
+  - **Background allowed:** waiting/orchestration only (time/distance progress + notification).
+- If we still want data, we can add a **debug-only best-effort experiment mode** that disables current background cancellation and logs quality/failure deltas.
+
+---
+
+## What Is Confirmed in Current Code
+
+### 1) Active test is cancelled when app backgrounds
+
+`Sources/RMBTTestRunner.swift`
 
 ```swift
 @objc func applicationDidSwitchToBackground(_ notification: Notification) {
@@ -69,260 +35,226 @@ If Loop Mode were to run speed tests in the background:
 }
 ```
 
-When the app backgrounds during a Loop Mode test:
+### 2) Loop can transition to waiting after cancel
 
-1. **Active test cancelled** (Sources/RMBTTestRunner.swift:259-287)
-2. **TestViewController handles cancellation** (Sources/Test/RMBTTestViewController.swift:802-807)
-3. **Loop session transitions to waiting state** (already implemented, line 805)
-4. **Waiting logic uses timers/location tracker** (RMBTTestViewController.swift:569-620)
-   - Timer runs every 0.3s to check time elapsed (line 589)
-   - Location tracker monitors distance traveled (line 592-620)
-   - **Problem:** Timers don't fire when app is suspended; location tracker is stopped by AppDelegate
+`Sources/Test/RMBTTestViewController.swift`
 
-### Why Waiting Fails in Background
+- `onTestCancelled(with:)` moves to waiting for non-user cancellation in loop mode.
 
-From RMBTAppDelegate.swift:
+### 3) Waiting currently depends on components that stop when app backgrounds
+
+`Sources/Test/RMBTTestViewController.swift`
+
+- Waiting time uses a repeating timer (`startWaitingNextTest`, `tick`).
+- Distance uses `RMBTLocationTracker` callbacks.
+
+`Sources/RMBTAppDelegate.swift`
 
 ```swift
 func applicationDidEnterBackground(_ application: UIApplication) {
-    RMBTLocationTracker.shared.stop()  // ← Stops location updates
+    RMBTLocationTracker.shared.stop()
     NetworkReachability.shared.stopMonitoring()
 }
 ```
 
-From RMBTTestViewController.swift:
+This means current waiting logic does not continue while app is suspended.
 
-```swift
-private func startWaitingNextTest() {
-    // ← Timer-based waiting: won't run while suspended
-    timer = Timer.scheduledTimer(timeInterval: 0.3, target: self, selector: #selector(tick), userInfo: nil, repeats: true)
-}
-```
+### 4) Throughput engine is long-lived socket + worker driven
 
-**Result:** When app backgrounds during waiting, both time and distance tracking stop. User must keep app in foreground for entire loop duration.
+`Sources/RMBTTestWorker.swift`
 
----
+- Uses `CocoaAsyncSocket` (`GCDAsyncSocket`) and multi-phase timing-sensitive flow.
 
-## Proposed Solution: Background Waiting (Tests Remain Foreground-Only)
-
-### Strategy
-
-1. **Tests run in foreground only** (keep existing cancellation behavior)
-2. **Waiting period continues in background**
-   - Time-based: Compute elapsed on resume (no active timer)
-   - Distance-based: Subscribe to Network Coverage location stream
-3. **User notified when ready** via local notification
-4. **Next test starts only when app is foregrounded**
-
-### Architecture
-
-```
-Loop Mode Flow (with background waiting):
-
-┌─────────────────────────────────────────────────────────────┐
-│  Foreground: Speed Test Running                             │
-│  - RMBTTestRunner active                                    │
-│  - CocoaAsyncSocket workers running                         │
-│  - NO background activity session                           │
-└─────────────────────────────────────────────────────────────┘
-                           │
-                           │ Test completes
-                           ▼
-┌─────────────────────────────────────────────────────────────┐
-│  Waiting State (can background)                             │
-│  - START: BackgroundActivityActor.shared.startActivity()    │
-│  - Time tracking: Store waitingStartedAt, compute on resume │
-│  - Distance tracking: Subscribe to Coverage location stream │
-│  - Ready detection: Post notification, wait for foreground  │
-│  - STOP: BackgroundActivityActor.shared.stopActivity()      │
-└─────────────────────────────────────────────────────────────┘
-                           │
-                           │ Time/distance reached + app foregrounded
-                           ▼
-┌─────────────────────────────────────────────────────────────┐
-│  Foreground: Next Speed Test Starting                       │
-│  (cycle repeats)                                            │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### Implementation Plan
-
-#### 1. Create Loop Waiting Coordinator
-
-**New file:** `Sources/Test/LoopMode/LoopWaitingCoordinator.swift`
-
-**Responsibilities:**
-- Start/stop `BackgroundActivityActor` during waiting lifecycle
-- Subscribe to `RealLocationUpdatesService().locations()` (reuse Network Coverage stream)
-- Compute time-based readiness without active timers
-- Post local notification when conditions met
-
-**Key methods:**
-```swift
-@MainActor
-class LoopWaitingCoordinator {
-    func startWaiting(minutes: UInt, meters: UInt, startLocation: CLLocation?) async
-    func stopWaiting() async
-    func checkTimeReached() -> Bool  // Compute elapsed, no timer
-    func checkDistanceReached(currentLocation: CLLocation) -> Bool
-    private func notifyReady(reason: String)  // Local notification
-}
-```
-
-#### 2. Integrate in RMBTTestViewController
-
-**Modified methods:**
-
-- `goToWaitingState()` (line 622):
-  - Create `LoopWaitingCoordinator` instance
-  - Call `await coordinator.startWaiting(...)`
-  - Remove call to `startWaitingNextTest()` (timer-based approach)
-
-- `cleanup()` (line 545):
-  - Call `await coordinator.stopWaiting()`
-  - Stop background activity session
-
-- `didBecomeActive(_:)` (line 416):
-  - Check if waiting completed in background
-  - If ready, call `startTest()` to begin next test
-
-**Deleted methods:**
-- `startWaitingNextTest()` (line 588) – replaced by coordinator
-- `tick()` (line 569) – no longer needed (time computed on demand)
-
-#### 3. Request Notification Permission
-
-**File:** `Sources/RMBTAppDelegate.swift`
-
-Add to `applicationDidFinishLaunching`:
-```swift
-UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { granted, _ in
-    Log.logger.info("Loop Mode notification permission: \(granted)")
-}
-```
-
-#### 4. NO Changes to RMBTTestRunner
-
-**Keep existing background cancellation:**
-- Tests cancelled when backgrounded (line 568-573)
-- Loop session survives via existing `onTestCancelled` logic (line 802-807)
-- TestViewController transitions to waiting automatically
+This is not an opportunistic transfer model.
 
 ---
 
-## Benefits of This Approach
+## Corrected Platform Constraints
 
-### ✅ Compliance & Reliability
+### A) No background mode gives foreground-equivalent continuous throughput testing
 
-| Aspect | Status |
-|--------|--------|
-| **App Store guidelines** | ✅ Only location tracking in background (legitimate use) |
-| **iOS socket constraints** | ✅ No sockets active in background (tests foreground-only) |
-| **Test result integrity** | ✅ All measurements in foreground (full system resources) |
-| **Background execution budget** | ✅ Minimal (location updates only, proven by Coverage) |
+- iOS can suspend/deprioritize app execution in background.
+- Background transfer APIs (`URLSession` background) are optimized for delivery, not benchmark fidelity.
 
-### ✅ User Experience
+### B) You cannot periodically force app into foreground
 
-- **Passive waiting:** User can background app between tests
-- **Notification:** Clear prompt to return when next test is ready
-- **Transparency:** User understands tests run in foreground, waiting can background
-- **Battery efficiency:** No sustained network I/O in background
+- iOS requires user intent to bring UI foreground.
+- App can be resumed in background by system mechanisms, but cannot self-launch to active UI on a timer.
 
-### ✅ Code Reuse
+### C) `voip` is not a valid workaround
 
-- **BackgroundActivityActor:** Already implemented for Network Coverage
-- **Location stream:** Reuse `RealLocationUpdatesService().locations()`
-- **Persistence patterns:** Optional future enhancement (not required for MVP)
+- `voip` mode is for real call flows and is tightly enforced.
+- Using it to keep speed tests alive is policy and review risk.
 
 ---
 
-## Limitations & Trade-offs
+## Assumptions in Previous Proposal That Need Correction
 
-### What This Does NOT Solve
+1. "Ready notification exactly at threshold without active process" is guaranteed.
+- Not guaranteed unless notification is scheduled explicitly (time-based trigger), and distance threshold events still depend on background location delivery.
 
-1. **App termination:** If iOS kills app during waiting, loop session is lost
-   - **Mitigation:** Future enhancement with SwiftData persistence (like Coverage)
+2. `RealLocationUpdatesService().locations()` can be created directly.
+- Current type requires injected closures (`now`, `canReportLocations`).
 
-2. **Test execution:** Tests still require foreground
-   - **Mitigation:** Clear user notification; acceptable UX for measurement app
+3. Background capability is always present.
+- `Scripts/update_configurations_from_private.sh` copies either private or public plist into `Resources/RMBT-Info.plist`.
+- `public/Configurations/RMBT-Info.plist` currently does not include `UIBackgroundModes=location`.
+- Therefore behavior depends on which configuration is active.
 
-3. **Instant start:** User must manually open app when notified
-   - **Mitigation:** Standard iOS behavior; users are accustomed to this
-
-### Alternative: Make Tests Background-Compatible?
-
-**Not feasible because:**
-- Would require rewriting entire test engine (RMBTTestRunner + workers)
-- Still subject to iOS socket throttling (unreliable results)
-- App Review would likely reject (abuse of background location)
-- Network Coverage approach (UDP pings) not applicable to TCP throughput tests
+4. Background waiting can always be started after app is already in background.
+- Lifecycle details matter; session/setup timing must be designed carefully.
 
 ---
 
-## Files to Modify (Minimal Implementation)
+## Production Recommendation (Reliable)
 
-| File | Changes | Lines |
-|------|---------|-------|
-| **New:** `Sources/Test/LoopMode/LoopWaitingCoordinator.swift` | Create waiting coordinator | ~100 |
-| `Sources/Test/RMBTTestViewController.swift` | Integrate coordinator, remove timer logic | ~50 |
-| `Sources/RMBTAppDelegate.swift` | Request notification permission | ~5 |
-| **No change:** `Sources/RMBTTestRunner.swift` | Keep existing background cancellation | 0 |
+### Option A (recommended): Foreground tests + background waiting
 
-**Total:** 1 new file, 2 modified files, ~155 lines of code
+### Behavior
 
----
+- Test starts in foreground.
+- If app backgrounds during active test: cancel test (current behavior stays).
+- Loop enters waiting state.
+- Waiting can progress in background using:
+  - persisted start timestamp for time condition,
+  - location updates for distance condition when available,
+  - local notification when next test becomes eligible.
+- Next test starts only after app returns foreground.
 
-## Testing Checklist
+### Pros
 
-### Basic Flow
-- [ ] Start loop with 3 tests, 2-minute wait, 100-meter distance
-- [ ] Background app during test #1 → verify test cancelled, transitions to waiting
-- [ ] Leave backgrounded for 2 minutes → verify notification posted
-- [ ] Foreground app → verify test #2 starts automatically
+- Best App Review posture.
+- Preserves measurement integrity (no forced background throughput).
+- Minimal architecture risk.
 
-### Edge Cases
-- [ ] Background during waiting → foreground before time/distance reached → verify still waiting
-- [ ] Achieve distance threshold while backgrounded → verify notification
-- [ ] Revoke location permission during waiting → verify graceful error
-- [ ] Toggle airplane mode during waiting → verify loop handles mixed connectivity
-- [ ] Force-quit app during waiting → verify no crash on relaunch (session lost, expected)
+### Cons
 
-### Background Execution
-- [ ] Monitor `BackgroundActivityActor.isActive()` during waiting (should be true)
-- [ ] Verify location updates continue via Coverage stream
-- [ ] Verify no socket connections active during waiting
-- [ ] Check battery usage (should be comparable to Coverage feature)
+- User must return to app for each test run.
 
 ---
 
-## Future Enhancements (Out of Scope for Minimal Implementation)
+### Option B (best effort, not production default): allow active test in background
 
-### Persistence for Crash Recovery
-Add SwiftData models similar to `PersistentCoverageSession`:
-- Store `PersistentLoopSession` (loop UUID, current test count, waiting state)
-- On app relaunch, check for incomplete session
-- Prompt user: "Resume previous loop test?"
+### Behavior
 
-### Progress UI While Backgrounded
-- Notification extensions showing "Test 3/10 completed, waiting..."
-- Today widget with loop progress bar
+- Do not cancel active test immediately on background.
+- Attempt to continue until suspension/expiration/failure.
 
-### Adaptive Notification Timing
-- If user repeatedly ignores notifications, delay or suppress
-- If user always responds immediately, be more proactive
+### Pros
 
----
+- Allows empirical measurement of degradation.
 
-## References
+### Cons
 
-- **Network Coverage implementation:** Sources/NetworkCoverage/BackgroundActivityActor.swift
-- **Current loop waiting logic:** Sources/Test/RMBTTestViewController.swift:569-620
-- **Test cancellation:** Sources/RMBTTestRunner.swift:568-573
-- **Location stream:** Sources/NetworkCoverage/LocationUpdates/LocationUpdatesService.swift
-- **Apple docs:** [Background Execution](https://developer.apple.com/documentation/uikit/app_and_environment/scenes/preparing_your_ui_to_run_in_the_background)
+- Not reliable by design.
+- App Review risk if shipped as user-facing promise.
+- Results may be biased by background scheduling and suspension timing.
+
+Use only behind debug/feature flag for internal study.
 
 ---
 
-## Summary
+## Rejected Paths
 
-Loop Mode speed tests **cannot** run in background due to iOS socket lifecycle constraints and App Store policy. The minimal viable solution is to keep tests foreground-only while allowing the **waiting period** to progress in background using `CLBackgroundActivitySession` and the proven Network Coverage location stream. This approach is App Review-compliant, technically reliable, and requires minimal code changes (~155 lines across 3 files).
+- Misusing unrelated background modes (`voip`, audio, etc.) to keep networking alive.
+- Claiming "continuous background Loop Mode" as guaranteed product behavior.
+
+---
+
+## Minimal Experiment Plan (Low Effort, Current Architecture)
+
+Goal: quantify whether background degradation is severe in practice for your real users/networks.
+
+### Experiment Mode: smallest code surface
+
+### Change 1: add debug flag
+
+- Add `debugLoopModeAllowBackgroundBestEffort` in `RMBTSettings` (debug-only behavior).
+
+### Change 2: conditional cancel in runner
+
+`Sources/RMBTTestRunner.swift`
+
+- In `applicationDidSwitchToBackground`:
+  - if flag is `false`: keep current cancel behavior.
+  - if flag is `true`: do not cancel, only log transition timestamp and phase.
+
+### Change 3: keep location tracker alive only in experiment path
+
+`Sources/RMBTAppDelegate.swift`
+
+- In `applicationDidEnterBackground`, conditionally skip `RMBTLocationTracker.shared.stop()` only when:
+  - experiment flag is enabled,
+  - and loop measurement is active (`RMBTSettings.shared.activeMeasurementId` set).
+
+This gives best chance to keep process active in background without broad redesign.
+
+### Change 4: add structured telemetry (must-have)
+
+For each test result, record at minimum:
+
+- `started_in_state`: foreground/background.
+- `did_background_during_test`: bool.
+- `background_entry_phase`: ping/down/up/qos.
+- `background_duration_while_test_active_s`.
+- `cancel_reason`.
+- `bytes_uploaded`, `bytes_downloaded`, phase durations.
+- final throughput/ping values.
+
+Without this, experiment results are not interpretable.
+
+---
+
+## How to Evaluate "Good Enough"
+
+Use paired runs on same route/time window:
+
+1. Foreground baseline set.
+2. Experiment best-effort background set.
+
+Compare:
+
+- success rate drop (percentage points),
+- median down/up degradation (%),
+- p95 degradation,
+- increased cancellations/timeouts.
+
+Suggested provisional acceptance threshold for "usable":
+
+- success rate drop <= 5 percentage points,
+- median throughput degradation <= 10%,
+- p95 degradation <= 25%.
+
+If outside this, background execution is not good enough for production measurement claims.
+
+---
+
+## Practical Implementation Sequence
+
+1. Implement Option A (production-safe waiting in BG).
+2. Add Option B experiment flag (debug-only).
+3. Run internal test matrix for at least:
+   - LTE/5G, Wi-Fi, mixed mobility,
+   - 30+ paired samples per scenario.
+4. Decide product behavior from evidence.
+
+---
+
+## Notes About Configuration
+
+Because build-time script swaps plist/config files, confirm active config before validating background behavior:
+
+- `Scripts/update_configurations_from_private.sh`
+- `private/Configurations/RMBT-Info.plist`
+- `public/Configurations/RMBT-Info.plist`
+- `Resources/RMBT-Info.plist` (effective copied target)
+
+Background location expectations are invalid if active plist does not include location background mode.
+
+---
+
+## Final Answer to Original Question
+
+- Can Loop Mode run reliably in background with no meaningful network degradation? **No (not as a guaranteed product behavior).**
+- Can we still test whether it is "good enough" in practice? **Yes**, with a debug-only best-effort mode and proper telemetry.
+- Can app periodically wake itself to foreground without user action? **No.**
