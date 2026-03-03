@@ -46,19 +46,16 @@ struct CoverageHistoryDetail {
         fenceData.compactMap { data in
             let location = CLLocation(latitude: data.latitude, longitude: data.longitude)
 
-            // FIXME: Need to get timestamp fro server to know when the test was executed
-            // Historical data provides offset_ms from test start. We don't have the
-            // original test start here, so use a stable reference point (now) just
-            // to construct deterministic Date values for UI ordering.
-            let now = Date()
-            let dateEntered = now
+            // fence_time should always be present for new data; fallback to now for legacy entries
+            let dateEntered = data.fenceTime
+                .map { Date(timeIntervalSince1970: Double($0) / 1000.0) } ?? Date()
             let technologyString = data.technologyId.radioAccessTechnology
 
             // Represent average ping using a single PingResult sample so that
             // existing UI that computes averages over pings works as expected.
             let pings: [PingResult]
-            if data.avgPingMs > 0 {
-                pings = [PingResult(result: .interval(.milliseconds(Int(data.avgPingMs))),
+            if let avgPing = data.avgPingMs, avgPing > 0 {
+                pings = [PingResult(result: .interval(.milliseconds(Int(avgPing))),
                                      timestamp: dateEntered)]
             } else {
                 pings = []

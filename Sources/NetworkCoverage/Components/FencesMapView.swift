@@ -206,10 +206,10 @@ struct FencesMapView: View {
 
     func fenceCircle(for fence: FenceItem) -> some MapContent {
         MapCircle(center: fence.coordinate, radius: fenceRadius)
-            .foregroundStyle(fence.color.opacity(fence.isSelected ? 0.4 : 0.1))
+            .foregroundStyle(fence.color.opacity(fence.isSelected ? 0.5 : 0.1))
             .stroke(
-                fence.color.opacity(fence.isSelected ? 1 : 0.8),
-                lineWidth: fence.isSelected ? 2 : 1
+                fence.isSelected ? Color.black : fence.color.opacity(0.8),
+                lineWidth: fence.isSelected ? 3 : 1
             )
             .mapOverlayLevel(level: .aboveLabels)
     }
@@ -218,14 +218,14 @@ struct FencesMapView: View {
         Annotation(
             coordinate: fence.coordinate,
             content: {
+                let size: CGFloat = fence.isSelected ? 26 : 20
                 Circle()
                     .fill(fence.color.opacity(fence.isSelected ? 1 : 0.6))
                     .stroke(
-                        fence.isSelected ? Color.black.opacity(0.6) :
-                            fence.color,
-                        lineWidth: fence.isSelected ? 2 : 1
+                        fence.isSelected ? Color.black : fence.color,
+                        lineWidth: fence.isSelected ? 3 : 1
                     )
-                    .frame(width: 20, height: 20)
+                    .frame(width: size, height: size)
             },
             label: { EmptyView() }
         )
@@ -273,10 +273,12 @@ struct FencesMapView: View {
                 Text(detail.technology)
                     .foregroundStyle(detail.color)
             }
-            HStack(alignment: .bottom) {
-                Text("Ping:")
-                    .font(.headline)
-                Text(detail.averagePing)
+            if !detail.averagePing.isEmpty {
+                HStack(alignment: .bottom) {
+                    Text("Ping:")
+                        .font(.headline)
+                    Text(detail.averagePing)
+                }
             }
         }
         .padding()

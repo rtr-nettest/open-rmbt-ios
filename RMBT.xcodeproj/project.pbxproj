@@ -84,6 +84,7 @@
 		49EDC7A12EAA35630009D9A6 /* AsynchronousSequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC7652EAA35630009D9A6 /* AsynchronousSequence.swift */; };
 		49EDC7A22EAA35630009D9A6 /* CoverageHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC75D2EAA35630009D9A6 /* CoverageHeader.swift */; };
 		49F976802B0B3E880098C4CC /* RMBTConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49C86FDC2AFBBF1500663CE2 /* RMBTConfig.swift */; };
+		520219059FE77FE975227F1E /* CoverageHistoryDetailServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E95B2179B357FF985E9D9D7 /* CoverageHistoryDetailServiceTests.swift */; };
 		7E9819F45E7330372FF7FDF1 /* Pods_RMBTTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34EAAD260B73771684B942BA /* Pods_RMBTTests.framework */; };
 		C573F2A5175281D300C728FC /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C573F2A4175281D300C728FC /* MapKit.framework */; };
 		C573F2B1175294A500C728FC /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C573F2B0175294A500C728FC /* CoreLocation.framework */; };
@@ -435,6 +436,7 @@
 		49EDC7822EAA35630009D9A6 /* NetworkCoverageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkCoverageView.swift; sourceTree = "<group>"; };
 		49EDC7832EAA35630009D9A6 /* NetworkCoverageViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkCoverageViewModel.swift; sourceTree = "<group>"; };
 		89CA21386C488DD817CA1DC2 /* Pods-RMBT.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RMBT.debug.xcconfig"; path = "Pods/Target Support Files/Pods-RMBT/Pods-RMBT.debug.xcconfig"; sourceTree = "<group>"; };
+		9E95B2179B357FF985E9D9D7 /* CoverageHistoryDetailServiceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CoverageHistoryDetailServiceTests.swift; sourceTree = "<group>"; };
 		A0C545CF605E364BCA4F45EA /* Pods-RMBTTest.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RMBTTest.debug.xcconfig"; path = "Pods/Target Support Files/Pods-RMBTTest/Pods-RMBTTest.debug.xcconfig"; sourceTree = "<group>"; };
 		B14EBFEF9713BCFE2072175F /* Pods-RMBTTest.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RMBTTest.release.xcconfig"; path = "Pods/Target Support Files/Pods-RMBTTest/Pods-RMBTTest.release.xcconfig"; sourceTree = "<group>"; };
 		C573F2A4175281D300C728FC /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
@@ -802,6 +804,7 @@
 			isa = PBXGroup;
 			children = (
 				49EDC7322EAA2E000009D9A6 /* CoverageTestDetailsModelTests.swift */,
+				9E95B2179B357FF985E9D9D7 /* CoverageHistoryDetailServiceTests.swift */,
 			);
 			path = Coverage;
 			sourceTree = "<group>";
@@ -1970,6 +1973,7 @@
 				492851BC2ED66688005811D0 /* NetworkCoverageIntegrationTests.swift in Sources */,
 				E92E07BC277B4E92008143FE /* RMBTThroughputHistoryTest.swift in Sources */,
 				498581632EAB4F41008C11A7 /* FencePersistenceTests.swift in Sources */,
+				520219059FE77FE975227F1E /* CoverageHistoryDetailServiceTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
