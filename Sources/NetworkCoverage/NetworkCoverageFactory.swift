@@ -153,7 +153,7 @@ struct NetworkCoverageFactory {
         return NetworkCoverageViewModel(
             fences: fences,
             refreshInterval: 1,
-            minimumLocationAccuracy: 5,
+            minimumLocationAccuracy: 15,
             locationInaccuracyWarningInitialDelay: Self.locationInaccuracyWarningInitialDelay,
             insufficientAccuracyAutoStopInterval: Self.insufficientAccuracyAutoStopInterval,
             updates: {
