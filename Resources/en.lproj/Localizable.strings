@@ -289,6 +289,8 @@
 "private_ip_address" = "Private address";
 
 "title_loop_mode" = "Loop mode";
+"title_coverage_series" = "Coverage series";
+"coverage_label" = "Coverage";
 
 /* Location Dialog */
 "location_dialog_label_title" = "Location";

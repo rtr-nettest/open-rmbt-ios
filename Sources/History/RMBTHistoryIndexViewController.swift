@@ -384,11 +384,29 @@ extension RMBTHistoryIndexViewController: UITableViewDataSource, UITableViewDele
             return nil
         }
         let header = tableView.dequeueReusableHeaderFooterView(withIdentifier: RMBTHistoryLoopCell.ID) as! RMBTHistoryLoopCell
-        header.dateLabel.text = testResults[section].timeStringIn24hFormat
-        let networkTypeIcon = RMBTNetworkTypeConstants.networkTypeDictionary[testResults[section].networkTypeServerDescription]?.icon
-        header.typeImageView.image = networkTypeIcon
+        let loopResult = testResults[section]
+        header.dateLabel.text = loopResult.timeStringIn24hFormat
+
+        if loopResult.isCoverageSeries {
+            header.typeImageView.image = UIImage(named: "tab_coverage")
+            header.typeImageView.tintColor = .darkGray
+            header.subtitleLabel.text = NSLocalizedString("title_coverage_series", comment: "")
+            if let totalCount = loopResult.totalFencesCount {
+                header.pointsLabel.text = Self.formatPointsCount(totalCount)
+                header.pointsLabel.isHidden = false
+            } else {
+                header.pointsLabel.isHidden = true
+            }
+        } else {
+            let networkTypeIcon = RMBTNetworkTypeConstants.networkTypeDictionary[loopResult.networkTypeServerDescription]?.icon
+            header.typeImageView.image = networkTypeIcon
+            header.typeImageView.tintColor = nil
+            header.subtitleLabel.text = NSLocalizedString("title_loop_mode", comment: "")
+            header.pointsLabel.isHidden = true
+        }
+
         header.onExpand = { [unowned self] in
-            self.expandLoopSection(self.testResults[section].loopUuid ?? "")
+            self.expandLoopSection(loopResult.loopUuid ?? "")
         }
         // header.bottomBorder is hidden by default to avoid border overlapping
         if section < testResults.count - 1 {
@@ -429,8 +447,7 @@ extension RMBTHistoryIndexViewController: UITableViewDataSource, UITableViewDele
             let cell = tableView.dequeueReusableCell(withIdentifier: RMBTHistoryIndexCell.ID, for: indexPath) as! RMBTHistoryIndexCell
 
             if let coverageResult = testResult as? RMBTHistoryCoverageResult {
-                let isLoop = testResults[indexPath.section].loopResults.count > 1
-                cell.configureAsCoverageTest(with: coverageResult.historyItem, isLoop: isLoop)
+                cell.configureAsCoverageTest(with: coverageResult.historyItem)
             } else {
                 cell.configureAsSpeedTest(with: testResult)
             }
@@ -466,6 +483,14 @@ extension RMBTHistoryIndexViewController: UITableViewDataSource, UITableViewDele
                 self.getNextBatch()
             }
         }
+    }
+}
+
+// MARK: Helpers
+
+extension RMBTHistoryIndexViewController {
+    static func formatPointsCount(_ count: Int) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("coverage_points_count", comment: ""), count)
     }
 }
 

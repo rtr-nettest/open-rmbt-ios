@@ -32,6 +32,17 @@ class RMBTHistoryLoopResult: RMBTHistoryResult {
     var openTestUUIDs: [String] {
         loopResults.compactMap(\.openTestUuid)
     }
+
+    var isCoverageSeries: Bool {
+        loopResults.first is RMBTHistoryCoverageResult
+    }
+
+    /// Returns the sum of all per-segment fence counts, or nil when no counts are available.
+    var totalFencesCount: Int? {
+        let counts = loopResults.compactMap { ($0 as? RMBTHistoryCoverageResult)?.historyItem.fencesCount }
+        guard !counts.isEmpty else { return nil }
+        return counts.reduce(0, +)
+    }
 }
 
 class RMBTHistoryCoverageResult: RMBTHistoryResult {

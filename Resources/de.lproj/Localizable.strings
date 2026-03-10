@@ -289,6 +289,8 @@
 "private_ip_address" = "Lokale Adresse";
 
 "title_loop_mode" = "Wiederholungsmodus";
+"title_coverage_series" = "Abdeckungsserie";
+"coverage_label" = "Abdeckung";
 
 /* Location Dialog */
 "location_dialog_label_title" = "Standort";

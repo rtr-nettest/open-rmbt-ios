@@ -15,6 +15,8 @@ class RMBTHistoryLoopCell: UITableViewHeaderFooterView {
     
     @IBOutlet weak var typeImageView: UIImageView!
     @IBOutlet weak var dateLabel: UILabel!
+    @IBOutlet weak var subtitleLabel: UILabel!
+    @IBOutlet weak var pointsLabel: UILabel!
     @IBOutlet weak var expandButton: UIButton!
     @IBOutlet weak var stackView: UIStackView!
     @IBOutlet weak var topBorder: UIView!

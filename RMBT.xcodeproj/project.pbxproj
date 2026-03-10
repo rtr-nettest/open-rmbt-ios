@@ -205,6 +205,7 @@
 		E9555EA32727D3DE003547B0 /* MainStoryboard.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E9555EA22727D3DE003547B0 /* MainStoryboard.storyboard */; };
 		E9555EA52727D413003547B0 /* TestStoryboard.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E9555EA42727D413003547B0 /* TestStoryboard.storyboard */; };
 		E9555EA62727D478003547B0 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = E9555EA82727D478003547B0 /* Localizable.strings */; };
+		AA000001303A000000000001 /* Localizable.stringsdict in Resources */ = {isa = PBXBuildFile; fileRef = AA000001303A000000000004 /* Localizable.stringsdict */; };
 		E9555EAC2727D49C003547B0 /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E9555EAA2727D49C003547B0 /* Metal.framework */; };
 		E9555EAD2727D49C003547B0 /* MetalKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E9555EAB2727D49C003547B0 /* MetalKit.framework */; };
 		E9555EAF2727D4B1003547B0 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E9555EAE2727D4B0003547B0 /* CoreServices.framework */; };
@@ -569,6 +570,9 @@
 		E9555EA22727D3DE003547B0 /* MainStoryboard.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = MainStoryboard.storyboard; sourceTree = "<group>"; };
 		E9555EA42727D413003547B0 /* TestStoryboard.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = TestStoryboard.storyboard; sourceTree = "<group>"; };
 		E9555EA72727D478003547B0 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		AA000001303A000000000002 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = en; path = en.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
+		AA000001303A000000000003 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = Base; path = Base.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
+		AA000001303A000000000005 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = de; path = de.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
 		E9555EAA2727D49C003547B0 /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
 		E9555EAB2727D49C003547B0 /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = System/Library/Frameworks/MetalKit.framework; sourceTree = SDKROOT; };
 		E9555EAE2727D4B0003547B0 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
@@ -1112,6 +1116,7 @@
 				E959548226E4F17D004EA6D9 /* Fonts */,
 				C70C178B17D7BFC400F55964 /* Images.xcassets */,
 				E9555EA82727D478003547B0 /* Localizable.strings */,
+				AA000001303A000000000004 /* Localizable.stringsdict */,
 				C7F3FB35179CC86900E336CF /* terms_conditions_long.html */,
 				C783F68D1EDC7EB4001CB2F9 /* loop_mode_info.html */,
 				C783F68F1EDC7EB4001CB2F9 /* loop_mode_info2.html */,
@@ -1835,6 +1840,7 @@
 				C7BC5C731F747A9E00A91F0F /* Launch Screen.storyboard in Resources */,
 				E93FB0EF26F39A7B00DD24CD /* RMBTHistoryQoSSingleResultCell.xib in Resources */,
 				E9555EA62727D478003547B0 /* Localizable.strings in Resources */,
+				AA000001303A000000000001 /* Localizable.stringsdict in Resources */,
 				E9E993DE26EB24AE00E7EED6 /* RMBTNetInfoItemtCell.xib in Resources */,
 				E9555EA32727D3DE003547B0 /* MainStoryboard.storyboard in Resources */,
 				E959549A26E4F17E004EA6D9 /* Roboto-BlackItalic.ttf in Resources */,
@@ -2282,6 +2288,16 @@
 				E9C13F92272C28CD00DA60D4 /* de */,
 			);
 			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+		AA000001303A000000000004 /* Localizable.stringsdict */ = {
+			isa = PBXVariantGroup;
+			children = (
+				AA000001303A000000000002 /* en */,
+				AA000001303A000000000003 /* Base */,
+				AA000001303A000000000005 /* de */,
+			);
+			name = Localizable.stringsdict;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
