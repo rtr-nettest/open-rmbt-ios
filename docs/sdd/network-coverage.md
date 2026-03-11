@@ -120,6 +120,13 @@ High‑level flow
 - Each tick either initiates a UDP ping session (if needed) or sends a ping within the current session.
 - Errors yield `.error` pings except when the error requires reinitialization, in which case nothing is emitted on that tick and a reinit is scheduled.
 
+UDP transport
+- The UDP transport is abstracted behind the `UDPConnectable` protocol (`send(data:)` is enqueue‑only / synchronous; `receive()` is async).
+- Two concrete implementations exist:
+  - `AsyncSocketUDPConnection` (default): unconnected `GCDAsyncUdpSocket` that binds to an ephemeral local port and sends each datagram with an explicit destination host/port. This accepts replies from any server source address, which is required on IPv6 where the server may respond from a different address than the one the client targeted.
+  - `NWUDPConnection`: connected `NWConnection`‑based transport retained for comparison and debugging. Not used by default because a connected UDP endpoint drops replies arriving from a different IPv6 source address.
+- Response validity is determined by protocol fields and sequence/token semantics, not by source endpoint identity.
+
 UDP session and protocol
 - `UDPPingSession` (actor) encapsulates the RTR UDP ping protocol.
 - Request packet: ASCII `"RP01"` + 32‑bit big‑endian sequence + Base64‑decoded token bytes.
@@ -127,6 +134,7 @@ UDP session and protocol
   - `RR01` with matching sequence → ping succeeds.
   - `RE01` with matching sequence → fail with `needsReinitialization`.
   - `RE01` with unmatched sequence (incl. seq 0x0) while any ping is pending → treat as global reinit signal; all pending pings fail with `needsReinitialization`.
+- Pending request registration happens before the send so that a fast reply cannot arrive before the continuation is stored.
 - Timeouts: pending pings exceeding `timeoutIntervalMs` (default 1000 ms) are completed with `timedOut`.
 - UDP connection start parameters come from the coverage request (host/port/ip version). `ipVersion` may be nil.
 

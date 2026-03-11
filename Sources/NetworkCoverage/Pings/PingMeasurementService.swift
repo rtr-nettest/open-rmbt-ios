@@ -75,15 +75,18 @@ struct PingMeasurementService {
 
                             // Check session timeout
                             if let limit = sessionMaxDuration(), let sStart = sessionStartDate, currentDate.timeIntervalSince(sStart) >= limit {
+                                Log.logger.info("UDPPing: Session timeout reached (\(limit)s elapsed since \(sStart)), requesting reinitialisation")
                                 reinitializeSession()
                             }
 
                             switch pingSessionState {
                             case .needsInitiation:
+                                Log.logger.info("UDPPing: Initiating new ping session")
                                 pingSessionState = .inProgress
                                 let session = try await pingSender.initiatePingSession()
                                 pingSessionState = .finished(session)
                                 sessionStartDate = currentDate
+                                Log.logger.info("UDPPing: Ping session initiated successfully")
                             case .finished(let session):
                                 if let result = await pingResult(
                                     sender: pingSender,
@@ -165,6 +168,7 @@ struct PingMeasurementService {
         }
         if let capturedError {
             if capturedError == .needsReinitialization {
+                Log.logger.info("UDPPing: Server responded with reinitialisation request (RE01), will start new session")
                 reinitalizeSession()
                 return nil
             } else {

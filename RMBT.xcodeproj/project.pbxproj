@@ -55,6 +55,7 @@
 		49EDC7432EAA2E000009D9A6 /* NetworkCoverageViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC73C2EAA2E000009D9A6 /* NetworkCoverageViewModelTests.swift */; };
 		49EDC7452EAA2E000009D9A6 /* CoverageMeasurementSessionInitializerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC73B2EAA2E000009D9A6 /* CoverageMeasurementSessionInitializerTests.swift */; };
 		49EDC7462EAA2E000009D9A6 /* UDPPingSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC7382EAA2E000009D9A6 /* UDPPingSessionTests.swift */; };
+		49FBC0012F00A0000009D9A6 /* AsyncSocketUDPConnectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49FBC0002F00A0000009D9A6 /* AsyncSocketUDPConnectionTests.swift */; };
 		49EDC7852EAA35630009D9A6 /* CurrentRadioTechnologyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC7632EAA35630009D9A6 /* CurrentRadioTechnologyService.swift */; };
 		49EDC7862EAA35630009D9A6 /* CoverageResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC77F2EAA35630009D9A6 /* CoverageResultView.swift */; };
 		49EDC7872EAA35630009D9A6 /* PingMeasurementService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC7762EAA35630009D9A6 /* PingMeasurementService.swift */; };
@@ -84,8 +85,10 @@
 		49EDC7A12EAA35630009D9A6 /* AsynchronousSequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC7652EAA35630009D9A6 /* AsynchronousSequence.swift */; };
 		49EDC7A22EAA35630009D9A6 /* CoverageHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC75D2EAA35630009D9A6 /* CoverageHeader.swift */; };
 		49F976802B0B3E880098C4CC /* RMBTConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49C86FDC2AFBBF1500663CE2 /* RMBTConfig.swift */; };
+		4DB4791A3F5C244D745CBAD6 /* NWUDPConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 008286A33D9AC4D0BF3936B3 /* NWUDPConnection.swift */; };
 		520219059FE77FE975227F1E /* CoverageHistoryDetailServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E95B2179B357FF985E9D9D7 /* CoverageHistoryDetailServiceTests.swift */; };
 		7E9819F45E7330372FF7FDF1 /* Pods_RMBTTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34EAAD260B73771684B942BA /* Pods_RMBTTests.framework */; };
+		AA000001303A000000000001 /* Localizable.stringsdict in Resources */ = {isa = PBXBuildFile; fileRef = AA000001303A000000000004 /* Localizable.stringsdict */; };
 		C573F2A5175281D300C728FC /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C573F2A4175281D300C728FC /* MapKit.framework */; };
 		C573F2B1175294A500C728FC /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C573F2B0175294A500C728FC /* CoreLocation.framework */; };
 		C5DEB476176364B100187C94 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C5DEB475176364B100187C94 /* AVFoundation.framework */; };
@@ -107,6 +110,7 @@
 		C7F08F6A1769F37700741844 /* CoreTelephony.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7F08F691769F37600741844 /* CoreTelephony.framework */; };
 		C7F3FB33179CC86900E336CF /* terms_conditions_long.html in Resources */ = {isa = PBXBuildFile; fileRef = C7F3FB35179CC86900E336CF /* terms_conditions_long.html */; };
 		C7F599A71A2A81940020ADC4 /* RMBTHistoryIndexCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = C7F599A61A2A81940020ADC4 /* RMBTHistoryIndexCell.xib */; };
+		E0B12E597C005AE52379D499 /* AsyncSocketUDPConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08375CB881FC7003A0FCBF87 /* AsyncSocketUDPConnection.swift */; };
 		E91316AE26AD72F200368DCD /* RMBTTOSViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E91316AD26AD72F200368DCD /* RMBTTOSViewController.swift */; };
 		E91316B026AD95B300368DCD /* RMBTTOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = E91316AF26AD95B300368DCD /* RMBTTOS.swift */; };
 		E91316B226AD966300368DCD /* UserDefaults+Additions.swift in Sources */ = {isa = PBXBuildFile; fileRef = E91316B126AD966300368DCD /* UserDefaults+Additions.swift */; };
@@ -205,7 +209,6 @@
 		E9555EA32727D3DE003547B0 /* MainStoryboard.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E9555EA22727D3DE003547B0 /* MainStoryboard.storyboard */; };
 		E9555EA52727D413003547B0 /* TestStoryboard.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E9555EA42727D413003547B0 /* TestStoryboard.storyboard */; };
 		E9555EA62727D478003547B0 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = E9555EA82727D478003547B0 /* Localizable.strings */; };
-		AA000001303A000000000001 /* Localizable.stringsdict in Resources */ = {isa = PBXBuildFile; fileRef = AA000001303A000000000004 /* Localizable.stringsdict */; };
 		E9555EAC2727D49C003547B0 /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E9555EAA2727D49C003547B0 /* Metal.framework */; };
 		E9555EAD2727D49C003547B0 /* MetalKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E9555EAB2727D49C003547B0 /* MetalKit.framework */; };
 		E9555EAF2727D4B1003547B0 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E9555EAE2727D4B0003547B0 /* CoreServices.framework */; };
@@ -355,6 +358,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		008286A33D9AC4D0BF3936B3 /* NWUDPConnection.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NWUDPConnection.swift; sourceTree = "<group>"; };
+		08375CB881FC7003A0FCBF87 /* AsyncSocketUDPConnection.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AsyncSocketUDPConnection.swift; sourceTree = "<group>"; };
 		09BF4B6D48151BE0513DA599 /* Pods-RMBTTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RMBTTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-RMBTTests/Pods-RMBTTests.debug.xcconfig"; sourceTree = "<group>"; };
 		1C605E59889E3DF77EFDC8CF /* Pods-RMBTTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RMBTTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-RMBTTests/Pods-RMBTTests.release.xcconfig"; sourceTree = "<group>"; };
 		1F9C078F216F751C00F1FC10 /* RMBT.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RMBT.entitlements; sourceTree = "<group>"; };
@@ -404,6 +409,7 @@
 		49EDC7322EAA2E000009D9A6 /* CoverageTestDetailsModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverageTestDetailsModelTests.swift; sourceTree = "<group>"; };
 		49EDC7362EAA2E000009D9A6 /* ResenderSessionBasedTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResenderSessionBasedTests.swift; sourceTree = "<group>"; };
 		49EDC7382EAA2E000009D9A6 /* UDPPingSessionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UDPPingSessionTests.swift; sourceTree = "<group>"; };
+		49FBC0002F00A0000009D9A6 /* AsyncSocketUDPConnectionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncSocketUDPConnectionTests.swift; sourceTree = "<group>"; };
 		49EDC7392EAA2E000009D9A6 /* UDPPingsSequenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UDPPingsSequenceTests.swift; sourceTree = "<group>"; };
 		49EDC73B2EAA2E000009D9A6 /* CoverageMeasurementSessionInitializerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverageMeasurementSessionInitializerTests.swift; sourceTree = "<group>"; };
 		49EDC73C2EAA2E000009D9A6 /* NetworkCoverageViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkCoverageViewModelTests.swift; sourceTree = "<group>"; };
@@ -439,6 +445,9 @@
 		89CA21386C488DD817CA1DC2 /* Pods-RMBT.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RMBT.debug.xcconfig"; path = "Pods/Target Support Files/Pods-RMBT/Pods-RMBT.debug.xcconfig"; sourceTree = "<group>"; };
 		9E95B2179B357FF985E9D9D7 /* CoverageHistoryDetailServiceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CoverageHistoryDetailServiceTests.swift; sourceTree = "<group>"; };
 		A0C545CF605E364BCA4F45EA /* Pods-RMBTTest.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RMBTTest.debug.xcconfig"; path = "Pods/Target Support Files/Pods-RMBTTest/Pods-RMBTTest.debug.xcconfig"; sourceTree = "<group>"; };
+		AA000001303A000000000002 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = en; path = en.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
+		AA000001303A000000000003 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = Base; path = Base.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
+		AA000001303A000000000005 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = de; path = de.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
 		B14EBFEF9713BCFE2072175F /* Pods-RMBTTest.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RMBTTest.release.xcconfig"; path = "Pods/Target Support Files/Pods-RMBTTest/Pods-RMBTTest.release.xcconfig"; sourceTree = "<group>"; };
 		C573F2A4175281D300C728FC /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
 		C573F2B0175294A500C728FC /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
@@ -570,9 +579,6 @@
 		E9555EA22727D3DE003547B0 /* MainStoryboard.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = MainStoryboard.storyboard; sourceTree = "<group>"; };
 		E9555EA42727D413003547B0 /* TestStoryboard.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = TestStoryboard.storyboard; sourceTree = "<group>"; };
 		E9555EA72727D478003547B0 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
-		AA000001303A000000000002 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = en; path = en.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
-		AA000001303A000000000003 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = Base; path = Base.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
-		AA000001303A000000000005 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = de; path = de.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
 		E9555EAA2727D49C003547B0 /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
 		E9555EAB2727D49C003547B0 /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = System/Library/Frameworks/MetalKit.framework; sourceTree = SDKROOT; };
 		E9555EAE2727D4B0003547B0 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
@@ -835,6 +841,7 @@
 		49EDC73A2EAA2E000009D9A6 /* Pings */ = {
 			isa = PBXGroup;
 			children = (
+				49FBC0002F00A0000009D9A6 /* AsyncSocketUDPConnectionTests.swift */,
 				49EDC7382EAA2E000009D9A6 /* UDPPingSessionTests.swift */,
 				49EDC7392EAA2E000009D9A6 /* UDPPingsSequenceTests.swift */,
 			);
@@ -928,6 +935,8 @@
 				49EDC7762EAA35630009D9A6 /* PingMeasurementService.swift */,
 				49EDC7772EAA35630009D9A6 /* UDPConnection.swift */,
 				49EDC7782EAA35630009D9A6 /* UDPPingSession.swift */,
+				008286A33D9AC4D0BF3936B3 /* NWUDPConnection.swift */,
+				08375CB881FC7003A0FCBF87 /* AsyncSocketUDPConnection.swift */,
 			);
 			path = Pings;
 			sourceTree = "<group>";
@@ -1975,6 +1984,7 @@
 				49EDC7432EAA2E000009D9A6 /* NetworkCoverageViewModelTests.swift in Sources */,
 				49EDC7452EAA2E000009D9A6 /* CoverageMeasurementSessionInitializerTests.swift in Sources */,
 				49EDC7462EAA2E000009D9A6 /* UDPPingSessionTests.swift in Sources */,
+				49FBC0012F00A0000009D9A6 /* AsyncSocketUDPConnectionTests.swift in Sources */,
 				E92E07B8277B4B4F008143FE /* RMBTProgressTest.swift in Sources */,
 				492851BC2ED66688005811D0 /* NetworkCoverageIntegrationTests.swift in Sources */,
 				E92E07BC277B4E92008143FE /* RMBTThroughputHistoryTest.swift in Sources */,
@@ -2223,6 +2233,8 @@
 				E9B51CC627240B84006ED0C7 /* UIApplication+Additions.swift in Sources */,
 				E930769926CE247F0046A17B /* RMBTMapViewController.swift in Sources */,
 				36933A75274FBF00009A52BE /* RMBTTestDetailCell.swift in Sources */,
+				4DB4791A3F5C244D745CBAD6 /* NWUDPConnection.swift in Sources */,
+				E0B12E597C005AE52379D499 /* AsyncSocketUDPConnection.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2248,6 +2260,16 @@
 				3678AA80291E35DC0059D6CB /* de */,
 			);
 			name = "RMBT-InfoPlist.strings";
+			sourceTree = "<group>";
+		};
+		AA000001303A000000000004 /* Localizable.stringsdict */ = {
+			isa = PBXVariantGroup;
+			children = (
+				AA000001303A000000000002 /* en */,
+				AA000001303A000000000003 /* Base */,
+				AA000001303A000000000005 /* de */,
+			);
+			name = Localizable.stringsdict;
 			sourceTree = "<group>";
 		};
 		C783F68D1EDC7EB4001CB2F9 /* loop_mode_info.html */ = {
@@ -2288,16 +2310,6 @@
 				E9C13F92272C28CD00DA60D4 /* de */,
 			);
 			name = Localizable.strings;
-			sourceTree = "<group>";
-		};
-		AA000001303A000000000004 /* Localizable.stringsdict */ = {
-			isa = PBXVariantGroup;
-			children = (
-				AA000001303A000000000002 /* en */,
-				AA000001303A000000000003 /* Base */,
-				AA000001303A000000000005 /* de */,
-			);
-			name = Localizable.stringsdict;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */

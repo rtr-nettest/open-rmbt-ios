@@ -137,7 +137,7 @@ struct NetworkCoverageFactory {
             clock: clock,
             pingSender: UDPPingSession(
                 sessionInitiator: sessionInitializer,
-                udpConnection: UDPConnection(),
+                udpConnection: AsyncSocketUDPConnection(),
                 timeoutIntervalMs: 1000,
                 now: RMBTHelpers.RMBTCurrentNanos
             ),

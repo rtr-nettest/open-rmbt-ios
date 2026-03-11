@@ -33,6 +33,13 @@ Feature: UDP ping session behavior for RTR NetTest coverage
     When t >= t0 + 7200 seconds
     Then the app shall stop the coverage measurement and show results
 
+  # UDP transport requirements
+  Scenario: UDP transport must be unconnected
+    Given the server may respond to a UDP ping from a different IP address than the destination
+    When the client sends a UDP ping to the server address returned by ping_host
+    Then the client shall accept the reply regardless of which server source address it arrives from
+    And response validity shall be determined only by protocol fields (RR01/RE01) and sequence number
+
   # UDP packet protocol mapping (Appendix: Specification Ping)
   Scenario: Successful ping response (RR01)
     Given a UDP request was sent with protocol "RP01", a 32-bit sequence number, and the Base64 token

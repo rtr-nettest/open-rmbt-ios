@@ -64,11 +64,13 @@ actor UDPPingSession {
 
     func initiatePingSession() async throws -> PingSessionToken {
         let sessionInitiation = try await sessionInitiator.initiate()
+        Log.logger.info("UDPPingSession: Starting UDP connection to \(sessionInitiation.serverAddress):\(sessionInitiation.serverPort) (ipVersion: \(sessionInitiation.ipVersion?.description ?? "any"))")
         try await udpConnection.start(
             host: sessionInitiation.serverAddress,
             port: sessionInitiation.serverPort,
             ipVersion: sessionInitiation.ipVersion
         )
+        Log.logger.info("UDPPingSession: UDP connection started")
         return sessionInitiation.token
     }
 
@@ -77,29 +79,44 @@ actor UDPPingSession {
 
         sequenceNumber &+= 1
         let currentSequence = sequenceNumber
+        let message = try makePingMessage(sequence: currentSequence, authToken: authToken)
+
+        Log.logger.debug("UDPPingSession: Sending ping with sequence number \(currentSequence), auth token \(authToken.prefix(4))...\(authToken.suffix(4))")
+
+        try await awaitPingResponse(sequence: currentSequence, message: message)
+    }
+
+    // MARK: - Private helpers
+
+    private func makePingMessage(sequence: UInt32, authToken: PingSessionToken) throws(PingSendingError) -> Data {
         var message = Data()
         message.append(Const.requestProtocol.data(using: .ascii)!)
-        message.append(withUnsafeBytes(of: currentSequence.bigEndian) { Data($0) })
+        message.append(withUnsafeBytes(of: sequence.bigEndian) { Data($0) })
 
         guard let tokenBytes = Data(base64Encoded: authToken) else {
             throw .needsReinitialization
         }
         message.append(tokenBytes)
+        return message
+    }
 
-        do {
-            try await udpConnection.send(data: message)
-        } catch {
-            throw .networkIssue
-        }
-
+    private func awaitPingResponse(sequence: UInt32, message: Data) async throws(PingSendingError) {
         do {
             try await withTaskCancellationHandler {
                 try await withCheckedThrowingContinuation { continuation in
-                    self.continuations[currentSequence] = .init(sentAt: self.now(), continuation: continuation)
+                    self.continuations[sequence] = .init(sentAt: self.now(), continuation: continuation)
                     self.startReceiveLoopIfNeeded()
+
+                    do {
+                        try self.udpConnection.send(data: message)
+                    } catch {
+                        self.continuations[sequence] = nil
+                        Log.logger.warning("UDPPingSession: Send failed with error: \(error)")
+                        continuation.resume(throwing: PingSendingError.networkIssue)
+                    }
                 }
             } onCancel: {
-                Task { await self.cancelContinuation(sequence: currentSequence, error: CancellationError()) }
+                Task { await self.cancelContinuation(sequence: sequence, error: CancellationError()) }
             }
         } catch let error as PingSendingError {
             throw error
@@ -125,6 +142,7 @@ actor UDPPingSession {
             } catch is CancellationError {
                 break
             } catch {
+                Log.logger.warning("UDPPingSession: Receive loop failed with error: \(error), failing \(continuations.count) pending request(s)")
                 failPendingRequests(with: .networkIssue)
                 break
             }
@@ -153,6 +171,8 @@ actor UDPPingSession {
         let sequenceNumber = response[4...7].withUnsafeBytes {
             $0.load(as: UInt32.self).bigEndian
         }
+
+        Log.logger.debug("UDPPingSession: Received \(protocolName) response for sequence \(sequenceNumber).")
 
         switch protocolName {
         case Const.responseErrorProtocol:
@@ -190,8 +210,12 @@ actor UDPPingSession {
         }
     }
 
-    deinit {
+    nonisolated deinit {
+        // These accesses are safe: at deinit time no other code can reference
+        // this actor, so there is no data race. Swift 5 mode allows it with a warning.
+        Log.logger.info("UDPPingSession: Deinit, cancelling \(continuations.count) pending request(s)")
         failPendingRequests(with: .networkIssue)
+        udpConnection.cancel()
         receiverTask?.cancel()
     }
 }
