@@ -47,7 +47,7 @@ struct PersistedFencesResender {
             let anchorAtDate = session.anchorAt.map { Date(timeIntervalSince1970: Double($0) / 1_000_000) }
             let finalizedAtDate = session.finalizedAt.map { Date(timeIntervalSince1970: Double($0) / 1_000_000) }
 
-            Log.logger.info("Session[\(index)]: testUUID=\(session.testUUID ?? "nil"), loopUUID=\(session.loopUUID ?? "nil"), fenceCount=\(session.fences.count), startedAt=\(startedAtDate), anchorAt=\(anchorAtDate?.description ?? "nil"), finalizedAt=\(finalizedAtDate?.description ?? "nil")")
+            Log.logger.info("Session[\(index)]: testUUID=\(session.testUUID ?? "nil"), fenceCount=\(session.fences.count), startedAt=\(startedAtDate), anchorAt=\(anchorAtDate?.description ?? "nil"), finalizedAt=\(finalizedAtDate?.description ?? "nil")")
 
             guard let uuid = session.testUUID, let anchorAt = session.anchorAt else {
                 Log.logger.warning("Skipping session without UUID or anchor: testUUID=\(session.testUUID ?? "nil"), anchorAt=\(session.anchorAt?.description ?? "nil")")

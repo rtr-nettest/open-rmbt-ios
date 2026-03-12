@@ -18,15 +18,18 @@ struct NetworkCoverageFactory {
     private let database: UserDatabase
     private let maxResendAge: TimeInterval
     private let dateNow: () -> Date
+    private let coverageAPIService: any CoverageAPIService
 
     init(
         database: UserDatabase = .shared,
         maxResendAge: TimeInterval = Self.persistenceMaxAgeInterval,
-        dateNow: @escaping () -> Date = Date.init
+        dateNow: @escaping () -> Date = Date.init,
+        coverageAPIService: some CoverageAPIService = RMBTControlServer.shared
     ) {
         self.database = database
         self.maxResendAge = maxResendAge
         self.dateNow = dateNow
+        self.coverageAPIService = coverageAPIService
     }
 
     var persistedFencesSender: PersistedFencesResender {
@@ -98,7 +101,7 @@ struct NetworkCoverageFactory {
     func makeSessionInitializer(onlineStatusService: OnlineStatusService? = nil) -> OnlineAwareSessionInitializer {
         let core = CoreSessionInitializer(
             now: dateNow,
-            coverageAPIService: RMBTControlServer.shared
+            coverageAPIService: coverageAPIService
         )
         let withPersistence = PersistenceAwareSessionInitializer(
             wrapped: core,
@@ -203,9 +206,7 @@ private actor MockFencePersistenceService: FencePersistenceService {
     func save(_ fence: Fence) throws {}
     func sessionStarted(at date: Date) throws {}
     func sessionFinalized(at date: Date) throws {}
-    func beginSession(startedAt: Date, loopUUID: String?) throws {}
     func assignTestUUIDAndAnchor(_ uuid: String, anchorNow: Date) throws {}
-    func finalizeCurrentSession(at date: Date) throws {}
     func deleteFinalizedNilUUIDSessions() throws {}
 }
 

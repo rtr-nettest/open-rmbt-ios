@@ -9,17 +9,20 @@ import Foundation
 
 @Suite("CoverageMeasurementSessionInitializer Tests")
 struct CoverageMeasurementSessionInitializerTests {
-    @Test("WHEN reinitialized THEN previous test UUID is sent as loop UUID")
-    func whenReinitialized_thenLoopUUIDIsChainedToPreviousTestUUID() async throws {
-        let (sut, apiSpy) = makeSUT(testUUIDs: ["T1", "T2"]) 
+    @Test("WHEN reinitialized THEN previous loop UUID is sent as loop UUID")
+    func whenReinitialized_thenLoopUUIDIsChainedToPreviousLoopUUID() async throws {
+        let (sut, apiSpy) = makeSUT(
+            testUUIDs: ["T1", "T2"],
+            loopUUIDs: ["L1", "L2"]
+        )
 
         // First initiation — no loop_uuid
         _ = try await sut.initiate()
         #expect(apiSpy.capturedLoopUUIDs == [nil])
 
-        // Second initiation — must pass loop_uuid = previous test_uuid (T1)
+        // Second initiation — must pass loop_uuid = previous response loop_uuid (L1)
         _ = try await sut.initiate()
-        #expect(apiSpy.capturedLoopUUIDs == [nil, "T1"])
+        #expect(apiSpy.capturedLoopUUIDs == [nil, "L1"])
     }
 
     @Test("WHEN starting sessions THEN lastIPVersion reflects server response and count increases")
@@ -71,27 +74,40 @@ struct CoverageMeasurementSessionInitializerTests {
 
 // MARK: - Test Helpers
 
-private func makeSUT(testUUIDs: [String], ipVersions: [Int?] = []) -> (CoverageMeasurementSessionInitializer, ControlServerSpy) {
-    let spy = ControlServerSpy(enqueuedTestUUIDs: testUUIDs, enqueuedIpVersions: ipVersions)
+private func makeSUT(
+    testUUIDs: [String],
+    loopUUIDs: [String?] = [],
+    ipVersions: [Int?] = []
+) -> (CoverageMeasurementSessionInitializer, ControlServerSpy) {
+    let spy = ControlServerSpy(
+        enqueuedTestUUIDs: testUUIDs,
+        enqueuedLoopUUIDs: loopUUIDs,
+        enqueuedIpVersions: ipVersions
+    )
     let database = UserDatabase(useInMemoryStore: true)
-    let factory = NetworkCoverageFactory(database: database, dateNow: { Date() })
+    let factory = NetworkCoverageFactory(
+        database: database,
+        dateNow: { Date() },
+        coverageAPIService: spy
+    )
     let sut = factory.makeSessionInitializer(onlineStatusService: nil)
 
-    // Replace the core initializer's API service with our spy by creating a new composition
-    let core = CoreSessionInitializer(now: { Date() }, coverageAPIService: spy)
-    let withPersistence = PersistenceAwareSessionInitializer(wrapped: core, database: database)
-    let withOnline = OnlineAwareSessionInitializer(wrapped: withPersistence, onlineStatusService: nil, now: { Date() })
-
-    return (withOnline, spy)
+    return (sut, spy)
 }
 
 private final class ControlServerSpy: CoverageAPIService {
     var enqueuedTestUUIDs: [String]
+    var enqueuedLoopUUIDs: [String?]
     var capturedLoopUUIDs: [String?] = []
     var enqueuedIpVersions: [Int?]
 
-    init(enqueuedTestUUIDs: [String], enqueuedIpVersions: [Int?] = []) {
+    init(
+        enqueuedTestUUIDs: [String],
+        enqueuedLoopUUIDs: [String?] = [],
+        enqueuedIpVersions: [Int?] = []
+    ) {
         self.enqueuedTestUUIDs = enqueuedTestUUIDs
+        self.enqueuedLoopUUIDs = enqueuedLoopUUIDs
         self.enqueuedIpVersions = enqueuedIpVersions
     }
 
@@ -104,6 +120,7 @@ private final class ControlServerSpy: CoverageAPIService {
         capturedLoopUUIDs.append(loopUUID)
         let response = SignalRequestResponse()
         response.testUUID = enqueuedTestUUIDs.removeFirst()
+        response.loopUUID = enqueuedLoopUUIDs.isEmpty ? nil : enqueuedLoopUUIDs.removeFirst()
         response.pingHost = "host"
         response.pingPort = "444"
         response.pingToken = "Z7kKKZqSYU/j7nSGbjoRLw=="
@@ -124,6 +141,7 @@ private final class OfflineThenOnlineControlServerSpy: CoverageAPIService {
         }
         let response = SignalRequestResponse()
         response.testUUID = "ONLINE-UUID"
+        response.loopUUID = "ONLINE-LOOP-UUID"
         response.pingHost = "host"
         response.pingPort = "444"
         response.pingToken = "Z7kKKZqSYU/j7nSGbjoRLw=="

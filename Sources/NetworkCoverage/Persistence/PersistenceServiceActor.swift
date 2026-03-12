@@ -24,7 +24,6 @@ actor PersistenceServiceActor: FencePersistenceService {
     func sessionStarted(at date: Date) throws {
         let session = PersistentCoverageSession(
             testUUID: nil,
-            loopUUID: nil,
             startedAt: date.microsecondsTimestamp,
             anchorAt: nil,
             finalizedAt: nil
@@ -67,7 +66,6 @@ actor PersistenceServiceActor: FencePersistenceService {
                 }
                 let newSession = PersistentCoverageSession(
                     testUUID: testUUID,
-                    loopUUID: nil,
                     startedAt: anchorTimestamp,
                     anchorAt: anchorTimestamp,
                     finalizedAt: nil
@@ -78,7 +76,6 @@ actor PersistenceServiceActor: FencePersistenceService {
             Log.logger.info("Creating new session with UUID: \(testUUID)")
             let session = PersistentCoverageSession(
                 testUUID: testUUID,
-                loopUUID: nil,
                 startedAt: anchorTimestamp,
                 anchorAt: anchorTimestamp,
                 finalizedAt: nil

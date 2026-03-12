@@ -195,7 +195,7 @@ extension Duration {
 
 extension OnlineAwareSessionInitializer: UDPPingSession.SessionInitiating {
     func initiate() async throws -> UDPPingSession.SessionInitiation {
-        let sessionData = try await startNewSession(loopID: lastTestUUID).udpPing
+        let sessionData = try await startNewSession(loopID: lastLoopUUID).udpPing
         return .init(
             serverAddress: sessionData.pingHost,
             serverPort: sessionData.pingPort,

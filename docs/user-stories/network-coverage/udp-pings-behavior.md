@@ -12,9 +12,9 @@ Feature: UDP ping session behavior for RTR NetTest coverage
     And it shall remember test_uuid as the current session id
 
   Scenario: Chain sessions via loop_uuid on reinitialization
-    Given a previous session with test_uuid "T1"
+    Given a previous session response carried loop_uuid "L1"
     When a new /coverageRequest is needed for reinitialization
-    Then the request payload shall include loop_uuid set to "T1"
+    Then the request payload shall include loop_uuid set to "L1"
     And the response test_uuid shall become the new current session id
 
   # Timed reinitialization per measurement window
@@ -68,16 +68,23 @@ Feature: UDP ping session behavior for RTR NetTest coverage
     Then fences collected under "T1" are submitted with test_uuid "T1"
     And any persisted fences from older sessions are resent in order of most recent finalization time first
 
-  # Offline start & anchored offsets (new)
-  Scenario: Start measurement offline and anchor offsets when session initializes
+  # Offline start & anchored offsets (current partial behavior)
+  Scenario: Persist fences before a session UUID exists
     Given the app starts a coverage measurement while offline
     And the app collects some fences before it can initialize with the server
-    When the app later goes online and /coverageRequest succeeds with test_uuid "T3"
-    Then the app anchors time zero at the moment of this initialization
-    And fences collected before that moment are submitted with negative offset_ms
-    And fences collected after that moment are submitted with positive offset_ms
-    And all fences are submitted with test_uuid "T3"
-    And if initialization fails again, the app retries automatically when connectivity is stable
+    Then those fences may exist under an unfinished persisted session without test_uuid
+
+  Scenario: Use the session anchor for offset_ms after a late UUID assignment
+    Given an unfinished persisted session contains fences collected before and after a later anchor time
+    When test_uuid "T3" and anchor_at are assigned to that session
+    Then resend shall encode fences collected before the anchor with negative offset_ms
+    And resend shall encode fences collected after the anchor with positive offset_ms
+
+  Scenario: Default production wiring does not wait for connectivity automatically
+    Given the app starts a coverage measurement while offline
+    When the initial /coverageRequest fails
+    Then the default production composition does not inject OnlineStatusService
+    And the measurement does not automatically wait for connectivity and continue within the same run
 
   # Multiple sub-sessions submission (new)
   Scenario: Submit multiple sub-sessions in one user-visible measurement

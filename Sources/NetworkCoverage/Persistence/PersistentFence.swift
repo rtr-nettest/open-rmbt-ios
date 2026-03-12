@@ -48,15 +48,13 @@ final class PersistentFence {
 final class PersistentCoverageSession {
     // Unique when non-nil; SwiftData doesn't support conditional uniqueness, so we rely on app logic.
     @Attribute(.unique) var testUUID: String?
-    var loopUUID: String?
     var startedAt: UInt64
     var anchorAt: UInt64?
     var finalizedAt: UInt64?
     @Relationship(deleteRule: .cascade) var fences: [PersistentFence] = []
 
-    init(testUUID: String? = nil, loopUUID: String? = nil, startedAt: UInt64, anchorAt: UInt64? = nil, finalizedAt: UInt64? = nil) {
+    init(testUUID: String? = nil, startedAt: UInt64, anchorAt: UInt64? = nil, finalizedAt: UInt64? = nil) {
         self.testUUID = testUUID
-        self.loopUUID = loopUUID
         self.startedAt = startedAt
         self.anchorAt = anchorAt
         self.finalizedAt = finalizedAt

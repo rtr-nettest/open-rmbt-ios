@@ -51,6 +51,7 @@ class CoreSessionInitializer {
     private let coverageAPIService: any CoverageAPIService
 
     private(set) var lastTestUUID: String?
+    private(set) var lastLoopUUID: String?
     private(set) var lastTestStartDate: Date?
     private(set) var maxCoverageSessionDuration: TimeInterval?
     private(set) var maxCoverageMeasurementDuration: TimeInterval?
@@ -71,6 +72,7 @@ class CoreSessionInitializer {
         let response = try await request(loopID: loopID)
 
         lastTestUUID = response.testUUID
+        lastLoopUUID = response.loopUUID
         lastTestStartDate = now()
         if let maxSessionSec = response.maxCoverageSessionSeconds {
             maxCoverageSessionDuration = TimeInterval(maxSessionSec)
@@ -91,7 +93,7 @@ class CoreSessionInitializer {
 
         return SessionCredentials(
             testID: response.testUUID,
-            loopID: loopID,
+            loopID: response.loopUUID,
             udpPing: .init(
                 pingToken: response.pingToken,
                 pingHost: response.pingHost,
@@ -124,6 +126,7 @@ class PersistenceAwareSessionInitializer {
     private let database: UserDatabase
 
     var lastTestUUID: String? { wrapped.lastTestUUID }
+    var lastLoopUUID: String? { wrapped.lastLoopUUID }
     var lastTestStartDate: Date? { wrapped.lastTestStartDate }
     var maxCoverageSessionDuration: TimeInterval? { wrapped.maxCoverageSessionDuration }
     var maxCoverageMeasurementDuration: TimeInterval? { wrapped.maxCoverageMeasurementDuration }
@@ -154,6 +157,7 @@ class OnlineAwareSessionInitializer {
     private let now: () -> Date
 
     var lastTestUUID: String? { wrapped.lastTestUUID }
+    var lastLoopUUID: String? { wrapped.lastLoopUUID }
     var lastTestStartDate: Date? { wrapped.lastTestStartDate }
     var maxCoverageSessionDuration: TimeInterval? { wrapped.maxCoverageSessionDuration }
     var maxCoverageMeasurementDuration: TimeInterval? { wrapped.maxCoverageMeasurementDuration }
@@ -249,6 +253,7 @@ class CoverageRequestRequest: BasicRequest {
 
 class SignalRequestResponse: BasicResponse {
     var testUUID: String = ""
+    var loopUUID: String?
     var pingToken: String = ""
     var pingHost: String = ""
     var pingPort: String = ""
@@ -260,6 +265,7 @@ class SignalRequestResponse: BasicResponse {
         super.mapping(map: map)
 
         testUUID <- map["test_uuid"]
+        loopUUID <- map["loop_uuid"]
         pingToken <- map["ping_token"]
         pingHost <- map["ping_host"]
         pingPort <- map["ping_port"]
