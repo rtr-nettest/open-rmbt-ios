@@ -34,12 +34,6 @@ struct PingResult: Hashable {
 }
 
 struct PingMeasurementService {
-    enum PingSessionInitiationState<T> {
-        case needsInitiation
-        case inProgress
-        case finished(T)
-    }
-
     static func pings2<T>(
         clock: some Clock<Duration>,
         pingSender: some PingSending<T>,
@@ -47,13 +41,7 @@ struct PingMeasurementService {
         frequency: Duration,
         sessionMaxDuration: @escaping () -> TimeInterval? = { nil }
     ) -> some PingsAsyncSequence {
-        var pingSessionState: PingSessionInitiationState<T> = .needsInitiation
-        var sessionStartDate: Date?
-
-        func reinitializeSession() {
-            pingSessionState = .needsInitiation
-            sessionStartDate = nil
-        }
+        let state = PingSessionStateController<T>()
 
         return AsyncStream { continuation in
             let start = clock.now
@@ -70,39 +58,45 @@ struct PingMeasurementService {
                     let nextInstant = tick.advanced(by: frequency)
 
                     Task {
+                        let action = await state.actionForTick(
+                            at: currentDate,
+                            sessionMaxDuration: sessionMaxDuration()
+                        )
+
                         do {
                             try Task.checkCancellation()
 
-                            // Check session timeout
-                            if let limit = sessionMaxDuration(), let sStart = sessionStartDate, currentDate.timeIntervalSince(sStart) >= limit {
-                                Log.logger.info("UDPPing: Session timeout reached (\(limit)s elapsed since \(sStart)), requesting reinitialisation")
-                                reinitializeSession()
-                            }
-
-                            switch pingSessionState {
-                            case .needsInitiation:
+                            switch action {
+                            case .initiate(let generation):
                                 Log.logger.info("UDPPing: Initiating new ping session")
-                                pingSessionState = .inProgress
                                 let session = try await pingSender.initiatePingSession()
-                                pingSessionState = .finished(session)
-                                sessionStartDate = currentDate
+                                await state.didInitiateSession(
+                                    session,
+                                    at: currentDate,
+                                    generation: generation
+                                )
                                 Log.logger.info("UDPPing: Ping session initiated successfully")
-                            case .finished(let session):
+                            case .send(let session, let generation):
                                 if let result = await pingResult(
                                     sender: pingSender,
                                     session: session,
                                     clock: clock,
                                     at: currentDate,
-                                    reinitalizeSession: reinitializeSession
+                                    reinitializeSession: {
+                                        await state.requestReinitialization(for: generation)
+                                    }
                                 ) {
                                     continuation.yield(result)
                                 }
-                            case .inProgress:
+                            case .skip:
                                 break
                             }
                         } catch is CancellationError {
                             continuation.finish()
                         } catch {
+                            if case .initiate(let generation) = action {
+                                await state.didFailInitiation(generation: generation)
+                            }
                             continuation.yield(PingResult(result: .error, timestamp: currentDate))
                         }
                     }
@@ -111,39 +105,6 @@ struct PingMeasurementService {
                     try await clock.sleep(until: nextInstant, tolerance: .milliseconds(1))
                 }
 
-                // Below is a different implementation which works as well - need to examine which one is better (after unit tests are in place)
-
-//                for await tick in chain(
-//                    [clock.now].async,
-//                    AsyncTimerSequence(interval: frequency, tolerance: .milliseconds(1), clock: clock)
-//                ) {
-//                    func currentDate() -> Date {
-//                        let duration = startInstant.duration(to: clock.now)
-//                        return startDate.advanced(by: TimeInterval(duration.milliseconds) / 1000)
-//                    }
-//                    do {
-//                        try Task.checkCancellation()
-//
-//                        switch pingSessionState {
-//                        case .needsInitiation:
-//                            pingSessionState = .inProgress
-//                            let session = try await pingSender.initiatePingSession()
-//                            pingSessionState = .finished(session)
-////                            continuation.yield(await pingResult(sender: pingSender, session: session, clock: clock, at: currentDate()))
-//                        case .finished(let session):
-//                            continuation.yield(await pingResult(sender: pingSender, session: session, clock: clock, at: currentDate()))
-//                        case .inProgress:
-//                            // session initiation in progress error, or do not yield anything until session is fully initialized
-//                            //continuation.yield(PingResult(result: .error, timestamp: now()))
-//                            break
-//                        }
-//                    } catch is CancellationError {
-//                        continuation.finish()
-//                    } catch {
-//                        // TODO: return invalid ping session error
-//                        continuation.yield(PingResult(result: .error, timestamp: currentDate()))
-//                    }
-//                }
             }
             continuation.onTermination = { _ in
                 task.cancel()
@@ -156,7 +117,7 @@ struct PingMeasurementService {
         session: T,
         clock: some Clock<Duration>,
         at date: Date,
-        reinitalizeSession: () -> Void
+        reinitializeSession: () async -> Void
     ) async -> PingResult? {
         var capturedError: PingSendingError? = nil
         let elapsed = await clock.measure {
@@ -169,7 +130,7 @@ struct PingMeasurementService {
         if let capturedError {
             if capturedError == .needsReinitialization {
                 Log.logger.info("UDPPing: Server responded with reinitialisation request (RE01), will start new session")
-                reinitalizeSession()
+                await reinitializeSession()
                 return nil
             } else {
                 return PingResult(result: .error, timestamp: date)
@@ -177,6 +138,76 @@ struct PingMeasurementService {
         } else {
             return PingResult(result: .interval(elapsed), timestamp: date)
         }
+    }
+}
+
+private actor PingSessionStateController<Session> {
+    enum TickAction {
+        case initiate(generation: Int)
+        case send(session: Session, generation: Int)
+        case skip
+    }
+
+    private enum State {
+        case needsInitiation
+        case inProgress(generation: Int)
+        case finished(session: Session, generation: Int, startedAt: Date)
+    }
+
+    private var state: State = .needsInitiation
+    private var nextGeneration = 0
+
+    func actionForTick(
+        at currentDate: Date,
+        sessionMaxDuration: TimeInterval?
+    ) -> TickAction {
+        if
+            case let .finished(_, _, startedAt) = state,
+            let sessionMaxDuration,
+            currentDate.timeIntervalSince(startedAt) >= sessionMaxDuration
+        {
+            Log.logger.info(
+                "UDPPing: Session timeout reached (\(sessionMaxDuration)s elapsed since \(startedAt)), requesting reinitialisation"
+            )
+            state = .needsInitiation
+        }
+
+        switch state {
+        case .needsInitiation:
+            nextGeneration += 1
+            let generation = nextGeneration
+            state = .inProgress(generation: generation)
+            return .initiate(generation: generation)
+        case .inProgress:
+            return .skip
+        case .finished(let session, let generation, _):
+            return .send(session: session, generation: generation)
+        }
+    }
+
+    func didInitiateSession(
+        _ session: Session,
+        at currentDate: Date,
+        generation: Int
+    ) {
+        guard case .inProgress(let currentGeneration) = state, currentGeneration == generation else {
+            return
+        }
+        state = .finished(session: session, generation: generation, startedAt: currentDate)
+    }
+
+    func didFailInitiation(generation: Int) {
+        guard case .inProgress(let currentGeneration) = state, currentGeneration == generation else {
+            return
+        }
+        state = .needsInitiation
+    }
+
+    func requestReinitialization(for generation: Int) {
+        guard case .finished(_, let currentGeneration, _) = state, currentGeneration == generation else {
+            return
+        }
+        state = .needsInitiation
     }
 }
 
