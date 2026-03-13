@@ -220,7 +220,7 @@ func expect(
     var capturedElements: [PingResult] = []
     var capturedInstants: [TestClock<Duration>.Instant] = []
     await confirmation(expectedCount: expectedElements.count) { confirmation in
-        Task {
+        let consumer = Task {
             for try await element in sut {
                 capturedInstants.append(clock.now)
                 capturedElements.append(element)
@@ -228,6 +228,8 @@ func expect(
             }
         }
         await clock.advance(by: totalDuration)
+        consumer.cancel()
+        _ = await consumer.result
     }
 
     #expect(capturedElements == expectedElements.map(\.1))
@@ -324,13 +326,27 @@ actor ReinitializationPingSenderSpy: PingSending {
 
     func initiatePingSession() async throws -> String {
         initiatePingSessionCalls += 1
-        let step = initiatePingSessionSteps.removeFirst()
+        guard let step = initiatePingSessionSteps.first else {
+            try await clock.sleep(for: .seconds(404))
+            return "unexpected-session"
+        }
+        initiatePingSessionSteps.removeFirst()
         try await clock.sleep(for: step.delay)
         return step.session
     }
 
     func sendPing(in session: String) async throws(PingSendingError) {
-        let step = sendPingSteps.removeFirst()
+        guard let step = sendPingSteps.first else {
+            do {
+                try await clock.sleep(for: .seconds(404))
+            } catch is CancellationError {
+                return
+            } catch {
+                return
+            }
+            return
+        }
+        sendPingSteps.removeFirst()
         do {
             try await clock.sleep(for: step.delay)
         } catch is CancellationError {

@@ -46,65 +46,72 @@ struct PingMeasurementService {
         return AsyncStream { continuation in
             let start = clock.now
             let startDate = now()
-//            let startInstant = clock.now
 
             let task = Task {
-                while true {
-                    if Task.isCancelled { break }
+                await withDiscardingTaskGroup { group in
+                    while !Task.isCancelled {
+                        let tick = clock.now
+                        let duration = start.duration(to: tick)
+                        let currentDate = startDate.advanced(by: TimeInterval(duration.milliseconds) / 1000)
+                        let nextInstant = tick.advanced(by: frequency)
 
-                    let tick = clock.now
-                    let duration = start.duration(to: tick)
-                    let currentDate = startDate.advanced(by: TimeInterval(duration.milliseconds) / 1000)
-                    let nextInstant = tick.advanced(by: frequency)
+                        group.addTask {
+                            let action = await state.actionForTick(
+                                at: currentDate,
+                                sessionMaxDuration: sessionMaxDuration()
+                            )
 
-                    Task {
-                        let action = await state.actionForTick(
-                            at: currentDate,
-                            sessionMaxDuration: sessionMaxDuration()
-                        )
+                            do {
+                                try Task.checkCancellation()
+
+                                switch action {
+                                case .initiate(let generation):
+                                    Log.logger.info("UDPPing: Initiating new ping session")
+                                    let session = try await pingSender.initiatePingSession()
+                                    await state.didInitiateSession(
+                                        session,
+                                        at: currentDate,
+                                        generation: generation
+                                    )
+                                    Log.logger.info("UDPPing: Ping session initiated successfully")
+                                case .send(let session, let generation):
+                                    if let result = await pingResult(
+                                        sender: pingSender,
+                                        session: session,
+                                        clock: clock,
+                                        at: currentDate,
+                                        reinitializeSession: {
+                                            await state.requestReinitialization(for: generation)
+                                        }
+                                    ) {
+                                        continuation.yield(result)
+                                    }
+                                case .skip:
+                                    break
+                                }
+                            } catch is CancellationError {
+                                return
+                            } catch {
+                                if case .initiate(let generation) = action {
+                                    await state.didFailInitiation(generation: generation)
+                                }
+                                continuation.yield(PingResult(result: .error, timestamp: currentDate))
+                            }
+                        }
 
                         do {
-                            try Task.checkCancellation()
-
-                            switch action {
-                            case .initiate(let generation):
-                                Log.logger.info("UDPPing: Initiating new ping session")
-                                let session = try await pingSender.initiatePingSession()
-                                await state.didInitiateSession(
-                                    session,
-                                    at: currentDate,
-                                    generation: generation
-                                )
-                                Log.logger.info("UDPPing: Ping session initiated successfully")
-                            case .send(let session, let generation):
-                                if let result = await pingResult(
-                                    sender: pingSender,
-                                    session: session,
-                                    clock: clock,
-                                    at: currentDate,
-                                    reinitializeSession: {
-                                        await state.requestReinitialization(for: generation)
-                                    }
-                                ) {
-                                    continuation.yield(result)
-                                }
-                            case .skip:
-                                break
-                            }
+                            try await clock.sleep(until: nextInstant, tolerance: .milliseconds(1))
                         } catch is CancellationError {
-                            continuation.finish()
+                            break
                         } catch {
-                            if case .initiate(let generation) = action {
-                                await state.didFailInitiation(generation: generation)
-                            }
-                            continuation.yield(PingResult(result: .error, timestamp: currentDate))
+                            break
                         }
                     }
 
-                    if Task.isCancelled { break }
-                    try await clock.sleep(until: nextInstant, tolerance: .milliseconds(1))
+                    group.cancelAll()
                 }
 
+                continuation.finish()
             }
             continuation.onTermination = { _ in
                 task.cancel()
