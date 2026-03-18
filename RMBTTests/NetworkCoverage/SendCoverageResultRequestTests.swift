@@ -9,7 +9,7 @@ import CoreLocation
 
 @Suite("SendCoverageResultRequest encoding")
 struct SendCoverageResultRequestTests {
-    @Test("WHEN building request THEN encodes radius_m and location extras")
+    @Test("WHEN building request THEN encodes radius and location extras")
     func whenBuildingRequest_thenEncodesRadiusAndLocation() throws {
         let startDate = Date(timeIntervalSinceReferenceDate: 0)
         let loc = CLLocation(
@@ -36,7 +36,7 @@ struct SendCoverageResultRequestTests {
         let fences = try #require(json["fences"] as? [[String: Any]])
         let f0 = try #require(fences.first)
         // Radius meters
-        #expect(f0["radius_m"] as? Int == 25)
+        #expect(f0["radius"] as? Int == 25)
         // Offset/duration
         #expect(f0["offset_ms"] as? Int == 0)
         #expect(f0["duration_ms"] as? Int == 2000)
