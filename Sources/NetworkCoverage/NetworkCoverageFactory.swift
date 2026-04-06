@@ -7,6 +7,7 @@
 
 import Foundation
 import AsyncAlgorithms
+import CoreLocation
 
 struct NetworkCoverageFactory {
     // MARK: - Constants
@@ -14,6 +15,7 @@ struct NetworkCoverageFactory {
     static let persistenceMaxAgeInterval: TimeInterval = 7 * 24 * 60 * 60
     static let locationInaccuracyWarningInitialDelay: TimeInterval = 3
     static let insufficientAccuracyAutoStopInterval: TimeInterval = 30 * 60
+    static let minimumFenceRadius: CLLocationDistance = 15
 
     private let database: UserDatabase
     private let maxResendAge: TimeInterval
@@ -94,7 +96,8 @@ struct NetworkCoverageFactory {
             persistenceService: MockFencePersistenceService(),
             locale: .current,
             clock: ContinuousClock(),
-            maxTestDuration: { 1 }
+            maxTestDuration: { 1 },
+            fenceRadiusCalculator: .init(minimumRadius: Self.minimumFenceRadius)
         )
     }
 
@@ -183,7 +186,8 @@ struct NetworkCoverageFactory {
             clock: clock,
             maxTestDuration: { sessionInitializer.maxCoverageSessionDuration ?? 4*60*60 /* 4 hours */ },
             ipVersionProvider: { sessionInitializer.lastIPVersion },
-            connectionsCountProvider: { max(1, sessionInitializer.udpPingSessionCount) }
+            connectionsCountProvider: { max(1, sessionInitializer.udpPingSessionCount) },
+            fenceRadiusCalculator: .init(minimumRadius: Self.minimumFenceRadius)
         )
     }
 

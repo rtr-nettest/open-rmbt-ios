@@ -79,6 +79,7 @@
 		49EDC79B2EAA35630009D9A6 /* LocationUpdate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC7672EAA35630009D9A6 /* LocationUpdate.swift */; };
 		49EDC79C2EAA35630009D9A6 /* PersistedFencesResender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC76E2EAA35630009D9A6 /* PersistedFencesResender.swift */; };
 		49EDC79D2EAA35630009D9A6 /* Color+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC75C2EAA35630009D9A6 /* Color+Ext.swift */; };
+		66A000012F10000000000001 /* FenceRadiusCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66A000012F10000000000002 /* FenceRadiusCalculator.swift */; };
 		49EDC79F2EAA35630009D9A6 /* HTTPPingSender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC7752EAA35630009D9A6 /* HTTPPingSender.swift */; };
 		49EDC7A02EAA35630009D9A6 /* UDPConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC7772EAA35630009D9A6 /* UDPConnection.swift */; };
 		49EDC7A12EAA35630009D9A6 /* AsynchronousSequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC7652EAA35630009D9A6 /* AsynchronousSequence.swift */; };
@@ -441,6 +442,7 @@
 		49EDC7812EAA35630009D9A6 /* NetworkCoverageFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkCoverageFactory.swift; sourceTree = "<group>"; };
 		49EDC7822EAA35630009D9A6 /* NetworkCoverageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkCoverageView.swift; sourceTree = "<group>"; };
 		49EDC7832EAA35630009D9A6 /* NetworkCoverageViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkCoverageViewModel.swift; sourceTree = "<group>"; };
+		66A000012F10000000000002 /* FenceRadiusCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FenceRadiusCalculator.swift; sourceTree = "<group>"; };
 		49FBC0002F00A0000009D9A6 /* AsyncSocketUDPConnectionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncSocketUDPConnectionTests.swift; sourceTree = "<group>"; };
 		89CA21386C488DD817CA1DC2 /* Pods-RMBT.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RMBT.debug.xcconfig"; path = "Pods/Target Support Files/Pods-RMBT/Pods-RMBT.debug.xcconfig"; sourceTree = "<group>"; };
 		9E95B2179B357FF985E9D9D7 /* CoverageHistoryDetailServiceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CoverageHistoryDetailServiceTests.swift; sourceTree = "<group>"; };
@@ -974,6 +976,7 @@
 				49EDC77F2EAA35630009D9A6 /* CoverageResultView.swift */,
 				498581602EAA7982008C11A7 /* TestCoverageResultView.swift */,
 				49EDC7802EAA35630009D9A6 /* Fence.swift */,
+				66A000012F10000000000002 /* FenceRadiusCalculator.swift */,
 				49EDC7812EAA35630009D9A6 /* NetworkCoverageFactory.swift */,
 				49EDC7822EAA35630009D9A6 /* NetworkCoverageView.swift */,
 				49EDC7832EAA35630009D9A6 /* NetworkCoverageViewModel.swift */,
@@ -2091,6 +2094,7 @@
 				49EDC79B2EAA35630009D9A6 /* LocationUpdate.swift in Sources */,
 				49EDC79C2EAA35630009D9A6 /* PersistedFencesResender.swift in Sources */,
 				49EDC79D2EAA35630009D9A6 /* Color+Ext.swift in Sources */,
+				66A000012F10000000000001 /* FenceRadiusCalculator.swift in Sources */,
 				49EDC79F2EAA35630009D9A6 /* HTTPPingSender.swift in Sources */,
 				49EDC7A02EAA35630009D9A6 /* UDPConnection.swift in Sources */,
 				49EDC7A12EAA35630009D9A6 /* AsynchronousSequence.swift in Sources */,

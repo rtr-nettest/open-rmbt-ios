@@ -36,7 +36,6 @@ struct NetworkCoverageView: View {
                     locations: viewModel.locations.map { LocationUpdate(location: $0, timestamp: $0.timestamp) },
                     selectedFenceItem: $viewModel.selectedFenceItem,
                     selectedFenceDetail: viewModel.selectedFenceDetail,
-                    fenceRadius: viewModel.fenceRadius,
                     isExpertMode: isExpertMode,
                     showsSettingsButton: true,
                     showsSettings: showsSettings,
@@ -157,30 +156,18 @@ struct NetworkCoverageView: View {
 
             horizontalSeparator()
 
-            VStack(alignment: .leading) {
-                Text("Fence radius: **\(viewModel.fenceRadius, format: .number) m**")
-                Slider(
-                    value: $viewModel.fenceRadius,
-                    in: 10...50,
-                    step: 1,
-                    label: { Text("\(viewModel.fenceRadius) m").font(.footnote) },
-                    minimumValueLabel: { Text("10 m").font(.footnote) },
-                    maximumValueLabel: { Text("50 m").font(.footnote) }
-                )
-            }
+            Text("Current fence radius: **\(measurementValue(viewModel.currentFenceRadius))**")
+                .frame(maxWidth: .infinity, alignment: .leading)
 
-            horizontalSeparator()
+            if isExpertMode {
+                horizontalSeparator()
 
-            VStack(alignment: .leading) {
-                Text("Accuracy: **\(viewModel.minimumLocationAccuracy, format: .number) m**")
-                Slider(
-                    value: $viewModel.minimumLocationAccuracy,
-                    in: 3...20,
-                    step: 1,
-                    label: { Text("\(viewModel.minimumLocationAccuracy) m").font(.footnote) },
-                    minimumValueLabel: { Text("3 m").font(.footnote) },
-                    maximumValueLabel: { Text("20 m").font(.footnote) }
-                )
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Accepted location accuracy: **\(viewModel.minimumLocationAccuracy, format: .number) m**")
+                    Text("Only locations at or below this accuracy contribute to fences and ping assignment.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
             }
         }
         .padding()
@@ -233,6 +220,11 @@ struct NetworkCoverageView: View {
         .frame(maxWidth: .infinity, alignment: .center)
         .padding(.horizontal, 16)
         .padding(.vertical, 8)
+    }
+
+    private func measurementValue(_ value: CLLocationDistance?) -> String {
+        guard let value else { return "N/A" }
+        return "\(Int(value.rounded())) m"
     }
 }
 

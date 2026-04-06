@@ -31,6 +31,53 @@ import Clocks
         #expect(sut.fenceItems.last?.coordinate.longitude == 2.0)
     }
 
+    @Test func whenReceivingFirstPreciseLocation_thenCreatesFenceWithDynamicRadius() async throws {
+        let sut = makeSUT(
+            updates: [
+                makeLocationUpdate(at: 0, lat: 1.0, lon: 2.0, accuracy: 8, speed: 4)
+            ]
+        )
+
+        await sut.startTest()
+
+        #expect(sut.fenceItems.count == 1)
+        #expect(sut.fenceItems.first?.radiusMeters == 26)
+        #expect(sut.currentFenceRadius == 26)
+        #expect(sut.currentDynamicRadius == 26)
+    }
+
+    @Test func whenCurrentLocationRadiusShrinks_thenLeavingFenceUsesStoredRadius() async throws {
+        let sut = makeSUT(
+            updates: [
+                makeLocationUpdate(at: 0, lat: 0.0, lon: 0.0, accuracy: 10),
+                makeLocationUpdate(at: 1, lat: 0.00018, lon: 0.0, accuracy: 1),
+                makeLocationUpdate(at: 2, lat: 0.00031, lon: 0.0, accuracy: 1)
+            ]
+        )
+
+        await sut.startTest()
+
+        #expect(sut.fenceItems.count == 2)
+        #expect(sut.fenceItems.map(\.radiusMeters) == [30, 15])
+        #expect(sut.fenceItems.map(\.date).map(\.timeIntervalSinceReferenceDate) == [0, 2])
+    }
+
+    @Test func whenOpeningNewFenceAfterSpeedChanges_thenNewFenceStoresNewDynamicRadius() async throws {
+        let sut = makeSUT(
+            updates: [
+                makeLocationUpdate(at: 0, lat: 0.0, lon: 0.0, accuracy: 1),
+                makeLocationUpdate(at: 1, lat: 0.0003, lon: 0.0, accuracy: 1, speed: 40)
+            ]
+        )
+
+        await sut.startTest()
+
+        #expect(sut.fenceItems.count == 2)
+        #expect(sut.fenceItems.map(\.radiusMeters) == [15, 40])
+        #expect(sut.currentFenceRadius == 40)
+        #expect(sut.currentDynamicRadius == 40)
+    }
+
     @Test func whenReceivingMultiplePingsForOneLocation_thenCombinesPingTotalValue() async throws {
         let sut = makeSUT(updates: [
             makeLocationUpdate  (at: 1, lat: 1.0, lon: 1.0),
@@ -1607,7 +1654,13 @@ private func expectFenceItems(
     }
 }
 
-func makeLocationUpdate(at timestampOffset: TimeInterval, lat: CLLocationDegrees, lon: CLLocationDegrees, accuracy: CLLocationAccuracy = 1) -> NetworkCoverageViewModel.Update {
+func makeLocationUpdate(
+    at timestampOffset: TimeInterval,
+    lat: CLLocationDegrees,
+    lon: CLLocationDegrees,
+    accuracy: CLLocationAccuracy = 1,
+    speed: CLLocationSpeed = 0
+) -> NetworkCoverageViewModel.Update {
     let timestamp = makeDate(offset: timestampOffset)
     return .location(
         LocationUpdate(
@@ -1616,6 +1669,8 @@ func makeLocationUpdate(at timestampOffset: TimeInterval, lat: CLLocationDegrees
                 altitude: 0,
                 horizontalAccuracy: accuracy,
                 verticalAccuracy: 1,
+                course: 0,
+                speed: speed,
                 timestamp: timestamp
             ) ,
             timestamp: timestamp

@@ -22,7 +22,6 @@ struct FencesMapView: View {
     let locations: [LocationUpdate]
     let selectedFenceItem: Binding<FenceItem?>
     let selectedFenceDetail: FenceDetail?
-    let fenceRadius: Double
     let isExpertMode: Bool
     let showsSettingsButton: Bool
     let showsSettings: Bool
@@ -41,7 +40,6 @@ struct FencesMapView: View {
         locations: [LocationUpdate],
         selectedFenceItem: Binding<FenceItem?>,
         selectedFenceDetail: FenceDetail?,
-        fenceRadius: Double,
         isExpertMode: Bool,
         showsSettingsButton: Bool,
         showsSettings: Bool,
@@ -55,7 +53,6 @@ struct FencesMapView: View {
         self.locations = locations
         self.selectedFenceItem = selectedFenceItem
         self.selectedFenceDetail = selectedFenceDetail
-        self.fenceRadius = fenceRadius
         self.isExpertMode = isExpertMode
         self.showsSettingsButton = showsSettingsButton
         self.showsSettings = showsSettings
@@ -205,7 +202,7 @@ struct FencesMapView: View {
     }
 
     func fenceCircle(for fence: FenceItem) -> some MapContent {
-        MapCircle(center: fence.coordinate, radius: fenceRadius)
+        MapCircle(center: fence.coordinate, radius: fence.radiusMeters)
             .foregroundStyle(fence.color.opacity(fence.isSelected ? 0.5 : 0.1))
             .stroke(
                 fence.isSelected ? Color.black : fence.color.opacity(0.8),
@@ -309,7 +306,6 @@ private extension View {
         locations: [],
         selectedFenceItem: $selectedFenceItem,
         selectedFenceDetail: nil,
-        fenceRadius: 20.0,
         isExpertMode: false,
         showsSettingsButton: true,
         showsSettings: true,

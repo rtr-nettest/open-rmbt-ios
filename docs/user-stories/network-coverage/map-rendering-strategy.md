@@ -36,6 +36,13 @@ Feature: Adaptive map rendering for Network Coverage fences
     And the map render mode is "Polyline"
     When the current fence receives a new location update
     Then the current fence circle remains visible on the map
+    And the circle uses the radius that was stored when the current fence was opened
+
+  Scenario: Render circles using each fence's persisted radius
+    Given fences were recorded with different radius values
+    When the map renders them in "Circle" mode
+    Then each circle uses its own stored radius
+    And historical result screens render the same radii as the live measurement screen
 
   Scenario: Cull off-screen fences for performance
     Given fences exist outside the visible region extended by 20 percent padding

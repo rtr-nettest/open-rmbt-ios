@@ -27,13 +27,13 @@ This document reflects the current behavior verified by unit tests in `RMBTTests
 - Scope: SwiftUI UI, MVVM logic, UDP ping measurement, Core Location, persistence via SwiftData, and server sync using the existing control server API.
 - Key features:
   - Continuous ping measurement on a fixed cadence (default 100 ms).
-  - Fence grouping by proximity (default radius 20 m).
+  - Fence grouping by proximity using a dynamic per-location fence radius with a 15 m minimum fallback.
   - Location-accuracy awareness with warning and auto‑stop behavior.
   - Wi‑Fi connection awareness (blocks measurement on Wi‑Fi).
   - Reliable result submission with local persistence and resend.
 
 Defaults (from factory):
-- Fence radius: 20 m.
+- Minimum fence radius fallback: 15 m.
 - Minimum acceptable location accuracy: production 15 m; read‑only/preview 10 m.
 - Location inaccuracy warning initial delay: 3 s.
 - Auto‑stop if no accurate location ever appears within: 30 minutes.
@@ -159,7 +159,7 @@ Chaining sessions (`loop_uuid`)
 ## Location Accuracy Handling
 
 Accuracy threshold and windows
-- A location is “precise enough” when `horizontalAccuracy ≤ minimumLocationAccuracy` (prod 5 m).
+- A location is “precise enough” when `horizontalAccuracy ≤ minimumLocationAccuracy` (prod 15 m).
 - While accuracy is insufficient, the view model opens an “inaccurate location window”; any ping whose timestamp falls within any open window is ignored (not assigned to fences).
 - When accuracy improves, the last open window is closed; subsequent pings are processed normally.
 
@@ -184,9 +184,11 @@ Warning popup and auto‑stop
 
 Creation and updates
 - On a precise location update:
-  - If there is no current fence → open a new fence at this location.
-  - Else if `distance(from: startingLocation) ≥ fenceRadius` (default 20 m) → close the current fence at the update timestamp, persist it, and start a new fence at the new location.
+  - Compute the candidate fence radius as `max(15 m, 10 m + 2 × horizontalAccuracy, speed_m_s × 1 s)`.
+  - If there is no current fence → open a new fence at this location using that computed radius.
+  - Else if `distance(from: startingLocation) ≥ currentFence.radiusMeters` → close the current fence at the update timestamp, persist it, and start a new fence at the new location using the newly computed radius.
   - Else → append location to the current fence and, if available, append the current technology code.
+- Once a fence is opened, its `radiusMeters` stays frozen for the lifetime of that fence; later location updates do not resize an already-open fence.
 
 Ping assignment to fences
 - For each successful ping, find the fence active at `ping.timestamp` (entered < t < exited; the last fence is open‑ended) and append the ping there.
@@ -226,8 +228,9 @@ Submission
 
 ## UI Behavior
 
-- Map overlay shows fence centers (radius 20 m by default) with technology color coding:
+- Map overlay shows fence centers using each fence's stored radius with technology color coding:
   - 2G: #fca636, 3G: #e16462, 4G: #b12a90, 5G NSA: #6a00a8, 5G SA: #0d0887, unknown: #d9d9d9.
+- The live settings panel no longer exposes a production fence-radius slider; instead it shows the frozen current-fence radius and the latest computed dynamic radius as diagnostics.
 - Selection updates a detail panel with date, technology label, and average ping (e.g., “60 ms”).
 - Map rendering strategy is tunable through `FencesRenderingConfiguration` (defaults: `maxCircleCountBeforePolyline = 60`, `minimumSpanForPolylineMode = 0.03`, `visibleRegionPaddingFactor = 1.2`, `cullsToVisibleRegion = true`). The view model maintains derived state (`visibleFenceItems`, `fencePolylineSegments`, `mapRenderMode`) and only recomputes it when fences or the visible map region change, keeping SwiftUI diffs minimal.
 - When `mapRenderMode == .circles`, the map shows per-fence annotations and circles; when line count and zoom span exceed the configured thresholds, it switches to `mapRenderMode == .polylines`, grouping contiguous fences with the same technology into colored polylines while clearing any stale selection.

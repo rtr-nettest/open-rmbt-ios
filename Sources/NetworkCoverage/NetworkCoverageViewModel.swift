@@ -154,6 +154,7 @@ struct SessionInitializedUpdate: Hashable {
     @ObservationIgnored private let ipVersionProvider: () -> IPVersion?
     @ObservationIgnored private let connectionsCountProvider: () -> Int
     @ObservationIgnored private let renderingConfiguration: FencesRenderingConfiguration
+    @ObservationIgnored private let fenceRadiusCalculator: FenceRadiusCalculator
     @ObservationIgnored private var visibleRegion: MKCoordinateRegion?
     @ObservationIgnored private var isUpdatingRenderedFences = false
 
@@ -171,7 +172,6 @@ struct SessionInitializedUpdate: Hashable {
     @ObservationIgnored private var currentFence: Fence? { fences.last }
 
     // Observable state
-    var fenceRadius: CLLocationDistance = 20
     var minimumLocationAccuracy: CLLocationDistance
     private(set) var isStarted = false
     private(set) var errorMessage: String?
@@ -180,6 +180,7 @@ struct SessionInitializedUpdate: Hashable {
     private(set) var latestPing: String = "N/A"
     private(set) var latestTechnology = "N/A"
     private(set) var locationAccuracy = "N/A"
+    private(set) var currentDynamicRadius: CLLocationDistance?
     private(set) var fenceItems: [FenceItem] = [] {
         didSet { updateRenderedFencesIfNeeded() }
     }
@@ -231,7 +232,8 @@ struct SessionInitializedUpdate: Hashable {
         maxTestDuration: @escaping () -> TimeInterval,
         ipVersionProvider: @escaping () -> IPVersion? = { nil },
         connectionsCountProvider: @escaping () -> Int = { 1 },
-        renderingConfiguration: FencesRenderingConfiguration = .default
+        renderingConfiguration: FencesRenderingConfiguration = .default,
+        fenceRadiusCalculator: FenceRadiusCalculator = .init(minimumRadius: 15)
     ) {
         self.refreshInterval = refreshInterval
         self.minimumLocationAccuracy = minimumLocationAccuracy
@@ -247,6 +249,7 @@ struct SessionInitializedUpdate: Hashable {
         self.ipVersionProvider = ipVersionProvider
         self.connectionsCountProvider = connectionsCountProvider
         self.renderingConfiguration = renderingConfiguration
+        self.fenceRadiusCalculator = fenceRadiusCalculator
 
         selectedItemDateFormatter = {
             let dateFormatter = DateFormatter()
@@ -283,7 +286,8 @@ struct SessionInitializedUpdate: Hashable {
         maxTestDuration: @escaping () -> TimeInterval,
         ipVersionProvider: @escaping () -> IPVersion? = { nil },
         connectionsCountProvider: @escaping () -> Int = { 1 },
-        renderingConfiguration: FencesRenderingConfiguration = .default
+        renderingConfiguration: FencesRenderingConfiguration = .default,
+        fenceRadiusCalculator: FenceRadiusCalculator = .init(minimumRadius: 15)
     ) {
         self.init(
             fences: fences,
@@ -311,7 +315,8 @@ struct SessionInitializedUpdate: Hashable {
             maxTestDuration: maxTestDuration,
             ipVersionProvider: ipVersionProvider,
             connectionsCountProvider: connectionsCountProvider,
-            renderingConfiguration: renderingConfiguration
+            renderingConfiguration: renderingConfiguration,
+            fenceRadiusCalculator: fenceRadiusCalculator
         )
     }
 
@@ -413,15 +418,18 @@ struct SessionInitializedUpdate: Hashable {
             // On Wi‑Fi: update warning/UI only, ignore measurement state/fences
             guard !isOnWiFi else { return }
 
+            let newFenceRadius = fenceRadiusCalculator.radius(for: location)
+            currentDynamicRadius = newFenceRadius
+
             let currentFence = currentFence
             if var currentFence {
-                if currentFence.startingLocation.distance(from: location) >= fenceRadius {
+                if currentFence.startingLocation.distance(from: location) >= currentFence.radiusMeters {
                     let newFence = Fence(
                         startingLocation: location,
                         dateEntered: locationUpdate.timestamp,
                         technology: radioTechnologyCode,
                         pings: [],
-                        radiusMeters: fenceRadius,
+                        radiusMeters: newFenceRadius,
                         sessionUUID: currentTestUUID
                     )
 
@@ -430,6 +438,7 @@ struct SessionInitializedUpdate: Hashable {
 
                     try? await persistenceService.save(currentFence)
 
+                    Log.logger.info("New fence: radius=\(newFenceRadius)m (accuracy=\(location.horizontalAccuracy)m, speed=\(location.speed)m/s, min=\(fenceRadiusCalculator.minimumRadius)m)")
                     fences.append(newFence)
                 } else {
                     currentFence.append(location: location)
@@ -437,12 +446,13 @@ struct SessionInitializedUpdate: Hashable {
                     fences[fences.endIndex - 1] = currentFence
                 }
             } else {
+                Log.logger.info("First fence: radius=\(newFenceRadius)m (accuracy=\(location.horizontalAccuracy)m, speed=\(location.speed)m/s, min=\(fenceRadiusCalculator.minimumRadius)m)")
                 fences.append(.init(
                     startingLocation: location,
                     dateEntered: locationUpdate.timestamp,
                     technology: radioTechnologyCode,
                     pings: [],
-                    radiusMeters: fenceRadius,
+                    radiusMeters: newFenceRadius,
                     sessionUUID: currentTestUUID
                 ))
             }
@@ -463,6 +473,7 @@ struct SessionInitializedUpdate: Hashable {
         stopTestReasons.removeAll()
         isOnWiFi = false
         currentTestUUID = nil
+        currentDynamicRadius = nil
 
         try? await persistenceService.sessionStarted(at: sessionStartDate)
 
@@ -514,6 +525,7 @@ struct SessionInitializedUpdate: Hashable {
         testStartTime = nil
         locationAccuracy = "N/A"
         latestTechnology = "N/A"
+        currentDynamicRadius = nil
         warningPopups.removeAll()
         connectionFragmentsCount = 1
 
@@ -895,6 +907,10 @@ fileprivate extension NetworkCoverageViewModel {
 }
 
 extension NetworkCoverageViewModel {
+    var currentFenceRadius: CLLocationDistance? {
+        currentFence?.radiusMeters
+    }
+
     var pingProtocolDisplay: String {
         guard isStarted else { return "-" }
         switch ipVersionProvider() {
