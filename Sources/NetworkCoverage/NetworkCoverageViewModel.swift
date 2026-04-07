@@ -499,7 +499,11 @@ struct SessionInitializedUpdate: Hashable {
         canCheckForLocationInaccuracyWarning = false
         hasEverHadAccurateLocation = false
         stopTestReasons.removeAll()
-        isOnWiFi = false
+        if let networkTypeProvider, let currentType = networkTypeProvider.currentNetworkType() {
+            handleNetworkTypeChange(currentType)
+        } else {
+            isOnWiFi = false
+        }
         currentTestUUID = nil
         currentDynamicRadius = nil
 

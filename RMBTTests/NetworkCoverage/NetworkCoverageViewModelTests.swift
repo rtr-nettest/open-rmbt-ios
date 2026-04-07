@@ -1604,6 +1604,28 @@ import Clocks
             #expect(sut.fenceItems.count == 1)
         }
 
+        // MARK: - Initial WiFi State Tests
+
+        @Test func whenStartedWhileOnWiFi_thenWarningShownAndNoFencesCreated() async throws {
+            let provider = StubCurrentNetworkTypeProvider(type: .wifi)
+            let sut = makeSUT(
+                updates: [
+                    makeSessionInitializedUpdate(at: 0, sessionID: "uuid-1"),
+                    makeLocationUpdate      (at: 1, lat: 1.0, lon: 1.0),
+                    makePingUpdate          (at: 2, ms: 9),
+                    makeLocationUpdate      (at: 3, lat: 2.0, lon: 2.0)
+                ],
+                networkTypeProvider: provider
+            )
+
+            await sut.startTest()
+
+            #expect(sut.warningPopups.contains(makeWiFiWarningPopup()),
+                    "WiFi warning should be shown immediately on start")
+            #expect(sut.fences.isEmpty, "No fences should be created while on WiFi")
+            #expect(sut.fenceItems.isEmpty, "No fence items should be rendered")
+        }
+
         // MARK: - Network Polling Tests
 
         @Test func whenPollingDetectsWiFiOnLocationUpdate_thenWarningShownAndFenceDataBlocked() async throws {
