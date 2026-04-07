@@ -72,9 +72,10 @@ struct NetworkCoverageIntegrationTests {
         var calls = await sendFactory.sendCalls
         try #require(calls.count == 1, "Resend should have sent session 1")
         #expect(calls[0].testUUID == session1UUID)
-        #expect(calls[0].fences.count == 1, "Session 1 has only 1 CLOSED fence at this point (lat 1.0). Fence at lat 2.0 is still open.")
+        #expect(calls[0].fences.count == 2, "Session 1 has 2 fences (lat 1.0, 2.0) — both closed on previous session at reinit")
 
-        #expect(calls[0].fences.first?.startingLocation.coordinate.latitude == 1.0)
+        let resendLatitudes = calls[0].fences.map { $0.startingLocation.coordinate.latitude }.sorted()
+        #expect(resendLatitudes == [1.0, 2.0])
 
         await updates.sendLocation          (at: 6, lat: 3.0, lon: 3.0)
         await updates.sendPing              (at: 7, ms: 300)
@@ -90,12 +91,12 @@ struct NetworkCoverageIntegrationTests {
         let stopCall = calls[1]
         #expect(stopCall.testUUID == session2UUID)
         #expect(
-            stopCall.fences.count == 2,
-            "Stop should send session 2 fences: reassigned fence (lat 2.0) + new fence (lat 3.0)"
+            stopCall.fences.count == 1,
+            "Stop should send session 2 fences: only new fence (lat 3.0)"
         )
 
         let stopLatitudes = stopCall.fences.map { $0.startingLocation.coordinate.latitude }.sorted()
-        #expect(stopLatitudes == [2.0, 3.0], "Should send both fences from session 2")
+        #expect(stopLatitudes == [3.0], "Should send only fence from session 2")
 
         await database.wipeAll()
     }
@@ -157,16 +158,16 @@ struct NetworkCoverageIntegrationTests {
 
         let stopCall = calls[0]
         #expect(stopCall.testUUID == session2UUID)
-        #expect(stopCall.fences.count == 2, "Stop should send session 2 fences (reassigned fence + new fence)")
+        #expect(stopCall.fences.count == 1, "Stop should send session 2 fences: only new fence (lat 3.0)")
 
         let stopLatitudes = stopCall.fences.map { $0.startingLocation.coordinate.latitude }.sorted()
-        #expect(stopLatitudes == [2.0, 3.0], "Fence at lat 2.0 was reassigned to session 2, plus fence at lat 3.0 created in session 2")
+        #expect(stopLatitudes == [3.0], "Only fence from session 2")
 
         let resendCall = calls[1]
         #expect(resendCall.testUUID == session1UUID)
-        #expect(resendCall.fences.count == 1, "Session 1 has only 1 fence (lat 1.0). Fence at lat 2.0 was reassigned to session 2.")
+        #expect(resendCall.fences.count == 2, "Session 1 has 2 fences (lat 1.0, 2.0) — both closed on previous session at reinit")
         let resendLatitudes = resendCall.fences.map { $0.startingLocation.coordinate.latitude }.sorted()
-        #expect(resendLatitudes == [1.0], "Only fence closed before session reinitialization")
+        #expect(resendLatitudes == [1.0, 2.0], "Both fences from session 1")
 
         await database.wipeAll()
     }

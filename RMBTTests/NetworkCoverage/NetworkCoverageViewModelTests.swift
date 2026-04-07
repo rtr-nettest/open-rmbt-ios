@@ -795,9 +795,12 @@ import Clocks
             await sut.startTest()
 
             let capturedMessages = await persistenceService.capturedMessages
+            // Reinit closes the active fence and saves it before creating the new session
+            let savedFence = await persistenceService.capturedSavedFences.first
             #expect(capturedMessages == [
                 .sessionStarted(date: dateNow),
                 .assign(testUUID: uuid1, anchorDate: makeDate(offset: 1)),
+                .save(fence: savedFence!),
                 .assign(testUUID: uuid2, anchorDate: makeDate(offset: 3)),
             ])
         }
@@ -1021,7 +1024,7 @@ import Clocks
 
             await sut.startTest()
 
-            #expect(sut.fences.map(\.sessionUUID) == [uuid1, uuid2, uuid2, uuid2])
+            #expect(sut.fences.map(\.sessionUUID) == [uuid1, uuid1, uuid2, uuid2])
         }
 
         @Test func whenFenceCreatedWithoutUUID_thenStaysNilUntilFirstUUIDArrives() async throws {
@@ -1057,7 +1060,7 @@ import Clocks
 
             await sut.startTest()
 
-            #expect(sut.fences.map(\.sessionUUID) == [uuid2, uuid2])
+            #expect(sut.fences.map(\.sessionUUID) == [uuid1, uuid2])
         }
 
         @Test func whenMultipleSessionReinitializations_thenAssingsLatestSesssionUUID() async throws {
@@ -1083,7 +1086,8 @@ import Clocks
 
             await sut.startTest()
 
-            #expect(sut.fences.map(\.sessionUUID) == [uuid1, uuid3, uuid3, uuid3])
+            // Reinit closes active fence on previous session, next location creates new fence
+            #expect(sut.fences.map(\.sessionUUID) == [uuid1, uuid1, uuid2, uuid3, uuid3])
         }
 
         @Test func whenStopTestsSpanningOverMultipleSessions_thenSubmitsAllSessionsFences() async throws {
@@ -1598,6 +1602,200 @@ import Clocks
             
             #expect(!sut.warningPopups.contains(makeWiFiWarningPopup()))
             #expect(sut.fenceItems.count == 1)
+        }
+
+        // MARK: - WiFi + Fence Behavior Tests
+
+        @Test func whenSwitchedToWiFiWithoutReinit_thenFenceStaysOpenButNoNewDataCollected() async throws {
+            let sut = makeSUT(updates: [
+                makeSessionInitializedUpdate(at: 0, sessionID: "uuid-1"),
+                makeLocationUpdate      (at: 1, lat: 1.0, lon: 1.0),
+                makePingUpdate          (at: 2, ms: 50),
+                makeNetworkTypeUpdate   (at: 3, type: .wifi),
+                makePingUpdate          (at: 4, ms: 9),
+                makeLocationUpdate      (at: 5, lat: 2.0, lon: 2.0)
+            ])
+
+            await sut.startTest()
+
+            #expect(sut.fences.count == 1, "Fence should stay open without RE01")
+            #expect(sut.fences.first?.dateExited == nil, "Fence should not be closed without RE01")
+            #expect(sut.fences.first?.pings.count == 1, "Only the cellular ping should be recorded")
+            #expect(sut.warningPopups.contains(makeWiFiWarningPopup()))
+        }
+    }
+
+    // MARK: - Session Reinitialization Fence Handoff Tests
+
+    @MainActor @Suite("Session Reinitialization Fence Handoff")
+    struct SessionReinitializationFenceHandoffTests {
+        @Test func whenSessionReinitialized_thenActiveFenceStaysOnPreviousSession() async throws {
+            let uuid1 = "uuid-1"
+            let uuid2 = "uuid-2"
+            let sut = makeSUT(updates: [
+                makeSessionInitializedUpdate(at: 0, sessionID: uuid1),
+                makeLocationUpdate(at: 1, lat: 1.0, lon: 1.0),
+                makeSessionInitializedUpdate(at: 2, sessionID: uuid2),
+                makeLocationUpdate(at: 3, lat: 2.0, lon: 2.0)
+            ])
+
+            await sut.startTest()
+
+            #expect(sut.fences.count == 2)
+            #expect(sut.fences[0].sessionUUID == uuid1, "First fence should stay on previous session")
+            #expect(sut.fences[0].dateExited != nil, "First fence should be closed at reinit")
+            #expect(sut.fences[1].sessionUUID == uuid2)
+        }
+
+        @Test func whenSessionReinitialized_thenClosedFenceIsPersistedOnPreviousSession() async throws {
+            let uuid1 = "uuid-1"
+            let uuid2 = "uuid-2"
+            let persistenceService = FencePersistenceServiceSpy()
+            let sut = makeSUT(
+                updates: [
+                    makeSessionInitializedUpdate(at: 0, sessionID: uuid1),
+                    makeLocationUpdate(at: 1, lat: 1.0, lon: 1.0),
+                    makeSessionInitializedUpdate(at: 2, sessionID: uuid2)
+                ],
+                persistenceService: persistenceService
+            )
+
+            await sut.startTest()
+
+            let savedFences = await persistenceService.capturedSavedFences
+            let fenceSavedBeforeReinit = savedFences.first { $0.sessionUUID == uuid1 }
+            #expect(fenceSavedBeforeReinit != nil, "Fence should be persisted on previous session")
+            #expect(fenceSavedBeforeReinit?.dateExited != nil, "Persisted fence should be closed")
+        }
+
+        @Test func whenRapidSessionReinits_thenEachFenceStaysOnItsOriginalSession() async throws {
+            let uuid1 = "uuid-1"
+            let uuid2 = "uuid-2"
+            let uuid3 = "uuid-3"
+            let sut = makeSUT(updates: [
+                makeSessionInitializedUpdate(at: 0, sessionID: uuid1),
+                makeLocationUpdate(at: 1, lat: 1.0, lon: 1.0),
+                makeLocationUpdate(at: 2, lat: 2.0, lon: 2.0),
+                makeSessionInitializedUpdate(at: 3, sessionID: uuid2),
+                makeLocationUpdate(at: 4, lat: 3.0, lon: 3.0),
+                makeSessionInitializedUpdate(at: 5, sessionID: uuid3),
+                makeLocationUpdate(at: 6, lat: 4.0, lon: 4.0)
+            ])
+
+            await sut.startTest()
+
+            #expect(sut.fences.map(\.sessionUUID) == [uuid1, uuid1, uuid2, uuid3])
+        }
+    }
+
+    // MARK: - WiFi + RE01 Combined Tests
+
+    @MainActor @Suite("WiFi and Session Reinitialization Combined")
+    struct WiFiAndSessionReinitCombinedTests {
+        @Test func whenWiFiDetectedThenSessionReinitialized_thenFenceClosedAtReinitOnPreviousSession() async throws {
+            let sut = makeSUT(updates: [
+                makeSessionInitializedUpdate(at: 0, sessionID: "uuid-cell"),
+                makeLocationUpdate      (at: 1, lat: 1.0, lon: 1.0),
+                makePingUpdate          (at: 2, ms: 40),
+                makeNetworkTypeUpdate   (at: 3, type: .wifi),
+                makePingUpdate          (at: 4, ms: 9),
+                makeSessionInitializedUpdate(at: 5, sessionID: "uuid-wifi"),
+                makeLocationUpdate      (at: 6, lat: 2.0, lon: 2.0)
+            ])
+
+            await sut.startTest()
+
+            #expect(sut.fences.count == 1, "Only the cellular fence should exist")
+            #expect(sut.fences[0].sessionUUID == "uuid-cell")
+            #expect(sut.fences[0].dateExited != nil, "Fence should be closed at reinit")
+            #expect(sut.fences[0].pings.count == 1, "Only the cellular ping should be recorded")
+        }
+
+        @Test func whenSessionReinitializedThenWiFiDetected_thenCellularFenceClosedAndWiFiFenceStopsReceiving() async throws {
+            let sut = makeSUT(updates: [
+                makeSessionInitializedUpdate(at: 0, sessionID: "uuid-cell"),
+                makeLocationUpdate      (at: 1, lat: 1.0, lon: 1.0),
+                makePingUpdate          (at: 2, ms: 40),
+                makeSessionInitializedUpdate(at: 3, sessionID: "uuid-wifi"),
+                makeLocationUpdate      (at: 4, lat: 2.0, lon: 2.0),
+                makePingUpdate          (at: 5, ms: 9),
+                makeNetworkTypeUpdate   (at: 6, type: .wifi),
+                makeLocationUpdate      (at: 7, lat: 3.0, lon: 3.0),
+                makePingUpdate          (at: 8, ms: 8)
+            ])
+
+            await sut.startTest()
+
+            #expect(sut.fences.count == 2)
+            #expect(sut.fences[0].sessionUUID == "uuid-cell", "First fence stays on cellular session")
+            #expect(sut.fences[0].dateExited != nil, "First fence should be closed at reinit")
+            #expect(sut.fences[1].sessionUUID == "uuid-wifi", "Second fence on WiFi session (minor data leak)")
+            #expect(sut.fences[1].pings.count == 1, "One leaked ping before WiFi detected, no further data after discard")
+        }
+
+        @Test func whenCellularReturnsBeforeReinit_thenDiscardedBlocksFenceCreationOnWiFiSession() async throws {
+            let sut = makeSUT(updates: [
+                makeSessionInitializedUpdate(at: 0, sessionID: "uuid-cell-1"),
+                makeLocationUpdate      (at: 1, lat: 1.0, lon: 1.0),
+                makeNetworkTypeUpdate   (at: 2, type: .wifi),
+                makeSessionInitializedUpdate(at: 3, sessionID: "uuid-wifi"),
+                makeNetworkTypeUpdate   (at: 4, type: .cellular),
+                makeLocationUpdate      (at: 5, lat: 2.0, lon: 2.0),
+                makePingUpdate          (at: 6, ms: 100),
+                makeSessionInitializedUpdate(at: 7, sessionID: "uuid-cell-2"),
+                makeLocationUpdate      (at: 8, lat: 3.0, lon: 3.0)
+            ])
+
+            await sut.startTest()
+
+            #expect(sut.fences.count == 2, "Only fences on non-discarded sessions")
+            #expect(sut.fences[0].sessionUUID == "uuid-cell-1", "First fence on original cellular session")
+            #expect(sut.fences[0].dateExited != nil, "First fence should be closed")
+            #expect(sut.fences[1].sessionUUID == "uuid-cell-2", "Second fence on new cellular session")
+            #expect(sut.fences.contains(where: { $0.sessionUUID == "uuid-wifi" }) == false, "No fences on WiFi session")
+        }
+
+        @Test func whenCellularToWiFiToCellular_thenResumesNormalMeasurement() async throws {
+            let sut = makeSUT(updates: [
+                makeSessionInitializedUpdate(at: 0, sessionID: "uuid-cell-1"),
+                makeLocationUpdate      (at: 1, lat: 1.0, lon: 1.0),
+                makePingUpdate          (at: 2, ms: 40),
+                makeNetworkTypeUpdate   (at: 3, type: .wifi),
+                makeSessionInitializedUpdate(at: 4, sessionID: "uuid-wifi"),
+                makeNetworkTypeUpdate   (at: 5, type: .cellular),
+                makeSessionInitializedUpdate(at: 6, sessionID: "uuid-cell-2"),
+                makeLocationUpdate      (at: 7, lat: 2.0, lon: 2.0),
+                makePingUpdate          (at: 8, ms: 50)
+            ])
+
+            await sut.startTest()
+
+            #expect(sut.fences.count == 2, "Fences on cellular sessions only")
+            #expect(sut.fences[0].sessionUUID == "uuid-cell-1")
+            #expect(sut.fences[0].dateExited != nil, "First fence closed")
+            #expect(sut.fences[1].sessionUUID == "uuid-cell-2")
+            #expect(sut.fences.contains(where: { $0.sessionUUID == "uuid-wifi" }) == false)
+        }
+
+        @Test func whenStoppedWhileOnWiFiAfterReinit_thenAllFencesSentToServiceWithCorrectSessionUUIDs() async throws {
+            let sendService = SendCoverageResultsServiceSpy()
+            let sut = makeSUT(
+                updates: [
+                    makeSessionInitializedUpdate(at: 0, sessionID: "uuid-cell"),
+                    makeLocationUpdate      (at: 1, lat: 1.0, lon: 1.0),
+                    makeLocationUpdate      (at: 2, lat: 2.0, lon: 2.0),
+                    makeNetworkTypeUpdate   (at: 3, type: .wifi),
+                    makeSessionInitializedUpdate(at: 4, sessionID: "uuid-wifi")
+                ],
+                sendResultsService: sendService
+            )
+
+            await sut.startTest()
+            await sut.stopTest()
+
+            let sentFences = sendService.capturedSentFences.flatMap { $0 }
+            #expect(sentFences.allSatisfy { $0.sessionUUID == "uuid-cell" },
+                    "All fences should be on the cellular session, none on discarded WiFi session")
         }
     }
 }
