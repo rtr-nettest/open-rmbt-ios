@@ -134,9 +134,11 @@ struct NetworkCoverageFactory {
         let networkConnectionUpdatesService = SimulatorNetworkConnectionTypeUpdatesService(now: dateNow)
         // Simulator: inject the mocked radio technology to complement simulated connection types.
         let radioTechnologyService = SimulatorRadioTechnologyService()
+        let networkTypeProvider: (any CurrentNetworkTypeProvider)? = nil
 #else
-        let networkConnectionUpdatesService = ReachabilityNetworkConnectionTypeUpdatesService(now: dateNow)
+        let networkConnectionUpdatesService = NWPathMonitorNetworkConnectionTypeUpdatesService(now: dateNow)
         let radioTechnologyService = CTTelephonyRadioTechnologyService()
+        let networkTypeProvider: (any CurrentNetworkTypeProvider)? = NWPathMonitorCurrentNetworkTypeProvider()
 #endif
 
         let pingSeq = { PingMeasurementService.pings2(
@@ -187,6 +189,7 @@ struct NetworkCoverageFactory {
             maxTestDuration: { sessionInitializer.maxCoverageSessionDuration ?? 4*60*60 /* 4 hours */ },
             ipVersionProvider: { sessionInitializer.lastIPVersion },
             connectionsCountProvider: { max(1, sessionInitializer.udpPingSessionCount) },
+            networkTypeProvider: networkTypeProvider,
             fenceRadiusCalculator: .init(minimumRadius: Self.minimumFenceRadius)
         )
     }

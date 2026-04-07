@@ -1604,6 +1604,53 @@ import Clocks
             #expect(sut.fenceItems.count == 1)
         }
 
+        // MARK: - Network Polling Tests
+
+        @Test func whenPollingDetectsWiFiOnLocationUpdate_thenWarningShownAndFenceDataBlocked() async throws {
+            // Polling runs before location processing, so WiFi detected on first location blocks it
+            let provider = StubCurrentNetworkTypeProvider(type: .wifi)
+            let sut = makeSUT(
+                updates: [
+                    makeSessionInitializedUpdate(at: 0, sessionID: "uuid-1"),
+                    makeLocationUpdate      (at: 1, lat: 1.0, lon: 1.0),
+                    makePingUpdate          (at: 2, ms: 50),
+                    makeLocationUpdate      (at: 3, lat: 2.0, lon: 2.0)
+                ],
+                networkTypeProvider: provider
+            )
+
+            await sut.startTest()
+
+            #expect(sut.warningPopups.contains(makeWiFiWarningPopup()),
+                    "Polling should trigger WiFi warning")
+            #expect(sut.fences.isEmpty, "No fences created — WiFi detected by polling on every location")
+        }
+
+        @Test func whenPollingDetectsCellularAfterWiFi_thenWarningDismissedAndLocationProcessed() async throws {
+            // WiFi detected via async callback, then polling returns cellular on next location
+            let provider = StubCurrentNetworkTypeProvider(type: .cellular)
+            let sut = makeSUT(
+                updates: [
+                    makeSessionInitializedUpdate(at: 0, sessionID: "uuid-1"),
+                    makeLocationUpdate      (at: 1, lat: 1.0, lon: 1.0),
+                    makeNetworkTypeUpdate   (at: 2, type: .wifi),
+                    // Polling returns cellular on next location, dismissing WiFi warning
+                    makeLocationUpdate      (at: 3, lat: 2.0, lon: 2.0),
+                    makePingUpdate          (at: 4, ms: 100)
+                ],
+                networkTypeProvider: provider
+            )
+
+            await sut.startTest()
+
+            #expect(!sut.warningPopups.contains(makeWiFiWarningPopup()),
+                    "Polling should dismiss WiFi warning")
+            // First fence at lat 1.0 (before WiFi), second fence at lat 2.0 (after polling restores cellular)
+            // Note: uuid-1 is in discardedSessionIDs from WiFi detection, so the location at lat 2.0
+            // is blocked by the discarded guard. Only the first fence should exist.
+            #expect(sut.fences.count == 1, "Only pre-WiFi fence exists — uuid-1 is discarded")
+        }
+
         // MARK: - WiFi + Fence Behavior Tests
 
         @Test func whenSwitchedToWiFiWithoutReinit_thenFenceStaysOpenButNoNewDataCollected() async throws {
@@ -1813,6 +1860,7 @@ import Clocks
     clock: some Clock<Duration> = ContinuousClock(),
     insufficientAccuracyAutoStopInterval: TimeInterval = 30 * 60,
     maxTestDuration: @escaping () -> TimeInterval = { 4 * 60 * 60 },
+    networkTypeProvider: (any CurrentNetworkTypeProvider)? = nil,
     renderingConfiguration: FencesRenderingConfiguration = .default
 ) -> NetworkCoverageViewModel {
     .init(
@@ -1829,6 +1877,7 @@ import Clocks
         timeNow: currentTime,
         clock: clock,
         maxTestDuration: maxTestDuration,
+        networkTypeProvider: networkTypeProvider,
         renderingConfiguration: renderingConfiguration
     )
 }
@@ -1974,6 +2023,18 @@ extension AsyncThrowingPublisher: @retroactive AsynchronousSequence {}
 final class RadioTechnologyServiceStub: CurrentRadioTechnologyService {
     func technologyCode() -> String? {
         nil
+    }
+}
+
+final class StubCurrentNetworkTypeProvider: CurrentNetworkTypeProvider, @unchecked Sendable {
+    var type: NetworkTypeUpdate.NetworkConnectionType?
+
+    init(type: NetworkTypeUpdate.NetworkConnectionType?) {
+        self.type = type
+    }
+
+    func currentNetworkType() -> NetworkTypeUpdate.NetworkConnectionType? {
+        type
     }
 }
 

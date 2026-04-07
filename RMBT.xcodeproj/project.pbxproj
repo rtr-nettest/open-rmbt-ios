@@ -60,6 +60,8 @@
 		49EDC7872EAA35630009D9A6 /* PingMeasurementService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC7762EAA35630009D9A6 /* PingMeasurementService.swift */; };
 		49EDC7882EAA35630009D9A6 /* OnlineStatusService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC77A2EAA35630009D9A6 /* OnlineStatusService.swift */; };
 		49EDC7892EAA35630009D9A6 /* ReachabilityNetworkConnectionTypeUpdatesService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC76B2EAA35630009D9A6 /* ReachabilityNetworkConnectionTypeUpdatesService.swift */; };
+		4A0000012EAA35630009D9A6 /* NWPathMonitorNetworkConnectionTypeUpdatesService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A0000002EAA35630009D9A6 /* NWPathMonitorNetworkConnectionTypeUpdatesService.swift */; };
+		4A0000032EAA35630009D9A6 /* CurrentNetworkTypeProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A0000022EAA35630009D9A6 /* CurrentNetworkTypeProvider.swift */; };
 		49EDC78A2EAA35630009D9A6 /* LocationUpdatesService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC7682EAA35630009D9A6 /* LocationUpdatesService.swift */; };
 		49EDC78B2EAA35630009D9A6 /* TestPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC75F2EAA35630009D9A6 /* TestPopup.swift */; };
 		49EDC78C2EAA35630009D9A6 /* FencesMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC75E2EAA35630009D9A6 /* FencesMapView.swift */; };
@@ -426,6 +428,8 @@
 		49EDC76A2EAA35630009D9A6 /* NetworkConnectionType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkConnectionType.swift; sourceTree = "<group>"; };
 		49EDC76B2EAA35630009D9A6 /* ReachabilityNetworkConnectionTypeUpdatesService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReachabilityNetworkConnectionTypeUpdatesService.swift; sourceTree = "<group>"; };
 		49EDC76C2EAA35630009D9A6 /* SimulatorNetworkConnectionTypeUpdatesService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimulatorNetworkConnectionTypeUpdatesService.swift; sourceTree = "<group>"; };
+		4A0000002EAA35630009D9A6 /* NWPathMonitorNetworkConnectionTypeUpdatesService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NWPathMonitorNetworkConnectionTypeUpdatesService.swift; sourceTree = "<group>"; };
+		4A0000022EAA35630009D9A6 /* CurrentNetworkTypeProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentNetworkTypeProvider.swift; sourceTree = "<group>"; };
 		49EDC76E2EAA35630009D9A6 /* PersistedFencesResender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistedFencesResender.swift; sourceTree = "<group>"; };
 		49EDC76F2EAA35630009D9A6 /* PersistenceManagingCoverageResultsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceManagingCoverageResultsService.swift; sourceTree = "<group>"; };
 		49EDC7702EAA35630009D9A6 /* PersistenceServiceActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceServiceActor.swift; sourceTree = "<group>"; };
@@ -914,6 +918,8 @@
 				49EDC76A2EAA35630009D9A6 /* NetworkConnectionType.swift */,
 				49EDC76B2EAA35630009D9A6 /* ReachabilityNetworkConnectionTypeUpdatesService.swift */,
 				49EDC76C2EAA35630009D9A6 /* SimulatorNetworkConnectionTypeUpdatesService.swift */,
+				4A0000002EAA35630009D9A6 /* NWPathMonitorNetworkConnectionTypeUpdatesService.swift */,
+				4A0000022EAA35630009D9A6 /* CurrentNetworkTypeProvider.swift */,
 			);
 			path = NetworkType;
 			sourceTree = "<group>";
@@ -2075,6 +2081,8 @@
 				49EDC7872EAA35630009D9A6 /* PingMeasurementService.swift in Sources */,
 				49EDC7882EAA35630009D9A6 /* OnlineStatusService.swift in Sources */,
 				49EDC7892EAA35630009D9A6 /* ReachabilityNetworkConnectionTypeUpdatesService.swift in Sources */,
+				4A0000012EAA35630009D9A6 /* NWPathMonitorNetworkConnectionTypeUpdatesService.swift in Sources */,
+				4A0000032EAA35630009D9A6 /* CurrentNetworkTypeProvider.swift in Sources */,
 				49EDC78A2EAA35630009D9A6 /* LocationUpdatesService.swift in Sources */,
 				49EDC78B2EAA35630009D9A6 /* TestPopup.swift in Sources */,
 				49EDC78C2EAA35630009D9A6 /* FencesMapView.swift in Sources */,

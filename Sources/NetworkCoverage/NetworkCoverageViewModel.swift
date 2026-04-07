@@ -154,6 +154,7 @@ struct SessionInitializedUpdate: Hashable {
     @ObservationIgnored private let clock: any Clock<Duration>
     @ObservationIgnored private let ipVersionProvider: () -> IPVersion?
     @ObservationIgnored private let connectionsCountProvider: () -> Int
+    @ObservationIgnored private let networkTypeProvider: (any CurrentNetworkTypeProvider)?
     @ObservationIgnored private let renderingConfiguration: FencesRenderingConfiguration
     @ObservationIgnored private let fenceRadiusCalculator: FenceRadiusCalculator
     @ObservationIgnored private var visibleRegion: MKCoordinateRegion?
@@ -233,6 +234,7 @@ struct SessionInitializedUpdate: Hashable {
         maxTestDuration: @escaping () -> TimeInterval,
         ipVersionProvider: @escaping () -> IPVersion? = { nil },
         connectionsCountProvider: @escaping () -> Int = { 1 },
+        networkTypeProvider: (any CurrentNetworkTypeProvider)? = nil,
         renderingConfiguration: FencesRenderingConfiguration = .default,
         fenceRadiusCalculator: FenceRadiusCalculator = .init(minimumRadius: 15)
     ) {
@@ -249,6 +251,7 @@ struct SessionInitializedUpdate: Hashable {
         self.maxTestDuration = maxTestDuration
         self.ipVersionProvider = ipVersionProvider
         self.connectionsCountProvider = connectionsCountProvider
+        self.networkTypeProvider = networkTypeProvider
         self.renderingConfiguration = renderingConfiguration
         self.fenceRadiusCalculator = fenceRadiusCalculator
 
@@ -404,6 +407,15 @@ struct SessionInitializedUpdate: Hashable {
             }
             
         case .location(let locationUpdate):
+            // Poll network type on every location update to catch background WiFi transitions
+            if let polledType = networkTypeProvider?.currentNetworkType() {
+                let changed = (polledType == .wifi) != isOnWiFi
+                if changed {
+                    Log.logger.info("[NetworkPoll] detected network change via poll: \(polledType)")
+                }
+                handleNetworkTypeChange(polledType)
+            }
+
             let location = locationUpdate.location
             let radioTechnologyCode = currentRadioTechnology.technologyCode()
             locations.append(location)
@@ -525,6 +537,7 @@ struct SessionInitializedUpdate: Hashable {
         let newIsOnWiFi = (type == .wifi)
         guard newIsOnWiFi != isOnWiFi else { return }
 
+        Log.logger.info("[NetworkType] isOnWiFi changed: \(isOnWiFi) → \(newIsOnWiFi)")
         isOnWiFi = newIsOnWiFi
         if isOnWiFi {
             if let uuid = currentTestUUID {
