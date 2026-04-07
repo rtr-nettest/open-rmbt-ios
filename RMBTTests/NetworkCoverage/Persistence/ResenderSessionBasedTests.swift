@@ -94,6 +94,79 @@ struct ResenderSessionBasedTests {
         let remaining = try await persistence.sessionsToSubmitCold()
         #expect(remaining.isEmpty)
     }
+
+    // MARK: - Empty Session Guard Tests
+
+    @Test func whenColdResendingSessionWithZeroFences_thenSkipsSubmissionAndDeletesSession() async throws {
+        let now = makeDate(offset: 500)
+        let (sut, sendSpy, persistence) = makeSUT(dateNow: { now })
+
+        try await persistence.sessionStarted(at: now.advanced(by: -100))
+        try await persistence.assignTestUUIDAndAnchor("empty-session", anchorNow: now.advanced(by: -90))
+        try await persistence.sessionFinalized(at: now.advanced(by: -80))
+
+        try await sut.resendPersistentAreas(isLaunched: true)
+
+        #expect(sendSpy.calls.isEmpty, "Empty session should not be submitted")
+        let remaining = try await persistence.sessionsToSubmitCold()
+        #expect(remaining.isEmpty, "Empty session should be deleted")
+    }
+
+    @Test func whenWarmResendingFinalizedSessionWithZeroFences_thenSkipsSubmissionAndDeletesSession() async throws {
+        let now = makeDate(offset: 500)
+        let (sut, sendSpy, persistence) = makeSUT(dateNow: { now })
+
+        try await persistence.sessionStarted(at: now.advanced(by: -100))
+        try await persistence.assignTestUUIDAndAnchor("empty-warm", anchorNow: now.advanced(by: -90))
+        try await persistence.sessionFinalized(at: now.advanced(by: -80))
+
+        try await sut.resendPersistentAreas(isLaunched: false)
+
+        #expect(sendSpy.calls.isEmpty, "Empty session should not be submitted on warm start")
+        let remaining = try await persistence.sessionsToSubmitWarm()
+        #expect(remaining.isEmpty, "Empty session should be deleted on warm start")
+    }
+
+    @Test func whenWarmResendingMixOfEmptyAndNonEmptySessions_thenOnlySubmitsNonEmpty() async throws {
+        let now = makeDate(offset: 500)
+        let (sut, sendSpy, persistence) = makeSUT(dateNow: { now })
+
+        // Session S1 with 1 fence (finalized)
+        try await persistence.sessionStarted(at: now.advanced(by: -200))
+        try await persistence.assignTestUUIDAndAnchor("S1", anchorNow: now.advanced(by: -190))
+        try await persistence.save(makeFence(date: now.advanced(by: -185)))
+        try await persistence.sessionFinalized(at: now.advanced(by: -180))
+
+        // Session S2 with 0 fences (finalized)
+        try await persistence.sessionStarted(at: now.advanced(by: -100))
+        try await persistence.assignTestUUIDAndAnchor("S2", anchorNow: now.advanced(by: -90))
+        try await persistence.sessionFinalized(at: now.advanced(by: -80))
+
+        try await sut.resendPersistentAreas(isLaunched: false)
+
+        #expect(sendSpy.calls.count == 1, "Only non-empty session should be submitted")
+        #expect(sendSpy.calls.first?.uuid == "S1")
+        let remaining = try await persistence.sessionsToSubmitWarm()
+        #expect(remaining.isEmpty, "Both sessions should be deleted")
+    }
+
+    @Test func whenResendingSessionWithFences_thenSubmitsAndDeletesSession() async throws {
+        let now = makeDate(offset: 500)
+        let (sut, sendSpy, persistence) = makeSUT(dateNow: { now })
+
+        try await persistence.sessionStarted(at: now.advanced(by: -100))
+        try await persistence.assignTestUUIDAndAnchor("with-fences", anchorNow: now.advanced(by: -90))
+        try await persistence.save(makeFence(date: now.advanced(by: -85)))
+        try await persistence.save(makeFence(lat: 2.0, date: now.advanced(by: -80)))
+        try await persistence.sessionFinalized(at: now.advanced(by: -70))
+
+        try await sut.resendPersistentAreas(isLaunched: true)
+
+        #expect(sendSpy.calls.count == 1, "Non-empty session should be submitted")
+        #expect(sendSpy.calls.first?.uuid == "with-fences")
+        let remaining = try await persistence.sessionsToSubmitCold()
+        #expect(remaining.isEmpty, "Session should be deleted after submission")
+    }
 }
 
 // MARK: - Test Helpers

@@ -54,6 +54,13 @@ struct PersistedFencesResender {
                 continue
             }
             let fencesToSend = session.fences.map(makeFence).sorted(by: { $0.dateEntered < $1.dateEntered })
+
+            guard !fencesToSend.isEmpty else {
+                Log.logger.info("Skipping empty session: uuid=\(uuid), deleting without submission")
+                try await persistence.delete([session])
+                continue
+            }
+
             let anchorDate = Date(timeIntervalSince1970: Double(anchorAt) / 1_000_000)
             Log.logger.info("Resending session: uuid=\(uuid), fenceCount=\(fencesToSend.count)")
             let service = sendResultsService(uuid, anchorDate)
