@@ -1486,8 +1486,9 @@ import Clocks
             await sut.startTest()
 
             #expect(sut.warningPopups == [makeWiFiWarningPopup()])
-            // Fence at 1.0 (dirty, closed) + fence at 3.0 (dirty, on WiFi)
-            #expect(sut.fenceItems.count == 2)
+            // Fences exist in memory but are dirty — hidden from map
+            #expect(sut.fences.count == 2)
+            #expect(sut.fenceItems.isEmpty, "Dirty fences hidden from map")
             // Latest ping should remain unchanged (no completed refresh interval)
             #expect(sut.latestPing == "-")
             // Locations always appended
@@ -1511,8 +1512,9 @@ import Clocks
             await sut.startTest()
 
             #expect(!sut.warningPopups.contains(makeWiFiWarningPopup()))
-            // 3 fences: fence(1.0, dirty) + fence(3.0, dirty) + fence(5.0, clean)
-            #expect(sut.fenceItems.count == 3)
+            // 3 fences in memory, but only the clean one visible on map
+            #expect(sut.fences.count == 3)
+            #expect(sut.fenceItems.count == 1, "Only clean fence at 5.0 visible on map")
         }
 
         @Test func whenOnWiFiAndAccuracyIsBad_thenBothWiFiAndGpsWarningsAreShown() async throws {
@@ -1568,8 +1570,9 @@ import Clocks
             await sut.startTest()
 
             #expect(sut.warningPopups.contains(makeWiFiWarningPopup()))
-            // Fences continue on WiFi: fence(1.0, dirty) + fence(2.0, dirty)
-            #expect(sut.fenceItems.count == 2)
+            // Fences exist in memory but both dirty — hidden from map
+            #expect(sut.fences.count == 2)
+            #expect(sut.fenceItems.isEmpty, "Dirty fences hidden from map")
         }
 
         @Test func whenStayingOnWiFiBeyondInaccuracyTimeout_thenStillAutoStop() async throws {
@@ -1625,9 +1628,9 @@ import Clocks
 
             #expect(sut.warningPopups.contains(makeWiFiWarningPopup()),
                     "WiFi warning should be shown immediately on start")
-            // Fences are created (for UI) but all dirty (born on WiFi)
+            // Fences exist in memory but all dirty — hidden from map
             #expect(sut.fences.count == 2)
-            #expect(sut.fenceItems.count == 2)
+            #expect(sut.fenceItems.isEmpty, "Dirty fences hidden from map")
         }
 
         // MARK: - Network Polling Tests

@@ -162,9 +162,9 @@ struct SessionInitializedUpdate: Hashable {
 
     @ObservationIgnored private(set) var fences: [Fence] {
         didSet {
-            // TODO: optimize: only very last fence is likely to need update, previous fences shoud remain untouched
-            // so no need to mapp all `fences` into fences items, but can cache previous mappings and update only the very last one
-            let newFences = fences.map(fenceItem)
+            // TODO: optimize: only very last fence is likely to need update, previous fences should remain untouched
+            // so no need to map all `fences` into fence items, but can cache previous mappings and update only the very last one
+            let newFences = fences.filter { !dirtyFenceIDs.contains($0.id) }.map(fenceItem)
             if fenceItems != newFences {
                 fenceItems = newFences
             }
