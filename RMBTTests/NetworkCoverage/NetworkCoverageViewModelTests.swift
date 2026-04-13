@@ -1473,12 +1473,12 @@ import Clocks
             #expect(!sut.warningPopups.contains(makeWiFiWarningPopup()))
         }
 
-        @Test func whenSwitchedToWiFi_thenShowWarningAndIgnoreIncomingUpdates() async throws {
+        @Test func whenSwitchedToWiFi_thenShowWarningAndFencesContinueAsDirty() async throws {
             let sut = makeSUT(updates: [
                 makeLocationUpdate      (at: 0, lat: 1.0, lon: 1.0),
                 makePingUpdate          (at: 1, ms: 50),
                 makeNetworkTypeUpdate   (at: 2, type: .wifi),
-                // These should be ignored while on Wi‑Fi
+                // Fences continue on WiFi but are dirty; pings are blocked
                 makeLocationUpdate      (at: 3, lat: 3.0, lon: 3.0),
                 makePingUpdate          (at: 4, ms: 999)
             ])
@@ -1486,23 +1486,24 @@ import Clocks
             await sut.startTest()
 
             #expect(sut.warningPopups == [makeWiFiWarningPopup()])
-            #expect(sut.fenceItems.count == 1)
+            // Fence at 1.0 (dirty, closed) + fence at 3.0 (dirty, on WiFi)
+            #expect(sut.fenceItems.count == 2)
             // Latest ping should remain unchanged (no completed refresh interval)
             #expect(sut.latestPing == "-")
-            // Locations should be appended while on Wi‑Fi
+            // Locations always appended
             #expect(sut.locations.count == 2)
         }
 
-        @Test func whenBackToCellular_thenHideWarningAndResumeProcessing() async throws {
+        @Test func whenBackToCellular_thenHideWarningAndNewCleanFenceCreated() async throws {
             let sut = makeSUT(updates: [
                 makeLocationUpdate      (at: 0, lat: 1.0, lon: 1.0),
                 makeNetworkTypeUpdate   (at: 1, type: .wifi),
-                // Ignored on Wi‑Fi
+                // Fences continue on WiFi (dirty)
                 makeLocationUpdate      (at: 2, lat: 3.0, lon: 3.0),
                 makePingUpdate          (at: 3, ms: 999),
-                // Switch back to cellular
+                // Switch back to cellular — marks fence at 3.0 dirty too
                 makeNetworkTypeUpdate   (at: 4, type: .cellular),
-                // Should be processed again
+                // New fence created (clean)
                 makeLocationUpdate      (at: 5, lat: 5.0, lon: 5.0),
                 makePingUpdate          (at: 6, ms: 100)
             ])
@@ -1510,7 +1511,8 @@ import Clocks
             await sut.startTest()
 
             #expect(!sut.warningPopups.contains(makeWiFiWarningPopup()))
-            #expect(sut.fenceItems.count == 2)
+            // 3 fences: fence(1.0, dirty) + fence(3.0, dirty) + fence(5.0, clean)
+            #expect(sut.fenceItems.count == 3)
         }
 
         @Test func whenOnWiFiAndAccuracyIsBad_thenBothWiFiAndGpsWarningsAreShown() async throws {
@@ -1562,11 +1564,12 @@ import Clocks
                 makeNetworkTypeUpdate   (at: 4, type: .wifi),
                 makeLocationUpdate      (at: 5, lat: 2.0, lon: 2.0)
             ])
-            
+
             await sut.startTest()
-            
+
             #expect(sut.warningPopups.contains(makeWiFiWarningPopup()))
-            #expect(sut.fenceItems.count == 1) // Only initial location processed
+            // Fences continue on WiFi: fence(1.0, dirty) + fence(2.0, dirty)
+            #expect(sut.fenceItems.count == 2)
         }
 
         @Test func whenStayingOnWiFiBeyondInaccuracyTimeout_thenStillAutoStop() async throws {
@@ -1606,7 +1609,7 @@ import Clocks
 
         // MARK: - Initial WiFi State Tests
 
-        @Test func whenStartedWhileOnWiFi_thenWarningShownAndNoFencesCreated() async throws {
+        @Test func whenStartedWhileOnWiFi_thenWarningShownAndFencesCreatedAsDirty() async throws {
             let provider = StubCurrentNetworkTypeProvider(type: .wifi)
             let sut = makeSUT(
                 updates: [
@@ -1622,14 +1625,15 @@ import Clocks
 
             #expect(sut.warningPopups.contains(makeWiFiWarningPopup()),
                     "WiFi warning should be shown immediately on start")
-            #expect(sut.fences.isEmpty, "No fences should be created while on WiFi")
-            #expect(sut.fenceItems.isEmpty, "No fence items should be rendered")
+            // Fences are created (for UI) but all dirty (born on WiFi)
+            #expect(sut.fences.count == 2)
+            #expect(sut.fenceItems.count == 2)
         }
 
         // MARK: - Network Polling Tests
 
-        @Test func whenPollingDetectsWiFiOnLocationUpdate_thenWarningShownAndFenceDataBlocked() async throws {
-            // Polling runs before location processing, so WiFi detected on first location blocks it
+        @Test func whenPollingDetectsWiFiOnLocationUpdate_thenWarningShownAndFencesCreatedAsDirty() async throws {
+            // Polling detects WiFi before location processing, fences continue but are dirty
             let provider = StubCurrentNetworkTypeProvider(type: .wifi)
             let sut = makeSUT(
                 updates: [
@@ -1645,10 +1649,11 @@ import Clocks
 
             #expect(sut.warningPopups.contains(makeWiFiWarningPopup()),
                     "Polling should trigger WiFi warning")
-            #expect(sut.fences.isEmpty, "No fences created — WiFi detected by polling on every location")
+            // Fences are created but dirty (polling detected WiFi on first location)
+            #expect(sut.fences.count == 2)
         }
 
-        @Test func whenPollingDetectsCellularAfterWiFi_thenWarningDismissedAndLocationProcessed() async throws {
+        @Test func whenPollingDetectsCellularAfterWiFi_thenNewCleanFenceCreatedAfterDirtyOne() async throws {
             // WiFi detected via async callback, then polling returns cellular on next location
             let provider = StubCurrentNetworkTypeProvider(type: .cellular)
             let sut = makeSUT(
@@ -1667,15 +1672,13 @@ import Clocks
 
             #expect(!sut.warningPopups.contains(makeWiFiWarningPopup()),
                     "Polling should dismiss WiFi warning")
-            // First fence at lat 1.0 (before WiFi), second fence at lat 2.0 (after polling restores cellular)
-            // Note: uuid-1 is in discardedSessionIDs from WiFi detection, so the location at lat 2.0
-            // is blocked by the discarded guard. Only the first fence should exist.
-            #expect(sut.fences.count == 1, "Only pre-WiFi fence exists — uuid-1 is discarded")
+            // Fence at 1.0 (dirty, network change during its life) + fence at 2.0 (clean, polling restored cellular)
+            #expect(sut.fences.count == 2)
         }
 
         // MARK: - WiFi + Fence Behavior Tests
 
-        @Test func whenSwitchedToWiFiWithoutReinit_thenFenceStaysOpenButNoNewDataCollected() async throws {
+        @Test func whenSwitchedToWiFiWithoutReinit_thenFencesContinueAsDirty() async throws {
             let sut = makeSUT(updates: [
                 makeSessionInitializedUpdate(at: 0, sessionID: "uuid-1"),
                 makeLocationUpdate      (at: 1, lat: 1.0, lon: 1.0),
@@ -1687,10 +1690,181 @@ import Clocks
 
             await sut.startTest()
 
-            #expect(sut.fences.count == 1, "Fence should stay open without RE01")
-            #expect(sut.fences.first?.dateExited == nil, "Fence should not be closed without RE01")
-            #expect(sut.fences.first?.pings.count == 1, "Only the cellular ping should be recorded")
+            // Fence at 1.0 (dirty, closed) + fence at 2.0 (dirty, on WiFi)
+            #expect(sut.fences.count == 2)
+            #expect(sut.fences[0].dateExited != nil, "First fence closed when user moved")
+            #expect(sut.fences[0].pings.count == 1, "Only the cellular ping recorded")
             #expect(sut.warningPopups.contains(makeWiFiWarningPopup()))
+        }
+    }
+
+    @MainActor @Suite("Dirty Fences")
+    struct DirtyFencesTests {
+        @Test func whenNetworkChangesToWiFi_thenActiveFenceMarkedDirtyAndNotPersisted() async throws {
+            let persistenceService = FencePersistenceServiceSpy()
+            let sut = makeSUT(
+                updates: [
+                    makeSessionInitializedUpdate(at: 0, sessionID: "uuid-1"),
+                    makeLocationUpdate      (at: 1, lat: 1.0, lon: 1.0),
+                    makePingUpdate          (at: 2, ms: 50),
+                    makeNetworkTypeUpdate   (at: 3, type: .wifi),
+                    makeLocationUpdate      (at: 4, lat: 2.0, lon: 2.0)
+                ],
+                persistenceService: persistenceService
+            )
+
+            await sut.startTest()
+
+            #expect(sut.fences.count == 2)
+            let savedFences = await persistenceService.capturedSavedFences
+            #expect(savedFences.isEmpty, "Dirty fences should not be persisted")
+        }
+
+        @Test func whenNetworkChangesToWiFiAndBack_thenDirtyFenceNotSentOnStop() async throws {
+            let sendService = SendCoverageResultsServiceSpy()
+            let sut = makeSUT(
+                updates: [
+                    makeSessionInitializedUpdate(at: 0, sessionID: "uuid-1"),
+                    makeLocationUpdate      (at: 1, lat: 1.0, lon: 1.0),
+                    makeNetworkTypeUpdate   (at: 2, type: .wifi),
+                    makeNetworkTypeUpdate   (at: 3, type: .cellular),
+                    makeLocationUpdate      (at: 4, lat: 2.0, lon: 2.0),
+                    makeLocationUpdate      (at: 5, lat: 3.0, lon: 3.0)
+                ],
+                sendResultsService: sendService
+            )
+
+            await sut.startTest()
+            await sut.stopTest()
+
+            // fence(1.0) dirty, fence(2.0) clean (created after cellular returned), fence(3.0) clean
+            let sentFences = sendService.capturedSentFences.flatMap { $0 }
+            #expect(sentFences.count == 2, "Both fences created after cellular returns should be sent")
+            let sentLats = sentFences.map { $0.startingLocation.coordinate.latitude }
+            #expect(sentLats == [2.0, 3.0])
+        }
+
+        @Test func whenFenceCreatedOnWiFi_thenBornDirty() async throws {
+            let persistenceService = FencePersistenceServiceSpy()
+            let sut = makeSUT(
+                updates: [
+                    makeNetworkTypeUpdate   (at: 0, type: .wifi),
+                    makeSessionInitializedUpdate(at: 1, sessionID: "uuid-1"),
+                    makeLocationUpdate      (at: 2, lat: 1.0, lon: 1.0),
+                    makeLocationUpdate      (at: 3, lat: 2.0, lon: 2.0)
+                ],
+                persistenceService: persistenceService
+            )
+
+            await sut.startTest()
+
+            #expect(sut.fences.count == 2)
+            let savedFences = await persistenceService.capturedSavedFences
+            #expect(savedFences.isEmpty, "Fences born on WiFi should not be persisted")
+        }
+
+        @Test func whenRapidWiFiFluctuation_thenAffectedFenceStaysDirty() async throws {
+            let sendService = SendCoverageResultsServiceSpy()
+            let sut = makeSUT(
+                updates: [
+                    makeSessionInitializedUpdate(at: 0, sessionID: "uuid-1"),
+                    makeLocationUpdate      (at: 1, lat: 1.0, lon: 1.0),
+                    makePingUpdate          (at: 2, ms: 50),
+                    makeNetworkTypeUpdate   (at: 3, type: .wifi),
+                    makeNetworkTypeUpdate   (at: 4, type: .cellular),
+                    makeNetworkTypeUpdate   (at: 5, type: .wifi),
+                    makeNetworkTypeUpdate   (at: 6, type: .cellular),
+                    // New fence after all the toggling
+                    makeLocationUpdate      (at: 7, lat: 2.0, lon: 2.0),
+                    makeLocationUpdate      (at: 8, lat: 3.0, lon: 3.0)
+                ],
+                sendResultsService: sendService
+            )
+
+            await sut.startTest()
+            await sut.stopTest()
+
+            // fence(1.0) dirty (experienced network changes), fence(2.0) clean (created after cellular), fence(3.0) clean
+            let sentFences = sendService.capturedSentFences.flatMap { $0 }
+            let sentLats = sentFences.map { $0.startingLocation.coordinate.latitude }
+            #expect(sentLats == [2.0, 3.0], "Only fences created after toggling ended should be sent")
+        }
+
+        @Test func whenStopWithAllDirtyFences_thenNothingSentToService() async throws {
+            let sendService = SendCoverageResultsServiceSpy()
+            let sut = makeSUT(
+                updates: [
+                    makeSessionInitializedUpdate(at: 0, sessionID: "uuid-1"),
+                    makeLocationUpdate      (at: 1, lat: 1.0, lon: 1.0),
+                    makeNetworkTypeUpdate   (at: 2, type: .wifi),
+                    makeLocationUpdate      (at: 3, lat: 2.0, lon: 2.0)
+                ],
+                sendResultsService: sendService
+            )
+
+            await sut.startTest()
+            await sut.stopTest()
+
+            #expect(sendService.capturedSentFences.isEmpty, "All fences are dirty — nothing sent")
+        }
+
+        @Test func whenStopWithMixOfCleanAndDirtyFences_thenOnlyCleanFencesSent() async throws {
+            let sendService = SendCoverageResultsServiceSpy()
+            let sut = makeSUT(
+                updates: [
+                    makeSessionInitializedUpdate(at: 0, sessionID: "uuid-1"),
+                    makeLocationUpdate      (at: 1, lat: 1.0, lon: 1.0),
+                    makeLocationUpdate      (at: 2, lat: 2.0, lon: 2.0),
+                    makeNetworkTypeUpdate   (at: 3, type: .wifi),
+                    makeLocationUpdate      (at: 4, lat: 3.0, lon: 3.0),
+                    makeNetworkTypeUpdate   (at: 5, type: .cellular),
+                    makeLocationUpdate      (at: 6, lat: 4.0, lon: 4.0),
+                    makeLocationUpdate      (at: 7, lat: 5.0, lon: 5.0)
+                ],
+                sendResultsService: sendService
+            )
+
+            await sut.startTest()
+            await sut.stopTest()
+
+            // fence(1.0) clean, fence(2.0) dirty, fence(3.0) dirty, fence(4.0) clean, fence(5.0) clean
+            let sentFences = sendService.capturedSentFences.flatMap { $0 }
+            let sentLats = sentFences.map { $0.startingLocation.coordinate.latitude }
+            #expect(sentLats == [1.0, 4.0, 5.0], "Only fences unaffected by network changes should be sent")
+        }
+
+        @Test func whenDirtyFenceClosedOnReinit_thenNotPersisted() async throws {
+            let persistenceService = FencePersistenceServiceSpy()
+            let sut = makeSUT(
+                updates: [
+                    makeSessionInitializedUpdate(at: 0, sessionID: "uuid-1"),
+                    makeLocationUpdate      (at: 1, lat: 1.0, lon: 1.0),
+                    makeNetworkTypeUpdate   (at: 2, type: .wifi),
+                    makeSessionInitializedUpdate(at: 3, sessionID: "uuid-2"),
+                    makeNetworkTypeUpdate   (at: 4, type: .cellular),
+                    makeLocationUpdate      (at: 5, lat: 2.0, lon: 2.0)
+                ],
+                persistenceService: persistenceService
+            )
+
+            await sut.startTest()
+
+            let savedFences = await persistenceService.capturedSavedFences
+            // The dirty fence closed at reinit should NOT be persisted
+            #expect(savedFences.isEmpty, "Dirty fence should not be persisted even when closed at reinit")
+        }
+
+        @Test func whenPingArrivesWhileOnWiFi_thenPingBlockedByWiFiGuard() async throws {
+            let sut = makeSUT(updates: [
+                makeSessionInitializedUpdate(at: 0, sessionID: "uuid-1"),
+                makeLocationUpdate      (at: 1, lat: 1.0, lon: 1.0),
+                makeNetworkTypeUpdate   (at: 2, type: .wifi),
+                makePingUpdate          (at: 3, ms: 999)
+            ])
+
+            await sut.startTest()
+
+            #expect(sut.fences[0].pings.isEmpty, "Pings should be blocked on WiFi")
         }
     }
 
@@ -1761,7 +1935,7 @@ import Clocks
 
     @MainActor @Suite("WiFi and Session Reinitialization Combined")
     struct WiFiAndSessionReinitCombinedTests {
-        @Test func whenWiFiDetectedThenSessionReinitialized_thenFenceClosedAtReinitOnPreviousSession() async throws {
+        @Test func whenWiFiDetectedThenSessionReinitialized_thenFenceClosedAndNewDirtyFenceCreated() async throws {
             let sut = makeSUT(updates: [
                 makeSessionInitializedUpdate(at: 0, sessionID: "uuid-cell"),
                 makeLocationUpdate      (at: 1, lat: 1.0, lon: 1.0),
@@ -1774,13 +1948,15 @@ import Clocks
 
             await sut.startTest()
 
-            #expect(sut.fences.count == 1, "Only the cellular fence should exist")
+            // Fence at 1.0 (dirty, WiFi during its life) + fence at 2.0 (dirty, born on WiFi)
+            #expect(sut.fences.count == 2)
             #expect(sut.fences[0].sessionUUID == "uuid-cell")
-            #expect(sut.fences[0].dateExited != nil, "Fence should be closed at reinit")
-            #expect(sut.fences[0].pings.count == 1, "Only the cellular ping should be recorded")
+            #expect(sut.fences[0].dateExited != nil, "First fence closed at reinit")
+            #expect(sut.fences[0].pings.count == 1, "Only the cellular ping recorded")
+            #expect(sut.fences[1].sessionUUID == "uuid-wifi")
         }
 
-        @Test func whenSessionReinitializedThenWiFiDetected_thenCellularFenceClosedAndWiFiFenceStopsReceiving() async throws {
+        @Test func whenSessionReinitializedThenWiFiDetected_thenPreWiFiFenceCleanAndWiFiFencesDirty() async throws {
             let sut = makeSUT(updates: [
                 makeSessionInitializedUpdate(at: 0, sessionID: "uuid-cell"),
                 makeLocationUpdate      (at: 1, lat: 1.0, lon: 1.0),
@@ -1795,14 +1971,15 @@ import Clocks
 
             await sut.startTest()
 
-            #expect(sut.fences.count == 2)
-            #expect(sut.fences[0].sessionUUID == "uuid-cell", "First fence stays on cellular session")
-            #expect(sut.fences[0].dateExited != nil, "First fence should be closed at reinit")
-            #expect(sut.fences[1].sessionUUID == "uuid-wifi", "Second fence on WiFi session (minor data leak)")
-            #expect(sut.fences[1].pings.count == 1, "One leaked ping before WiFi detected, no further data after discard")
+            // fence(1.0, uuid-cell, closed at reinit) + fence(2.0, uuid-wifi, dirty) + fence(3.0, uuid-wifi, dirty)
+            #expect(sut.fences.count == 3)
+            #expect(sut.fences[0].sessionUUID == "uuid-cell", "First fence on cellular session")
+            #expect(sut.fences[0].dateExited != nil)
+            #expect(sut.fences[1].sessionUUID == "uuid-wifi", "Second fence created after reinit")
+            #expect(sut.fences[1].pings.count == 1, "One ping before WiFi detected")
         }
 
-        @Test func whenCellularReturnsBeforeReinit_thenDiscardedBlocksFenceCreationOnWiFiSession() async throws {
+        @Test func whenCellularReturnsBeforeReinit_thenNewFenceOnRestoredCellularIsClean() async throws {
             let sut = makeSUT(updates: [
                 makeSessionInitializedUpdate(at: 0, sessionID: "uuid-cell-1"),
                 makeLocationUpdate      (at: 1, lat: 1.0, lon: 1.0),
@@ -1817,14 +1994,15 @@ import Clocks
 
             await sut.startTest()
 
-            #expect(sut.fences.count == 2, "Only fences on non-discarded sessions")
-            #expect(sut.fences[0].sessionUUID == "uuid-cell-1", "First fence on original cellular session")
-            #expect(sut.fences[0].dateExited != nil, "First fence should be closed")
-            #expect(sut.fences[1].sessionUUID == "uuid-cell-2", "Second fence on new cellular session")
-            #expect(sut.fences.contains(where: { $0.sessionUUID == "uuid-wifi" }) == false, "No fences on WiFi session")
+            // fence(1.0, uuid-cell-1, dirty) + fence(2.0, uuid-wifi, clean) + fence(3.0, uuid-cell-2, clean)
+            #expect(sut.fences.count == 3)
+            #expect(sut.fences[0].sessionUUID == "uuid-cell-1", "First fence on original session")
+            #expect(sut.fences[0].dateExited != nil)
+            #expect(sut.fences[1].sessionUUID == "uuid-wifi", "Second fence after cellular restored")
+            #expect(sut.fences[2].sessionUUID == "uuid-cell-2", "Third fence on new cellular session")
         }
 
-        @Test func whenCellularToWiFiToCellular_thenResumesNormalMeasurement() async throws {
+        @Test func whenCellularToWiFiToCellular_thenDirtyFenceFollowedByCleanFence() async throws {
             let sut = makeSUT(updates: [
                 makeSessionInitializedUpdate(at: 0, sessionID: "uuid-cell-1"),
                 makeLocationUpdate      (at: 1, lat: 1.0, lon: 1.0),
@@ -1839,14 +2017,16 @@ import Clocks
 
             await sut.startTest()
 
-            #expect(sut.fences.count == 2, "Fences on cellular sessions only")
+            // fence(1.0, uuid-cell-1, dirty) closed at reinit(uuid-wifi)
+            // No fence created between reinits (no location)
+            // fence(2.0, uuid-cell-2, clean)
+            #expect(sut.fences.count == 2)
             #expect(sut.fences[0].sessionUUID == "uuid-cell-1")
             #expect(sut.fences[0].dateExited != nil, "First fence closed")
             #expect(sut.fences[1].sessionUUID == "uuid-cell-2")
-            #expect(sut.fences.contains(where: { $0.sessionUUID == "uuid-wifi" }) == false)
         }
 
-        @Test func whenStoppedWhileOnWiFiAfterReinit_thenAllFencesSentToServiceWithCorrectSessionUUIDs() async throws {
+        @Test func whenStoppedWhileOnWiFiAfterReinit_thenOnlyCleanFencesSent() async throws {
             let sendService = SendCoverageResultsServiceSpy()
             let sut = makeSUT(
                 updates: [
@@ -1862,9 +2042,10 @@ import Clocks
             await sut.startTest()
             await sut.stopTest()
 
+            // fence(1.0) closed before WiFi → clean. fence(2.0) active when WiFi hit → dirty.
             let sentFences = sendService.capturedSentFences.flatMap { $0 }
-            #expect(sentFences.allSatisfy { $0.sessionUUID == "uuid-cell" },
-                    "All fences should be on the cellular session, none on discarded WiFi session")
+            #expect(sentFences.count == 1, "Only the clean fence before WiFi should be sent")
+            #expect(sentFences.first?.startingLocation.coordinate.latitude == 1.0)
         }
     }
 }
