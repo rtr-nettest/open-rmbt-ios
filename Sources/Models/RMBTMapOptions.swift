@@ -85,13 +85,34 @@ final class RMBTMapOptions {
     public var oldTypes: [RMBTMapOptionsType] = []
     
     public var mapFilters: [RMBTMapOptionsFilter] = []
-    
+
+    /// Whether the currently selected map type is mobile, derived from the
+    /// MAP_TYPE filter's active value params rather than display title matching.
+    public var activeMapTypeIsMobile: Bool {
+        let value = mapFilters.first(where: { $0.iconValue == "MAP_TYPE" })?
+            .activeValue?.params["map_type_is_mobile"]
+        return (value as? NSNumber)?.boolValue ?? false
+    }
+
+    /// Single source of truth for whether a filter is relevant to the current
+    /// map type. Used by both the UI layer and request-param generation.
+    public func isFilterActiveForCurrentContext(_ filter: RMBTMapOptionsFilter) -> Bool {
+        switch filter.iconValue {
+        case "MAP_FILTER_TECHNOLOGY":
+            return activeMapTypeIsMobile
+        case "MAP_FILTER_CARRIER":
+            return filter.dependsOnMapTypeIsMobile == activeMapTypeIsMobile
+        default:
+            return true
+        }
+    }
+
     public var mapFiltersDictionary: [String: Any] {
         var infos: [[String: Any]] = []
         var result: [String: Any] = [:]
 
-        //get params from all active values and active sub options
-        for mapFilter in mapFilters {
+        //get params from active values, skipping filters irrelevant to the current map type
+        for mapFilter in mapFilters where isFilterActiveForCurrentContext(mapFilter) {
             Log.logger.debug("Processing filter '\(mapFilter.title)' (icon=\(mapFilter.iconValue), dependsMobile=\(mapFilter.dependsOnMapTypeIsMobile)) activeValue='\(mapFilter.activeValue?.title ?? "nil")'")
             if let option = mapFilter.activeValue?.activeOption {
                 Log.logger.debug("  -> activeOption params: \(option.params)")

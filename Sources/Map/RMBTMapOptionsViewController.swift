@@ -27,30 +27,9 @@ final class RMBTMapOptionsViewController: UIViewController {
     
     weak var delegate: RMBTMapOptionsViewControllerDelegate?
     
-    var mapOptions: RMBTMapOptions? {
-        didSet {
-            let mapTypeFilter = self.mapOptions?.mapFilters.first(where: { filter in
-                filter.iconValue == "MAP_TYPE"
-            })
-            self.mapTypeIsMobile = mapTypeFilter?.activeValue?.title.contains("Mobile") ?? false
-        }
-    }
-    var mapTypeIsMobile = false
+    var mapOptions: RMBTMapOptions?
     var mapFilters: [RMBTMapOptionsFilter]? {
-        get {
-            return self.mapOptions?.mapFilters.filter({ filter in
-                if filter.iconValue == "MAP_FILTER_TECHNOLOGY" {
-                    return self.mapTypeIsMobile
-                } else if filter.iconValue == "MAP_FILTER_CARRIER" {
-                    if filter.dependsOnMapTypeIsMobile {
-                        return self.mapTypeIsMobile
-                    } else {
-                        return !self.mapTypeIsMobile
-                    }
-                }
-                return true
-            })
-        }
+        return mapOptions?.mapFilters.filter { mapOptions?.isFilterActiveForCurrentContext($0) ?? true }
     }
     
     override func viewDidLoad() {
@@ -115,13 +94,12 @@ final class RMBTMapOptionsViewController: UIViewController {
            let vc = segue.destination as? RMBTMapOptionsTypesViewController {
             let filter = self.filter(at: indexPath?.row ?? 0)
             vc.filter = filter
-            vc.onMapTypeChange = { filter in
+            vc.onMapTypeChange = { _ in
                 self.mapOptions?.mapFilters.forEach({ filter in
                     if filter.iconValue == "MAP_FILTER_CARRIER" || filter.iconValue == "MAP_FILTER_TECHNOLOGY" {
                         filter.activeValue = filter.possibleValues.first(where: { $0.isDefault })
                     }
                 })
-                self.mapTypeIsMobile = filter?.activeValue?.title.contains("Mobile") ?? false
             }
         }
     }
