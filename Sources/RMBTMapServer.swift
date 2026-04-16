@@ -61,31 +61,40 @@ import ObjectMapper
     ///
     @objc public func getMeasurementsAtCoordinate(_ coordinate: CLLocationCoordinate2D, zoom: Int, params: [String: Any], success successCallback: @escaping (_ response: [SpeedMeasurementResultResponse]) -> (), error failure: @escaping ErrorCallback) {
 
+        Log.logger.debug("Input params: \(params)")
+
         let mapMeasurementRequest = MapMeasurementRequest()
         mapMeasurementRequest.coords = MapMeasurementRequest.CoordObject()
         mapMeasurementRequest.coords?.latitude = coordinate.latitude
         mapMeasurementRequest.coords?.longitude = coordinate.longitude
         mapMeasurementRequest.coords?.zoom = zoom
-        
+
         mapMeasurementRequest.options = MapMeasurementRequest.MapOptions()
         mapMeasurementRequest.options?.mapOptions = params["map_options"] as? String
-        
+
         mapMeasurementRequest.filter = MapMeasurementRequest.Filter()
         mapMeasurementRequest.filter?.period = (params["period"] as? Int)?.description
-        
+
         if let technology = params["technology"] as? String, !technology.isEmpty, technology != "some" {
             mapMeasurementRequest.filter?.technology = technology
         }
 
-        if let provider = params["provider"] as? String, !provider.isEmpty {
+        if let provider = normalizedFilterString(params["provider"]) {
+            Log.logger.debug("Using PROVIDER filter: '\(provider)' (operator in params was: '\(params["operator"] ?? "missing")')")
             mapMeasurementRequest.filter?.provider = provider
-        } else if let mobileOperator = params["operator"] as? String, !mobileOperator.isEmpty {
+        } else if let mobileOperator = normalizedFilterString(params["operator"]) {
+            Log.logger.debug("Using OPERATOR filter: '\(mobileOperator)'")
             mapMeasurementRequest.filter?.mobileOperator = mobileOperator
+        } else {
+            Log.logger.debug("No provider/operator filter applied (provider='\(params["provider"] ?? "missing")', operator='\(params["operator"] ?? "missing")')")
         }
+
+        Log.logger.debug("Sending request: map_options=\(mapMeasurementRequest.options?.mapOptions ?? "nil"), period=\(mapMeasurementRequest.filter?.period ?? "nil"), technology=\(mapMeasurementRequest.filter?.technology ?? "nil"), provider=\(mapMeasurementRequest.filter?.provider ?? "nil"), operator=\(mapMeasurementRequest.filter?.mobileOperator ?? "nil")")
 
         // TODO: Check request and response
         request(.post, path: "/tiles/markers", requestObject: mapMeasurementRequest, success: { (response: MapMeasurementResponse) in
             if let measurements = response.measurements {
+                Log.logger.debug("Got \(measurements.count) measurements")
                 successCallback(measurements)
             } else {
                 failure(NSError(domain: "no measurements", code: -12543, userInfo: nil))
@@ -170,6 +179,21 @@ import ObjectMapper
                 Log.logger.error(error)
                 successCallback(nil)
             }
+        }
+    }
+
+    /// Converts a map filter param value to a non-empty String.
+    /// The `/v2/tiles/info` API returns filter values as String (empty for "All")
+    /// or numeric IDs (Int/Float) for specific selections. This normalizes both
+    /// to a String suitable for the `/tiles/markers` request body.
+    private func normalizedFilterString(_ value: Any?) -> String? {
+        switch value {
+        case let string as String:
+            return string.isEmpty ? nil : string
+        case let number as NSNumber:
+            return number.stringValue
+        default:
+            return nil
         }
     }
 

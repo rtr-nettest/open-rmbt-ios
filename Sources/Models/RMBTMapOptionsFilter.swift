@@ -72,14 +72,16 @@ import UIKit
         possibleValues = options.map { subresponse in
             let filterValue = RMBTMapOptionsFilterValue(with: subresponse)
             if filterValue.isDefault {
+                Log.logger.debug("\(self.title) (\(self.iconValue), dependsMobile=\(self.dependsOnMapTypeIsMobile)): setting activeValue to DEFAULT '\(filterValue.title)' params=\(filterValue.params)")
                 activeValue = filterValue
             }
             // For subtypes
             if filterValue.activeOption != nil {
+                Log.logger.debug("\(self.title) (\(self.iconValue), dependsMobile=\(self.dependsOnMapTypeIsMobile)): OVERRIDING activeValue to '\(filterValue.title)' (has activeOption '\(filterValue.activeOption?.title ?? "nil")') params=\(filterValue.params)")
                 activeValue = filterValue
             }
             return filterValue
         }
-        
+        Log.logger.debug("\(title) (\(iconValue), dependsMobile=\(dependsOnMapTypeIsMobile)): FINAL activeValue='\(activeValue?.title ?? "nil")' with \(possibleValues.count) options: [\(possibleValues.map { $0.title }.joined(separator: ", "))]")
     }
 }

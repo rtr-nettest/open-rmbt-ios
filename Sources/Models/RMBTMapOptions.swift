@@ -89,24 +89,28 @@ final class RMBTMapOptions {
     public var mapFiltersDictionary: [String: Any] {
         var infos: [[String: Any]] = []
         var result: [String: Any] = [:]
-        
+
         //get params from all active values and active sub options
         for mapFilter in mapFilters {
+            Log.logger.debug("Processing filter '\(mapFilter.title)' (icon=\(mapFilter.iconValue), dependsMobile=\(mapFilter.dependsOnMapTypeIsMobile)) activeValue='\(mapFilter.activeValue?.title ?? "nil")'")
             if let option = mapFilter.activeValue?.activeOption {
+                Log.logger.debug("  -> activeOption params: \(option.params)")
                 infos.append(option.params)
             }
             if let value = mapFilter.activeValue {
+                Log.logger.debug("  -> activeValue params: \(value.params)")
                 infos.append(value.params)
             }
         }
-        
+
         //merge all params to dictionary
         for info in infos {
             info.forEach { item in
                 result[item.key] = item.value
             }
         }
-        
+
+        Log.logger.debug("MERGED result: \(result)")
         return result
     }
     
@@ -150,11 +154,13 @@ final class RMBTMapOptions {
         let selection = RMBTMapOptionsSelection()
 
         selection.overlayIdentifier = oldActiveOverlay?.identifier
-        
+
         var activeFilters: [String: Any] = [:]
         for f in mapFilters {
+            Log.logger.debug(" filter '\(f.title)' (icon=\(f.iconValue), dependsMobile=\(f.dependsOnMapTypeIsMobile)) -> saving activeValue='\(f.activeValue?.title ?? "nil")'")
             activeFilters[f.title] = f.activeValue?.title
         }
+        Log.logger.debug(" Final saved activeFilters dictionary: \(activeFilters)")
         selection.activeFilters = activeFilters
 
         RMBTSettings.shared.mapOptionsSelection = selection
@@ -163,6 +169,7 @@ final class RMBTMapOptions {
     ///
     fileprivate func restoreSelection() {
         let selection: RMBTMapOptionsSelection = RMBTSettings.shared.mapOptionsSelection
+        Log.logger.debug("Saved activeFilters: \(selection.activeFilters ?? [:])")
 
         if let id = selection.overlayIdentifier {
             for o in oldOverlays {
@@ -175,12 +182,18 @@ final class RMBTMapOptions {
 
         if let activeFilters = selection.activeFilters {
             for f in mapFilters {
+                let beforeTitle = f.activeValue?.title ?? "nil"
                 if let activeFilterValueTitle = activeFilters[f.title] as? String {
                     if let v = f.possibleValues.first(where: { fv in
                         return fv.title == activeFilterValueTitle
                     }) {
                         f.activeValue = v
+                        Log.logger.debug("filter '\(f.title)' (icon=\(f.iconValue), dependsMobile=\(f.dependsOnMapTypeIsMobile)): restored '\(beforeTitle)' -> '\(v.title)' params=\(v.params)")
+                    } else {
+                        Log.logger.debug("filter '\(f.title)' (icon=\(f.iconValue), dependsMobile=\(f.dependsOnMapTypeIsMobile)): saved value '\(activeFilterValueTitle)' NOT FOUND in options [\(f.possibleValues.map { $0.title }.joined(separator: ", "))], keeping '\(beforeTitle)'")
                     }
+                } else {
+                    Log.logger.debug("filter '\(f.title)' (icon=\(f.iconValue), dependsMobile=\(f.dependsOnMapTypeIsMobile)): no saved value, keeping '\(beforeTitle)'")
                 }
             }
         }
