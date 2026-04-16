@@ -69,19 +69,13 @@ import UIKit
             dependsOnMapTypeIsMobile = mapTypeIsMobile
         }
         let options = response["options"] as? [[String: Any]] ?? []
-        possibleValues = options.map { subresponse in
-            let filterValue = RMBTMapOptionsFilterValue(with: subresponse)
-            if filterValue.isDefault {
-                Log.logger.debug("\(self.title) (\(self.iconValue), dependsMobile=\(self.dependsOnMapTypeIsMobile)): setting activeValue to DEFAULT '\(filterValue.title)' params=\(filterValue.params)")
-                activeValue = filterValue
-            }
-            // For subtypes
-            if filterValue.activeOption != nil {
-                Log.logger.debug("\(self.title) (\(self.iconValue), dependsMobile=\(self.dependsOnMapTypeIsMobile)): OVERRIDING activeValue to '\(filterValue.title)' (has activeOption '\(filterValue.activeOption?.title ?? "nil")') params=\(filterValue.params)")
-                activeValue = filterValue
-            }
-            return filterValue
-        }
-        Log.logger.debug("\(title) (\(iconValue), dependsMobile=\(dependsOnMapTypeIsMobile)): FINAL activeValue='\(activeValue?.title ?? "nil")' with \(possibleValues.count) options: [\(possibleValues.map { $0.title }.joined(separator: ", "))]")
+        possibleValues = options.map { RMBTMapOptionsFilterValue(with: $0) }
+
+        // Prefer explicit top-level default; fall back to first value with a default sub-option
+        activeValue =
+            possibleValues.first(where: \.isDefault) ??
+            possibleValues.first(where: { $0.activeOption != nil })
+
+        Log.logger.debug("\(title) (\(iconValue), dependsMobile=\(dependsOnMapTypeIsMobile)): activeValue='\(activeValue?.title ?? "nil")' (isDefault=\(activeValue?.isDefault ?? false)) with \(possibleValues.count) options: [\(possibleValues.map { $0.title }.joined(separator: ", "))]")
     }
 }
