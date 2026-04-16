@@ -157,16 +157,24 @@ final class RMBTMapOptions {
 
         var activeFilters: [String: Any] = [:]
         for f in mapFilters {
-            Log.logger.debug(" filter '\(f.title)' (icon=\(f.iconValue), dependsMobile=\(f.dependsOnMapTypeIsMobile)) -> saving activeValue='\(f.activeValue?.title ?? "nil")'")
-            activeFilters[f.title] = f.activeValue?.title
+            let key = persistenceKey(for: f)
+            Log.logger.debug("filter '\(f.title)' key='\(key)' -> saving activeValue='\(f.activeValue?.title ?? "nil")'")
+            activeFilters[key] = f.activeValue?.title
         }
-        Log.logger.debug(" Final saved activeFilters dictionary: \(activeFilters)")
+        Log.logger.debug("Final saved activeFilters dictionary: \(activeFilters)")
         selection.activeFilters = activeFilters
 
         RMBTSettings.shared.mapOptionsSelection = selection
     }
 
     ///
+    /// Stable persistence key derived from non-localized metadata.
+    /// Avoids collisions when multiple filters share the same display title
+    /// (e.g. two "Operator" carrier filters for mobile vs non-mobile).
+    private func persistenceKey(for filter: RMBTMapOptionsFilter) -> String {
+        "\(filter.iconValue)|mobile:\(filter.dependsOnMapTypeIsMobile)"
+    }
+
     fileprivate func restoreSelection() {
         let selection: RMBTMapOptionsSelection = RMBTSettings.shared.mapOptionsSelection
         Log.logger.debug("Saved activeFilters: \(selection.activeFilters ?? [:])")
@@ -183,17 +191,20 @@ final class RMBTMapOptions {
         if let activeFilters = selection.activeFilters {
             for f in mapFilters {
                 let beforeTitle = f.activeValue?.title ?? "nil"
-                if let activeFilterValueTitle = activeFilters[f.title] as? String {
+                let key = persistenceKey(for: f)
+                // Try stable key first, fall back to legacy title key for backward compatibility
+                let savedTitle = (activeFilters[key] as? String) ?? (activeFilters[f.title] as? String)
+                if let activeFilterValueTitle = savedTitle {
                     if let v = f.possibleValues.first(where: { fv in
                         return fv.title == activeFilterValueTitle
                     }) {
                         f.activeValue = v
-                        Log.logger.debug("filter '\(f.title)' (icon=\(f.iconValue), dependsMobile=\(f.dependsOnMapTypeIsMobile)): restored '\(beforeTitle)' -> '\(v.title)' params=\(v.params)")
+                        Log.logger.debug("filter '\(f.title)' key='\(key)': restored '\(beforeTitle)' -> '\(v.title)' params=\(v.params)")
                     } else {
-                        Log.logger.debug("filter '\(f.title)' (icon=\(f.iconValue), dependsMobile=\(f.dependsOnMapTypeIsMobile)): saved value '\(activeFilterValueTitle)' NOT FOUND in options [\(f.possibleValues.map { $0.title }.joined(separator: ", "))], keeping '\(beforeTitle)'")
+                        Log.logger.debug("filter '\(f.title)' key='\(key)': saved value '\(activeFilterValueTitle)' NOT FOUND in options [\(f.possibleValues.map { $0.title }.joined(separator: ", "))], keeping '\(beforeTitle)'")
                     }
                 } else {
-                    Log.logger.debug("filter '\(f.title)' (icon=\(f.iconValue), dependsMobile=\(f.dependsOnMapTypeIsMobile)): no saved value, keeping '\(beforeTitle)'")
+                    Log.logger.debug("filter '\(f.title)' key='\(key)': no saved value, keeping '\(beforeTitle)'")
                 }
             }
         }
