@@ -94,7 +94,10 @@ final class RMBTMapOptionsViewController: UIViewController {
            let vc = segue.destination as? RMBTMapOptionsTypesViewController {
             let filter = self.filter(at: indexPath?.row ?? 0)
             vc.filter = filter
+            let wasMobile = self.mapOptions?.activeMapTypeIsMobile ?? false
             vc.onMapTypeChange = { _ in
+                let isMobile = self.mapOptions?.activeMapTypeIsMobile ?? false
+                guard wasMobile != isMobile else { return }
                 self.mapOptions?.mapFilters.forEach({ filter in
                     if filter.iconValue == "MAP_FILTER_CARRIER" || filter.iconValue == "MAP_FILTER_TECHNOLOGY" {
                         filter.activeValue = filter.possibleValues.first(where: { $0.isDefault })
