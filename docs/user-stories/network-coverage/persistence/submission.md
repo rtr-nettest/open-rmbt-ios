@@ -37,6 +37,18 @@ Feature: Submitting coverage fences to ControlServer
     And the finalized nil-UUID persisted session is deleted locally
     And no /coverageResult request is sent for that session
 
+  Scenario: Fence recorded with no mobile network
+    Given a fence was created while no cellular technology was available
+    And the fence's technologies array is empty
+    When the fence is serialized into a /coverageResult request
+    Then technology_id is set to 1000
+    And technology is set to "NONE"
+
+  Scenario: Fence recorded with unrecognized technology string
+    Given a fence carries a technology string not found in the CoreTelephony lookup table
+    When the fence is serialized into a /coverageResult request
+    Then technology and technology_id are omitted (nil)
+
 References:
 - Sources/NetworkCoverage/NetworkCoverageViewModel.swift (stop → send)
 - Sources/NetworkCoverage/Persistence/PersistenceManagingCoverageResultsService.swift

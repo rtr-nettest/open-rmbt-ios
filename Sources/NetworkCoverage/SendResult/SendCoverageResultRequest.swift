@@ -47,6 +47,9 @@ public class SendCoverageResultRequest: BasicRequest {
         private(set) var avgPingMilliseconds: Int?
         private(set) var offsetMiliseconds: Int
         private(set) var durationMiliseconds: Int?
+        static let noNetworkTechnology = "NONE"
+        static let noNetworkTechnologyID = 1000
+
         private(set) var technology: String?
         private(set) var technology_id: Int?
         private(set) var radius: Int
@@ -75,8 +78,13 @@ public class SendCoverageResultRequest: BasicRequest {
                 durationMiliseconds = nil
             }
 
-            technology = fence.technologies.last?.radioTechnologyCode
-            technology_id = fence.technologies.last?.radioTechnologyTypeID
+            if let lastTechnology = fence.technologies.last {
+                technology = lastTechnology.radioTechnologyCode
+                technology_id = lastTechnology.radioTechnologyTypeID
+            } else {
+                technology = Self.noNetworkTechnology
+                technology_id = Self.noNetworkTechnologyID
+            }
             radius = Int(fence.radiusMeters)
         }
 
