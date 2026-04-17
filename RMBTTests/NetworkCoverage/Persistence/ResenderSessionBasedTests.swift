@@ -17,15 +17,15 @@ struct ResenderSessionBasedTests {
 
         // Create first session with pre-anchor and post-anchor fences
         try await persistence.sessionStarted(at: baseTime.advanced(by: -100))
-        try await persistence.save(makeFence(date: baseTime.advanced(by: -90)))
+        try await persistence.save(makeFence(dateEntered: baseTime.advanced(by: -90)))
         try await persistence.assignTestUUIDAndAnchor("S1", anchorNow: baseTime.advanced(by: -80))
-        try await persistence.save(makeFence(date: baseTime.advanced(by: -70)))
+        try await persistence.save(makeFence(dateEntered: baseTime.advanced(by: -70)))
         try await persistence.sessionFinalized(at: baseTime.advanced(by: -60))
 
         // Create second session
         try await persistence.sessionStarted(at: baseTime.advanced(by: -50))
         try await persistence.assignTestUUIDAndAnchor("S2", anchorNow: baseTime.advanced(by: -49))
-        try await persistence.save(makeFence(date: baseTime.advanced(by: -48)))
+        try await persistence.save(makeFence(dateEntered: baseTime.advanced(by: -48)))
         try await persistence.sessionFinalized(at: baseTime.advanced(by: -40))
 
         try await sut.resendPersistentAreas(isLaunched: true)
@@ -47,12 +47,12 @@ struct ResenderSessionBasedTests {
         // Create unfinished session (with fences)
         try await persistence.sessionStarted(at: now.advanced(by: -300))
         try await persistence.assignTestUUIDAndAnchor("unfinished", anchorNow: now.advanced(by: -290))
-        try await persistence.save(makeFence(date: now.advanced(by: -285)))
+        try await persistence.save(makeFence(dateEntered: now.advanced(by: -285)))
 
         // Create finished session (with fences)
         try await persistence.sessionStarted(at: now.advanced(by: -200))
         try await persistence.assignTestUUIDAndAnchor("finished", anchorNow: now.advanced(by: -190))
-        try await persistence.save(makeFence(date: now.advanced(by: -185)))
+        try await persistence.save(makeFence(dateEntered: now.advanced(by: -185)))
         try await persistence.sessionFinalized(at: now.advanced(by: -180))
 
         try await sut.resendPersistentAreas(isLaunched: false)
@@ -66,8 +66,8 @@ struct ResenderSessionBasedTests {
 
         // Save fences before anchor is set
         try await persistence.sessionStarted(at: t0)
-        try await persistence.save(makeFence(date: t0.advanced(by: -5)))
-        try await persistence.save(makeFence(date: t0.advanced(by: 3)))
+        try await persistence.save(makeFence(dateEntered: t0.advanced(by: -5)))
+        try await persistence.save(makeFence(dateEntered: t0.advanced(by: 3)))
         try await persistence.assignTestUUIDAndAnchor("S1", anchorNow: t0.advanced(by: 1))
         try await persistence.sessionFinalized(at: t0.advanced(by: 10))
 
@@ -134,7 +134,7 @@ struct ResenderSessionBasedTests {
         // Session S1 with 1 fence (finalized)
         try await persistence.sessionStarted(at: now.advanced(by: -200))
         try await persistence.assignTestUUIDAndAnchor("S1", anchorNow: now.advanced(by: -190))
-        try await persistence.save(makeFence(date: now.advanced(by: -185)))
+        try await persistence.save(makeFence(dateEntered: now.advanced(by: -185)))
         try await persistence.sessionFinalized(at: now.advanced(by: -180))
 
         // Session S2 with 0 fences (finalized)
@@ -156,8 +156,8 @@ struct ResenderSessionBasedTests {
 
         try await persistence.sessionStarted(at: now.advanced(by: -100))
         try await persistence.assignTestUUIDAndAnchor("with-fences", anchorNow: now.advanced(by: -90))
-        try await persistence.save(makeFence(date: now.advanced(by: -85)))
-        try await persistence.save(makeFence(lat: 2.0, date: now.advanced(by: -80)))
+        try await persistence.save(makeFence(dateEntered: now.advanced(by: -85)))
+        try await persistence.save(makeFence(lat: 2.0, dateEntered: now.advanced(by: -80)))
         try await persistence.sessionFinalized(at: now.advanced(by: -70))
 
         try await sut.resendPersistentAreas(isLaunched: true)
@@ -188,25 +188,6 @@ private func makeSUT(
     return (sut, sendSpy, persistence)
 }
 
-private func makeFence(
-    lat: CLLocationDegrees = 1.0,
-    lon: CLLocationDegrees = 1.0,
-    date: Date
-) -> Fence {
-    Fence(
-        startingLocation: CLLocation(
-            coordinate: .init(latitude: lat, longitude: lon),
-            altitude: 0,
-            horizontalAccuracy: 1,
-            verticalAccuracy: 1,
-            timestamp: date
-        ),
-        dateEntered: date,
-        technology: nil,
-        pings: [],
-        radiusMeters: 20
-    )
-}
 
 // MARK: - Test Doubles
 

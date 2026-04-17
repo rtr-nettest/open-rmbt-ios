@@ -183,10 +183,10 @@ import Clocks
 
         @Test func whenZoomedOutBeyondThreshold_thenSwitchesToPolylineMode() async throws {
             let fences = [
-                makeFence(lat: 0.0000, lon: 0.0, technology: "4G"),
-                makeFence(lat: 0.0001, lon: 0.0, technology: "4G"),
-                makeFence(lat: 0.0002, lon: 0.0, technology: "5G"),
-                makeFence(lat: 0.0003, lon: 0.0, technology: "5G")
+                makeFence(lat: 0.0000, lon: 0.0, technology: "4G", radiusMeters: 0),
+                makeFence(lat: 0.0001, lon: 0.0, technology: "4G", radiusMeters: 0),
+                makeFence(lat: 0.0002, lon: 0.0, technology: "5G", radiusMeters: 0),
+                makeFence(lat: 0.0003, lon: 0.0, technology: "5G", radiusMeters: 0)
             ]
 
             let configuration = FencesRenderingConfiguration(
@@ -217,9 +217,9 @@ import Clocks
 
         @Test func whenCullingEnabled_thenVisibleFenceItemsAreFilteredToRegion() async throws {
             let fences = [
-                makeFence(lat: 0.0, lon: 0.0),
-                makeFence(lat: 0.01, lon: 0.0),
-                makeFence(lat: 0.20, lon: 0.0)
+                makeFence(lat: 0.0, lon: 0.0, radiusMeters: 0),
+                makeFence(lat: 0.01, lon: 0.0, radiusMeters: 0),
+                makeFence(lat: 0.20, lon: 0.0, radiusMeters: 0)
             ]
 
             let configuration = FencesRenderingConfiguration(
@@ -244,10 +244,10 @@ import Clocks
 
         @Test func whenCullingEnabled_thenPolylineSegmentsOutsideRegionAreHidden() async throws {
             let fences = [
-                makeFence(lat: 0.0, lon: 0.0, technology: "4G"),
-                makeFence(lat: 0.0001, lon: 0.0, technology: "4G"),
-                makeFence(lat: 0.5, lon: 0.0, technology: "5G"),
-                makeFence(lat: 0.5001, lon: 0.0, technology: "5G")
+                makeFence(lat: 0.0, lon: 0.0, technology: "4G", radiusMeters: 0),
+                makeFence(lat: 0.0001, lon: 0.0, technology: "4G", radiusMeters: 0),
+                makeFence(lat: 0.5, lon: 0.0, technology: "5G", radiusMeters: 0),
+                makeFence(lat: 0.5001, lon: 0.0, technology: "5G", radiusMeters: 0)
             ]
 
             let configuration = FencesRenderingConfiguration(
@@ -273,10 +273,10 @@ import Clocks
 
         @Test func whenPolylineModeStable_thenSegmentIdentifiersRemainStableAcrossUpdates() async throws {
             let fences = [
-                makeFence(lat: 0.0000, lon: 0.0, technology: "4G"),
-                makeFence(lat: 0.0001, lon: 0.0, technology: "4G"),
-                makeFence(lat: 0.0002, lon: 0.0, technology: "5G"),
-                makeFence(lat: 0.0003, lon: 0.0, technology: "5G")
+                makeFence(lat: 0.0000, lon: 0.0, technology: "4G", radiusMeters: 0),
+                makeFence(lat: 0.0001, lon: 0.0, technology: "4G", radiusMeters: 0),
+                makeFence(lat: 0.0002, lon: 0.0, technology: "5G", radiusMeters: 0),
+                makeFence(lat: 0.0003, lon: 0.0, technology: "5G", radiusMeters: 0)
             ]
 
             let configuration = FencesRenderingConfiguration(
@@ -2149,29 +2149,6 @@ func makeSessionInitializedUpdate(
     .sessionInitialized(.init(timestamp: makeDate(offset: timestampOffset), sessionID: sessionID))
 }
 
-func makeFence(
-    id: UUID = UUID(),
-    lat: CLLocationDegrees,
-    lon: CLLocationDegrees,
-    dateEntered: Date = makeDate(offset: 0),
-    technology: String? = nil,
-    pings: [PingResult] = [],
-    radiusMeters: CLLocationDistance = 20
-) -> Fence {
-    Fence(
-        startingLocation: CLLocation(
-            coordinate: CLLocationCoordinate2D(latitude: lat, longitude: lon),
-            altitude: 0,
-            horizontalAccuracy: 1,
-            verticalAccuracy: 1,
-            timestamp: dateEntered
-        ),
-        dateEntered: dateEntered,
-        technology: technology,
-        pings: pings,
-        radiusMeters: radiusMeters
-    )
-}
 
 func makeSaveError() -> Error {
     NSError(domain: "test", code: 1, userInfo: nil)

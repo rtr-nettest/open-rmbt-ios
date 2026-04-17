@@ -41,17 +41,19 @@ struct SendCoverageResultRequestTests {
 
     @Test("WHEN building request THEN encodes radius and location extras")
     func whenBuildingRequest_thenEncodesRadiusAndLocationExtras() throws {
+        let startDate = Date(timeIntervalSinceReferenceDate: 0)
         let fence = makeFence(
             lat: 48.2082, lon: 16.3738,
             altitude: 123, horizontalAccuracy: 7, verticalAccuracy: 5,
             course: 42, speed: 1.5,
+            dateEntered: startDate,
             technology: CTRadioAccessTechnologyLTE,
-            pings: [PingResult(result: .interval(.milliseconds(50)), timestamp: referenceDate)],
+            pings: [PingResult(result: .interval(.milliseconds(50)), timestamp: startDate)],
             radiusMeters: 25,
-            exitedAt: referenceDate.addingTimeInterval(2)
+            exitedAt: startDate.addingTimeInterval(2)
         )
 
-        let json = try encodedFence(from: fence)
+        let json = try encodedFence(from: fence, coverageStartDate: startDate)
 
         #expect(json["radius"] as? Int == 25)
         #expect(json["offset_ms"] as? Int == 0)
@@ -67,48 +69,11 @@ struct SendCoverageResultRequestTests {
     }
 }
 
-// MARK: - makeSUT & Factories
-
-private let referenceDate = Date(timeIntervalSinceReferenceDate: 0)
-
-private func makeFence(
-    lat: CLLocationDegrees = Double.random(in: -90...90),
-    lon: CLLocationDegrees = Double.random(in: -180...180),
-    altitude: CLLocationDistance = 0,
-    horizontalAccuracy: CLLocationAccuracy = 10,
-    verticalAccuracy: CLLocationAccuracy = -1,
-    course: CLLocationDirection = -1,
-    speed: CLLocationSpeed = -1,
-    dateEntered: Date = referenceDate,
-    technology: String? = nil,
-    pings: [PingResult] = [],
-    radiusMeters: CLLocationDistance = Double.random(in: 1...100),
-    exitedAt: Date? = referenceDate.addingTimeInterval(1)
-) -> Fence {
-    var fence = Fence(
-        startingLocation: CLLocation(
-            coordinate: CLLocationCoordinate2D(latitude: lat, longitude: lon),
-            altitude: altitude,
-            horizontalAccuracy: horizontalAccuracy,
-            verticalAccuracy: verticalAccuracy,
-            course: course,
-            speed: speed,
-            timestamp: dateEntered
-        ),
-        dateEntered: dateEntered,
-        technology: technology,
-        pings: pings,
-        radiusMeters: radiusMeters
-    )
-    if let exitedAt {
-        fence.exit(at: exitedAt)
-    }
-    return fence
-}
+// MARK: - Helpers
 
 private func encodedFence(
     from fence: Fence,
-    coverageStartDate: Date = referenceDate,
+    coverageStartDate: Date = Date(timeIntervalSinceReferenceDate: 0),
     sourceLocation: SourceLocation = #_sourceLocation
 ) throws -> [String: Any] {
     let request = SendCoverageResultRequest(

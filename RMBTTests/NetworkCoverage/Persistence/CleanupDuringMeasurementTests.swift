@@ -45,7 +45,7 @@ struct CleanupDuringMeasurementTests {
 
         // Create session that started offline, collected fences, but never got UUID
         try await persistence.sessionStarted(at: now.advanced(by: -100))
-        try await persistence.save(makeFence(date: now.advanced(by: -90)))
+        try await persistence.save(makeFence(dateEntered: now.advanced(by: -90)))
         try await persistence.sessionFinalized(at: now.advanced(by: -80))
         // Note: No assignTestUUIDAndAnchor - it never connected to server
 
@@ -63,7 +63,7 @@ struct CleanupDuringMeasurementTests {
 
         try await persistence.sessionStarted(at: now.advanced(by: -100))
         try await persistence.assignTestUUIDAndAnchor("failed-session", anchorNow: now.advanced(by: -90))
-        try await persistence.save(makeFence(date: now.advanced(by: -80)))
+        try await persistence.save(makeFence(dateEntered: now.advanced(by: -80)))
         try await persistence.sessionFinalized(at: now.advanced(by: -70))
 
         // Make send fail, leads to status code 501 error
@@ -113,7 +113,7 @@ struct CleanupDuringMeasurementTests {
         // 1. Start measurement and assign UUID
         try await persistence.sessionStarted(at: now.advanced(by: -10))
         try await persistence.assignTestUUIDAndAnchor("active-session", anchorNow: now.advanced(by: -9))
-        try await persistence.save(makeFence(date: now.advanced(by: -8)))
+        try await persistence.save(makeFence(dateEntered: now.advanced(by: -8)))
         // Note: NOT finalized yet - measurement is ongoing
 
         // 2. Resend operation (cleanup runs, but session has UUID+fences so it's preserved)
@@ -137,12 +137,12 @@ struct CleanupDuringMeasurementTests {
         // Create 2 finalized sessions from previous runs
         try await persistence.sessionStarted(at: now.advanced(by: -200))
         try await persistence.assignTestUUIDAndAnchor("session1", anchorNow: now.advanced(by: -190))
-        try await persistence.save(makeFence(date: now.advanced(by: -180)))
+        try await persistence.save(makeFence(dateEntered: now.advanced(by: -180)))
         try await persistence.sessionFinalized(at: now.advanced(by: -170))
 
         try await persistence.sessionStarted(at: now.advanced(by: -100))
         try await persistence.assignTestUUIDAndAnchor("session2", anchorNow: now.advanced(by: -90))
-        try await persistence.save(makeFence(date: now.advanced(by: -80)))
+        try await persistence.save(makeFence(dateEntered: now.advanced(by: -80)))
         try await persistence.sessionFinalized(at: now.advanced(by: -70))
 
         // Cold start should resend both
@@ -161,13 +161,13 @@ struct CleanupDuringMeasurementTests {
         // Create active session
         try await persistence.sessionStarted(at: now.advanced(by: -100))
         try await persistence.assignTestUUIDAndAnchor("active", anchorNow: now.advanced(by: -90))
-        try await persistence.save(makeFence(date: now.advanced(by: -80)))
+        try await persistence.save(makeFence(dateEntered: now.advanced(by: -80)))
         // Not finalized
 
         // Create finalized session
         try await persistence.sessionStarted(at: now.advanced(by: -50))
         try await persistence.assignTestUUIDAndAnchor("finalized", anchorNow: now.advanced(by: -40))
-        try await persistence.save(makeFence(date: now.advanced(by: -30)))
+        try await persistence.save(makeFence(dateEntered: now.advanced(by: -30)))
         try await persistence.sessionFinalized(at: now.advanced(by: -20))
 
         // Warm start should only resend finalized
@@ -206,7 +206,7 @@ struct CleanupDuringMeasurementTests {
         let oldDate = now.advanced(by: -8 * 24 * 3600)
         try await persistence.sessionStarted(at: oldDate)
         try await persistence.assignTestUUIDAndAnchor("old-session", anchorNow: oldDate.advanced(by: 1))
-        try await persistence.save(makeFence(date: oldDate.advanced(by: 2)))
+        try await persistence.save(makeFence(dateEntered: oldDate.advanced(by: 2)))
         try await persistence.sessionFinalized(at: oldDate.advanced(by: 3))
 
         try await sut.resendPersistentAreas(isLaunched: true)
@@ -250,15 +250,6 @@ extension CleanupDuringMeasurementTests {
         return (sut, sendSpy, persistence)
     }
 
-    func makeFence(date: Date = Date(), lat: Double = 49.0, lon: Double = 13.0) -> Fence {
-        Fence(
-            startingLocation: CLLocation(latitude: lat, longitude: lon),
-            dateEntered: date,
-            technology: "4G/LTE",
-            pings: [],
-            radiusMeters: 20
-        )
-    }
 
     func makeDate(offset: TimeInterval) -> Date {
         Date(timeIntervalSinceReferenceDate: offset)

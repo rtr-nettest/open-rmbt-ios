@@ -451,32 +451,6 @@ private func makePersistenceSUT(
     return (sut, sendSpy, database)
 }
 
-/// Factory method to create Fence with optional sessionUUID
-private func makeFence(
-    lat: CLLocationDegrees,
-    lon: CLLocationDegrees,
-    sessionUUID: String? = nil,
-    dateEntered: Date = Date(timeIntervalSinceReferenceDate: 0),
-    technology: String? = nil,
-    pings: [PingResult] = [],
-    radiusMeters: CLLocationDistance = 20
-) -> Fence {
-    var fence = Fence(
-        startingLocation: CLLocation(
-            coordinate: CLLocationCoordinate2D(latitude: lat, longitude: lon),
-            altitude: 0,
-            horizontalAccuracy: 1,
-            verticalAccuracy: 1,
-            timestamp: dateEntered
-        ),
-        dateEntered: dateEntered,
-        technology: technology,
-        pings: pings,
-        radiusMeters: radiusMeters
-    )
-    fence.sessionUUID = sessionUUID
-    return fence
-}
 
 // MARK: - NetworkCoverageViewModel Test Helpers
 
