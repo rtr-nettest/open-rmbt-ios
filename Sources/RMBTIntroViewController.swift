@@ -448,7 +448,12 @@ class RMBTIntroViewController: UIViewController {
         let isMobile = connectivity?.networkType == .cellular
         let ready = isAccuracyOK && isMobile
         currentView.coverageTintColor = ready ? .ipAvailable : .coverageUnavailable
+#if DEBUG
+        currentView.isCoverageEnabled = true
+#else
         currentView.isCoverageEnabled = ready
+#endif
+
     }
 
     private var networkName: String? {
