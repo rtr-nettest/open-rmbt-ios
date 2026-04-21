@@ -10,6 +10,60 @@ import SwiftUI
 import CoreLocation
 import MapKit
 
+/// Coordinates how a fence map view forwards camera updates to its view model
+/// and when it should auto-center on newly arriving fences.
+///
+/// Lives as a plain value type so the view's decision logic is unit-testable
+/// without SwiftUI. Semantics:
+/// - The coordinator starts open (ready to forward) when we already have fences to show
+///   or when the map tracks the user's location.
+/// - Otherwise it stays closed until fences appear — in which case the view is told to
+///   center the map on them once.
+/// - Once open, the coordinator never closes. Transient culling that empties the
+///   visible fences (e.g. the user zooming into an empty area) must NOT stop future
+///   camera reports, otherwise the view model's culled region stays stuck on an
+///   empty area and the fences never reappear.
+struct FencesMapRegionCoordinator {
+    private(set) var lastReportedRegion: MKCoordinateRegion?
+    private(set) var isOpen: Bool
+    let tracksUserLocation: Bool
+
+    init(hasInitialItems: Bool, tracksUserLocation: Bool) {
+        self.tracksUserLocation = tracksUserLocation
+        self.isOpen = tracksUserLocation || hasInitialItems
+    }
+
+    /// Returns the region to forward to `onVisibleRegionChange`, or nil to suppress
+    /// (coordinator not yet open, or region is a near-duplicate of the last reported one).
+    mutating func regionToReport(for region: MKCoordinateRegion) -> MKCoordinateRegion? {
+        guard isOpen else { return nil }
+        if let previous = lastReportedRegion, !hasDiverged(region, from: previous) {
+            return nil
+        }
+        lastReportedRegion = region
+        return region
+    }
+
+    /// Reports a change in the filtered (culled) fence items on the map.
+    /// Returns `true` when the view should auto-center on the items — happens only on
+    /// the first time items appear in a read-only, non-tracking map that mounted empty.
+    @discardableResult
+    mutating func visibleItemsDidChange(hasItems: Bool) -> Bool {
+        guard hasItems, !isOpen, !tracksUserLocation else { return false }
+        isOpen = true
+        return true
+    }
+
+    private func hasDiverged(_ region: MKCoordinateRegion, from previous: MKCoordinateRegion) -> Bool {
+        let centerTolerance: CLLocationDegrees = 0.0002
+        let spanTolerance: CLLocationDegrees = 0.0002
+        return abs(region.center.latitude - previous.center.latitude) > centerTolerance ||
+            abs(region.center.longitude - previous.center.longitude) > centerTolerance ||
+            abs(region.span.latitudeDelta - previous.span.latitudeDelta) > spanTolerance ||
+            abs(region.span.longitudeDelta - previous.span.longitudeDelta) > spanTolerance
+    }
+}
+
 /// “Dumb” SwiftUI map responsible for visualising network coverage fences.
 ///
 /// All rendering decisions—culling, polyline switching, current selection—are
@@ -30,8 +84,7 @@ struct FencesMapView: View {
     let onVisibleRegionChange: (MKCoordinateRegion?) -> Void
     
     @State private var position: MapCameraPosition
-    @State private var lastReportedRegion: MKCoordinateRegion?
-    @State private var didCenterOnVisibleItems: Bool
+    @State private var regionCoordinator: FencesMapRegionCoordinator
     
     init(
         visibleFenceItems: [FenceItem],
@@ -71,8 +124,10 @@ struct FencesMapView: View {
         } else {
             _position = State(initialValue: .automatic)
         }
-        _lastReportedRegion = State(initialValue: nil)
-        _didCenterOnVisibleItems = State(initialValue: trackUserLocation || !visibleFenceItems.isEmpty)
+        _regionCoordinator = State(initialValue: FencesMapRegionCoordinator(
+            hasInitialItems: !visibleFenceItems.isEmpty,
+            tracksUserLocation: trackUserLocation
+        ))
     }
     
     private static func calculateCenter(coordinates: [CLLocationCoordinate2D]) -> CLLocationCoordinate2D {
@@ -146,23 +201,13 @@ struct FencesMapView: View {
             }
         }
         .onMapCameraChange(frequency: .continuous) { context in
-            guard trackUserLocation || didCenterOnVisibleItems else { return }
-            let region = context.region
-            if shouldReportRegionChange(to: region) {
-                lastReportedRegion = region
+            if let region = regionCoordinator.regionToReport(for: context.region) {
                 onVisibleRegionChange(region)
             }
         }
-        .onChange(of: visibleFenceItems) { newItems in
-            if newItems.isEmpty {
-                didCenterOnVisibleItems = trackUserLocation
-            } else if !didCenterOnVisibleItems, !trackUserLocation {
+        .onChange(of: visibleFenceItems) { _, newItems in
+            if regionCoordinator.visibleItemsDidChange(hasItems: !newItems.isEmpty) {
                 centerMap(on: newItems)
-            }
-        }
-        .onAppear {
-            if !didCenterOnVisibleItems, !trackUserLocation, !visibleFenceItems.isEmpty {
-                centerMap(on: visibleFenceItems)
             }
         }
         .mapControls {
@@ -241,20 +286,7 @@ struct FencesMapView: View {
         let center = Self.calculateCenter(coordinates: coordinates)
         let span = Self.calculateSpan(coordinates: coordinates)
         position = .region(MKCoordinateRegion(center: center, span: span))
-        didCenterOnVisibleItems = true
     }
-
-    private func shouldReportRegionChange(to region: MKCoordinateRegion) -> Bool {
-        guard let previous = lastReportedRegion else { return true }
-        let centerTolerance: CLLocationDegrees = 0.0002
-        let spanTolerance: CLLocationDegrees = 0.0002
-
-        return abs(region.center.latitude - previous.center.latitude) > centerTolerance ||
-            abs(region.center.longitude - previous.center.longitude) > centerTolerance ||
-            abs(region.span.latitudeDelta - previous.span.latitudeDelta) > spanTolerance ||
-            abs(region.span.longitudeDelta - previous.span.longitudeDelta) > spanTolerance
-    }
-
 
     @ViewBuilder
     func selectedFenceDetailView(_ detail: FenceDetail) -> some View {

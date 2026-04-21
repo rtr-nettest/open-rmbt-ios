@@ -242,6 +242,35 @@ import Clocks
             expectFenceItems(sut.visibleFenceItems, match: fences)
         }
 
+        @Test func whenRegionExcludesAllFencesThenReturnsOverFences_thenVisibleFencesAreRestored() async throws {
+            let fences = [
+                makeFence(lat: 0.0, lon: 0.0, radiusMeters: 0),
+                makeFence(lat: 0.01, lon: 0.0, radiusMeters: 0),
+                makeFence(lat: 0.20, lon: 0.0, radiusMeters: 0)
+            ]
+
+            let configuration = FencesRenderingConfiguration(
+                maxCircleCountBeforePolyline: Int.max,
+                minimumSpanForPolylineMode: 1.0,
+                visibleRegionPaddingFactor: 1.0,
+                cullsToVisibleRegion: true
+            )
+            let regionFarFromFences = MKCoordinateRegion(
+                center: .init(latitude: 60, longitude: 0),
+                span: .init(latitudeDelta: 0.001, longitudeDelta: 0.001)
+            )
+
+            let sut = makeSUT(fences: fences, renderingConfiguration: configuration)
+
+            expectFenceItems(sut.visibleFenceItems, match: fences)
+
+            sut.updateVisibleRegion(regionFarFromFences)
+            #expect(sut.visibleFenceItems.isEmpty)
+
+            sut.updateVisibleRegion(broadRegion)
+            expectFenceItems(sut.visibleFenceItems, match: fences)
+        }
+
         @Test func whenCullingEnabled_thenPolylineSegmentsOutsideRegionAreHidden() async throws {
             let fences = [
                 makeFence(lat: 0.0, lon: 0.0, technology: "4G", radiusMeters: 0),
@@ -417,6 +446,61 @@ import Clocks
 
             expectFenceItems(sut.visibleFenceItems, match: fences)
             #expect(sut.mapRenderMode == .circles)
+        }
+    }
+
+    @Suite("Fences Map Region Coordinator")
+    struct FencesMapRegionCoordinatorTests {
+        private let initialRegion = MKCoordinateRegion(
+            center: .init(latitude: 48.2082, longitude: 16.3738),
+            span: .init(latitudeDelta: 0.1, longitudeDelta: 0.1)
+        )
+        private let pannedRegion = MKCoordinateRegion(
+            center: .init(latitude: 49.0, longitude: 17.0),
+            span: .init(latitudeDelta: 0.1, longitudeDelta: 0.1)
+        )
+
+        @Test func whenInitializedWithPreloadedFencesAndCameraReportsRegion_thenRegionIsForwarded() {
+            var sut = FencesMapRegionCoordinator(hasInitialItems: true, tracksUserLocation: false)
+
+            #expect(sut.regionToReport(for: initialRegion)?.center == initialRegion.center)
+        }
+
+        @Test func whenInitializedTrackingUserLocationWithoutFencesAndCameraReportsRegion_thenRegionIsForwarded() {
+            var sut = FencesMapRegionCoordinator(hasInitialItems: false, tracksUserLocation: true)
+
+            #expect(sut.regionToReport(for: initialRegion)?.center == initialRegion.center)
+        }
+
+        @Test func whenInitializedWithoutFencesAndWithoutTracking_thenInitialRegionIsSuppressed() {
+            var sut = FencesMapRegionCoordinator(hasInitialItems: false, tracksUserLocation: false)
+
+            #expect(sut.regionToReport(for: initialRegion) == nil)
+        }
+
+        @Test func whenSameRegionReportedTwice_thenSecondIsSuppressed() {
+            var sut = FencesMapRegionCoordinator(hasInitialItems: true, tracksUserLocation: false)
+            _ = sut.regionToReport(for: initialRegion)
+
+            #expect(sut.regionToReport(for: initialRegion) == nil)
+        }
+
+        @Test func whenVisibleItemsBecomeEmptyAfterInitialReport_thenSubsequentPanIsStillForwarded() {
+            var sut = FencesMapRegionCoordinator(hasInitialItems: true, tracksUserLocation: false)
+            _ = sut.regionToReport(for: initialRegion)
+
+            sut.visibleItemsDidChange(hasItems: false)
+
+            #expect(sut.regionToReport(for: pannedRegion)?.center == pannedRegion.center)
+        }
+
+        @Test func whenCoordinatorStartsClosedAndItemsAppear_thenCoordinatorAsksViewToCenter() {
+            var sut = FencesMapRegionCoordinator(hasInitialItems: false, tracksUserLocation: false)
+
+            let shouldCenter = sut.visibleItemsDidChange(hasItems: true)
+
+            #expect(shouldCenter)
+            #expect(sut.regionToReport(for: initialRegion)?.center == initialRegion.center)
         }
     }
 
