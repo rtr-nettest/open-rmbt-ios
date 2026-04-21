@@ -16,6 +16,7 @@ struct NetworkCoverageFactory {
     static let locationInaccuracyWarningInitialDelay: TimeInterval = 3
     static let insufficientAccuracyAutoStopInterval: TimeInterval = 30 * 60
     static let minimumFenceRadius: CLLocationDistance = 15
+    static let minimumLocationAccuracy: CLLocationAccuracy = 15
 
     private let database: UserDatabase
     private let maxResendAge: TimeInterval
@@ -160,7 +161,7 @@ struct NetworkCoverageFactory {
         return NetworkCoverageViewModel(
             fences: fences,
             refreshInterval: 1,
-            minimumLocationAccuracy: 15,
+            minimumLocationAccuracy: Self.minimumLocationAccuracy,
             locationInaccuracyWarningInitialDelay: Self.locationInaccuracyWarningInitialDelay,
             insufficientAccuracyAutoStopInterval: Self.insufficientAccuracyAutoStopInterval,
             updates: {

@@ -161,6 +161,7 @@ class RMBTIntroViewController: UIViewController {
         self.updateOrientation(to: UIApplication.shared.windowSize)
 
         NotificationCenter.default.addObserver(self, selector: #selector(forceUpdateNetwork(_:)), name: UIApplication.didBecomeActiveNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(locationDidUpdate(_:)), name: .RMBTLocationTracker, object: nil)
 
         RMBTControlServer.shared.updateWithCurrentSettings { [weak self] in
             guard let self = self else { return }
@@ -178,6 +179,12 @@ class RMBTIntroViewController: UIViewController {
         RMBTLocationTracker.shared.startAfterDeterminingAuthorizationStatus({
             self.connectivityTracker.forceUpdate()
         })
+    }
+
+    @objc private func locationDidUpdate(_ sender: Any) {
+        DispatchQueue.main.async { [weak self] in
+            self?.updateCoverageTint()
+        }
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -418,6 +425,8 @@ class RMBTIntroViewController: UIViewController {
             currentView.networkMobileClassImage = nil
         }
 
+        updateCoverageTint()
+
         if let popup = self.currentPopupViewController {
             switch popup.popupType {
             case .ipv4:
@@ -431,6 +440,15 @@ class RMBTIntroViewController: UIViewController {
             case .location: break
             }
         }
+    }
+
+    private func updateCoverageTint() {
+        let accuracy = RMBTLocationTracker.shared.location?.horizontalAccuracy ?? -1
+        let isAccuracyOK = accuracy >= 0 && accuracy <= NetworkCoverageFactory.minimumLocationAccuracy
+        let isMobile = connectivity?.networkType == .cellular
+        let ready = isAccuracyOK && isMobile
+        currentView.coverageTintColor = ready ? .ipAvailable : .coverageUnavailable
+        currentView.isCoverageEnabled = ready
     }
 
     private var networkName: String? {
@@ -625,4 +643,5 @@ private extension UIColor {
     static let ipNotAvailable = UIColor(red: 245.0 / 255.0, green: 0.0 / 255.0, blue: 28.0/255.0, alpha: 1.0)
     static let ipSemiAvailable = UIColor(red: 255.0 / 255.0, green: 186.0 / 255.0, blue: 0, alpha: 1.0)
     static let ipAvailable = UIColor(red: 89.0 / 255.0, green: 178.0 / 255.0, blue: 0, alpha: 1.0)
+    static let coverageUnavailable = UIColor.systemGray
 }
