@@ -164,10 +164,7 @@ struct SessionInitializedUpdate: Hashable {
         didSet {
             // TODO: optimize: only very last fence is likely to need update, previous fences should remain untouched
             // so no need to map all `fences` into fence items, but can cache previous mappings and update only the very last one
-            let newFences = fences.filter { !dirtyFenceIDs.contains($0.id) }.map(fenceItem)
-            if fenceItems != newFences {
-                fenceItems = newFences
-            }
+            rebuildFenceItems()
         }
     }
 
@@ -202,8 +199,9 @@ struct SessionInitializedUpdate: Hashable {
             selectedFenceDetail = selectedFence.map {
                 .init(fence: $0, selectedItemDateFormatter: selectedItemDateFormatter)
             }
-            // Recreate fenceItems to update selection state
-            fenceItems = fences.map(fenceItem)
+            // Recreate fenceItems to update selection state; must filter dirty
+            // fences so they don't flash back onto the map during a tap.
+            rebuildFenceItems()
         }
     }
     private(set) var selectedFenceDetail: FenceDetail?
@@ -724,6 +722,13 @@ extension NetworkCoverageViewModel {
 }
 
 fileprivate extension NetworkCoverageViewModel {
+    func rebuildFenceItems() {
+        let newItems = fences.filter { !dirtyFenceIDs.contains($0.id) }.map(fenceItem)
+        if fenceItems != newItems {
+            fenceItems = newItems
+        }
+    }
+
     func updateRenderedFencesIfNeeded() {
         guard !isUpdatingRenderedFences else { return }
         isUpdatingRenderedFences = true

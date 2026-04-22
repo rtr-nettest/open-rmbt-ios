@@ -1601,6 +1601,36 @@ import Clocks
             #expect(sut.fenceItems.count == 1, "Only clean fence at 5.0 visible on map")
         }
 
+        @Test("WHEN a clean fence is selected after dirty fences exist THEN dirty fences remain hidden")
+        func whenSelectingFenceWhileDirtyFencesExist_thenDirtyFencesStayHidden() async throws {
+            let sut = makeSUT(updates: [
+                makeLocationUpdate      (at: 0, lat: 1.0, lon: 1.0),
+                // Switch to WiFi — subsequent fence becomes dirty
+                makeNetworkTypeUpdate   (at: 1, type: .wifi),
+                makeLocationUpdate      (at: 2, lat: 3.0, lon: 3.0),
+                // Back to cellular — new clean fence created
+                makeNetworkTypeUpdate   (at: 3, type: .cellular),
+                makeLocationUpdate      (at: 4, lat: 5.0, lon: 5.0)
+            ])
+
+            await sut.startTest()
+
+            #expect(sut.fences.count == 3)
+            #expect(sut.fenceItems.count == 1, "Only clean fence visible before selection")
+
+            let cleanFence = try #require(sut.fenceItems.first)
+            sut.selectedFenceItem = cleanFence
+
+            #expect(sut.fenceItems.count == 1, "Dirty fences must not reappear when a fence is selected")
+            #expect(sut.fenceItems.first?.id == cleanFence.id)
+            #expect(sut.fenceItems.first?.isSelected == true)
+
+            sut.selectedFenceItem = nil
+
+            #expect(sut.fenceItems.count == 1, "Dirty fences must not reappear on deselection either")
+            #expect(sut.fenceItems.first?.isSelected == false)
+        }
+
         @Test func whenOnWiFiAndAccuracyIsBad_thenBothWiFiAndGpsWarningsAreShown() async throws {
             let clock = TestClock()
             let minAccuracy: CLLocationDistance = 10
