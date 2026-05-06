@@ -64,4 +64,82 @@ class RMBTHelpersTest: XCTestCase {
         XCTAssertNil(resolved.networkDescription)
     }
 
+    // MARK: - Download speed classification (RTR FAQ thresholds, in kbps)
+
+    func testDownClassification_whenSpeedAtOrAbove100Mbps_thenReturnsDarkGreen() {
+        XCTAssertEqual(RMBTHelpers.RMBTDownClassification(with: 100_000), 4)
+        XCTAssertEqual(RMBTHelpers.RMBTDownClassification(with: 250_000), 4)
+    }
+
+    func testDownClassification_whenSpeedBetween10And100Mbps_thenReturnsGreen() {
+        XCTAssertEqual(RMBTHelpers.RMBTDownClassification(with: 99_999), 3)
+        XCTAssertEqual(RMBTHelpers.RMBTDownClassification(with: 30_000), 3)
+        XCTAssertEqual(RMBTHelpers.RMBTDownClassification(with: 10_000), 3)
+    }
+
+    func testDownClassification_whenSpeedBetween5And10Mbps_thenReturnsYellow() {
+        XCTAssertEqual(RMBTHelpers.RMBTDownClassification(with: 9_999), 2)
+        XCTAssertEqual(RMBTHelpers.RMBTDownClassification(with: 7_500), 2)
+        XCTAssertEqual(RMBTHelpers.RMBTDownClassification(with: 5_000), 2)
+    }
+
+    func testDownClassification_whenSpeedBelow5Mbps_thenReturnsRed() {
+        XCTAssertEqual(RMBTHelpers.RMBTDownClassification(with: 4_999), 1)
+        XCTAssertEqual(RMBTHelpers.RMBTDownClassification(with: 1_000), 1)
+        XCTAssertEqual(RMBTHelpers.RMBTDownClassification(with: 0), 1)
+    }
+
+    // MARK: - Upload speed classification (RTR FAQ thresholds, in kbps)
+
+    func testUpClassification_whenSpeedAtOrAbove50Mbps_thenReturnsDarkGreen() {
+        XCTAssertEqual(RMBTHelpers.RMBTUpClassification(with: 50_000), 4)
+        XCTAssertEqual(RMBTHelpers.RMBTUpClassification(with: 120_000), 4)
+    }
+
+    func testUpClassification_whenSpeedBetween5And50Mbps_thenReturnsGreen() {
+        XCTAssertEqual(RMBTHelpers.RMBTUpClassification(with: 49_999), 3)
+        XCTAssertEqual(RMBTHelpers.RMBTUpClassification(with: 10_000), 3)
+        XCTAssertEqual(RMBTHelpers.RMBTUpClassification(with: 5_000), 3)
+    }
+
+    func testUpClassification_whenSpeedBetween2_5And5Mbps_thenReturnsYellow() {
+        XCTAssertEqual(RMBTHelpers.RMBTUpClassification(with: 4_999), 2)
+        XCTAssertEqual(RMBTHelpers.RMBTUpClassification(with: 3_000), 2)
+        XCTAssertEqual(RMBTHelpers.RMBTUpClassification(with: 2_500), 2)
+    }
+
+    func testUpClassification_whenSpeedBelow2_5Mbps_thenReturnsRed() {
+        XCTAssertEqual(RMBTHelpers.RMBTUpClassification(with: 2_499), 1)
+        XCTAssertEqual(RMBTHelpers.RMBTUpClassification(with: 500), 1)
+        XCTAssertEqual(RMBTHelpers.RMBTUpClassification(with: 0), 1)
+    }
+
+    // MARK: - Ping classification (RTR FAQ thresholds, in ms; helper takes nanoseconds)
+
+    func testPingClassification_whenLatencyAtOrBelow10ms_thenReturnsDarkGreen() {
+        XCTAssertEqual(RMBTHelpers.RMBTPingClassification(with: ms(0)), 4)
+        XCTAssertEqual(RMBTHelpers.RMBTPingClassification(with: ms(5)), 4)
+        XCTAssertEqual(RMBTHelpers.RMBTPingClassification(with: ms(10)), 4)
+    }
+
+    func testPingClassification_whenLatencyBetween10And25ms_thenReturnsGreen() {
+        XCTAssertEqual(RMBTHelpers.RMBTPingClassification(with: ms(11)), 3)
+        XCTAssertEqual(RMBTHelpers.RMBTPingClassification(with: ms(20)), 3)
+        XCTAssertEqual(RMBTHelpers.RMBTPingClassification(with: ms(25)), 3)
+    }
+
+    func testPingClassification_whenLatencyBetween25And75ms_thenReturnsYellow() {
+        XCTAssertEqual(RMBTHelpers.RMBTPingClassification(with: ms(26)), 2)
+        XCTAssertEqual(RMBTHelpers.RMBTPingClassification(with: ms(50)), 2)
+        XCTAssertEqual(RMBTHelpers.RMBTPingClassification(with: ms(75)), 2)
+    }
+
+    func testPingClassification_whenLatencyAbove75ms_thenReturnsRed() {
+        XCTAssertEqual(RMBTHelpers.RMBTPingClassification(with: ms(76)), 1)
+        XCTAssertEqual(RMBTHelpers.RMBTPingClassification(with: ms(500)), 1)
+    }
+
+    private func ms(_ milliseconds: Int64) -> Int64 {
+        milliseconds * 1_000_000
+    }
 }
