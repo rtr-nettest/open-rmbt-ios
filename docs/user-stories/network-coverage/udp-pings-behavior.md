@@ -80,11 +80,13 @@ Feature: UDP ping session behavior for RTR NetTest coverage
     Then resend shall encode fences collected before the anchor with negative offset_ms
     And resend shall encode fences collected after the anchor with positive offset_ms
 
-  Scenario: Default production wiring does not wait for connectivity automatically
+  Scenario: Mid-measurement recovery when connectivity returns
     Given the app starts a coverage measurement while offline
+    And NetworkCoverageFactory injects NetworkReachabilityOnlineStatusService into the session initializer
     When the initial /coverageRequest fails
-    Then the default production composition does not inject OnlineStatusService
-    And the measurement does not automatically wait for connectivity and continue within the same run
+    Then the OnlineAwareSessionInitializer suspends until reachability reports the device is online
+    And on the next online emission the session initializer retries /coverageRequest
+    And on success it emits a sessionInitialized event so the view model anchors the in‑memory session
 
   # Multiple sub-sessions submission (new)
   Scenario: Submit multiple sub-sessions in one user-visible measurement
@@ -96,10 +98,31 @@ Feature: UDP ping session behavior for RTR NetTest coverage
     And the second request contains fences belonging to "T5" with offsets relative to its own initialization
     And the current unfinalized session (if any) is not submitted until it is finalized
 
-  # Finalized offline session without test_uuid (new)
-  Scenario: Discard a finalized session that never obtained test_uuid
+  # Finalized offline session without test_uuid (issue #60)
+  Scenario: Preserve a finalized fully-offline session for later late anchoring
     Given the user stops a coverage measurement while the device never went online
     And the app never obtained a test_uuid for that session
+    And the persisted session contains at least one fence
     When stopping the measurement
-    Then the session and its fences are discarded locally
-    And no results are submitted for that session
+    Then the session is finalized locally and kept on disk (NOT discarded)
+    And no /coverageResult request is sent yet
+
+  Scenario: Resender anchors a fully-offline session once connectivity returns
+    Given a finalized persisted session with fences but no test_uuid exists
+    When the resender runs (cold launch, foreground, before a new test, or after a successful submission)
+    And /coverageRequest succeeds
+    Then the resender writes the new test_uuid and anchor_at = now() onto the persisted session
+    And submits all fences with negative offset_ms relative to that anchor
+    And on a 2xx response the session is deleted from persistence
+    And on failure the session is kept for the next resend cycle
+
+  Scenario: Multiple stranded offline sessions are anchored independently
+    Given multiple finalized persisted sessions with fences and no test_uuid exist
+    When the resender runs and /coverageRequest succeeds for each
+    Then each session receives its own test_uuid via a separate /coverageRequest call
+    And each is submitted with offsets relative to its own anchor
+
+  Scenario: Stranded offline session aged beyond maxResendAge is dropped
+    Given a finalized persisted session with fences but no test_uuid is older than maxResendAge (default 7 days)
+    When the resender runs cleanup
+    Then the session is deleted by the age-based cleanup before any anchoring is attempted

@@ -123,7 +123,7 @@ class CoreSessionInitializer {
 /// Decorator that adds persistence management and resending functionality.
 class PersistenceAwareSessionInitializer {
     private let wrapped: CoreSessionInitializer
-    private let database: UserDatabase
+    private let resendBeforeNewSession: @Sendable () async throws -> Void
 
     var lastTestUUID: String? { wrapped.lastTestUUID }
     var lastLoopUUID: String? { wrapped.lastLoopUUID }
@@ -134,15 +134,21 @@ class PersistenceAwareSessionInitializer {
     var udpPingSessionCount: Int { wrapped.udpPingSessionCount }
     var isInitialized: Bool { wrapped.isInitialized }
 
-    init(wrapped: CoreSessionInitializer, database: UserDatabase) {
+    /// `resendBeforeNewSession` must capture the factory's full configuration; otherwise
+    /// tests injecting a stub `CoverageAPIService` silently fall back to the production
+    /// shared control server here.
+    init(
+        wrapped: CoreSessionInitializer,
+        resendBeforeNewSession: @escaping @Sendable () async throws -> Void
+    ) {
         self.wrapped = wrapped
-        self.database = database
+        self.resendBeforeNewSession = resendBeforeNewSession
     }
 
     func startNewSession(loopID: String? = nil) async throws -> CoreSessionInitializer.SessionCredentials {
         // Before starting new session, try to resend failed-to-be-sent coverage test results, if any
         Log.logger.info("Attempting to resend persistent areas before starting new session")
-        try? await NetworkCoverageFactory(database: database).persistedFencesSender.resendPersistentAreas(isLaunched: false)
+        try? await resendBeforeNewSession()
 
         return try await wrapped.startNewSession(loopID: loopID)
     }
@@ -155,6 +161,7 @@ class OnlineAwareSessionInitializer {
     private let wrapped: PersistenceAwareSessionInitializer
     private let onlineStatusService: OnlineStatusService?
     private let now: () -> Date
+    private let retryDelay: Duration
 
     var lastTestUUID: String? { wrapped.lastTestUUID }
     var lastLoopUUID: String? { wrapped.lastLoopUUID }
@@ -178,43 +185,51 @@ class OnlineAwareSessionInitializer {
         return stream
     }
 
-    init(wrapped: PersistenceAwareSessionInitializer, onlineStatusService: OnlineStatusService?, now: @escaping () -> Date) {
+    init(
+        wrapped: PersistenceAwareSessionInitializer,
+        onlineStatusService: OnlineStatusService?,
+        now: @escaping () -> Date,
+        retryDelay: Duration = .seconds(1)
+    ) {
         self.wrapped = wrapped
         self.onlineStatusService = onlineStatusService
         self.now = now
+        self.retryDelay = retryDelay
     }
 
     func startNewSession(loopID: String? = nil) async throws -> CoreSessionInitializer.SessionCredentials {
-        var credentials: CoreSessionInitializer.SessionCredentials?
-
         do {
-            credentials = try await wrapped.startNewSession(loopID: loopID)
+            let credentials = try await wrapped.startNewSession(loopID: loopID)
+            emitInitialized(credentials)
+            return credentials
         } catch {
-            // Offline-aware retry if an OnlineStatusService was provided.
-            if let service = onlineStatusService {
-                Log.logger.info("Session start failed, waiting for online status...")
-                // Wait for a 'true' emission
-                for await isOnline in service.online() {
-                    if isOnline {
-                        Log.logger.info("Online status detected, retrying session start")
-                        credentials = try await wrapped.startNewSession(loopID: loopID)
-                        break
-                    }
+            guard let service = onlineStatusService else { throw error }
+            Log.logger.info("Session start failed, waiting for online status...")
+            // Keep retrying on every reachability `true` until cancelled or success.
+            // Off→on flips during a failed retry re-arm the loop instead of giving up.
+            for await isOnline in service.online() {
+                try Task.checkCancellation()
+                guard isOnline else { continue }
+                Log.logger.info("Online status detected, retrying session start after \(retryDelay)")
+                try await Task.sleep(for: retryDelay)
+                do {
+                    let credentials = try await wrapped.startNewSession(loopID: loopID)
+                    emitInitialized(credentials)
+                    return credentials
+                } catch is CancellationError {
+                    throw CancellationError()
+                } catch {
+                    Log.logger.info("Retry failed, waiting for next online signal: \(error.localizedDescription)")
+                    continue
                 }
-            } else {
-                throw error
             }
+            throw error
         }
+    }
 
-        guard let credentials else {
-            throw NSError(domain: "CoverageInitializer", code: -1)
-        }
-
-        // Emit session initialized event for consumers (ViewModel)
+    private func emitInitialized(_ credentials: CoreSessionInitializer.SessionCredentials) {
         Log.logger.info("Emitting session initialized event: sessionID=\(credentials.testID)")
         eventsContinuation?.yield(SessionInitializedUpdate(timestamp: now(), sessionID: credentials.testID))
-
-        return credentials
     }
 }
 

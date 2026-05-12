@@ -38,8 +38,7 @@ struct CleanupDuringMeasurementTests {
         #expect(remainingSessions.count == 1, "Session should be preserved - no cleanup on warm start")
     }
 
-    /// Test that finalized sessions without UUID ARE cleaned up (they can never be sent)
-    @Test func givenFinalizedSessionWithoutUUID_whenCleanup_thenShouldBeDeleted() async throws {
+    @Test func givenFinalizedSessionWithoutUUIDButWithFences_whenCleanup_thenSessionPreserved() async throws {
         let now = Date()
         let (sut, _, persistence) = makeSUT(dateNow: { now })
 
@@ -49,11 +48,25 @@ struct CleanupDuringMeasurementTests {
         try await persistence.sessionFinalized(at: now.advanced(by: -80))
         // Note: No assignTestUUIDAndAnchor - it never connected to server
 
-        // Cleanup should remove this session (it can never be sent)
         try await sut.resendPersistentAreas(isLaunched: true)
 
         let remainingSessions = try await getAllSessions(persistence)
-        #expect(remainingSessions.isEmpty, "Finalized session without UUID should be deleted")
+        #expect(remainingSessions.count == 1, "Finalized session with fences but no UUID must survive for late anchoring")
+        #expect(remainingSessions.first?.testUUID == nil)
+        #expect(remainingSessions.first?.fences.count == 1)
+    }
+
+    @Test func givenFinalizedSessionWithoutUUIDAndNoFences_whenCleanup_thenSessionDeleted() async throws {
+        let now = Date()
+        let (sut, _, persistence) = makeSUT(dateNow: { now })
+
+        try await persistence.sessionStarted(at: now.advanced(by: -100))
+        try await persistence.sessionFinalized(at: now.advanced(by: -80))
+
+        try await sut.resendPersistentAreas(isLaunched: true)
+
+        let remainingSessions = try await getAllSessions(persistence)
+        #expect(remainingSessions.isEmpty, "Empty finalized session should be deleted")
     }
 
     /// Test that sessions with UUID but failed send are NOT deleted

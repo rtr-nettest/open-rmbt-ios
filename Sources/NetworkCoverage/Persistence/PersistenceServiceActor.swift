@@ -111,6 +111,22 @@ actor PersistenceServiceActor: FencePersistenceService {
         return sessions
     }
 
+    func finalizedSessionsNeedingAnchor() throws -> [PersistentCoverageSession] {
+        let descriptor = FetchDescriptor<PersistentCoverageSession>(
+            predicate: #Predicate { $0.testUUID == nil && $0.finalizedAt != nil },
+            sortBy: [SortDescriptor(\.finalizedAt, order: .reverse)]
+        )
+        let candidates = try modelContext.fetch(descriptor)
+        return candidates.filter { !$0.fences.isEmpty }
+    }
+
+    func assignTestUUIDToFinalizedSession(_ session: PersistentCoverageSession, testUUID: String, anchorAt: Date) throws {
+        session.testUUID = testUUID
+        session.anchorAt = anchorAt.microsecondsTimestamp
+        try modelContext.save()
+        Log.logger.info("Late-anchored finalized session: testUUID=\(testUUID), anchorAt=\(anchorAt), fences=\(session.fences.count)")
+    }
+
     func delete(_ sessions: [PersistentCoverageSession]) throws {
         Log.logger.info("Deleting \(sessions.count) session(s)")
         for session in sessions {
@@ -120,13 +136,16 @@ actor PersistenceServiceActor: FencePersistenceService {
         try modelContext.save()
     }
 
+    /// Deletes only empty finalized nil-UUID sessions. Sessions with fences are preserved
+    /// for the resender to anchor later (issue #60).
     func deleteFinalizedNilUUIDSessions() throws {
         let descriptor = FetchDescriptor<PersistentCoverageSession>(
             predicate: #Predicate { $0.testUUID == nil && $0.finalizedAt != nil }
         )
-        let sessions = try modelContext.fetch(descriptor)
-        guard !sessions.isEmpty else { return }
-        sessions.forEach { modelContext.delete($0) }
+        let candidates = try modelContext.fetch(descriptor)
+        let toDelete = candidates.filter { $0.fences.isEmpty }
+        guard !toDelete.isEmpty else { return }
+        toDelete.forEach { modelContext.delete($0) }
         try modelContext.save()
     }
 
@@ -180,9 +199,8 @@ actor PersistenceServiceActor: FencePersistenceService {
                 deletedCount += 1
             }
 
-            // If app launched, remove also empty sessions or those which never had a UUID assigned = cannot be sent
-            if isLaunched && (session.fences.isEmpty || session.testUUID == nil) {
-                Log.logger.info("Cleanup: Deleting orphaned session - testUUID=\(session.testUUID ?? "nil"), fences=\(session.fences.count), startedAt=\(startedAt), finalizedAt=\(finalizedAt?.description ?? "nil")")
+            if isLaunched && session.fences.isEmpty {
+                Log.logger.info("Cleanup: Deleting empty session - testUUID=\(session.testUUID ?? "nil"), fences=\(session.fences.count), startedAt=\(startedAt), finalizedAt=\(finalizedAt?.description ?? "nil")")
                 modelContext.delete(session)
                 didDelete = true
                 deletedCount += 1

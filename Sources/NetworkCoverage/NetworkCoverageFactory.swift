@@ -43,7 +43,8 @@ struct NetworkCoverageFactory {
                 self.makeSendResultsService(testUUID: testUUID, startDate: startDate)
             },
             maxResendAge: maxResendAge,
-            dateNow: dateNow
+            dateNow: dateNow,
+            sessionAnchoring: makeSessionAnchoring()
         )
     }
 
@@ -55,7 +56,15 @@ struct NetworkCoverageFactory {
             persistence: persistence,
             sendResultsService: { uuid, start in sendResultsServiceMaker(uuid, start) },
             maxResendAge: maxResendAge,
-            dateNow: dateNow
+            dateNow: dateNow,
+            sessionAnchoring: makeSessionAnchoring()
+        )
+    }
+
+    private func makeSessionAnchoring() -> some SessionAnchoringService {
+        CoverageRequestSessionAnchoring(
+            coverageAPIService: coverageAPIService,
+            now: dateNow
         )
     }
 
@@ -102,25 +111,32 @@ struct NetworkCoverageFactory {
         )
     }
 
-    func makeSessionInitializer(onlineStatusService: OnlineStatusService? = nil) -> OnlineAwareSessionInitializer {
+    func makeSessionInitializer(
+        onlineStatusService: OnlineStatusService? = nil,
+        retryDelay: Duration = .seconds(1)
+    ) -> OnlineAwareSessionInitializer {
         let core = CoreSessionInitializer(
             now: dateNow,
             coverageAPIService: coverageAPIService
         )
+        let resender = persistedFencesSender
         let withPersistence = PersistenceAwareSessionInitializer(
             wrapped: core,
-            database: database
+            resendBeforeNewSession: { try await resender.resendPersistentAreas(isLaunched: false) }
         )
         let withOnline = OnlineAwareSessionInitializer(
             wrapped: withPersistence,
             onlineStatusService: onlineStatusService,
-            now: dateNow
+            now: dateNow,
+            retryDelay: retryDelay
         )
         return withOnline
     }
 
     @MainActor func makeCoverageViewModel(fences: [Fence] = []) -> NetworkCoverageViewModel {
-        let sessionInitializer = makeSessionInitializer()
+        let sessionInitializer = makeSessionInitializer(
+            onlineStatusService: NetworkReachabilityOnlineStatusService()
+        )
         let (persistenceService, resultSender) = services(
             testUUID: sessionInitializer.lastTestUUID,
             startDate: sessionInitializer.lastTestStartDate,

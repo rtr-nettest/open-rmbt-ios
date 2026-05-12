@@ -296,7 +296,7 @@ struct FencePersistenceTests {
 
     @Suite("Session-Based Persistence")
     struct SessionBasedPersistence {
-        @Test func whenDeletingNilUUIDSession_thenOrphanedFencesAreDeleted() async throws {
+        @Test func whenDeletingNilUUIDSessionWithFences_thenSessionPreservedForLateAnchor() async throws {
             let baseTime = makeBaseTime()
             let (sut, persistence, _) = makeSUT(testUUID: nil)
 
@@ -306,10 +306,11 @@ struct FencePersistenceTests {
             try await sut.deleteFinalizedNilUUIDSessions()
 
             let sessions = try persistence.allPersistedSessions()
-            #expect(sessions.isEmpty)
+            #expect(sessions.count == 1)
+            #expect(sessions.first?.testUUID == nil)
 
             let fences = try persistence.allPersistedFences()
-            #expect(fences.isEmpty)
+            #expect(fences.count == 1)
         }
 
         @Test func whenStoppedWithoutUUID_thenSessionDeleted() async throws {

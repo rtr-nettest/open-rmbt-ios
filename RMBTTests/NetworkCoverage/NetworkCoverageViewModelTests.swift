@@ -856,8 +856,7 @@ import Clocks
                 .sessionStarted(date: makeDate(offset: 0)),
                 .assign(testUUID: sessionID, anchorDate: makeDate(offset: 1)),
                 .save(fence: savedFece),
-                .sessionFinalized(date: makeDate(offset: 5)),
-                .deleteFinalizedNilUUIDSessions
+                .sessionFinalized(date: makeDate(offset: 5))
             ])
         }
 
@@ -912,7 +911,7 @@ import Clocks
             #expect(sendService.capturedSentFences.first?.count == expectedFenceCount)
         }
 
-        @Test func whenStop_andCurrentSessionHasNoUUID_thenPersistenceServiceDeletesFinalizedNilUUIDSessions() async throws {
+        @Test func whenStop_andCurrentSessionHasNoUUID_thenSessionIsKeptForLateAnchoring() async throws {
             let persistenceService = FencePersistenceServiceSpy()
             var dateNow = Date(timeIntervalSinceReferenceDate: 0)
             let sut = makeSUT(
@@ -928,7 +927,8 @@ import Clocks
             await sut.stopTest()
 
             let capturedMessages = await persistenceService.capturedMessages
-            #expect(capturedMessages.contains(.deleteFinalizedNilUUIDSessions))
+            #expect(capturedMessages.contains(.sessionFinalized(date: dateNow)))
+            #expect(capturedMessages.contains(.deleteFinalizedNilUUIDSessions) == false)
         }
 
         @Test func whenReceivingLocationUpdatesAndPings_thenPersistsFencesIntoPersistenceLayer() async throws {

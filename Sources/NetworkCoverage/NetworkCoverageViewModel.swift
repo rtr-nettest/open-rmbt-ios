@@ -603,7 +603,6 @@ struct SessionInitializedUpdate: Hashable {
         dirtyFenceIDs.removeAll()
 
         try? await persistenceService.sessionFinalized(at: finalizationDate)
-        try? await persistenceService.deleteFinalizedNilUUIDSessions()
     }
 
     func toggleMeasurement() async {

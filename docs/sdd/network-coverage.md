@@ -123,7 +123,7 @@ High‑level flow
 - Each tick either initiates a UDP ping session (if needed) or sends a ping within the current session.
 - Ping send/receive errors yield `.error` pings.
 - Reinitialization errors coming from the UDP protocol (`RE01`) reset the ping state and the next cadence tick re-initiates the session.
-- Session-init failures from `/coverageRequest` currently yield an `.error` ping on the failing tick, but production does not inject `OnlineStatusService`, so there is no wait-for-connectivity fallback in the default app composition.
+- Session-init failures from `/coverageRequest` yield an `.error` ping on the failing tick. In production the factory injects `NetworkReachabilityOnlineStatusService`, so the next `/coverageRequest` retry is suspended inside the initializer until reachability reports the device is online again — the cadence then proceeds without a busy retry loop.
 
 UDP transport
 - The UDP transport is abstracted behind the `UDPConnectable` protocol (`send(data:)` is enqueue‑only / synchronous; `receive()` is async).
@@ -222,7 +222,7 @@ Submission
 - Payload includes `radius_m`, location extras (accuracy/altitude/heading/speed when available), `offset_ms`, and optional `duration_ms`.
 - `PersistenceManagingCoverageResultsService` submits only fences whose `sessionUUID` matches the current `test_uuid`.
 - If the current session has no matching fences, the send path falls back to resend-only behavior for previously finalized persisted sessions.
-- If the current measurement never obtained a `test_uuid`, send fails with `missingTestUUID`; the view model finalizes the local persisted session and then deletes finalized nil-UUID sessions.
+- If the current measurement never obtained a `test_uuid`, send fails with `missingTestUUID`; the view model finalizes the local persisted session and **keeps it on disk** (issue #60). The resender will anchor it on the next online opportunity via `SessionAnchoringService`.
 
 ---
 
@@ -254,7 +254,7 @@ UDP pings reinitialization (docs/NetworkCoverage/user-stories/udp-pings-behavior
 - Stop on `max_coverage_session_seconds` elapse.
 - Protocol mapping: `RP01` request; `RR01` (match) → success; `RE01` (match) → needs reinit; `RE01` (unmatched/0x0) → global reinit of all pending pings.
 - Persist/submit: fences collected under a given `test_uuid` are sent with that `test_uuid`; older persisted sessions are resent, newest groups first.
-- Offline-start note: the persisted-session anchoring model supports negative `offset_ms`, but the default production composition does not yet wire automatic wait-for-online recovery.
+- Offline-start: persisted sessions support negative `offset_ms` and the production composition wires `NetworkReachabilityOnlineStatusService` for mid-measurement recovery (scenario B). For fully-offline runs (scenario A), the resender invokes `/coverageRequest` per stranded session via `SessionAnchoringService`, late-writes `test_uuid` + `anchor_at` onto the persisted session, and submits with all-negative offsets. Sessions that never reach connectivity within `persistenceMaxAgeInterval` (7 days) are dropped by the age-based cleanup.
 
 Location accuracy warning (docs/NetworkCoverage/user-stories/location-accuracy-warning.md)
 - Hidden before start; initial delay of 3 s after start.

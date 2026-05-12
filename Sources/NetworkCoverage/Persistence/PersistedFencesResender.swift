@@ -14,22 +14,27 @@ struct PersistedFencesResender {
     private let sendResultsService: (String, Date) -> any SendCoverageResultsService
     private let maxResendAge: TimeInterval
     private let dateNow: () -> Date
+    private let sessionAnchoring: (any SessionAnchoringService)?
 
     init(
         persistence: PersistenceServiceActor,
         sendResultsService: @escaping (String, Date) -> some SendCoverageResultsService,
         maxResendAge: TimeInterval,
-        dateNow: @escaping () -> Date = Date.init
+        dateNow: @escaping () -> Date = Date.init,
+        sessionAnchoring: (any SessionAnchoringService)? = nil
     ) {
         self.persistence = persistence
         self.sendResultsService = sendResultsService
         self.maxResendAge = maxResendAge
         self.dateNow = dateNow
+        self.sessionAnchoring = sessionAnchoring
     }
 
     func resendPersistentAreas(isLaunched: Bool) async throws {
         Log.logger.info("Starting resend operation, mode: \(isLaunched ? "cold start" : "warm start")")
         try? await persistence.cleanupOldSessionsAndOrphans(maxAge: maxResendAge, now: dateNow(), isLaunched: isLaunched)
+
+        await anchorStrandedOfflineSessions()
 
         let sessions: [PersistentCoverageSession] = try await {
             if isLaunched {
@@ -73,6 +78,36 @@ struct PersistedFencesResender {
             }
         }
         Log.logger.info("Resend operation completed")
+    }
+
+    /// Two overlapping callers can both fetch the same stranded session, both perform a
+    /// `/coverageRequest`, and only the last `assignTestUUIDToFinalizedSession` write wins —
+    /// the losing UUID becomes a phantom server-side slot. Intentional: server-tolerant,
+    /// no data loss, avoids a global lock for a rare race.
+    private func anchorStrandedOfflineSessions() async {
+        guard let sessionAnchoring else { return }
+        let stranded: [PersistentCoverageSession]
+        do {
+            stranded = try await persistence.finalizedSessionsNeedingAnchor()
+        } catch {
+            Log.logger.error("Failed to fetch stranded offline sessions: \(error.localizedDescription)")
+            return
+        }
+        guard !stranded.isEmpty else { return }
+
+        Log.logger.info("Anchoring \(stranded.count) stranded offline session(s)")
+        for session in stranded {
+            do {
+                let anchored = try await sessionAnchoring.anchorOfflineSession()
+                try await persistence.assignTestUUIDToFinalizedSession(
+                    session,
+                    testUUID: anchored.testUUID,
+                    anchorAt: anchored.anchorAt
+                )
+            } catch {
+                Log.logger.warning("Anchoring failed for stranded session (still offline?): \(error.localizedDescription)")
+            }
+        }
     }
 
     private func makeFence(from persistedFence: PersistentFence) -> Fence {
