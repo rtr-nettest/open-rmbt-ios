@@ -145,6 +145,7 @@ struct SessionInitializedUpdate: Hashable {
     @ObservationIgnored private var isOnWiFi: Bool = false
     @ObservationIgnored private var currentTestUUID: String?
     @ObservationIgnored private var dirtyFenceIDs: Set<UUID> = []
+    @ObservationIgnored private var lastLoggedRadioTech: String?
 
     // Dependencies
     @ObservationIgnored private let currentRadioTechnology: any CurrentRadioTechnologyService
@@ -410,6 +411,10 @@ struct SessionInitializedUpdate: Hashable {
 
             let location = locationUpdate.location
             let radioTechnologyCode = currentRadioTechnology.technologyCode()
+            if radioTechnologyCode != lastLoggedRadioTech {
+                Log.logger.info("[NetPath] tech: \(lastLoggedRadioTech ?? "nil") → \(radioTechnologyCode ?? "nil")")
+                lastLoggedRadioTech = radioTechnologyCode
+            }
             locations.append(location)
             locationAccuracy = String(format: "%.2fm", location.horizontalAccuracy)
             latestTechnology = displayValue(forRadioTechnology: radioTechnologyCode ?? "N/A")
@@ -505,6 +510,7 @@ struct SessionInitializedUpdate: Hashable {
         currentTestUUID = nil
         currentDynamicRadius = nil
         dirtyFenceIDs.removeAll()
+        lastLoggedRadioTech = nil
 
         try? await persistenceService.sessionStarted(at: sessionStartDate)
 

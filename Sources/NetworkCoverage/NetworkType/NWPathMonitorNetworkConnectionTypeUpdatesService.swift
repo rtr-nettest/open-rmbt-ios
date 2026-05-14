@@ -7,6 +7,7 @@
 
 import Foundation
 import Network
+import NetworkExtension
 import UIKit
 
 struct NWPathMonitorNetworkConnectionTypeUpdatesService: NetworkConnectionTypeUpdatesService {
@@ -14,32 +15,59 @@ struct NWPathMonitorNetworkConnectionTypeUpdatesService: NetworkConnectionTypeUp
 
     func networkConnectionTypes() -> AsyncStream<NetworkTypeUpdate> {
         AsyncStream { continuation in
-            let monitor = NWPathMonitor()
-            var lastEmitted: NetworkTypeUpdate.NetworkConnectionType?
+            let queue = DispatchQueue(label: "at.rmbt.coverage.nwpathmonitor")
+            let primaryMonitor = NWPathMonitor()
+            let wifiMonitor = NWPathMonitor(requiredInterfaceType: .wifi)
 
-            monitor.pathUpdateHandler = { path in
-                let interfaces = path.availableInterfaces.map { "\($0.name):\($0.type)" }.joined(separator: ",")
+            var lastEmittedType: NetworkTypeUpdate.NetworkConnectionType?
+            var lastWifiAvailable: Bool?
+
+            primaryMonitor.pathUpdateHandler = { path in
                 let appState = DispatchQueue.main.sync { UIApplication.shared.applicationState.rawValue }
-                Log.logger.debug("[NWPathMonitor] callback: status=\(path.status), interfaces=[\(interfaces)], appState=\(appState)")
+                let ifs = path.availableInterfaces.map { "\($0.name):\($0.type)" }.joined(separator: ",")
+                let wifiAvailable = wifiMonitor.currentPath.status == .satisfied
 
                 let type: NetworkTypeUpdate.NetworkConnectionType? = {
                     guard path.status == .satisfied else { return nil }
                     if path.usesInterfaceType(.wifi) { return .wifi }
-                    else if path.usesInterfaceType(.cellular) { return .cellular }
+                    if path.usesInterfaceType(.cellular) { return .cellular }
                     return nil
                 }()
 
-                guard let type, type != lastEmitted else {
-                    Log.logger.debug("[NWPathMonitor] no change from \(lastEmitted.map(String.init(describing:)) ?? "nil")")
-                    return
-                }
-                Log.logger.info("[NWPathMonitor] network type changed: \(lastEmitted.map(String.init(describing:)) ?? "nil") → \(type)")
-                lastEmitted = type
+                let typeDesc = type.map(String.init(describing:)) ?? "nil"
+                Log.logger.debug("[NetPath] tick status=\(path.status) type=\(typeDesc) wifi_avail=\(wifiAvailable) ifs=[\(ifs)] appState=\(appState)")
+
+                guard let type, type != lastEmittedType else { return }
+                Log.logger.info("[NetPath] type: \(lastEmittedType.map(String.init(describing:)) ?? "nil") → \(type)")
+                lastEmittedType = type
                 continuation.yield(.init(type: type, timestamp: now()))
             }
 
-            monitor.start(queue: DispatchQueue(label: "at.rmbt.coverage.nwpathmonitor"))
-            continuation.onTermination = { _ in monitor.cancel() }
+            wifiMonitor.pathUpdateHandler = { path in
+                let available = path.status == .satisfied
+                guard lastWifiAvailable != available else { return }
+                let previous = lastWifiAvailable
+                lastWifiAvailable = available
+                Log.logger.info("[NetPath] wifi_avail: \(previous.map(String.init(describing:)) ?? "nil") → \(available)")
+                guard available else { return }
+
+                // WiFi just became reachable: probe association so a later log review can tell
+                // "WiFi associated but routed via cellular" apart from "WiFi not associated".
+                NEHotspotNetwork.fetchCurrent { network in
+                    if let network {
+                        Log.logger.info("[NetPath] wifi_assoc ssid=\"\(network.ssid)\" bssid=\(network.bssid)")
+                    } else {
+                        Log.logger.info("[NetPath] wifi_assoc: nil (path satisfied but NEHotspotNetwork returned nil — check location auth)")
+                    }
+                }
+            }
+
+            primaryMonitor.start(queue: queue)
+            wifiMonitor.start(queue: queue)
+            continuation.onTermination = { _ in
+                primaryMonitor.cancel()
+                wifiMonitor.cancel()
+            }
         }
     }
 }
