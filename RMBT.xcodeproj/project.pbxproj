@@ -84,6 +84,7 @@
 		49EDC79F2EAA35630009D9A6 /* HTTPPingSender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC7752EAA35630009D9A6 /* HTTPPingSender.swift */; };
 		49EDC7A02EAA35630009D9A6 /* UDPConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC7772EAA35630009D9A6 /* UDPConnection.swift */; };
 		49EDC7A12EAA35630009D9A6 /* AsynchronousSequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC7652EAA35630009D9A6 /* AsynchronousSequence.swift */; };
+		49EDC7A32EAA35630009D9A6 /* KeepScreenAwakeModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC7A42EAA35630009D9A6 /* KeepScreenAwakeModifier.swift */; };
 		49EDC7A22EAA35630009D9A6 /* CoverageHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC75D2EAA35630009D9A6 /* CoverageHeader.swift */; };
 		49F976802B0B3E880098C4CC /* RMBTConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49C86FDC2AFBBF1500663CE2 /* RMBTConfig.swift */; };
 		49FBC0012F00A0000009D9A6 /* AsyncSocketUDPConnectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49FBC0002F00A0000009D9A6 /* AsyncSocketUDPConnectionTests.swift */; };
@@ -427,6 +428,7 @@
 		49EDC8032EAA35630009D9A6 /* SessionAnchoringService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionAnchoringService.swift; sourceTree = "<group>"; };
 		49EDC7632EAA35630009D9A6 /* CurrentRadioTechnologyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentRadioTechnologyService.swift; sourceTree = "<group>"; };
 		49EDC7652EAA35630009D9A6 /* AsynchronousSequence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsynchronousSequence.swift; sourceTree = "<group>"; };
+		49EDC7A42EAA35630009D9A6 /* KeepScreenAwakeModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeepScreenAwakeModifier.swift; sourceTree = "<group>"; };
 		49EDC7672EAA35630009D9A6 /* LocationUpdate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationUpdate.swift; sourceTree = "<group>"; };
 		49EDC7682EAA35630009D9A6 /* LocationUpdatesService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationUpdatesService.swift; sourceTree = "<group>"; };
 		49EDC76A2EAA35630009D9A6 /* NetworkConnectionType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkConnectionType.swift; sourceTree = "<group>"; };
@@ -907,6 +909,7 @@
 			isa = PBXGroup;
 			children = (
 				49EDC7652EAA35630009D9A6 /* AsynchronousSequence.swift */,
+				49EDC7A42EAA35630009D9A6 /* KeepScreenAwakeModifier.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -2117,6 +2120,7 @@
 				49EDC79F2EAA35630009D9A6 /* HTTPPingSender.swift in Sources */,
 				49EDC7A02EAA35630009D9A6 /* UDPConnection.swift in Sources */,
 				49EDC7A12EAA35630009D9A6 /* AsynchronousSequence.swift in Sources */,
+				49EDC7A32EAA35630009D9A6 /* KeepScreenAwakeModifier.swift in Sources */,
 				49EDC7A22EAA35630009D9A6 /* CoverageHeader.swift in Sources */,
 				E9E993D426EB0E4700E7EED6 /* RMBTQOEListCell.swift in Sources */,
 				E94ED1D126C615F500B17B25 /* RMBTPopupViewController.swift in Sources */,

@@ -110,6 +110,7 @@ struct NetworkCoverageView: View {
                         .environment(viewModel)
                 }
             }
+            .keepScreenAwake(while: viewModel.isStarted)
             .onChange(of: viewModel.stopTestReasons) { reasons in
                 // Navigate to results when auto-stop reason for insufficient accuracy is recorded
                 if reasons.contains(where: { reason in
