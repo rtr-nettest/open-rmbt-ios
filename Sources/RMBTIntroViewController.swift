@@ -443,17 +443,17 @@ class RMBTIntroViewController: UIViewController {
     }
 
     private func updateCoverageTint() {
-        let accuracy = RMBTLocationTracker.shared.location?.horizontalAccuracy ?? -1
-        let isAccuracyOK = accuracy >= 0 && accuracy <= NetworkCoverageFactory.minimumLocationAccuracy
-        let isMobile = connectivity?.networkType == .cellular
-        let ready = isAccuracyOK && isMobile
-        currentView.coverageTintColor = ready ? .ipAvailable : .coverageUnavailable
+        let canStart = CoverageButtonGate.canStart(
+            accuracy: RMBTLocationTracker.shared.location?.horizontalAccuracy,
+            networkType: connectivity?.networkType,
+            minAccuracy: NetworkCoverageFactory.minimumLocationAccuracy
+        )
+        currentView.coverageTintColor = canStart ? .ipAvailable : .coverageUnavailable
 #if DEBUG
         currentView.isCoverageEnabled = true
 #else
-        currentView.isCoverageEnabled = ready
+        currentView.isCoverageEnabled = canStart
 #endif
-
     }
 
     private var networkName: String? {
