@@ -18,7 +18,6 @@ target 'RMBT' do
   pod 'BlocksKit/UIKit', :git => 'https://github.com/sglushchenko/BlocksKit', :branch => 'without_UIWebView'
   pod 'BlocksKit/MessageUI', :git => 'https://github.com/sglushchenko/BlocksKit', :branch => 'without_UIWebView'
   
-  pod 'libextobjc/EXTKeyPathCoding'
   pod 'TUSafariActivity'
   pod 'KeychainAccess'
 

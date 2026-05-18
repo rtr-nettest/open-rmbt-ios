@@ -65,8 +65,12 @@ Explain clearly your reasoning behind your decisions and pros/cons of chosen sol
 
 ## Environment
 - Use Homebrew Ruby ≥ 3.1; update PATH via `eval "$(/opt/homebrew/bin/brew shellenv)"` then prepend `/opt/homebrew/opt/ruby/bin`.
-- CocoaPods must run through Bundler to match the pinned version in `Gemfile.lock`.
+- CocoaPods must run through Bundler to match the pinned version in `Gemfile.lock`. Run `bundle install` once after a fresh clone; gems land in `./vendor/bundle` (per `.bundle/config`).
 - Xcode 26+, iOS deployment target 17.0+. Simulator defaults to iPhone 17 Pro / iOS 26.1 (visionOS style naming by Apple).
+
+### Known issues / workarounds
+- **`pod install` fails with `Unable to find compatibility version string for object version 71`**: Xcode 26.x bumps `objectVersion` in `project.pbxproj` past what `xcodeproj 1.27.0` supports (cap = 77). Temporarily edit the line to `objectVersion = 77` before running `bundle exec pod install`; Xcode silently bumps it back on the next save. Tracked upstream as CocoaPods #12805 / #12840.
+- **App Store upload fails with ITMS-90085 "No architectures in the binary"**: caused by header-only Pods (e.g. `libextobjc/EXTKeyPathCoding`) producing an empty `.framework` wrapper that Xcode 26+ no longer fills with a stub binary. Symptoms: framework folder in the IPA contains `_CodeSignature/` and `Info.plist` but no executable. Fix: drop the Pod from `Podfile` and remove the corresponding `import` (verify with `lipo -archs` on every Mach-O inside the .ipa).
 
 ## Special Notes
 - Do not mutate files outside the workspace root without explicit approval

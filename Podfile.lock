@@ -14,9 +14,6 @@ PODS:
     - BlocksKit/DynamicDelegate
   - CocoaAsyncSocket (7.6.5)
   - KeychainAccess (4.2.2)
-  - libextobjc/EXTKeyPathCoding (0.6):
-    - libextobjc/RuntimeExtensions
-  - libextobjc/RuntimeExtensions (0.6)
   - MaterialComponents/AnimationTiming (124.2.0)
   - MaterialComponents/Availability (124.2.0)
   - MaterialComponents/private/Color (124.2.0):
@@ -52,7 +49,6 @@ DEPENDENCIES:
   - BlocksKit/UIKit (from `https://github.com/sglushchenko/BlocksKit`, branch `without_UIWebView`)
   - CocoaAsyncSocket
   - KeychainAccess
-  - libextobjc/EXTKeyPathCoding
   - "MaterialComponents/Tabs+TabBarView"
   - ReachabilitySwift
   - TUSafariActivity
@@ -65,7 +61,6 @@ SPEC REPOS:
     - BCGenieEffect
     - CocoaAsyncSocket
     - KeychainAccess
-    - libextobjc
     - MaterialComponents
     - MDFInternationalization
     - ObjcExceptionBridging
@@ -91,7 +86,6 @@ SPEC CHECKSUMS:
   BlocksKit: 5fae06c13638d9fdb0bbddca3dabfe8f5aa735c5
   CocoaAsyncSocket: 065fd1e645c7abab64f7a6a2007a48038fdc6a99
   KeychainAccess: c0c4f7f38f6fc7bbe58f5702e25f7bd2f65abf51
-  libextobjc: aed8b7d2b07f511c1a7ecaacb33ea03e327c69b7
   MaterialComponents: 1a9b2d9d45b1601ae544de85089adc4c464306d4
   MDFInternationalization: d697c55307816222a55685c4ccb1044ffb030c12
   ObjcExceptionBridging: c30e00eb3700467e695faeea30e26e18bd445001
@@ -100,6 +94,6 @@ SPEC CHECKSUMS:
   TUSafariActivity: afc55a00965377939107ce4fdc7f951f62454546
   XCGLogger: 1943831ef907df55108b0b18657953f868de973b
 
-PODFILE CHECKSUM: a020d00b6c7521558430a63f00632edf9ca9ae3a
+PODFILE CHECKSUM: 3856d0cc6b67077c4cd8def47ca4e72236673eba
 
 COCOAPODS: 1.16.2
