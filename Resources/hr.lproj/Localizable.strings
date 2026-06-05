@@ -1,0 +1,456 @@
+"ÜBERNEHMEN" = "PRIHVATI";
+
+"Options" = "Postavke";
+
+"Description" = "Opis";
+
+"Succeeded" = "Uspješno";
+
+"Failed" = "Neuspješno";
+
+"Cancel" = "Odustani";
+
+/* History column */
+"Date" = "Datum";
+
+/* History column */
+"Device" = "Uređaj";
+
+/* Sync dialog button */
+"Enter code" = "Unesi kôd";
+
+/* Sync alert title */
+"Enter sync code:" = "Unesite kôd za sinkronizaciju:";
+
+/* Sync success alert msg */
+"History synchronisation was successful." = "Sinkronizacija povijesti bila je uspješna";
+
+/* History result section title */
+"Measurement" = "Mjerenje";
+
+/* History result section title */
+"Weitere Details" = "Dodatni detalji";
+
+/* History result section title */
+"Network" = "Mreža";
+
+/* History result section title */
+"Qualität" = "Kvaliteta";
+
+/* History result section title */
+"Test details" = "Detalji testa";
+
+/* Sync success button */
+"Reload" = "Ponovno učitaj";
+
+/* Sync dialog button */
+"Request code" = "Zatraži kôd";
+
+/* Sync success alert title */
+"Success" = "Uspjeh";
+
+/* Sync alert button */
+"Sync" = "Sinkronizacija";
+
+/* Sync intro text */
+"To merge history from two different devices, request the sync code on one device and enter it on another device" = "Za spajanje povijesti s dva različita uređaja, zatražite kôd za sinkronizaciju na jednom uređaju i unesite ga na drugom uređaju";
+
+/* Abort test alert title */
+"Abort Test" = "Prekini test";
+
+/* Abort test alert title */
+"Continue" = "Nastavi";
+
+/* Display code alert button */
+"Copy code" = "Kopiraj kôd";
+
+/* Abort test alert title */
+"Do you really want to abort the running test?" = "Želite li doista prekinuti test koji je u tijeku?";
+
+/* Display code alert button */
+"OK" = "OK";
+
+/* Display code alert title */
+"Sync Code" = "Kôd za sinkronizaciju";
+
+/* Text field placholder */
+"Code" = "Kôd";
+
+/* Filter section title */
+"Network Type" = "Vrsta mreže";
+
+/* Sync error alert button */
+"Dismiss" = "Odbaci";
+
+/* Map overlay description */
+"Auto" = "Automatski";
+
+/* Map overlay description */
+"Heatmap" = "Toplinska karta";
+
+/* Google Maps Legal Notice nevigation title */
+"Legal Notice" = "Pravna napomena";
+
+/* Table section header title */
+"Overlay" = "Sloj";
+
+/* Map overlay description */
+"Points" = "Točke";
+
+/* Footer status label */
+"Aborted" = "Prekinuto";
+
+/* Alert view button */
+"Close" = "Zatvori";
+
+/* Alert view title */
+"Connection Error" = "Pogreška u vezi";
+
+/* Alert view message */
+"Couldn't connect to test server." = "Povezivanje s testnim poslužiteljem nije uspjelo.";
+
+/* Alert view title */
+"Error" = "Pogreška";
+
+/* Alert view button */
+"Repeat Test" = "Ponovi test";
+
+/* Alert view title */
+"Test aborted" = "Test prekinut";
+
+/* Alert view message */
+"Test was aborted because the app went into background. Tests can only be performed while the app is running in foreground." = "Test je prekinut jer je aplikacija prešla u pozadinu. Testovi se mogu izvoditi samo dok je aplikacija u prednjem planu.";
+
+/* Alert view message */
+"Test was completed, but the results couldn't be submitted to the test server." = "Test je dovršen, ali rezultate nije bilo moguće poslati na testni poslužitelj.";
+
+/* Alert view message */
+"The connection to the test server was lost. Test aborted." = "Veza s testnim poslužiteljem je izgubljena. Test prekinut.";
+
+/* Alert view button */
+"Try Again" = "Pokušaj ponovno";
+
+/* Phase status label */
+"Fetching test parameters" = "Dohvaćanje parametara testa";
+
+/* Phase status label */
+"Finalizing" = "Dovršavanje";
+
+/* Phase status label */
+"Initializing Upload" = "Inicijalizacija slanja";
+
+/* Phase status label */
+"Initializing" = "Inicijalizacija";
+
+/* Phase status label */
+"Pinging" = "Ping";
+
+/* Phase status label */
+"Upload" = "Upload";
+
+/* Phase status label */
+"Waiting for test server" = "Čekanje na testni poslužitelj";
+
+/* Test view label */
+"Connection" = "Veza";
+
+/* Speed suffix */
+"Mbps" = "Mbps";
+
+/* Phase status label */
+"Download" = "Download";
+
+/* Test intro screen title when thre's no connectivity */
+"No network connection available" = "Nije dostupna mrežna veza";
+
+/* Map overlay description */
+"Shapes" = "Oblici";
+
+/* Measurement item title */
+"Quality tests" = "Testovi kvalitete";
+
+/* QoS Details section header */
+"Information" = "Informacije";
+
+/* Section header */
+"Details" = "Detalji";
+
+/* History result section title
+   Phase status label */
+"QoS" = "QoS";
+
+/* Section header for successful test */
+"Test Failed" = "Test neuspješan";
+
+/* Section header for successful test */
+"Test Succeeded" = "Test uspješan";
+
+/* QoS Details section header */
+"Tests" = "Testovi";
+
+/* Map overlay summary */
+"Map shows tests as community shapes" = "Karta prikazuje testove prema općinama";
+
+/* Map overlay summary */
+"Map shows tests as heatmap" = "Karta prikazuje testove kao toplinsku kartu";
+
+/* Map overlay summary */
+"Map shows tests as points" = "Karta prikazuje testove kao točke";
+
+/* Map overlay summary */
+"Map switches automatically between heatmap and points" = "Karta se automatski prebacuje između toplinske karte i točaka";
+
+/* Section title in the map options view
+   Title of the map options subview */
+"Map type" = "Vrsta karte";
+
+/* Loop mode alert message */
+"You are about to start tests in loop mode. The distance is set to %@ meters. The waiting time between tests is %@ minutes." = "Spremate se pokrenuti testove u načinu petlje. Udaljenost je postavljena na %@ metara. Vrijeme čekanja između testova je %@ minuta.";
+
+/* Loop mode details title */
+"Access" = "Pristup";
+
+/* Loop mode details title */
+"Data usage" = "Potrošnja podataka";
+
+/* Loop mode header title */
+"Previous test" = "Prethodni test";
+
+/* Screen title */
+"Loop Mode" = "Način petlje";
+
+/* Loop mode alert title */
+"Number of tests" = "Broj testova";
+
+/* Loop mode alert button */
+"Start tests" = "Pokreni testove";
+
+/* Intro screen button title */
+"Test Connection" = "Testiraj vezu";
+
+/* Confirmation dialog title 1/2 */
+"Activation and privacy" = "Aktivacija i privatnost";
+
+/* Confirmation dialog title 1/2 */
+"Usage" = "Upotreba";
+
+/* Confirmation dialog subtitle */
+"Loop mode %@/2" = "Način petlje %@/2";
+
+/* Loop Mode status */
+"Waiting" = "Čekanje";
+
+/* Loop mode details title */
+"Location" = "Lokacija";
+
+/* A11 */
+"Start" = "Početak";
+"History" = "Povijest";
+"Statistics" = "Statistika";
+"Map" = "Karta";
+"Collapse results" = "Sažmi rezultate";
+"Expand results" = "Proširi rezultate";
+"Share result" = "Podijeli rezultat";
+"Start measurement now" = "Pokreni mjerenje";
+"Disable loop mode" = "Onemogući način petlje";
+"Enable loop mode" = "Omogući način petlje";
+"Settings" = "Postavke";
+"Show IPv4 address" = "Prikaži IPv4 adresu";
+"Show IPv6 address" = "Prikaži IPv6 adresu";
+"Show location" = "Prikaži lokaciju";
+
+"video_telephony" = "Videotelefonija";
+"video_conferencing" = "Videokonferencije";
+"cloud" = "Cloud";
+"video_uhd" = "Video UHD";
+"video_sd" = "Video SD";
+"video_hd" = "Video HD";
+"voip" = "VoIP";
+"streaming_audio_streaming" = "Audio streaming";
+"web" = "Web";
+"messaging" = "Razmjena poruka";
+"gaming_download" = "Preuzimanje igara";
+"gaming" = "Igre";
+"gaming_cloud" = "Cloud igranje";
+"gaming_streaming" = "Streaming igara";
+"qos" = "QoS testovi";
+
+"text_button_decline" = "Odbij";
+"text_button_accept" = "Prihvati";
+
+"title_loop_instruction_1" = "Aktivacija";
+"title_loop_instruction_2" = "Upotreba";
+
+"tos.agree" = "Prihvaćam";
+"tos.decline" = "Odbij";
+"tos.agreements.title" = "Slažem se s RTR-ovim pravilima o privatnosti i uvjetima korištenja za RTR-NetTest.";
+
+"public_ip_address" = "Javna adresa";
+"private_ip_address" = "Privatna adresa";
+
+"title_loop_mode" = "Način petlje";
+"title_coverage_series" = "Serija pokrivenosti";
+"coverage_label" = "Mjerenje signala";
+
+/* Location Dialog */
+"location_dialog_label_title" = "Lokacija";
+"location_dialog_label_position" = "Položaj";
+"location_dialog_label_accuracy" = "Točnost";
+"location_dialog_label_age" = "Starost";
+"location_dialog_label_source" = "Izvor";
+"location_dialog_label_altitude" = "Nadmorska visina";
+"location_dialog_label_speed" = "Brzina";
+"location_dialog_label_satellites" = "Sateliti";
+"location_dialog_label_location_progress_message" = "Određivanje lokacije, pričekajte…";
+"open_gps_setting_dialog_label_gps_not_enabled" = "Usluge lokacije nisu omogućene. Želite li promijeniti postavke lokacije?";
+"open_gps_setting_dialog_label_open_gps_setting" = "Otvori postavke lokacije";
+"open_gps_setting_dialog_label_cancel" = "Odustani";
+"location_dialog_not_available" = "Nije dostupno";
+"location_dialog_age" = "%1$s s";
+"location_dialog_accuracy" = "%1$s m";
+"location_dialog_speed" = "%1$s km/h";
+"location_dialog_position" = "%1$s %2$s";
+"location_location_direction_n" = "S";
+"location_location_direction_e" = "I";
+"location_location_direction_s" = "J";
+"location_location_direction_w" = "Z";
+"open_location_permission_dialog_label_location_not_permitted" = "RTR-NetTest nema dopuštenje za korištenje vaše lokacije. Želite li dopustiti aplikaciji RTR-NetTest korištenje vaše lokacije?";
+"open_location_permission_dialog_label_open_permission_setting" = "Otvori postavke aplikacije";
+
+/* Menu Items */
+"menu_button_history" = "Povijest";
+
+"preferences_enter_code" = "Unesite kôd";
+
+"input_setting_dialog_ok" = "OK";
+"input_setting_dialog_cancel" = "Odustani";
+"button_sync_enter_code" = "Unesi kôd";
+
+"title_loop_mode" = "Način petlje";
+"title_loop_count" = "Odaberite broj testova";
+"text_loop_start" = "Pokreni testove";
+"text_loop_mode" = "Novi test nakon vremena čekanja ili prijeđene udaljenosti. Maks. 2 dana";
+"preferences_loop_mode_summary" = "Novi test nakon vremena čekanja ili prijeđene udaljenosti. Maks. 2 dana";
+"preferences_loop_mode_min_delay" = "Vrijeme čekanja (u minutama)";
+"preferences_loop_mode_max_movement" = "Udaljenost (u metrima)";
+
+"invalide_loop_mode_count" = "Nevažeći broj testova";
+"invalide_loop_mode_distance" = "Nevažeća udaljenost čekanja";
+"invalide_loop_mode_waiting_minutes" = "Nevažeće minute čekanja";
+"loop_mode_enter_value_between_format" = "Unesite vrijednost između %i i %i";
+
+"loop_mode_next_test" = "Sljedeći test";
+"loop_mode_minutes" = "Minute";
+"loop_mode_meters" = "Metri";
+"loop_mode_no_gps" = "Nema GPS-a";
+"or" = "ili";
+
+"loop_mode_finished" = "RTR-NetTest način petlje završen!";
+"loop_mode_finished_description" = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquya.";
+"loop_continue_to_results" = "Nastavi na rezultat";
+"loop_run_again" = "Pokreni ponovno";
+
+/* History */
+"history.sync-modal-title.default" = "Sinkronizacija";
+"history.sync-modal-title.sync-success" = "Uspješno";
+"history.sync-modal-description.default" = "Imate mogućnost spajanja rezultata s različitih uređaja. Da biste to učinili, unesite već zatraženi kôd za sinkronizaciju ili zatražite novi.";
+"history.sync-modal-description.enter-code" = "Unesite kôd koji ste primili na drugom uređaju.";
+"history.sync-modal-description.request-code" = "Unesite dolje prikazani kôd na drugom uređaju za sinkronizaciju rezultata.";
+"history.sync-modal-description.sync-success" = "Sinkronizacija je bila uspješna.";
+"The code must consist of twelve characters" = "Kôd se mora sastojati od dvanaest znakova";
+"The devices are already synchronized with each other." = "Uređaji su već sinkronizirani.";
+"The code you entered does not exist." = "Uneseni kôd ne postoji.";
+"history.result.connection" = "Vrsta";
+"history.result.operator" = "Operator";
+
+/* Test */
+"test.network.label" = "Mreža";
+"test.technology.label" = "Tehnologija";
+"label_upload" = "Upload";
+"label_download" = "Download";
+"label_ping" = "Ping";
+
+"measurement_ping" = "Ping";
+"measurement_down" = "Down";
+"measurement_up" = "Up";
+
+"measurement_qos" = "Kvaliteta usluge (QoS)";
+"measurement_qos_website" = "Web stranica";
+"measurement_qos_http_proxy" = "Neizmijenjeni sadržaj";
+"measurement_qos_non_transparent_proxy" = "Transparentna veza";
+"measurement_qos_dns" = "DNS";
+"measurement_qos_tcp" = "TCP portovi";
+"measurement_qos_udp" = "UDP portovi";
+"measurement_qos_traceroute_masked" = "Traceroute";
+"measurement_qos_voip" = "VoIP";
+
+"preferences_general_settings" = "Opće postavke";
+"preferences_advanced_settings" = "Napredne postavke";
+"preferences_location" = "Omogući lokaciju";
+"preferences_location_summary" = "Lokacija je trenutno onemogućena, možete je omogućiti putem ove poveznice u postavkama sustava";
+"preferences_ipv4_only" = "Samo IPv4";
+"preferences_skip_qos" = "QoS mjerenje";
+"preferences_expert_mode" = "Stručni način";
+"preferences_loop_mode" = "Način petlje";
+"preferences_loop_mode_enabled" = "Omogućeno";
+"preferences_loop_mode_summary" = "Novi test nakon vremena čekanja ili prijeđene udaljenosti. Maks. 2 dana";
+"preferences_loop_mode_min_delay" = "Vrijeme čekanja (u minutama)";
+"preferences_loop_mode_max_movement" = "Udaljenost (u metrima)";
+"preferences_contact" = "Kontakt";
+"preferences_go_to_website" = "Posjeti web stranicu";
+"preferences_contact_us" = "Kontaktirajte nas";
+"preferences_data_protection" = "Pravila o privatnosti i uvjeti korištenja";
+"preferences_additional_Information" = "Dodatne informacije";
+"preferences_client_uuid" = "UUID klijenta";
+"preferences_test_cases" = "Broj izvršenih testova";
+"preferences_version" = "Verzija";
+"preferences_about" = "O aplikaciji";
+"preferences_developed_by" = "Razvio";
+"preferences_source_code" = "Izvorni kôd";
+"preferences_export_logs" = "Izvezi zapisnike";
+"preferences_export_logs_error" = "Današnju datoteku zapisnika nije bilo moguće pripremiti.";
+
+"preferences_debug_options" = "Opcije za otklanjanje pogrešaka";
+"preferences_ipv6_only" = "Samo IPv6";
+
+"preferences_developer_control_server" = "Control poslužitelj";
+"preferences_override_control_enabled" = "Premosti Control poslužitelj";
+"preferences_override_control_server_host" = "Control host";
+"preferences_override_control_server_port" = "Control port";
+"preferences_override_control_server_ssl" = "Control SSL";
+
+"preferences_developer_logging" = "Zapisivanje";
+"preferences_developer_logging_enabled" = "Omogući zapisivanje";
+"preferences_developer_logging_summary" = "Poruke zapisnika bit će poslane na odabrano odredište putem UDP-a.";
+"preferences_developer_loggind_host" = "Host zapisivanja";
+"preferences_developer_loggind_port" = "Port zapisivanja";
+
+"preferences_qos_measurement_only_after_some_time" = "Samo nakon 2 sata";
+"preferences_qos_measurement_only_after_some_time_summary" = "Ne izvodi nova QoS mjerenja ako je posljednje izvršeno prije manje od 2 sata.";
+
+"button_accept.title" = "PRIHVATI";
+
+"map.map_view" = "Izgled karte";
+"map.cart_details" = "Vrsta sloja";
+
+"map_style_hybrid" = "Hibridna";
+"map_style_satellite" = "Satelitska";
+"map_style_standard" = "Standardna";
+
+"map_layer_communities" = "Općine";
+"map_layer_points" = "Točke";
+"map_layer_automatic" = "Automatski";
+
+"menu_button_statistics" = "Statistika";
+
+"text_ip_address_not_available" = "Adresa nije dostupna";
+"start_test_button_help_message" = "Pritisnite gumb za pokretanje testa!";
+"RTR-NetTest" = "RTR-NetTest";
+
+"Export data" = "Izvoz";
+
+"Home" = "Početna";
+"History" = "Povijest";
+"Statistics" = "Statistika";
+"Map" = "Karta";
+"Coverage" = "Mjerenje signala";

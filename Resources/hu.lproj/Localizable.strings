@@ -1,0 +1,456 @@
+"ÜBERNEHMEN" = "ELFOGADÁS";
+
+"Options" = "Beállítások";
+
+"Description" = "Leírás";
+
+"Succeeded" = "Sikeres";
+
+"Failed" = "Sikertelen";
+
+"Cancel" = "Mégse";
+
+/* History column */
+"Date" = "Dátum";
+
+/* History column */
+"Device" = "Eszköz";
+
+/* Sync dialog button */
+"Enter code" = "Kód megadása";
+
+/* Sync alert title */
+"Enter sync code:" = "Adja meg a szinkronizációs kódot:";
+
+/* Sync success alert msg */
+"History synchronisation was successful." = "Az előzmények szinkronizálása sikeres volt";
+
+/* History result section title */
+"Measurement" = "Mérés";
+
+/* History result section title */
+"Weitere Details" = "További részletek";
+
+/* History result section title */
+"Network" = "Hálózat";
+
+/* History result section title */
+"Qualität" = "Minőség";
+
+/* History result section title */
+"Test details" = "Teszt részletei";
+
+/* Sync success button */
+"Reload" = "Újratöltés";
+
+/* Sync dialog button */
+"Request code" = "Kód kérése";
+
+/* Sync success alert title */
+"Success" = "Siker";
+
+/* Sync alert button */
+"Sync" = "Szinkronizálás";
+
+/* Sync intro text */
+"To merge history from two different devices, request the sync code on one device and enter it on another device" = "Két különböző eszköz előzményeinek egyesítéséhez kérjen szinkronizációs kódot az egyik eszközön, és adja meg a másik eszközön";
+
+/* Abort test alert title */
+"Abort Test" = "Teszt megszakítása";
+
+/* Abort test alert title */
+"Continue" = "Folytatás";
+
+/* Display code alert button */
+"Copy code" = "Kód másolása";
+
+/* Abort test alert title */
+"Do you really want to abort the running test?" = "Valóban meg szeretné szakítani a futó tesztet?";
+
+/* Display code alert button */
+"OK" = "OK";
+
+/* Display code alert title */
+"Sync Code" = "Szinkronizációs kód";
+
+/* Text field placholder */
+"Code" = "Kód";
+
+/* Filter section title */
+"Network Type" = "Hálózat típusa";
+
+/* Sync error alert button */
+"Dismiss" = "Bezárás";
+
+/* Map overlay description */
+"Auto" = "Automatikus";
+
+/* Map overlay description */
+"Heatmap" = "Hőtérkép";
+
+/* Google Maps Legal Notice nevigation title */
+"Legal Notice" = "Jogi nyilatkozat";
+
+/* Table section header title */
+"Overlay" = "Réteg";
+
+/* Map overlay description */
+"Points" = "Pontok";
+
+/* Footer status label */
+"Aborted" = "Megszakítva";
+
+/* Alert view button */
+"Close" = "Bezárás";
+
+/* Alert view title */
+"Connection Error" = "Kapcsolódási hiba";
+
+/* Alert view message */
+"Couldn't connect to test server." = "Nem sikerült csatlakozni a tesztszerverhez.";
+
+/* Alert view title */
+"Error" = "Hiba";
+
+/* Alert view button */
+"Repeat Test" = "Teszt megismétlése";
+
+/* Alert view title */
+"Test aborted" = "Teszt megszakítva";
+
+/* Alert view message */
+"Test was aborted because the app went into background. Tests can only be performed while the app is running in foreground." = "A teszt megszakadt, mert az alkalmazás a háttérbe került. A tesztek csak akkor végezhetők el, ha az alkalmazás az előtérben fut.";
+
+/* Alert view message */
+"Test was completed, but the results couldn't be submitted to the test server." = "A teszt befejeződött, de az eredményeket nem sikerült elküldeni a tesztszerverre.";
+
+/* Alert view message */
+"The connection to the test server was lost. Test aborted." = "A tesztszerverrel való kapcsolat megszakadt. Teszt megszakítva.";
+
+/* Alert view button */
+"Try Again" = "Próbálja újra";
+
+/* Phase status label */
+"Fetching test parameters" = "Tesztparaméterek lekérése";
+
+/* Phase status label */
+"Finalizing" = "Véglegesítés";
+
+/* Phase status label */
+"Initializing Upload" = "Feltöltés inicializálása";
+
+/* Phase status label */
+"Initializing" = "Inicializálás";
+
+/* Phase status label */
+"Pinging" = "Ping";
+
+/* Phase status label */
+"Upload" = "Upload";
+
+/* Phase status label */
+"Waiting for test server" = "Várakozás a tesztszerverre";
+
+/* Test view label */
+"Connection" = "Kapcsolat";
+
+/* Speed suffix */
+"Mbps" = "Mbps";
+
+/* Phase status label */
+"Download" = "Download";
+
+/* Test intro screen title when thre's no connectivity */
+"No network connection available" = "Nincs elérhető hálózati kapcsolat";
+
+/* Map overlay description */
+"Shapes" = "Alakzatok";
+
+/* Measurement item title */
+"Quality tests" = "Minőségi tesztek";
+
+/* QoS Details section header */
+"Information" = "Információ";
+
+/* Section header */
+"Details" = "Részletek";
+
+/* History result section title
+   Phase status label */
+"QoS" = "QoS";
+
+/* Section header for successful test */
+"Test Failed" = "Teszt sikertelen";
+
+/* Section header for successful test */
+"Test Succeeded" = "Teszt sikeres";
+
+/* QoS Details section header */
+"Tests" = "Tesztek";
+
+/* Map overlay summary */
+"Map shows tests as community shapes" = "A térkép a teszteket települések szerint jeleníti meg";
+
+/* Map overlay summary */
+"Map shows tests as heatmap" = "A térkép a teszteket hőtérképként jeleníti meg";
+
+/* Map overlay summary */
+"Map shows tests as points" = "A térkép a teszteket pontokként jeleníti meg";
+
+/* Map overlay summary */
+"Map switches automatically between heatmap and points" = "A térkép automatikusan vált a hőtérkép és a pontok között";
+
+/* Section title in the map options view
+   Title of the map options subview */
+"Map type" = "Térkép típusa";
+
+/* Loop mode alert message */
+"You are about to start tests in loop mode. The distance is set to %@ meters. The waiting time between tests is %@ minutes." = "Teszteket fog indítani ismétlődő módban. A távolság %@ méterre van állítva. A tesztek közötti várakozási idő %@ perc.";
+
+/* Loop mode details title */
+"Access" = "Hozzáférés";
+
+/* Loop mode details title */
+"Data usage" = "Adathasználat";
+
+/* Loop mode header title */
+"Previous test" = "Előző teszt";
+
+/* Screen title */
+"Loop Mode" = "Ismétlődő mód";
+
+/* Loop mode alert title */
+"Number of tests" = "Tesztek száma";
+
+/* Loop mode alert button */
+"Start tests" = "Tesztek indítása";
+
+/* Intro screen button title */
+"Test Connection" = "Kapcsolat tesztelése";
+
+/* Confirmation dialog title 1/2 */
+"Activation and privacy" = "Aktiválás és adatvédelem";
+
+/* Confirmation dialog title 1/2 */
+"Usage" = "Használat";
+
+/* Confirmation dialog subtitle */
+"Loop mode %@/2" = "Ismétlődő mód %@/2";
+
+/* Loop Mode status */
+"Waiting" = "Várakozás";
+
+/* Loop mode details title */
+"Location" = "Helyzet";
+
+/* A11 */
+"Start" = "Indítás";
+"History" = "Előzmények";
+"Statistics" = "Statisztika";
+"Map" = "Térkép";
+"Collapse results" = "Eredmények összecsukása";
+"Expand results" = "Eredmények kibontása";
+"Share result" = "Eredmény megosztása";
+"Start measurement now" = "Mérés indítása";
+"Disable loop mode" = "Ismétlődő mód kikapcsolása";
+"Enable loop mode" = "Ismétlődő mód bekapcsolása";
+"Settings" = "Beállítások";
+"Show IPv4 address" = "IPv4-cím megjelenítése";
+"Show IPv6 address" = "IPv6-cím megjelenítése";
+"Show location" = "Helyzet megjelenítése";
+
+"video_telephony" = "Videotelefonálás";
+"video_conferencing" = "Videokonferencia";
+"cloud" = "Felhő";
+"video_uhd" = "Videó UHD";
+"video_sd" = "Videó SD";
+"video_hd" = "Videó HD";
+"voip" = "VoIP";
+"streaming_audio_streaming" = "Hangstreamelés";
+"web" = "Web";
+"messaging" = "Üzenetküldés";
+"gaming_download" = "Játékletöltés";
+"gaming" = "Játék";
+"gaming_cloud" = "Felhőjáték";
+"gaming_streaming" = "Játékstreamelés";
+"qos" = "QoS-tesztek";
+
+"text_button_decline" = "Elutasítás";
+"text_button_accept" = "Elfogadás";
+
+"title_loop_instruction_1" = "Aktiválás";
+"title_loop_instruction_2" = "Használat";
+
+"tos.agree" = "Elfogadom";
+"tos.decline" = "Elutasítom";
+"tos.agreements.title" = "Elfogadom az RTR adatvédelmi szabályzatát és az RTR-NetTest használati feltételeit.";
+
+"public_ip_address" = "Nyilvános cím";
+"private_ip_address" = "Helyi cím";
+
+"title_loop_mode" = "Ismétlődő mód";
+"title_coverage_series" = "Lefedettségi sorozat";
+"coverage_label" = "Jelmérés";
+
+/* Location Dialog */
+"location_dialog_label_title" = "Helyzet";
+"location_dialog_label_position" = "Pozíció";
+"location_dialog_label_accuracy" = "Pontosság";
+"location_dialog_label_age" = "Kor";
+"location_dialog_label_source" = "Forrás";
+"location_dialog_label_altitude" = "Magasság";
+"location_dialog_label_speed" = "Sebesség";
+"location_dialog_label_satellites" = "Műholdak";
+"location_dialog_label_location_progress_message" = "Helymeghatározás folyamatban, kérjük, várjon…";
+"open_gps_setting_dialog_label_gps_not_enabled" = "A helymeghatározási szolgáltatások nincsenek engedélyezve. Szeretné módosítani a helybeállításokat?";
+"open_gps_setting_dialog_label_open_gps_setting" = "Helybeállítások megnyitása";
+"open_gps_setting_dialog_label_cancel" = "Mégse";
+"location_dialog_not_available" = "Nem érhető el";
+"location_dialog_age" = "%1$s s";
+"location_dialog_accuracy" = "%1$s m";
+"location_dialog_speed" = "%1$s km/h";
+"location_dialog_position" = "%1$s %2$s";
+"location_location_direction_n" = "É";
+"location_location_direction_e" = "K";
+"location_location_direction_s" = "D";
+"location_location_direction_w" = "Ny";
+"open_location_permission_dialog_label_location_not_permitted" = "Az RTR-NetTest nem használhatja a helyzetét. Engedélyezi az RTR-NetTest számára a helyzete használatát?";
+"open_location_permission_dialog_label_open_permission_setting" = "Alkalmazás beállításainak megnyitása";
+
+/* Menu Items */
+"menu_button_history" = "Előzmények";
+
+"preferences_enter_code" = "Kérjük, adja meg a kódot";
+
+"input_setting_dialog_ok" = "OK";
+"input_setting_dialog_cancel" = "Mégse";
+"button_sync_enter_code" = "Kód megadása";
+
+"title_loop_mode" = "Ismétlődő mód";
+"title_loop_count" = "Válassza ki a tesztek számát";
+"text_loop_start" = "Tesztek indítása";
+"text_loop_mode" = "Új teszt a várakozás vagy a távolság megtétele után. Max. 2 nap";
+"preferences_loop_mode_summary" = "Új teszt a várakozási idő vagy a távolság megtétele után. Max. 2 nap";
+"preferences_loop_mode_min_delay" = "Várakozási idő (percben)";
+"preferences_loop_mode_max_movement" = "Távolság (méterben)";
+
+"invalide_loop_mode_count" = "Érvénytelen tesztszám";
+"invalide_loop_mode_distance" = "Érvénytelen várakozási távolság";
+"invalide_loop_mode_waiting_minutes" = "Érvénytelen várakozási percek";
+"loop_mode_enter_value_between_format" = "Adjon meg egy értéket %i és %i között";
+
+"loop_mode_next_test" = "Következő teszt";
+"loop_mode_minutes" = "Perc";
+"loop_mode_meters" = "Méter";
+"loop_mode_no_gps" = "Nincs GPS";
+"or" = "vagy";
+
+"loop_mode_finished" = "Az RTR-NetTest ismétlődő mód befejeződött!";
+"loop_mode_finished_description" = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquya.";
+"loop_continue_to_results" = "Tovább az eredményhez";
+"loop_run_again" = "Futtatás újra";
+
+/* History */
+"history.sync-modal-title.default" = "Szinkronizálás";
+"history.sync-modal-title.sync-success" = "Sikeres";
+"history.sync-modal-description.default" = "Lehetősége van különböző eszközök eredményeinek egyesítésére. Ehhez adjon meg egy már igényelt szinkronizációs kódot, vagy kérjen újat.";
+"history.sync-modal-description.enter-code" = "Adja meg a másik eszközön kapott kódot.";
+"history.sync-modal-description.request-code" = "Az eredmények szinkronizálásához adja meg az alább látható kódot a másik eszközön.";
+"history.sync-modal-description.sync-success" = "A szinkronizálás sikeres volt.";
+"The code must consist of twelve characters" = "A kódnak tizenkét karakterből kell állnia";
+"The devices are already synchronized with each other." = "Az eszközök már szinkronizálva vannak.";
+"The code you entered does not exist." = "A megadott kód nem létezik.";
+"history.result.connection" = "Típus";
+"history.result.operator" = "Szolgáltató";
+
+/* Test */
+"test.network.label" = "Hálózat";
+"test.technology.label" = "Technológia";
+"label_upload" = "Upload";
+"label_download" = "Download";
+"label_ping" = "Ping";
+
+"measurement_ping" = "Ping";
+"measurement_down" = "Down";
+"measurement_up" = "Up";
+
+"measurement_qos" = "Szolgáltatásminőség (QoS)";
+"measurement_qos_website" = "Weboldal";
+"measurement_qos_http_proxy" = "Módosítatlan tartalom";
+"measurement_qos_non_transparent_proxy" = "Transzparens kapcsolat";
+"measurement_qos_dns" = "DNS";
+"measurement_qos_tcp" = "TCP-portok";
+"measurement_qos_udp" = "UDP-portok";
+"measurement_qos_traceroute_masked" = "Traceroute";
+"measurement_qos_voip" = "VoIP";
+
+"preferences_general_settings" = "Általános beállítások";
+"preferences_advanced_settings" = "Speciális beállítások";
+"preferences_location" = "Helyzet engedélyezése";
+"preferences_location_summary" = "A helyzet jelenleg le van tiltva, a rendszerbeállításokban ezzel a hivatkozással engedélyezheti";
+"preferences_ipv4_only" = "Csak IPv4";
+"preferences_skip_qos" = "QoS-mérés";
+"preferences_expert_mode" = "Szakértői mód";
+"preferences_loop_mode" = "Ismétlődő mód";
+"preferences_loop_mode_enabled" = "Engedélyezve";
+"preferences_loop_mode_summary" = "Új teszt a várakozási idő vagy a távolság megtétele után. Max. 2 nap";
+"preferences_loop_mode_min_delay" = "Várakozási idő (percben)";
+"preferences_loop_mode_max_movement" = "Távolság (méterben)";
+"preferences_contact" = "Kapcsolat";
+"preferences_go_to_website" = "Webhely megnyitása";
+"preferences_contact_us" = "Írjon nekünk";
+"preferences_data_protection" = "Adatvédelmi szabályzat és használati feltételek";
+"preferences_additional_Information" = "További információk";
+"preferences_client_uuid" = "Kliens UUID";
+"preferences_test_cases" = "Elvégzett tesztek száma";
+"preferences_version" = "Verzió";
+"preferences_about" = "Az alkalmazásról";
+"preferences_developed_by" = "Fejlesztette";
+"preferences_source_code" = "Forráskód";
+"preferences_export_logs" = "Naplók exportálása";
+"preferences_export_logs_error" = "A mai naplófájlt nem sikerült előkészíteni.";
+
+"preferences_debug_options" = "Hibakeresési beállítások";
+"preferences_ipv6_only" = "Csak IPv6";
+
+"preferences_developer_control_server" = "Control szerver";
+"preferences_override_control_enabled" = "Control szerver felülírása";
+"preferences_override_control_server_host" = "Control host";
+"preferences_override_control_server_port" = "Control port";
+"preferences_override_control_server_ssl" = "Control SSL";
+
+"preferences_developer_logging" = "Naplózás";
+"preferences_developer_logging_enabled" = "Naplózás engedélyezése";
+"preferences_developer_logging_summary" = "A naplóüzenetek a kiválasztott célhelyre kerülnek UDP-n keresztül.";
+"preferences_developer_loggind_host" = "Naplózási host";
+"preferences_developer_loggind_port" = "Naplózási port";
+
+"preferences_qos_measurement_only_after_some_time" = "Csak 2 óra elteltével";
+"preferences_qos_measurement_only_after_some_time_summary" = "Ne végezzen új QoS-mérést, ha az utolsó kevesebb mint 2 órája történt.";
+
+"button_accept.title" = "ELFOGADÁS";
+
+"map.map_view" = "Térkép megjelenése";
+"map.cart_details" = "Rétegtípus";
+
+"map_style_hybrid" = "Hibrid";
+"map_style_satellite" = "Műholdas";
+"map_style_standard" = "Normál";
+
+"map_layer_communities" = "Települések";
+"map_layer_points" = "Pontok";
+"map_layer_automatic" = "Automatikus";
+
+"menu_button_statistics" = "Statisztika";
+
+"text_ip_address_not_available" = "A cím nem érhető el";
+"start_test_button_help_message" = "Nyomja meg a gombot a teszt elindításához!";
+"RTR-NetTest" = "RTR-NetTest";
+
+"Export data" = "Exportálás";
+
+"Home" = "Főoldal";
+"History" = "Előzmények";
+"Statistics" = "Statisztika";
+"Map" = "Térkép";
+"Coverage" = "Jelmérés";

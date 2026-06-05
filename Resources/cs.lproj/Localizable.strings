@@ -1,0 +1,456 @@
+"ÜBERNEHMEN" = "Přijmout";
+
+"Options" = "Možnosti";
+
+"Description" = "Popis";
+
+"Succeeded" = "Úspěšné";
+
+"Failed" = "Selhalo";
+
+"Cancel" = "Zrušit";
+
+/* History column */
+"Date" = "Datum";
+
+/* History column */
+"Device" = "Zařízení";
+
+/* Sync dialog button */
+"Enter code" = "Zadejte kód";
+
+/* Sync alert title */
+"Enter sync code:" = "Zadejte synchronizační kód:";
+
+/* Sync success alert msg */
+"History synchronisation was successful." = "Synchronizace výsledků byla úspěšná";
+
+/* History result section title */
+"Measurement" = "Měření";
+
+/* History result section title */
+"Weitere Details" = "Více informací";
+
+/* History result section title */
+"Network" = "Síť";
+
+/* History result section title */
+"Qualität" = "Kvalita";
+
+/* History result section title */
+"Test details" = "Podrobnosti testu";
+
+/* Sync success button */
+"Reload" = "Obnovit";
+
+/* Sync dialog button */
+"Request code" = "Získat synchronizační kód";
+
+/* Sync success alert title */
+"Success" = "Synchronizace byla úspěšná";
+
+/* Sync alert button */
+"Sync" = "Synchronizace";
+
+/* Sync intro text */
+"To merge history from two different devices, request the sync code on one device and enter it on another device" = "Chcete-li synchronizovat historii výsledků ze dvou různých zařízení, vyžádejte si synchronizační kód na jednom zařízení a zadejte jej na druhém zařízení";
+
+/* Abort test alert title */
+"Abort Test" = "Přerušit test";
+
+/* Abort test alert title */
+"Continue" = "Pokračovat";
+
+/* Display code alert button */
+"Copy code" = "Kopírovat kód";
+
+/* Abort test alert title */
+"Do you really want to abort the running test?" = "Opravdu chcete přerušit právě probíhající test?";
+
+/* Display code alert button */
+"OK" = "OK";
+
+/* Display code alert title */
+"Sync Code" = "Synchronizační kód";
+
+/* Text field placholder */
+"Code" = "Kód";
+
+/* Filter section title */
+"Network Type" = "Typ sítě";
+
+/* Sync error alert button */
+"Dismiss" = "Zrušit";
+
+/* Map overlay description */
+"Auto" = "Auto";
+
+/* Map overlay description */
+"Heatmap" = "Heatmapa";
+
+/* Google Maps Legal Notice nevigation title */
+"Legal Notice" = "Zákonné oznámení";
+
+/* Table section header title */
+"Overlay" = "Překryv";
+
+/* Map overlay description */
+"Points" = "Body";
+
+/* Footer status label */
+"Aborted" = "Přerušeno";
+
+/* Alert view button */
+"Close" = "Zavřít";
+
+/* Alert view title */
+"Connection Error" = "Chyba připojení";
+
+/* Alert view message */
+"Couldn't connect to test server." = "Nelze se připojit k měřicímu serveru.";
+
+/* Alert view title */
+"Error" = "Chyba";
+
+/* Alert view button */
+"Repeat Test" = "Opakovat měření";
+
+/* Alert view title */
+"Test aborted" = "Měření bylo přerušeno";
+
+/* Alert view message */
+"Test was aborted because the app went into background. Tests can only be performed while the app is running in foreground." = "Měření bylo přerušeno, protože aplikace byla minimalizována na pozadí. Měření lze provádět pouze tehdy, když je aplikace spuštěna v popředí.";
+
+/* Alert view message */
+"Test was completed, but the results couldn't be submitted to the test server." = "Měření bylo dokončeno, ale výsledky nebylo možné odeslat na server.";
+
+/* Alert view message */
+"The connection to the test server was lost. Test aborted." = "Spojení s měřicím serverem bylo ztraceno. Test byl přerušen.";
+
+/* Alert view button */
+"Try Again" = "Zkusit znovu";
+
+/* Phase status label */
+"Fetching test parameters" = "Načítání parametrů testu";
+
+/* Phase status label */
+"Finalizing" = "Finalizace";
+
+/* Phase status label */
+"Initializing Upload" = "Inicializace uploadu";
+
+/* Phase status label */
+"Initializing" = "Inicializace";
+
+/* Phase status label */
+"Pinging" = "Ping";
+
+/* Phase status label */
+"Upload" = "Upload";
+
+/* Phase status label */
+"Waiting for test server" = "Čekání na měřicí server";
+
+/* Test view label */
+"Connection" = "Spojení";
+
+/* Speed suffix */
+"Mbps" = "Mb/s";
+
+/* Phase status label */
+"Download" = "Download";
+
+/* Test intro screen title when thre's no connectivity */
+"No network connection available" = "Připojení k síti není k dispozici";
+
+/* Map overlay description */
+"Shapes" = "Tvary";
+
+/* Measurement item title */
+"Quality tests" = "QoS test";
+
+/* QoS Details section header */
+"Information" = "Informace";
+
+/* Section header */
+"Details" = "Detaily";
+
+/* History result section title
+   Phase status label */
+"QoS" = "QoS";
+
+/* Section header for successful test */
+"Test Failed" = "Měření se nezdařilo";
+
+/* Section header for successful test */
+"Test Succeeded" = "Měření bylo dokončeno";
+
+/* QoS Details section header */
+"Tests" = "Testy";
+
+/* Map overlay summary */
+"Map shows tests as community shapes" = "Mapa zobrazuje testy podle obcí";
+
+/* Map overlay summary */
+"Map shows tests as heatmap" = "Mapa zobrazuje testy jako heatmapu";
+
+/* Map overlay summary */
+"Map shows tests as points" = "Mapa zobrazuje testy jako body";
+
+/* Map overlay summary */
+"Map switches automatically between heatmap and points" = "Mapa automaticky přepíná mezi heatmapou a body";
+
+/* Section title in the map options view
+   Title of the map options subview */
+"Map type" = "Typ mapy";
+
+/* Loop mode alert message */
+"You are about to start tests in loop mode. The distance is set to %@ meters. The waiting time between tests is %@ minutes." = "Chystáte se spustit opakované měření. Vzdálenost je nastavena na %@ metrů. Časová prodleva je nastavena na %@ minut.";
+
+/* Loop mode details title */
+"Access" = "Přístup";
+
+/* Loop mode details title */
+"Data usage" = "Využití dat";
+
+/* Loop mode header title */
+"Previous test" = "Předchozí test";
+
+/* Screen title */
+"Loop Mode" = "Opakované měření";
+
+/* Loop mode alert title */
+"Number of tests" = "Počet testů";
+
+/* Loop mode alert button */
+"Start tests" = "Spustit testy";
+
+/* Intro screen button title */
+"Test Connection" = "Test připojení";
+
+/* Confirmation dialog title 1/2 */
+"Activation and privacy" = "Aktivace";
+
+/* Confirmation dialog title 1/2 */
+"Usage" = "Použití";
+
+/* Confirmation dialog subtitle */
+"Loop mode %@/2" = "Opakované měření %@/2";
+
+/* Loop Mode status */
+"Waiting" = "Čekání";
+
+/* Loop mode details title */
+"Location" = "Umístění";
+
+/* A11 */
+"Start" = "Start";
+"History" = "Historie";
+"Statistics" = "Statistika";
+"Map" = "Mapa";
+"Collapse results" = "Skrýt výsledky";
+"Expand results" = "Zobrazit výsledky";
+"Share result" = "Sdílet výsledek";
+"Start measurement now" = "Spustit měření";
+"Disable loop mode" = "Zakázat režim opakovaného měření";
+"Enable loop mode" = "Povolit režim opakovaného měření";
+"Settings" = "Nastavení";
+"Show IPv4 address" = "Zobrazit IPv4 adresu";
+"Show IPv6 address" = "Zobrazit IPv6 adresu";
+"Show location" = "Zobrazit lokalitu";
+
+"video_telephony" = "Videotelefonie";
+"video_conferencing" = "Video konference";
+"cloud" = "Cloud";
+"video_uhd" = "Video UHD";
+"video_sd" = "Video SD";
+"video_hd" = "Video HD";
+"voip" = "VoIP";
+"streaming_audio_streaming" = "Streamování zvuku";
+"web" = "Web";
+"messaging" = "Messaging";
+"gaming_download" = "Stahování her";
+"gaming" = "Hry";
+"gaming_cloud" = "Cloudové hraní";
+"gaming_streaming" = "Streamování her";
+"qos" = "QoS testy";
+
+"text_button_decline" = "Odmítnout";
+"text_button_accept" = "Přijmout";
+
+"title_loop_instruction_1" = "Aktivace";
+"title_loop_instruction_2" = "Použití";
+
+"tos.agree" = "Přijmout";
+"tos.decline" = "Odmítnout";
+"tos.agreements.title" = "Souhlasím s prohlášením o ochraně osobních údajů a podmínkami užití nástroje RTR-NetTest.";
+
+"public_ip_address" = "Veřejná adresa";
+"private_ip_address" = "Privátní adresa";
+
+"title_loop_mode" = "Opakované měření";
+"title_coverage_series" = "Série pokrytí";
+"coverage_label" = "Měření signálu";
+
+/* Location Dialog */
+"location_dialog_label_title" = "Lokalita";
+"location_dialog_label_position" = "Poloha";
+"location_dialog_label_accuracy" = "Přesnost";
+"location_dialog_label_age" = "Doba";
+"location_dialog_label_source" = "Zdroj";
+"location_dialog_label_altitude" = "Nadmořská výška";
+"location_dialog_label_speed" = "Rychlost";
+"location_dialog_label_satellites" = "Satelity";
+"location_dialog_label_location_progress_message" = "Určování polohy, prosím čekejte…";
+"open_gps_setting_dialog_label_gps_not_enabled" = "Služby určování polohy jsou zakázány, přejete si toto nastavení změnit?";
+"open_gps_setting_dialog_label_open_gps_setting" = "Otevřít nastavení polohy";
+"open_gps_setting_dialog_label_cancel" = "Zavřít";
+"location_dialog_not_available" = "Není k dispozici";
+"location_dialog_age" = "%1$s s";
+"location_dialog_accuracy" = "%1$s m";
+"location_dialog_speed" = "%1$s km/h";
+"location_dialog_position" = "%1$s %2$s";
+"location_location_direction_n" = "S";
+"location_location_direction_e" = "V";
+"location_location_direction_s" = "J";
+"location_location_direction_w" = "Z";
+"open_location_permission_dialog_label_location_not_permitted" = "RTR-NetTest nemá povolen přístup k poloze. Přejete si přístup k poloze povolit?";
+"open_location_permission_dialog_label_open_permission_setting" = "Otevřít nastavení aplikace";
+
+/* Menu Items */
+"menu_button_history" = "Moje měření";
+
+"preferences_enter_code" = "Zadejte prosím kód";
+
+"input_setting_dialog_ok" = "OK";
+"input_setting_dialog_cancel" = "Zrušit";
+"button_sync_enter_code" = "Zadat kód";
+
+"title_loop_mode" = "Opakované měření";
+"title_loop_count" = "Zvolte počet testů";
+"text_loop_start" = "Spustit opakované měření";
+"text_loop_mode" = "Další test se spustí po uplynutí časové prodlevy nebo po překonání nastavené vzdálenosti (max. 2 dny).";
+"preferences_loop_mode_summary" = "Další test se spustí po uplynutí časové prodlevy nebo po překonání nastavené vzdálenosti (max. 2 dny).";
+"preferences_loop_mode_min_delay" = "Časová prodleva (v minutách)";
+"preferences_loop_mode_max_movement" = "Vzdálenost (v metrech)";
+
+"invalide_loop_mode_count" = "Neplatný počet testů";
+"invalide_loop_mode_distance" = "Neplatná vzdálenost";
+"invalide_loop_mode_waiting_minutes" = "Neplatná hodnota časové prodlevy";
+"loop_mode_enter_value_between_format" = "Zadejte prosím hodnotu mezi %i a %i";
+
+"loop_mode_next_test" = "Další test";
+"loop_mode_minutes" = "Minuty";
+"loop_mode_meters" = "Metry";
+"loop_mode_no_gps" = "Bez GPS";
+"or" = "nebo";
+
+"loop_mode_finished" = "Opakované měření dokončeno!";
+"loop_mode_finished_description" = "";
+"loop_continue_to_results" = "Zobrazit výsledky";
+"loop_run_again" = "Spustit znovu";
+
+/* History */
+"history.sync-modal-title.default" = "Synchronizace";
+"history.sync-modal-title.sync-success" = "Synchronizace byla úspěšná";
+"history.sync-modal-description.default" = "Chcete-li synchronizovat historii výsledků ze dvou různých zařízení, vyžádejte si synchronizační kód nebo zadejte již přidělený synchronizační kód.";
+"history.sync-modal-description.enter-code" = "Zadejte prosím přidělený synchronizační kód na druhém zařízení.";
+"history.sync-modal-description.request-code" = "Pro synchronizaci výsledků prosím zadejte níže zobrazený kód na zařízení, se kterým chcete výsledky synchronizovat.";
+"history.sync-modal-description.sync-success" = "Synchronizace byla úspěšná.";
+"The code must consist of twelve characters" = "Kód musí obsahovat 12 znaků";
+"The devices are already synchronized with each other." = "Zařízení jsou již synchronizována.";
+"The code you entered does not exist." = "Zadaný kód neexistuje.";
+"history.result.connection" = "Typ";
+"history.result.operator" = "Operátor";
+
+/* Test */
+"test.network.label" = "Síť";
+"test.technology.label" = "Technologie";
+"label_upload" = "Upload";
+"label_download" = "Download";
+"label_ping" = "Ping";
+
+"measurement_ping" = "Ping";
+"measurement_down" = "Download";
+"measurement_up" = "Upload";
+
+"measurement_qos" = "Kvalita služeb (QoS)";
+"measurement_qos_website" = "Webová stránka";
+"measurement_qos_http_proxy" = "Modifikace obsahu";
+"measurement_qos_non_transparent_proxy" = "Transparentní proxy";
+"measurement_qos_dns" = "DNS";
+"measurement_qos_tcp" = "TCP porty";
+"measurement_qos_udp" = "UDP porty";
+"measurement_qos_traceroute_masked" = "Traceroute";
+"measurement_qos_voip" = "Internetová telefonie";
+
+"preferences_general_settings" = "Hlavní nastavení";
+"preferences_advanced_settings" = "Rozšířená nastavení";
+"preferences_location" = "Povolit přístup k poloze";
+"preferences_location_summary" = "Přístup k poloze je zakázán, můžete jej povolit v nastavení zařízení.";
+"preferences_ipv4_only" = "Pouze IPv4";
+"preferences_skip_qos" = "QoS měření";
+"preferences_expert_mode" = "Expertní mód";
+"preferences_loop_mode" = "Opakované měření";
+"preferences_loop_mode_enabled" = "Povoleno";
+"preferences_loop_mode_summary" = "Další test se spustí po uplynutí časové prodlevy nebo po překonání nastavené vzdálenosti (max. 2 dny).";
+"preferences_loop_mode_min_delay" = "Časová prodleva (v minutách)";
+"preferences_loop_mode_max_movement" = "Vzdálenost (v metrech)";
+"preferences_contact" = "Kontakt";
+"preferences_go_to_website" = "Navštivte webové stránky";
+"preferences_contact_us" = "Napište e-mail";
+"preferences_data_protection" = "Prohlášení o ochraně osobních údajů a podmínky užití";
+"preferences_additional_Information" = "Další informace";
+"preferences_client_uuid" = "UUID klienta";
+"preferences_test_cases" = "Počet provedených testů";
+"preferences_version" = "Verze";
+"preferences_about" = "O aplikaci";
+"preferences_developed_by" = "Vyvinul";
+"preferences_source_code" = "Zdrojový kód";
+"preferences_export_logs" = "Exportovat logy";
+"preferences_export_logs_error" = "Nepodařilo se připravit dnešní soubor logu.";
+
+"preferences_debug_options" = "Možnosti ladění";
+"preferences_ipv6_only" = "Pouze IPv6";
+
+"preferences_developer_control_server" = "Control server";
+"preferences_override_control_enabled" = "Přepsat Control server";
+"preferences_override_control_server_host" = "Control host";
+"preferences_override_control_server_port" = "Control port";
+"preferences_override_control_server_ssl" = "Control SSL";
+
+"preferences_developer_logging" = "Logování";
+"preferences_developer_logging_enabled" = "Povolit logování";
+"preferences_developer_logging_summary" = "Logy budou odeslány do cílového umístění prostřednictvím UDP.";
+"preferences_developer_loggind_host" = "Logging host";
+"preferences_developer_loggind_port" = "Logging port";
+
+"preferences_qos_measurement_only_after_some_time" = "Pouze po 2 hodinách";
+"preferences_qos_measurement_only_after_some_time_summary" = "Neprovádět nové QoS měření, pokud bylo provedeno v posledních 2 hodinách.";
+
+"button_accept.title" = "Potvrdit";
+
+"map.map_view" = "Vzhled mapy";
+"map.cart_details" = "Typ překryvu";
+
+"map_style_hybrid" = "Hybridní";
+"map_style_satellite" = "Satelitní";
+"map_style_standard" = "Standardní";
+
+"map_layer_communities" = "Obce";
+"map_layer_points" = "Body";
+"map_layer_automatic" = "Automaticky";
+
+"menu_button_statistics" = "Statistika";
+
+"text_ip_address_not_available" = "Adresa není k dispozici";
+"start_test_button_help_message" = "Stiskněte tlačítko pro spuštění měření!";
+"RTR-NetTest" = "RTR-NetTest";
+
+"Export data" = "Exportovat";
+
+"Home" = "Domů";
+"History" = "Historie";
+"Statistics" = "Statistika";
+"Map" = "Mapa";
+"Coverage" = "Měření signálu";

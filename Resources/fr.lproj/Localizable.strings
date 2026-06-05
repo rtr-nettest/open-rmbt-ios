@@ -1,0 +1,456 @@
+"ÜBERNEHMEN" = "ACCEPTER";
+
+"Options" = "Options";
+
+"Description" = "Description";
+
+"Succeeded" = "Réussi";
+
+"Failed" = "Échoué";
+
+"Cancel" = "Annuler";
+
+/* History column */
+"Date" = "Date";
+
+/* History column */
+"Device" = "Appareil";
+
+/* Sync dialog button */
+"Enter code" = "Saisir le code";
+
+/* Sync alert title */
+"Enter sync code:" = "Saisissez le code de synchronisation :";
+
+/* Sync success alert msg */
+"History synchronisation was successful." = "La synchronisation de l’historique a réussi";
+
+/* History result section title */
+"Measurement" = "Mesure";
+
+/* History result section title */
+"Weitere Details" = "Plus de détails";
+
+/* History result section title */
+"Network" = "Réseau";
+
+/* History result section title */
+"Qualität" = "Qualité";
+
+/* History result section title */
+"Test details" = "Détails du test";
+
+/* Sync success button */
+"Reload" = "Recharger";
+
+/* Sync dialog button */
+"Request code" = "Demander un code";
+
+/* Sync success alert title */
+"Success" = "Succès";
+
+/* Sync alert button */
+"Sync" = "Synchroniser";
+
+/* Sync intro text */
+"To merge history from two different devices, request the sync code on one device and enter it on another device" = "Pour fusionner l’historique de deux appareils différents, demandez le code de synchronisation sur un appareil et saisissez-le sur l’autre appareil";
+
+/* Abort test alert title */
+"Abort Test" = "Interrompre le test";
+
+/* Abort test alert title */
+"Continue" = "Continuer";
+
+/* Display code alert button */
+"Copy code" = "Copier le code";
+
+/* Abort test alert title */
+"Do you really want to abort the running test?" = "Voulez-vous vraiment interrompre le test en cours ?";
+
+/* Display code alert button */
+"OK" = "OK";
+
+/* Display code alert title */
+"Sync Code" = "Code de synchronisation";
+
+/* Text field placholder */
+"Code" = "Code";
+
+/* Filter section title */
+"Network Type" = "Type de réseau";
+
+/* Sync error alert button */
+"Dismiss" = "Ignorer";
+
+/* Map overlay description */
+"Auto" = "Auto";
+
+/* Map overlay description */
+"Heatmap" = "Carte de chaleur";
+
+/* Google Maps Legal Notice nevigation title */
+"Legal Notice" = "Mentions légales";
+
+/* Table section header title */
+"Overlay" = "Superposition";
+
+/* Map overlay description */
+"Points" = "Points";
+
+/* Footer status label */
+"Aborted" = "Interrompu";
+
+/* Alert view button */
+"Close" = "Fermer";
+
+/* Alert view title */
+"Connection Error" = "Erreur de connexion";
+
+/* Alert view message */
+"Couldn't connect to test server." = "Impossible de se connecter au serveur de test.";
+
+/* Alert view title */
+"Error" = "Erreur";
+
+/* Alert view button */
+"Repeat Test" = "Répéter le test";
+
+/* Alert view title */
+"Test aborted" = "Test interrompu";
+
+/* Alert view message */
+"Test was aborted because the app went into background. Tests can only be performed while the app is running in foreground." = "Le test a été interrompu car l’application est passée en arrière-plan. Les tests ne peuvent être effectués que lorsque l’application est au premier plan.";
+
+/* Alert view message */
+"Test was completed, but the results couldn't be submitted to the test server." = "Le test est terminé, mais les résultats n’ont pas pu être envoyés au serveur de test.";
+
+/* Alert view message */
+"The connection to the test server was lost. Test aborted." = "La connexion au serveur de test a été perdue. Test interrompu.";
+
+/* Alert view button */
+"Try Again" = "Réessayer";
+
+/* Phase status label */
+"Fetching test parameters" = "Récupération des paramètres du test";
+
+/* Phase status label */
+"Finalizing" = "Finalisation";
+
+/* Phase status label */
+"Initializing Upload" = "Initialisation de l’envoi";
+
+/* Phase status label */
+"Initializing" = "Initialisation";
+
+/* Phase status label */
+"Pinging" = "Ping";
+
+/* Phase status label */
+"Upload" = "Upload";
+
+/* Phase status label */
+"Waiting for test server" = "En attente du serveur de test";
+
+/* Test view label */
+"Connection" = "Connexion";
+
+/* Speed suffix */
+"Mbps" = "Mbps";
+
+/* Phase status label */
+"Download" = "Download";
+
+/* Test intro screen title when thre's no connectivity */
+"No network connection available" = "Aucune connexion réseau disponible";
+
+/* Map overlay description */
+"Shapes" = "Formes";
+
+/* Measurement item title */
+"Quality tests" = "Tests de qualité";
+
+/* QoS Details section header */
+"Information" = "Informations";
+
+/* Section header */
+"Details" = "Détails";
+
+/* History result section title
+   Phase status label */
+"QoS" = "QoS";
+
+/* Section header for successful test */
+"Test Failed" = "Test échoué";
+
+/* Section header for successful test */
+"Test Succeeded" = "Test réussi";
+
+/* QoS Details section header */
+"Tests" = "Tests";
+
+/* Map overlay summary */
+"Map shows tests as community shapes" = "La carte affiche les tests par communes";
+
+/* Map overlay summary */
+"Map shows tests as heatmap" = "La carte affiche les tests sous forme de carte de chaleur";
+
+/* Map overlay summary */
+"Map shows tests as points" = "La carte affiche les tests sous forme de points";
+
+/* Map overlay summary */
+"Map switches automatically between heatmap and points" = "La carte bascule automatiquement entre la carte de chaleur et les points";
+
+/* Section title in the map options view
+   Title of the map options subview */
+"Map type" = "Type de carte";
+
+/* Loop mode alert message */
+"You are about to start tests in loop mode. The distance is set to %@ meters. The waiting time between tests is %@ minutes." = "Vous êtes sur le point de démarrer des tests en mode boucle. La distance est réglée sur %@ mètres. Le temps d’attente entre les tests est de %@ minutes.";
+
+/* Loop mode details title */
+"Access" = "Accès";
+
+/* Loop mode details title */
+"Data usage" = "Utilisation des données";
+
+/* Loop mode header title */
+"Previous test" = "Test précédent";
+
+/* Screen title */
+"Loop Mode" = "Mode boucle";
+
+/* Loop mode alert title */
+"Number of tests" = "Nombre de tests";
+
+/* Loop mode alert button */
+"Start tests" = "Démarrer les tests";
+
+/* Intro screen button title */
+"Test Connection" = "Tester la connexion";
+
+/* Confirmation dialog title 1/2 */
+"Activation and privacy" = "Activation et confidentialité";
+
+/* Confirmation dialog title 1/2 */
+"Usage" = "Utilisation";
+
+/* Confirmation dialog subtitle */
+"Loop mode %@/2" = "Mode boucle %@/2";
+
+/* Loop Mode status */
+"Waiting" = "En attente";
+
+/* Loop mode details title */
+"Location" = "Position";
+
+/* A11 */
+"Start" = "Démarrer";
+"History" = "Historique";
+"Statistics" = "Statistiques";
+"Map" = "Carte";
+"Collapse results" = "Réduire les résultats";
+"Expand results" = "Développer les résultats";
+"Share result" = "Partager le résultat";
+"Start measurement now" = "Démarrer la mesure";
+"Disable loop mode" = "Désactiver le mode boucle";
+"Enable loop mode" = "Activer le mode boucle";
+"Settings" = "Réglages";
+"Show IPv4 address" = "Afficher l’adresse IPv4";
+"Show IPv6 address" = "Afficher l’adresse IPv6";
+"Show location" = "Afficher la position";
+
+"video_telephony" = "Visiophonie";
+"video_conferencing" = "Visioconférence";
+"cloud" = "Cloud";
+"video_uhd" = "Vidéo UHD";
+"video_sd" = "Vidéo SD";
+"video_hd" = "Vidéo HD";
+"voip" = "VoIP";
+"streaming_audio_streaming" = "Streaming audio";
+"web" = "Web";
+"messaging" = "Messagerie";
+"gaming_download" = "Téléchargement de jeux";
+"gaming" = "Jeux";
+"gaming_cloud" = "Jeux dans le cloud";
+"gaming_streaming" = "Streaming de jeux";
+"qos" = "Tests QoS";
+
+"text_button_decline" = "Refuser";
+"text_button_accept" = "Accepter";
+
+"title_loop_instruction_1" = "Activation";
+"title_loop_instruction_2" = "Utilisation";
+
+"tos.agree" = "Accepter";
+"tos.decline" = "Refuser";
+"tos.agreements.title" = "J’accepte la politique de confidentialité de RTR et les conditions d’utilisation de RTR-NetTest.";
+
+"public_ip_address" = "Adresse publique";
+"private_ip_address" = "Adresse privée";
+
+"title_loop_mode" = "Mode boucle";
+"title_coverage_series" = "Série de couverture";
+"coverage_label" = "Mesure du signal";
+
+/* Location Dialog */
+"location_dialog_label_title" = "Position";
+"location_dialog_label_position" = "Position";
+"location_dialog_label_accuracy" = "Précision";
+"location_dialog_label_age" = "Ancienneté";
+"location_dialog_label_source" = "Source";
+"location_dialog_label_altitude" = "Altitude";
+"location_dialog_label_speed" = "Vitesse";
+"location_dialog_label_satellites" = "Satellites";
+"location_dialog_label_location_progress_message" = "Détermination de la position, veuillez patienter…";
+"open_gps_setting_dialog_label_gps_not_enabled" = "Les services de localisation ne sont pas activés. Souhaitez-vous modifier les réglages de localisation ?";
+"open_gps_setting_dialog_label_open_gps_setting" = "Ouvrir les réglages de localisation";
+"open_gps_setting_dialog_label_cancel" = "Annuler";
+"location_dialog_not_available" = "Non disponible";
+"location_dialog_age" = "%1$s s";
+"location_dialog_accuracy" = "%1$s m";
+"location_dialog_speed" = "%1$s km/h";
+"location_dialog_position" = "%1$s %2$s";
+"location_location_direction_n" = "N";
+"location_location_direction_e" = "E";
+"location_location_direction_s" = "S";
+"location_location_direction_w" = "O";
+"open_location_permission_dialog_label_location_not_permitted" = "RTR-NetTest n’est pas autorisé à utiliser votre position. Souhaitez-vous autoriser RTR-NetTest à utiliser votre position ?";
+"open_location_permission_dialog_label_open_permission_setting" = "Ouvrir les réglages de l’application";
+
+/* Menu Items */
+"menu_button_history" = "Historique";
+
+"preferences_enter_code" = "Veuillez saisir le code";
+
+"input_setting_dialog_ok" = "OK";
+"input_setting_dialog_cancel" = "Annuler";
+"button_sync_enter_code" = "Saisir le code";
+
+"title_loop_mode" = "Mode boucle";
+"title_loop_count" = "Choisissez le nombre de tests";
+"text_loop_start" = "Démarrer les tests";
+"text_loop_mode" = "Nouveau test après l’attente ou la distance parcourue. Max. 2 jours";
+"preferences_loop_mode_summary" = "Nouveau test après le temps d’attente ou la distance parcourue. Max. 2 jours";
+"preferences_loop_mode_min_delay" = "Temps d’attente (en minutes)";
+"preferences_loop_mode_max_movement" = "Distance (en mètres)";
+
+"invalide_loop_mode_count" = "Nombre de tests invalide";
+"invalide_loop_mode_distance" = "Distance d’attente invalide";
+"invalide_loop_mode_waiting_minutes" = "Minutes d’attente invalides";
+"loop_mode_enter_value_between_format" = "Veuillez saisir une valeur entre %i et %i";
+
+"loop_mode_next_test" = "Test suivant";
+"loop_mode_minutes" = "Minutes";
+"loop_mode_meters" = "Mètres";
+"loop_mode_no_gps" = "Pas de GPS";
+"or" = "ou";
+
+"loop_mode_finished" = "Mode boucle RTR-NetTest terminé !";
+"loop_mode_finished_description" = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquya.";
+"loop_continue_to_results" = "Continuer vers le résultat";
+"loop_run_again" = "Relancer";
+
+/* History */
+"history.sync-modal-title.default" = "Synchronisation";
+"history.sync-modal-title.sync-success" = "Réussie";
+"history.sync-modal-description.default" = "Vous avez la possibilité de fusionner les résultats de différents appareils. Pour ce faire, saisissez un code de synchronisation déjà demandé ou demandez-en un nouveau.";
+"history.sync-modal-description.enter-code" = "Veuillez saisir le code que vous avez reçu sur votre autre appareil.";
+"history.sync-modal-description.request-code" = "Veuillez saisir le code affiché ci-dessous sur l’autre appareil pour synchroniser les résultats.";
+"history.sync-modal-description.sync-success" = "La synchronisation a réussi.";
+"The code must consist of twelve characters" = "Le code doit comporter douze caractères";
+"The devices are already synchronized with each other." = "Les appareils sont déjà synchronisés.";
+"The code you entered does not exist." = "Le code que vous avez saisi n’existe pas.";
+"history.result.connection" = "Type";
+"history.result.operator" = "Opérateur";
+
+/* Test */
+"test.network.label" = "Réseau";
+"test.technology.label" = "Technologie";
+"label_upload" = "Upload";
+"label_download" = "Download";
+"label_ping" = "Ping";
+
+"measurement_ping" = "Ping";
+"measurement_down" = "Down";
+"measurement_up" = "Up";
+
+"measurement_qos" = "Qualité de service (QoS)";
+"measurement_qos_website" = "Page web";
+"measurement_qos_http_proxy" = "Contenu non modifié";
+"measurement_qos_non_transparent_proxy" = "Connexion transparente";
+"measurement_qos_dns" = "DNS";
+"measurement_qos_tcp" = "Ports TCP";
+"measurement_qos_udp" = "Ports UDP";
+"measurement_qos_traceroute_masked" = "Traceroute";
+"measurement_qos_voip" = "VoIP";
+
+"preferences_general_settings" = "Réglages généraux";
+"preferences_advanced_settings" = "Réglages avancés";
+"preferences_location" = "Activer la localisation";
+"preferences_location_summary" = "La localisation est actuellement désactivée, vous pouvez l’activer via ce lien dans les réglages du système";
+"preferences_ipv4_only" = "IPv4 uniquement";
+"preferences_skip_qos" = "Mesure QoS";
+"preferences_expert_mode" = "Mode expert";
+"preferences_loop_mode" = "Mode boucle";
+"preferences_loop_mode_enabled" = "Activé";
+"preferences_loop_mode_summary" = "Nouveau test après le temps d’attente ou la distance parcourue. Max. 2 jours";
+"preferences_loop_mode_min_delay" = "Temps d’attente (en minutes)";
+"preferences_loop_mode_max_movement" = "Distance (en mètres)";
+"preferences_contact" = "Contact";
+"preferences_go_to_website" = "Accéder au site web";
+"preferences_contact_us" = "Nous contacter";
+"preferences_data_protection" = "Politique de confidentialité et conditions d’utilisation";
+"preferences_additional_Information" = "Informations complémentaires";
+"preferences_client_uuid" = "UUID du client";
+"preferences_test_cases" = "Nombre de tests effectués";
+"preferences_version" = "Version";
+"preferences_about" = "À propos";
+"preferences_developed_by" = "Développé par";
+"preferences_source_code" = "Code source";
+"preferences_export_logs" = "Exporter les journaux";
+"preferences_export_logs_error" = "Impossible de préparer le fichier journal du jour.";
+
+"preferences_debug_options" = "Options de débogage";
+"preferences_ipv6_only" = "IPv6 uniquement";
+
+"preferences_developer_control_server" = "Serveur de contrôle";
+"preferences_override_control_enabled" = "Remplacer le serveur de contrôle";
+"preferences_override_control_server_host" = "Hôte de contrôle";
+"preferences_override_control_server_port" = "Port de contrôle";
+"preferences_override_control_server_ssl" = "SSL de contrôle";
+
+"preferences_developer_logging" = "Journalisation";
+"preferences_developer_logging_enabled" = "Activer la journalisation";
+"preferences_developer_logging_summary" = "Les messages de journal seront envoyés vers la destination sélectionnée via UDP.";
+"preferences_developer_loggind_host" = "Hôte de journalisation";
+"preferences_developer_loggind_port" = "Port de journalisation";
+
+"preferences_qos_measurement_only_after_some_time" = "Seulement après 2 heures";
+"preferences_qos_measurement_only_after_some_time_summary" = "Ne pas effectuer de nouvelle mesure QoS si la dernière a été réalisée il y a moins de 2 heures.";
+
+"button_accept.title" = "ACCEPTER";
+
+"map.map_view" = "Apparence de la carte";
+"map.cart_details" = "Type de superposition";
+
+"map_style_hybrid" = "Hybride";
+"map_style_satellite" = "Satellite";
+"map_style_standard" = "Standard";
+
+"map_layer_communities" = "Communes";
+"map_layer_points" = "Points";
+"map_layer_automatic" = "Automatique";
+
+"menu_button_statistics" = "Statistiques";
+
+"text_ip_address_not_available" = "L’adresse n’est pas disponible";
+"start_test_button_help_message" = "Appuyez sur le bouton pour lancer le test maintenant !";
+"RTR-NetTest" = "RTR-NetTest";
+
+"Export data" = "Exporter";
+
+"Home" = "Accueil";
+"History" = "Historique";
+"Statistics" = "Statistiques";
+"Map" = "Carte";
+"Coverage" = "Mesure du signal";

@@ -1,0 +1,456 @@
+"ÜBERNEHMEN" = "قبول";
+
+"Options" = "خيارات";
+
+"Description" = "الوصف";
+
+"Succeeded" = "نجح";
+
+"Failed" = "فشل";
+
+"Cancel" = "إلغاء";
+
+/* History column */
+"Date" = "التاريخ";
+
+/* History column */
+"Device" = "الجهاز";
+
+/* Sync dialog button */
+"Enter code" = "إدخال الرمز";
+
+/* Sync alert title */
+"Enter sync code:" = "أدخل رمز المزامنة:";
+
+/* Sync success alert msg */
+"History synchronisation was successful." = "تمت مزامنة السجل بنجاح";
+
+/* History result section title */
+"Measurement" = "القياس";
+
+/* History result section title */
+"Weitere Details" = "مزيد من التفاصيل";
+
+/* History result section title */
+"Network" = "الشبكة";
+
+/* History result section title */
+"Qualität" = "الجودة";
+
+/* History result section title */
+"Test details" = "تفاصيل الاختبار";
+
+/* Sync success button */
+"Reload" = "إعادة التحميل";
+
+/* Sync dialog button */
+"Request code" = "طلب رمز";
+
+/* Sync success alert title */
+"Success" = "نجاح";
+
+/* Sync alert button */
+"Sync" = "مزامنة";
+
+/* Sync intro text */
+"To merge history from two different devices, request the sync code on one device and enter it on another device" = "لدمج السجل من جهازين مختلفين، اطلب رمز المزامنة على أحد الجهازين وأدخله على الجهاز الآخر";
+
+/* Abort test alert title */
+"Abort Test" = "إيقاف الاختبار";
+
+/* Abort test alert title */
+"Continue" = "متابعة";
+
+/* Display code alert button */
+"Copy code" = "نسخ الرمز";
+
+/* Abort test alert title */
+"Do you really want to abort the running test?" = "هل تريد بالفعل إيقاف الاختبار الجاري؟";
+
+/* Display code alert button */
+"OK" = "موافق";
+
+/* Display code alert title */
+"Sync Code" = "رمز المزامنة";
+
+/* Text field placholder */
+"Code" = "الرمز";
+
+/* Filter section title */
+"Network Type" = "نوع الشبكة";
+
+/* Sync error alert button */
+"Dismiss" = "تجاهل";
+
+/* Map overlay description */
+"Auto" = "تلقائي";
+
+/* Map overlay description */
+"Heatmap" = "خريطة حرارية";
+
+/* Google Maps Legal Notice nevigation title */
+"Legal Notice" = "إشعار قانوني";
+
+/* Table section header title */
+"Overlay" = "طبقة";
+
+/* Map overlay description */
+"Points" = "نقاط";
+
+/* Footer status label */
+"Aborted" = "تم الإيقاف";
+
+/* Alert view button */
+"Close" = "إغلاق";
+
+/* Alert view title */
+"Connection Error" = "خطأ في الاتصال";
+
+/* Alert view message */
+"Couldn't connect to test server." = "تعذّر الاتصال بخادم الاختبار.";
+
+/* Alert view title */
+"Error" = "خطأ";
+
+/* Alert view button */
+"Repeat Test" = "إعادة الاختبار";
+
+/* Alert view title */
+"Test aborted" = "تم إيقاف الاختبار";
+
+/* Alert view message */
+"Test was aborted because the app went into background. Tests can only be performed while the app is running in foreground." = "تم إيقاف الاختبار لأن التطبيق انتقل إلى الخلفية. لا يمكن إجراء الاختبارات إلا أثناء تشغيل التطبيق في المقدمة.";
+
+/* Alert view message */
+"Test was completed, but the results couldn't be submitted to the test server." = "اكتمل الاختبار، لكن تعذّر إرسال النتائج إلى خادم الاختبار.";
+
+/* Alert view message */
+"The connection to the test server was lost. Test aborted." = "فُقد الاتصال بخادم الاختبار. تم إيقاف الاختبار.";
+
+/* Alert view button */
+"Try Again" = "حاول مرة أخرى";
+
+/* Phase status label */
+"Fetching test parameters" = "جارٍ جلب معلمات الاختبار";
+
+/* Phase status label */
+"Finalizing" = "جارٍ الإنهاء";
+
+/* Phase status label */
+"Initializing Upload" = "تهيئة الرفع";
+
+/* Phase status label */
+"Initializing" = "جارٍ التهيئة";
+
+/* Phase status label */
+"Pinging" = "Ping";
+
+/* Phase status label */
+"Upload" = "Upload";
+
+/* Phase status label */
+"Waiting for test server" = "في انتظار خادم الاختبار";
+
+/* Test view label */
+"Connection" = "الاتصال";
+
+/* Speed suffix */
+"Mbps" = "Mbps";
+
+/* Phase status label */
+"Download" = "Download";
+
+/* Test intro screen title when thre's no connectivity */
+"No network connection available" = "لا يوجد اتصال بالشبكة";
+
+/* Map overlay description */
+"Shapes" = "أشكال";
+
+/* Measurement item title */
+"Quality tests" = "اختبارات الجودة";
+
+/* QoS Details section header */
+"Information" = "معلومات";
+
+/* Section header */
+"Details" = "التفاصيل";
+
+/* History result section title
+   Phase status label */
+"QoS" = "QoS";
+
+/* Section header for successful test */
+"Test Failed" = "فشل الاختبار";
+
+/* Section header for successful test */
+"Test Succeeded" = "نجح الاختبار";
+
+/* QoS Details section header */
+"Tests" = "الاختبارات";
+
+/* Map overlay summary */
+"Map shows tests as community shapes" = "تعرض الخريطة الاختبارات حسب البلديات";
+
+/* Map overlay summary */
+"Map shows tests as heatmap" = "تعرض الخريطة الاختبارات كخريطة حرارية";
+
+/* Map overlay summary */
+"Map shows tests as points" = "تعرض الخريطة الاختبارات كنقاط";
+
+/* Map overlay summary */
+"Map switches automatically between heatmap and points" = "تبدّل الخريطة تلقائيًا بين الخريطة الحرارية والنقاط";
+
+/* Section title in the map options view
+   Title of the map options subview */
+"Map type" = "نوع الخريطة";
+
+/* Loop mode alert message */
+"You are about to start tests in loop mode. The distance is set to %@ meters. The waiting time between tests is %@ minutes." = "أنت على وشك بدء الاختبارات في وضع التكرار. المسافة مضبوطة على %@ متر. وقت الانتظار بين الاختبارات هو %@ دقيقة.";
+
+/* Loop mode details title */
+"Access" = "الوصول";
+
+/* Loop mode details title */
+"Data usage" = "استخدام البيانات";
+
+/* Loop mode header title */
+"Previous test" = "الاختبار السابق";
+
+/* Screen title */
+"Loop Mode" = "وضع التكرار";
+
+/* Loop mode alert title */
+"Number of tests" = "عدد الاختبارات";
+
+/* Loop mode alert button */
+"Start tests" = "بدء الاختبارات";
+
+/* Intro screen button title */
+"Test Connection" = "اختبار الاتصال";
+
+/* Confirmation dialog title 1/2 */
+"Activation and privacy" = "التفعيل والخصوصية";
+
+/* Confirmation dialog title 1/2 */
+"Usage" = "الاستخدام";
+
+/* Confirmation dialog subtitle */
+"Loop mode %@/2" = "وضع التكرار %@/2";
+
+/* Loop Mode status */
+"Waiting" = "في الانتظار";
+
+/* Loop mode details title */
+"Location" = "الموقع";
+
+/* A11 */
+"Start" = "ابدأ";
+"History" = "السجل";
+"Statistics" = "الإحصائيات";
+"Map" = "الخريطة";
+"Collapse results" = "طي النتائج";
+"Expand results" = "توسيع النتائج";
+"Share result" = "مشاركة النتيجة";
+"Start measurement now" = "بدء القياس";
+"Disable loop mode" = "تعطيل وضع التكرار";
+"Enable loop mode" = "تمكين وضع التكرار";
+"Settings" = "الإعدادات";
+"Show IPv4 address" = "إظهار عنوان IPv4";
+"Show IPv6 address" = "إظهار عنوان IPv6";
+"Show location" = "إظهار الموقع";
+
+"video_telephony" = "الاتصال المرئي";
+"video_conferencing" = "مؤتمرات الفيديو";
+"cloud" = "السحابة";
+"video_uhd" = "فيديو UHD";
+"video_sd" = "فيديو SD";
+"video_hd" = "فيديو HD";
+"voip" = "VoIP";
+"streaming_audio_streaming" = "بث صوتي";
+"web" = "ويب";
+"messaging" = "المراسلة";
+"gaming_download" = "تنزيل الألعاب";
+"gaming" = "الألعاب";
+"gaming_cloud" = "الألعاب السحابية";
+"gaming_streaming" = "بث الألعاب";
+"qos" = "اختبارات QoS";
+
+"text_button_decline" = "رفض";
+"text_button_accept" = "قبول";
+
+"title_loop_instruction_1" = "التفعيل";
+"title_loop_instruction_2" = "الاستخدام";
+
+"tos.agree" = "أوافق";
+"tos.decline" = "رفض";
+"tos.agreements.title" = "أوافق على سياسة الخصوصية وشروط استخدام RTR لتطبيق RTR-NetTest.";
+
+"public_ip_address" = "العنوان العام";
+"private_ip_address" = "العنوان الخاص";
+
+"title_loop_mode" = "وضع التكرار";
+"title_coverage_series" = "سلسلة التغطية";
+"coverage_label" = "قياس الإشارة";
+
+/* Location Dialog */
+"location_dialog_label_title" = "الموقع";
+"location_dialog_label_position" = "الموضع";
+"location_dialog_label_accuracy" = "الدقة";
+"location_dialog_label_age" = "العمر";
+"location_dialog_label_source" = "المصدر";
+"location_dialog_label_altitude" = "الارتفاع";
+"location_dialog_label_speed" = "السرعة";
+"location_dialog_label_satellites" = "الأقمار الصناعية";
+"location_dialog_label_location_progress_message" = "جارٍ تحديد الموقع، يُرجى الانتظار…";
+"open_gps_setting_dialog_label_gps_not_enabled" = "خدمات الموقع غير مفعّلة. هل تريد تعديل إعدادات الموقع؟";
+"open_gps_setting_dialog_label_open_gps_setting" = "فتح إعدادات الموقع";
+"open_gps_setting_dialog_label_cancel" = "إلغاء";
+"location_dialog_not_available" = "غير متوفر";
+"location_dialog_age" = "%1$s s";
+"location_dialog_accuracy" = "%1$s m";
+"location_dialog_speed" = "%1$s km/h";
+"location_dialog_position" = "%1$s %2$s";
+"location_location_direction_n" = "شمال";
+"location_location_direction_e" = "شرق";
+"location_location_direction_s" = "جنوب";
+"location_location_direction_w" = "غرب";
+"open_location_permission_dialog_label_location_not_permitted" = "لا يُسمح لتطبيق RTR-NetTest باستخدام موقعك. هل تريد السماح لتطبيق RTR-NetTest باستخدام موقعك؟";
+"open_location_permission_dialog_label_open_permission_setting" = "فتح إعدادات التطبيق";
+
+/* Menu Items */
+"menu_button_history" = "السجل";
+
+"preferences_enter_code" = "يُرجى إدخال الرمز";
+
+"input_setting_dialog_ok" = "موافق";
+"input_setting_dialog_cancel" = "إلغاء";
+"button_sync_enter_code" = "إدخال الرمز";
+
+"title_loop_mode" = "وضع التكرار";
+"title_loop_count" = "اختر عدد الاختبارات";
+"text_loop_start" = "بدء الاختبارات";
+"text_loop_mode" = "اختبار جديد بعد الانتظار أو قطع المسافة. بحد أقصى يومان";
+"preferences_loop_mode_summary" = "اختبار جديد بعد وقت الانتظار أو قطع المسافة. بحد أقصى يومان";
+"preferences_loop_mode_min_delay" = "وقت الانتظار (بالدقائق)";
+"preferences_loop_mode_max_movement" = "المسافة (بالأمتار)";
+
+"invalide_loop_mode_count" = "عدد اختبارات غير صالح";
+"invalide_loop_mode_distance" = "مسافة انتظار غير صالحة";
+"invalide_loop_mode_waiting_minutes" = "دقائق انتظار غير صالحة";
+"loop_mode_enter_value_between_format" = "يُرجى إدخال قيمة بين %i و %i";
+
+"loop_mode_next_test" = "الاختبار التالي";
+"loop_mode_minutes" = "دقائق";
+"loop_mode_meters" = "أمتار";
+"loop_mode_no_gps" = "لا يوجد GPS";
+"or" = "أو";
+
+"loop_mode_finished" = "اكتمل وضع التكرار في RTR-NetTest!";
+"loop_mode_finished_description" = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquya.";
+"loop_continue_to_results" = "المتابعة إلى النتيجة";
+"loop_run_again" = "تشغيل مرة أخرى";
+
+/* History */
+"history.sync-modal-title.default" = "المزامنة";
+"history.sync-modal-title.sync-success" = "تمت بنجاح";
+"history.sync-modal-description.default" = "يمكنك دمج النتائج من أجهزة مختلفة. للقيام بذلك، أدخل رمز مزامنة سبق طلبه أو اطلب رمزًا جديدًا.";
+"history.sync-modal-description.enter-code" = "يُرجى إدخال الرمز الذي تلقيته على جهازك الآخر.";
+"history.sync-modal-description.request-code" = "يُرجى إدخال الرمز الموضح أدناه على الجهاز الآخر لمزامنة النتائج.";
+"history.sync-modal-description.sync-success" = "تمت المزامنة بنجاح.";
+"The code must consist of twelve characters" = "يجب أن يتكون الرمز من اثني عشر حرفًا";
+"The devices are already synchronized with each other." = "الأجهزة متزامنة بالفعل.";
+"The code you entered does not exist." = "الرمز الذي أدخلته غير موجود.";
+"history.result.connection" = "النوع";
+"history.result.operator" = "المشغّل";
+
+/* Test */
+"test.network.label" = "الشبكة";
+"test.technology.label" = "التقنية";
+"label_upload" = "Upload";
+"label_download" = "Download";
+"label_ping" = "Ping";
+
+"measurement_ping" = "Ping";
+"measurement_down" = "Down";
+"measurement_up" = "Up";
+
+"measurement_qos" = "جودة الخدمة (QoS)";
+"measurement_qos_website" = "صفحة ويب";
+"measurement_qos_http_proxy" = "محتوى غير معدّل";
+"measurement_qos_non_transparent_proxy" = "اتصال شفاف";
+"measurement_qos_dns" = "DNS";
+"measurement_qos_tcp" = "منافذ TCP";
+"measurement_qos_udp" = "منافذ UDP";
+"measurement_qos_traceroute_masked" = "Traceroute";
+"measurement_qos_voip" = "VoIP";
+
+"preferences_general_settings" = "الإعدادات العامة";
+"preferences_advanced_settings" = "الإعدادات المتقدمة";
+"preferences_location" = "تمكين الموقع";
+"preferences_location_summary" = "الموقع معطّل حاليًا، يمكنك تمكينه عبر هذا الرابط في إعدادات النظام";
+"preferences_ipv4_only" = "IPv4 فقط";
+"preferences_skip_qos" = "قياس QoS";
+"preferences_expert_mode" = "وضع الخبير";
+"preferences_loop_mode" = "وضع التكرار";
+"preferences_loop_mode_enabled" = "مفعّل";
+"preferences_loop_mode_summary" = "اختبار جديد بعد وقت الانتظار أو قطع المسافة. بحد أقصى يومان";
+"preferences_loop_mode_min_delay" = "وقت الانتظار (بالدقائق)";
+"preferences_loop_mode_max_movement" = "المسافة (بالأمتار)";
+"preferences_contact" = "اتصال";
+"preferences_go_to_website" = "الانتقال إلى الموقع";
+"preferences_contact_us" = "اتصل بنا";
+"preferences_data_protection" = "سياسة الخصوصية وشروط الاستخدام";
+"preferences_additional_Information" = "معلومات إضافية";
+"preferences_client_uuid" = "UUID العميل";
+"preferences_test_cases" = "عدد الاختبارات التي أُجريت";
+"preferences_version" = "الإصدار";
+"preferences_about" = "حول التطبيق";
+"preferences_developed_by" = "تم التطوير بواسطة";
+"preferences_source_code" = "الشيفرة المصدرية";
+"preferences_export_logs" = "تصدير السجلات";
+"preferences_export_logs_error" = "تعذّر تحضير ملف سجل اليوم.";
+
+"preferences_debug_options" = "خيارات التصحيح";
+"preferences_ipv6_only" = "IPv6 فقط";
+
+"preferences_developer_control_server" = "خادم التحكم";
+"preferences_override_control_enabled" = "تجاوز خادم التحكم";
+"preferences_override_control_server_host" = "مضيف التحكم";
+"preferences_override_control_server_port" = "منفذ التحكم";
+"preferences_override_control_server_ssl" = "SSL التحكم";
+
+"preferences_developer_logging" = "التسجيل";
+"preferences_developer_logging_enabled" = "تمكين التسجيل";
+"preferences_developer_logging_summary" = "سيتم إرسال رسائل السجل إلى الوجهة المحددة عبر UDP.";
+"preferences_developer_loggind_host" = "مضيف التسجيل";
+"preferences_developer_loggind_port" = "منفذ التسجيل";
+
+"preferences_qos_measurement_only_after_some_time" = "فقط بعد ساعتين";
+"preferences_qos_measurement_only_after_some_time_summary" = "لا تُجرِ قياسات QoS جديدة إذا كان آخر قياس قد أُجري قبل أقل من ساعتين.";
+
+"button_accept.title" = "قبول";
+
+"map.map_view" = "مظهر الخريطة";
+"map.cart_details" = "نوع الطبقة";
+
+"map_style_hybrid" = "هجين";
+"map_style_satellite" = "قمر صناعي";
+"map_style_standard" = "قياسي";
+
+"map_layer_communities" = "البلديات";
+"map_layer_points" = "نقاط";
+"map_layer_automatic" = "تلقائي";
+
+"menu_button_statistics" = "الإحصائيات";
+
+"text_ip_address_not_available" = "العنوان غير متوفر";
+"start_test_button_help_message" = "اضغط على الزر لبدء الاختبار الآن!";
+"RTR-NetTest" = "RTR-NetTest";
+
+"Export data" = "تصدير";
+
+"Home" = "الرئيسية";
+"History" = "السجل";
+"Statistics" = "الإحصائيات";
+"Map" = "الخريطة";
+"Coverage" = "قياس الإشارة";

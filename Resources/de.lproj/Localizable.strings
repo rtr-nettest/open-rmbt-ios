@@ -290,7 +290,7 @@
 
 "title_loop_mode" = "Wiederholungsmodus";
 "title_coverage_series" = "Abdeckungsserie";
-"coverage_label" = "Abdeckung";
+"coverage_label" = "Signalmessung";
 
 /* Location Dialog */
 "location_dialog_label_title" = "Standort";
@@ -334,10 +334,10 @@
 "preferences_loop_mode_min_delay" = "Wartezeit (in Minuten)";
 "preferences_loop_mode_max_movement" = "Distanz (in Metern)";
 
-"invalide_loop_mode_count" = "Invalid number of tests";
-"invalide_loop_mode_distance" = "Invalid waiting distance";
-"invalide_loop_mode_waiting_minutes" = "Invalid waiting minutes";
-"loop_mode_enter_value_between_format" = "Please enter a value between %i and %i";
+"invalide_loop_mode_count" = "Ungültige Anzahl der Tests";
+"invalide_loop_mode_distance" = "Ungültige Wartedistanz";
+"invalide_loop_mode_waiting_minutes" = "Ungültige Wartezeit in Minuten";
+"loop_mode_enter_value_between_format" = "Bitte geben Sie einen Wert zwischen %i und %i ein";
 
 "loop_mode_next_test" = "Nächster Test";
 "loop_mode_minutes" = "Minuten";
@@ -376,11 +376,11 @@
 
 "measurement_qos" = "Servicequalität (QoS)";
 "measurement_qos_website" = "Webseite";
+"measurement_qos_http_proxy" = "Unveränderter Inhalt";
 "measurement_qos_non_transparent_proxy" = "Transparente Verbindung";
 "measurement_qos_dns" = "DNS";
 "measurement_qos_tcp" = "TCP Ports";
 "measurement_qos_udp" = "UDP Ports";
-"measurement_qos_http_proxy" = "Unveränderter Inhalt";
 "measurement_qos_traceroute_masked" = "Traceroute";
 "measurement_qos_voip" = "VoIP";
 
@@ -453,4 +453,4 @@
 "History" = "Verlauf";
 "Statistics" = "Statistik";
 "Map" = "Karte";
-"Coverage" = "Coverage";
+"Coverage" = "Signalmessung";
