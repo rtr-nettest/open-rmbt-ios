@@ -290,7 +290,7 @@
 
 "title_loop_mode" = "Loop mode";
 "title_coverage_series" = "Coverage series";
-"coverage_label" = "Coverage";
+"coverage_label" = "Signal measurement";
 
 /* Location Dialog */
 "location_dialog_label_title" = "Location";
@@ -454,7 +454,7 @@
 "History" = "History";
 "Statistics" = "Statistics";
 "Map" = "Map";
-"Coverage" = "Coverage";
+"Coverage" = "Signal measurement";
 
 /* Signal measurement (coverage) start screen */
 "coverage_intro_title" = "Signal Measurement";
