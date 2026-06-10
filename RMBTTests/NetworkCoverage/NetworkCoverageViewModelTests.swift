@@ -1291,7 +1291,7 @@ import Clocks
 
             #expect(sut.selectedFenceDetail?.technology == "4G")
             #expect(sut.selectedFenceDetail?.averagePing == "60 ms")
-            #expect(sut.selectedFenceDetail?.color == Color(red: 0.694, green: 0.165, blue: 0.565)) // #b12a90
+            #expect(sut.selectedFenceDetail?.color == Color(technology: CTRadioAccessTechnologyLTE.radioTechnologyDisplayValue))
             #expect(sut.fenceItems.map(\.isSelected) == [false, true])
         }
 

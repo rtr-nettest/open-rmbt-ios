@@ -1078,12 +1078,12 @@ extension Color {
     /// Creates a color for the given radio technology display value
     init(technology: String?) {
         self = switch technology {
-        case "2G": Color(red: 0.988, green: 0.651, blue: 0.212) // #fca636
-        case "3G": Color(red: 0.882, green: 0.392, blue: 0.384) // #e16462  
-        case "4G": Color(red: 0.694, green: 0.165, blue: 0.565) // #b12a90
-        case "5G NSA": Color(red: 0.416, green: 0.0, blue: 0.659) // #6a00a8
-        case "5G SA": Color(red: 0.051, green: 0.031, blue: 0.529) // #0d0887
-        default: Color(red: 0.851, green: 0.851, blue: 0.851) // #d9d9d9
+        case "2G": Color(red: 1.0, green: 0.871, blue: 0.0) // #FFDE00
+        case "3G": Color(red: 0.937, green: 1.0, blue: 0.0) // #EFFF00
+        case "4G": Color(red: 0.0, green: 0.871, blue: 1.0) // #00DEFF
+        case "5G NSA": Color(red: 0.0, green: 0.569, blue: 1.0) // #0091FF
+        case "5G SA": Color(red: 0.369, green: 0.0, blue: 1.0) // #5E00FF
+        default: Color(red: 0.627, green: 0.627, blue: 0.627) // #A0A0A0
         }
     }
 }
