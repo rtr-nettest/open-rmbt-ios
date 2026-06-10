@@ -118,12 +118,18 @@ struct PersistedFencesResender {
             ),
             dateEntered: Date(timeIntervalSince1970: Double(persistedFence.timestamp) / 1_000_000),
             technology: persistedFence.technology,
+            // A persisted fence with no recorded average is reconstructed with a failed ping
+            // rather than "no attempts", keeping its no-coverage (grey) classification
+            // consistent with how it was drawn live (see Fence.isNoCoverage).
             pings: persistedFence.avgPingMilliseconds.map {
                 [PingResult(
                     result: .interval(.milliseconds($0)),
                     timestamp: Date(timeIntervalSince1970: Double(persistedFence.timestamp) / 1_000_000)
                 )]
-            } ?? [],
+            } ?? [PingResult(
+                result: .error,
+                timestamp: Date(timeIntervalSince1970: Double(persistedFence.timestamp) / 1_000_000)
+            )],
             radiusMeters: persistedFence.radiusMeters
         )
 

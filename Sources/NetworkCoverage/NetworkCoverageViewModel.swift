@@ -841,8 +841,12 @@ fileprivate extension NetworkCoverageViewModel {
             let gapThreshold = radius * 4
             let hasGap = distance > gapThreshold
             let technologyChanged = item.technology != currentTechnology
+            // Color encodes coverage as well as technology, so a change here also covers the
+            // case where the technology stays the same but the fence flips to/from "no coverage".
+            let colorChanged = item.color != currentColor
+            let segmentChanged = technologyChanged || colorChanged
 
-            if technologyChanged || hasGap {
+            if segmentChanged || hasGap {
                 appendCurrentSegment()
 
                 currentTechnology = item.technology
@@ -850,7 +854,7 @@ fileprivate extension NetworkCoverageViewModel {
                 fenceIds = [item.id]
                 coordinates = []
 
-                if technologyChanged && !hasGap {
+                if segmentChanged && !hasGap {
                     coordinates.append(previousItem.coordinate)
                 }
 
@@ -931,7 +935,7 @@ fileprivate extension NetworkCoverageViewModel {
             technology: fence.significantTechnology.map(displayValue) ?? "N/A",
             isSelected: selectedFenceItem?.id == fence.id,
             isCurrent: currentFence?.id == fence.id,
-            color: Color(technology: fence.significantTechnology?.radioTechnologyDisplayValue)
+            color: Color(fence: fence)
         )
     }
 
@@ -1070,11 +1074,21 @@ extension FenceDetail {
         date = selectedItemDateFormatter.string(from: fence.dateEntered)
         technology = fence.significantTechnology?.radioTechnologyDisplayValue ?? "N/A"
         averagePing = fence.averagePing.map { "\($0) ms" } ?? ""
-        color = Color(technology: fence.significantTechnology?.radioTechnologyDisplayValue)
+        color = Color(fence: fence)
     }
 }
 
 extension Color {
+    /// Resolves the map color for a fence.
+    ///
+    /// Returns the no-coverage grey when the fence has no connectivity or no successful ping
+    /// (see `Fence.isNoCoverage`); otherwise the color of its significant radio technology.
+    init(fence: Fence) {
+        self = fence.isNoCoverage
+            ? Color(technology: nil)
+            : Color(technology: fence.significantTechnology?.radioTechnologyDisplayValue)
+    }
+
     /// Creates a color for the given radio technology display value
     init(technology: String?) {
         self = switch technology {

@@ -97,6 +97,89 @@ import Clocks
         #expect(sut.selectedFenceDetail?.averagePing == "")
     }
 
+    // MARK: - Fence coverage coloring (issue #90)
+
+    @Test func whenFenceHasTechnologyAndSuccessfulPing_thenFenceItemUsesTechnologyColor() async throws {
+        let fence = makeFence(
+            technology: CTRadioAccessTechnologyLTE,
+            pings: [PingResult(result: .interval(.milliseconds(50)), timestamp: makeDate(offset: 1))]
+        )
+        let sut = makeSUT(fences: [fence])
+
+        let item = try #require(sut.fenceItems.first)
+        #expect(item.color == Color(technology: CTRadioAccessTechnologyLTE.radioTechnologyDisplayValue))
+        #expect(item.color != Color(technology: nil))
+    }
+
+    @Test func whenFenceHasTechnologyButAllPingsFailed_thenFenceItemIsGrey() async throws {
+        let fence = makeFence(
+            technology: CTRadioAccessTechnologyLTE,
+            pings: [
+                PingResult(result: .error, timestamp: makeDate(offset: 1)),
+                PingResult(result: .error, timestamp: makeDate(offset: 2)),
+                PingResult(result: .error, timestamp: makeDate(offset: 3))
+            ]
+        )
+        let sut = makeSUT(fences: [fence])
+
+        let item = try #require(sut.fenceItems.first)
+        #expect(item.color == Color(technology: nil))
+    }
+
+    @Test func whenFenceHasTechnologyButNoPingsYet_thenFenceItemKeepsTechnologyColor() async throws {
+        // A freshly opened fence that has not received any ping result yet is pending, not
+        // no-coverage, so it keeps its technology color until the first ping arrives.
+        let fence = makeFence(technology: CTRadioAccessTechnologyLTE, pings: [])
+        let sut = makeSUT(fences: [fence])
+
+        let item = try #require(sut.fenceItems.first)
+        #expect(item.color == Color(technology: CTRadioAccessTechnologyLTE.radioTechnologyDisplayValue))
+        #expect(item.color != Color(technology: nil))
+    }
+
+    @Test func whenFenceFirstPingFails_thenFenceItemBecomesGrey() async throws {
+        // As soon as the first ping result arrives and it is a failure, the fence is grey.
+        let fence = makeFence(
+            technology: CTRadioAccessTechnologyLTE,
+            pings: [PingResult(result: .error, timestamp: makeDate(offset: 1))]
+        )
+        let sut = makeSUT(fences: [fence])
+
+        let item = try #require(sut.fenceItems.first)
+        #expect(item.color == Color(technology: nil))
+    }
+
+    @Test func whenFenceHasNoConnectivity_thenFenceItemIsGrey() async throws {
+        let fence = makeFence(
+            technology: nil,
+            pings: [PingResult(result: .interval(.milliseconds(50)), timestamp: makeDate(offset: 1))]
+        )
+        let sut = makeSUT(fences: [fence])
+
+        let item = try #require(sut.fenceItems.first)
+        #expect(item.color == Color(technology: nil))
+    }
+
+    @Test func whenSelectingFences_thenDetailColorFollowsCoverage() async throws {
+        let covered = makeFence(
+            lat: 0.0, lon: 0.0,
+            technology: CTRadioAccessTechnologyLTE,
+            pings: [PingResult(result: .interval(.milliseconds(50)), timestamp: makeDate(offset: 1))]
+        )
+        let noCoverage = makeFence(
+            lat: 0.001, lon: 0.0,
+            technology: CTRadioAccessTechnologyLTE,
+            pings: [PingResult(result: .error, timestamp: makeDate(offset: 2))]
+        )
+        let sut = makeSUT(fences: [covered, noCoverage])
+
+        sut.selectedFenceItem = sut.fenceItems.first { $0.id == noCoverage.id }
+        #expect(sut.selectedFenceDetail?.color == Color(technology: nil))
+
+        sut.selectedFenceItem = sut.fenceItems.first { $0.id == covered.id }
+        #expect(sut.selectedFenceDetail?.color == Color(technology: CTRadioAccessTechnologyLTE.radioTechnologyDisplayValue))
+    }
+
     @Test func whenReceivedPingsWithTimeBeforeFenceChanged_thenTheyAreAssignedToPreviousFence() async throws {
         let sut = makeSUT(updates: [
             makeLocationUpdate  (at: 0, lat: 1, lon: 1),
@@ -213,6 +296,35 @@ import Clocks
             #expect(sut.mapRenderMode == .circles)
             #expect(sut.fencePolylineSegments.isEmpty)
             expectFenceItems(sut.visibleFenceItems, match: fences)
+        }
+
+        @Test func whenSameTechnologyFencesChangeCoverage_thenPolylineSplitsColoredAndGreySegments() async throws {
+            let fences = [
+                makeFence(lat: 0.0000, lon: 0.0, technology: CTRadioAccessTechnologyLTE, pings: [PingResult(result: .interval(.milliseconds(50)), timestamp: makeDate(offset: 1))], radiusMeters: 0),
+                makeFence(lat: 0.0001, lon: 0.0, technology: CTRadioAccessTechnologyLTE, pings: [PingResult(result: .interval(.milliseconds(50)), timestamp: makeDate(offset: 2))], radiusMeters: 0),
+                makeFence(lat: 0.0002, lon: 0.0, technology: CTRadioAccessTechnologyLTE, pings: [PingResult(result: .error, timestamp: makeDate(offset: 3))], radiusMeters: 0),
+                makeFence(lat: 0.0003, lon: 0.0, technology: CTRadioAccessTechnologyLTE, pings: [PingResult(result: .error, timestamp: makeDate(offset: 4))], radiusMeters: 0)
+            ]
+
+            let configuration = FencesRenderingConfiguration(
+                maxCircleCountBeforePolyline: 4,
+                minimumSpanForPolylineMode: 0.02,
+                visibleRegionPaddingFactor: 1.0,
+                cullsToVisibleRegion: false
+            )
+
+            let sut = makeSUT(fences: fences, renderingConfiguration: configuration)
+            sut.updateVisibleRegion(equatorWideRegion)
+
+            #expect(sut.mapRenderMode == .polylines)
+            // Same technology throughout, but coverage flips, so the run splits into a
+            // colored segment followed by a grey (no-coverage) one.
+            #expect(sut.fencePolylineSegments.count == 2)
+            #expect(sut.fencePolylineSegments.map(\.technology) == ["4G", "4G"])
+            #expect(sut.fencePolylineSegments.map(\.color) == [
+                Color(technology: CTRadioAccessTechnologyLTE.radioTechnologyDisplayValue),
+                Color(technology: nil)
+            ])
         }
 
         @Test func whenCullingEnabled_thenVisibleFenceItemsAreFilteredToRegion() async throws {

@@ -53,12 +53,15 @@ struct CoverageHistoryDetail {
 
             // Represent average ping using a single PingResult sample so that
             // existing UI that computes averages over pings works as expected.
+            // A finalized fence with no recorded average is treated as a failed ping rather
+            // than "no attempts", so it is drawn grey as a no-coverage point (see
+            // Fence.isNoCoverage).
             let pings: [PingResult]
             if let avgPing = data.avgPingMs, avgPing > 0 {
                 pings = [PingResult(result: .interval(.milliseconds(Int(avgPing))),
                                      timestamp: dateEntered)]
             } else {
-                pings = []
+                pings = [PingResult(result: .error, timestamp: dateEntered)]
             }
 
             var fence = Fence(

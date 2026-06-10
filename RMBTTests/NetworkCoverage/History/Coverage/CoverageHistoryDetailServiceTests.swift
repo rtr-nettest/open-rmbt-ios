@@ -5,6 +5,7 @@
 
 import Testing
 import ObjectMapper
+import SwiftUI
 @testable import RMBT
 
 @Suite("CoverageHistoryDetailService – convertFenceData")
@@ -88,6 +89,30 @@ struct CoverageHistoryDetailServiceTests {
 
         let fence = try #require(fences.first)
         #expect(fence.dateExited == nil)
+    }
+
+    // MARK: - no-coverage coloring (issue #90)
+
+    @Test func whenHistoryFenceHasNoAvgPing_thenFenceIsDrawnGrey() throws {
+        // A finalized history fence with a technology but no recorded average ping is a
+        // no-coverage point and must be drawn grey.
+        let fences = makeSUT().convertFenceData([
+            try makeFenceData(technologyId: 13, avgPingMs: nil)
+        ])
+
+        let fence = try #require(fences.first)
+        #expect(fence.isNoCoverage)
+        #expect(Color(fence: fence) == Color(technology: nil))
+    }
+
+    @Test func whenHistoryFenceHasAvgPing_thenFenceUsesTechnologyColor() throws {
+        let fences = makeSUT().convertFenceData([
+            try makeFenceData(technologyId: 13, avgPingMs: 42)
+        ])
+
+        let fence = try #require(fences.first)
+        #expect(!fence.isNoCoverage)
+        #expect(Color(fence: fence) != Color(technology: nil))
     }
 }
 

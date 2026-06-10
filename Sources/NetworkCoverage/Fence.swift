@@ -102,6 +102,28 @@ extension Fence {
     var significantTechnology: String? {
         technologies.last
     }
+
+    /// Whether the fence represents "no coverage" and must be drawn grey on the map.
+    ///
+    /// True when the device had no connectivity (no radio technology, i.e. the `1000`
+    /// network id), or when it was registered to a technology yet every recorded ping
+    /// failed — meaning no real communication was possible.
+    ///
+    /// A fence that has not received any ping result yet (e.g. a freshly opened current
+    /// fence) is treated as pending rather than no-coverage, so it keeps its technology
+    /// color until the first ping result arrives; if that first result is a failure it turns
+    /// grey immediately. Finalized fences that never recorded a ping are reconstructed with a
+    /// failed ping (see history/resend mapping), so they remain grey.
+    ///
+    /// Pings that fail because the IP changed trigger a session reinitialisation and are
+    /// never recorded as results, so a non-empty `pings` with a `nil` `averagePing` always
+    /// means every recorded ping genuinely failed rather than an invalid point. Applies
+    /// live, after the test, and in history.
+    var isNoCoverage: Bool {
+        if significantTechnology == nil { return true }
+        if pings.isEmpty { return false }
+        return averagePing == nil
+    }
     
     var coordinate: CLLocationCoordinate2D {
         startingLocation.coordinate
