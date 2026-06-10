@@ -2380,7 +2380,6 @@
 					"\"$(PODS_CONFIGURATION_BUILD_DIR)/ReachabilitySwift\"",
 					"\"$(PODS_CONFIGURATION_BUILD_DIR)/TUSafariActivity\"",
 					"\"$(PODS_CONFIGURATION_BUILD_DIR)/XCGLogger\"",
-					"\"$(PODS_CONFIGURATION_BUILD_DIR)/libextobjc\"",
 				);
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_PREFIX_HEADER = "RMBTTests/RMBTTests-Prefix.pch";
@@ -2408,7 +2407,6 @@
 					"\"$(PODS_CONFIGURATION_BUILD_DIR)/ReachabilitySwift/Reachability.framework/Headers\"",
 					"\"$(PODS_CONFIGURATION_BUILD_DIR)/TUSafariActivity/TUSafariActivity.framework/Headers\"",
 					"\"$(PODS_CONFIGURATION_BUILD_DIR)/XCGLogger/XCGLogger.framework/Headers\"",
-					"\"$(PODS_CONFIGURATION_BUILD_DIR)/libextobjc/libextobjc.framework/Headers\"",
 				);
 				INFOPLIST_FILE = RMBTTest/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
@@ -2451,8 +2449,6 @@
 					"\"$(PODS_CONFIGURATION_BUILD_DIR)/TUSafariActivity/TUSafariActivity.framework/Headers\"",
 					"-isystem",
 					"\"$(PODS_CONFIGURATION_BUILD_DIR)/XCGLogger/XCGLogger.framework/Headers\"",
-					"-isystem",
-					"\"$(PODS_CONFIGURATION_BUILD_DIR)/libextobjc/libextobjc.framework/Headers\"",
 					"-iframework",
 					"\"$(PODS_CONFIGURATION_BUILD_DIR)/Alamofire\"",
 					"-iframework",
@@ -2479,8 +2475,6 @@
 					"\"$(PODS_CONFIGURATION_BUILD_DIR)/TUSafariActivity\"",
 					"-iframework",
 					"\"$(PODS_CONFIGURATION_BUILD_DIR)/XCGLogger\"",
-					"-iframework",
-					"\"$(PODS_CONFIGURATION_BUILD_DIR)/libextobjc\"",
 				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -2520,8 +2514,6 @@
 					TUSafariActivity,
 					"-framework",
 					XCGLogger,
-					"-framework",
-					libextobjc,
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D COCOAPODS";
 				PRODUCT_BUNDLE_IDENTIFIER = at.rtr.RMBTTests;
@@ -2565,7 +2557,6 @@
 					"\"$(PODS_CONFIGURATION_BUILD_DIR)/ReachabilitySwift\"",
 					"\"$(PODS_CONFIGURATION_BUILD_DIR)/TUSafariActivity\"",
 					"\"$(PODS_CONFIGURATION_BUILD_DIR)/XCGLogger\"",
-					"\"$(PODS_CONFIGURATION_BUILD_DIR)/libextobjc\"",
 				);
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_PREFIX_HEADER = "RMBTTests/RMBTTests-Prefix.pch";
@@ -2589,7 +2580,6 @@
 					"\"$(PODS_CONFIGURATION_BUILD_DIR)/ReachabilitySwift/Reachability.framework/Headers\"",
 					"\"$(PODS_CONFIGURATION_BUILD_DIR)/TUSafariActivity/TUSafariActivity.framework/Headers\"",
 					"\"$(PODS_CONFIGURATION_BUILD_DIR)/XCGLogger/XCGLogger.framework/Headers\"",
-					"\"$(PODS_CONFIGURATION_BUILD_DIR)/libextobjc/libextobjc.framework/Headers\"",
 				);
 				INFOPLIST_FILE = RMBTTest/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
@@ -2632,8 +2622,6 @@
 					"\"$(PODS_CONFIGURATION_BUILD_DIR)/TUSafariActivity/TUSafariActivity.framework/Headers\"",
 					"-isystem",
 					"\"$(PODS_CONFIGURATION_BUILD_DIR)/XCGLogger/XCGLogger.framework/Headers\"",
-					"-isystem",
-					"\"$(PODS_CONFIGURATION_BUILD_DIR)/libextobjc/libextobjc.framework/Headers\"",
 					"-iframework",
 					"\"$(PODS_CONFIGURATION_BUILD_DIR)/Alamofire\"",
 					"-iframework",
@@ -2660,8 +2648,6 @@
 					"\"$(PODS_CONFIGURATION_BUILD_DIR)/TUSafariActivity\"",
 					"-iframework",
 					"\"$(PODS_CONFIGURATION_BUILD_DIR)/XCGLogger\"",
-					"-iframework",
-					"\"$(PODS_CONFIGURATION_BUILD_DIR)/libextobjc\"",
 				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -2701,8 +2687,6 @@
 					TUSafariActivity,
 					"-framework",
 					XCGLogger,
-					"-framework",
-					libextobjc,
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D COCOAPODS";
 				PRODUCT_BUNDLE_IDENTIFIER = at.rtr.RMBTTests;
