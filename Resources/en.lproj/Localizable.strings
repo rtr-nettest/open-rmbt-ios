@@ -455,3 +455,8 @@
 "Statistics" = "Statistics";
 "Map" = "Map";
 "Coverage" = "Coverage";
+
+/* Signal measurement (coverage) start screen */
+"coverage_intro_title" = "Signal Measurement";
+"coverage_intro_description" = "The signal measurement allows outdoor mobile network measurements along a path. It monitors connectivity, technology and signal strength. Connectivity is measured using regular network pings. The measurement requires good GPS coverage and Wifi must be turned off. It consumes much less data compared to speed measurement. The signal measurement is (only) intended for use within the EU and the EEA.";
+"coverage_intro_start_button" = "Start test";

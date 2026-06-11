@@ -11,11 +11,39 @@ import SwiftUI
 struct TestPopup: View {
     let title: String
     let subtitle: String
+    let subtitleAlignment: TextAlignment
+    let scrollableBody: Bool
     let primaryButtonTitle: String
     let primaryButtonColor: Color
     let secondaryButtonTitle: String
     let onPrimaryAction: () -> Void
     let onSecondaryAction: () -> Void
+
+    init(
+        title: String,
+        subtitle: String,
+        subtitleAlignment: TextAlignment = .center,
+        scrollableBody: Bool = false,
+        primaryButtonTitle: String,
+        primaryButtonColor: Color,
+        secondaryButtonTitle: String,
+        onPrimaryAction: @escaping () -> Void,
+        onSecondaryAction: @escaping () -> Void
+    ) {
+        self.title = title
+        self.subtitle = subtitle
+        self.subtitleAlignment = subtitleAlignment
+        self.scrollableBody = scrollableBody
+        self.primaryButtonTitle = primaryButtonTitle
+        self.primaryButtonColor = primaryButtonColor
+        self.secondaryButtonTitle = secondaryButtonTitle
+        self.onPrimaryAction = onPrimaryAction
+        self.onSecondaryAction = onSecondaryAction
+    }
+
+    private var frameAlignment: Alignment {
+        subtitleAlignment == .leading ? .leading : .center
+    }
 
     var body: some View {
         VStack(spacing: 32) {
@@ -26,10 +54,14 @@ struct TestPopup: View {
                     .foregroundColor(.primary)
                     .multilineTextAlignment(.center)
 
-                Text(subtitle)
-                    .font(.body)
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
+                if scrollableBody {
+                    ScrollView {
+                        subtitleText
+                    }
+                    .frame(maxHeight: 320)
+                } else {
+                    subtitleText
+                }
             }
 
             VStack(spacing: 16) {
@@ -63,7 +95,14 @@ struct TestPopup: View {
                 .fill(Color(.systemBackground))
                 .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 5)
         )
-        .padding(.horizontal, 16)
+    }
+
+    private var subtitleText: some View {
+        Text(subtitle)
+            .font(.body)
+            .foregroundColor(.secondary)
+            .multilineTextAlignment(subtitleAlignment)
+            .frame(maxWidth: .infinity, alignment: frameAlignment)
     }
 }
 
@@ -72,6 +111,8 @@ struct TestPopupModifier: ViewModifier {
     @Binding var isPresented: Bool
     let title: String
     let subtitle: String
+    var subtitleAlignment: TextAlignment = .center
+    var scrollableBody: Bool = false
     let primaryButtonTitle: String
     let primaryButtonColor: Color
     let secondaryButtonTitle: String
@@ -106,6 +147,8 @@ struct TestPopupModifier: ViewModifier {
                         TestPopup(
                             title: title,
                             subtitle: subtitle,
+                            subtitleAlignment: subtitleAlignment,
+                            scrollableBody: scrollableBody,
                             primaryButtonTitle: primaryButtonTitle,
                             primaryButtonColor: primaryButtonColor,
                             secondaryButtonTitle: secondaryButtonTitle,
@@ -122,7 +165,7 @@ struct TestPopupModifier: ViewModifier {
                                 onSecondaryAction()
                             }
                         )
-                        .padding(.horizontal, 20)
+                        .padding(.horizontal, 16)
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
                 }
@@ -147,7 +190,9 @@ extension View {
                 isPresented: isPresented,
                 title: title,
                 subtitle: subtitle,
-                primaryButtonTitle: "Start test",
+                subtitleAlignment: .leading,
+                scrollableBody: true,
+                primaryButtonTitle: NSLocalizedString("coverage_intro_start_button", comment: ""),
                 primaryButtonColor: Color("greenButtonBackground"),
                 secondaryButtonTitle: NSLocalizedString("Cancel", comment: ""),
                 onPrimaryAction: onStartTest,
@@ -156,7 +201,7 @@ extension View {
             )
         )
     }
-    
+
     func testStopPopup(
         isPresented: Binding<Bool>,
         title: String,

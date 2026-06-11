@@ -77,8 +77,8 @@ struct NetworkCoverageView: View {
             }
             .testStartPopup(
                 isPresented: $showStartTestPopup,
-                title: "Start Coverage Test",
-                subtitle: "This will begin the network coverage test to measure signal quality in your area.",
+                title: NSLocalizedString("coverage_intro_title", comment: ""),
+                subtitle: NSLocalizedString("coverage_intro_description", comment: ""),
                 onStartTest: {
                     Task { await viewModel.toggleMeasurement() }
                 },

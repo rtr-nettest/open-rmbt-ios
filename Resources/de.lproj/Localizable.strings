@@ -455,3 +455,8 @@
 "Statistics" = "Statistik";
 "Map" = "Karte";
 "Coverage" = "Coverage";
+
+/* Signal measurement (coverage) start screen */
+"coverage_intro_title" = "Signalmessung";
+"coverage_intro_description" = "Die Signalmessung ermöglicht Messungen von Mobilfunknetzen im Freien entlang eines Messpfads. Sie überwacht Konnektivität, Technologie und Signalstärke. Die Konnektivität wird mittels regelmäßiger Netzwerk-Pings gemessen. Die Messung erfordert guten GPS-Empfang und deaktiviertes WLAN. Sie verbraucht deutlich weniger Daten als Geschwindigkeitsmessungen. Die Signalmessung ist ausschließlich für die Nutzung innerhalb der EU und des EWR vorgesehen.";
+"coverage_intro_start_button" = "Starten";
