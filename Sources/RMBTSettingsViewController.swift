@@ -8,6 +8,7 @@
 
 import Foundation
 import UIKit
+import SwiftUI
 import MessageUI
 
 enum RMBTSettingsSection: Int {
@@ -484,8 +485,13 @@ class RMBTSettingsViewController: UITableViewController {
                 presentLogShareSheet(from: indexPath)
             default: break
             }
+        } else if (indexPath.section == RMBTSettingsSection.info.rawValue) {
+            // Row 0 = Client UUID, row 1 = Test Counter, row 2 = SIM Information (diagnostic).
+            if indexPath.row == 2 {
+                presentSIMInfo()
+            }
         }
-        
+
         if let cell = tableView.cellForRow(at: indexPath),
            let textField = self.searchTextField(in: cell) {
             if !textField.isFirstResponder {
@@ -604,6 +610,16 @@ extension RMBTSettingsViewController {
     
     @objc func closeButtonClick(_ sender: Any) {
         self.dismiss(animated: true)
+    }
+
+    func presentSIMInfo() {
+        let hostingController = UIHostingController(rootView: SIMInfoView())
+        hostingController.title = NSLocalizedString("preferences_sim_info", comment: "")
+        if let navigationController = self.navigationController {
+            navigationController.pushViewController(hostingController, animated: true)
+        } else {
+            present(hostingController, animated: true)
+        }
     }
     
     @objc func updateLogging() {

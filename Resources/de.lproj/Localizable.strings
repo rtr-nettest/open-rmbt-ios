@@ -403,6 +403,7 @@
 "preferences_additional_Information" = "Weitere Informationen";
 "preferences_client_uuid" = "Client UUID";
 "preferences_test_cases" = "Durchgeführte Tests";
+"preferences_sim_info" = "SIM-Informationen";
 "preferences_version" = "Version";
 "preferences_about" = "Über die App";
 "preferences_developed_by" = "Entwickelt von";

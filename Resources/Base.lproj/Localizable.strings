@@ -393,6 +393,7 @@
 "preferences_additional_Information" = "Additional information";
 "preferences_client_uuid" = "Client UUID";
 "preferences_test_cases" = "Number of tests performed";
+"preferences_sim_info" = "SIM Information";
 "preferences_version" = "Version";
 "preferences_about" = "About";
 "preferences_developed_by" = "Developed by";
