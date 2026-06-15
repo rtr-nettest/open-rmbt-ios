@@ -58,6 +58,7 @@ struct SendCoverageResultRequestTests {
         #expect(json["radius"] as? Int == 25)
         #expect(json["offset_ms"] as? Int == 0)
         #expect(json["duration_ms"] as? Int == 2000)
+        #expect((json["avg_ping_ms"] as? NSNumber)?.doubleValue == 50)
 
         let location = try #require(json["location"] as? [String: Any])
         #expect((location["latitude"] as? NSNumber)?.doubleValue == 48.2082)
@@ -82,8 +83,8 @@ struct SendCoverageResultRequestTests {
         #expect(!serialized.contains("99999"))
     }
 
-    @Test("WHEN altitude, speed and bearing have excessive precision THEN rounds each to 1 decimal place")
-    func whenMetricsHaveExcessivePrecision_thenRoundsEachToOneDecimal() throws {
+    @Test("WHEN altitude, bearing and speed have excessive precision THEN rounds each per its unit rule (meter 1, bearing 0, speed 2)")
+    func whenMetricsHaveExcessivePrecision_thenRoundsEachPerUnitRule() throws {
         let json = try encodedFence(from: makeFence(
             altitude: 287.65432198, verticalAccuracy: 5, course: 42.98765, speed: 1.523423
         ))
@@ -91,7 +92,35 @@ struct SendCoverageResultRequestTests {
 
         #expect((location["altitude"] as? NSNumber)?.decimalValue == Decimal(string: "287.7"))
         #expect((location["bearing"] as? NSNumber)?.decimalValue == Decimal(string: "43"))
-        #expect((location["speed"] as? NSNumber)?.decimalValue == Decimal(string: "1.5"))
+        #expect((location["speed"] as? NSNumber)?.decimalValue == Decimal(string: "1.52"))
+    }
+
+    @Test("WHEN bearing is fractional THEN rounds to whole degrees with no decimal")
+    func whenBearingIsFractional_thenRoundsToWholeDegrees() throws {
+        let json = try encodedFence(from: makeFence(course: 137.6))
+        let location = try #require(json["location"] as? [String: Any])
+
+        #expect((location["bearing"] as? NSNumber)?.decimalValue == Decimal(string: "138"))
+    }
+
+    @Test("WHEN speed has excessive precision THEN rounds to 2 decimal places")
+    func whenSpeedHasExcessivePrecision_thenRoundsToTwoDecimals() throws {
+        let json = try encodedFence(from: makeFence(speed: 55.12678))
+        let location = try #require(json["location"] as? [String: Any])
+
+        #expect((location["speed"] as? NSNumber)?.decimalValue == Decimal(string: "55.13"))
+    }
+
+    @Test("WHEN average ping is fractional THEN encodes avg_ping_ms rounded to 2 decimal places")
+    func whenAveragePingIsFractional_thenRoundsToTwoDecimals() throws {
+        let t = Date(timeIntervalSinceReferenceDate: 0)
+        let json = try encodedFence(from: makeFence(pings: [
+            PingResult(result: .interval(.milliseconds(10)), timestamp: t),
+            PingResult(result: .interval(.milliseconds(10)), timestamp: t),
+            PingResult(result: .interval(.milliseconds(11)), timestamp: t)
+        ]))
+
+        #expect((json["avg_ping_ms"] as? NSNumber)?.decimalValue == Decimal(string: "10.33"))
     }
 
     @Test("WHEN location course is the device bearing THEN encodes it under the bearing key")

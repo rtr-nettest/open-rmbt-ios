@@ -93,10 +93,14 @@ extension Fence {
         )
     ]
     
-    var averagePing: Int? {
+    var averagePingMilliseconds: Double? {
         let pingsDurations = pings.compactMap(\.interval)
         if pingsDurations.isEmpty { return nil }
-        return Int(pingsDurations.map(\.milliseconds).average)
+        return pingsDurations.map(\.milliseconds).average
+    }
+
+    var averagePing: Int? {
+        averagePingMilliseconds.map { Int($0) }
     }
     
     var significantTechnology: String? {

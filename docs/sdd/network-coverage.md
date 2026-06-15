@@ -85,8 +85,8 @@ SendCoverageResultRequest (API payload):
   - `avg_ping_ms?`, `offset_ms`, `duration_ms?`, `technology?`, `technology_id?`, `radius`.
 
 Notes:
-- All `location` values are encoded as JSON numbers via `Decimal` (not `Double`) so the wire form has no floating-point tail (e.g. `48.2082`, not `48.208199999999998`).
-- `latitude`/`longitude` keep full precision; `accuracy`, `altitude`, `bearing`, `speed` are rounded to 1 decimal place.
+- All `location` values and `avg_ping_ms` are encoded as JSON numbers via `Decimal` (not `Double`) so the wire form has no floating-point tail (e.g. `48.2082`, not `48.208199999999998`).
+- `latitude`/`longitude` keep full precision. Everything else is rounded per its unit (issue #92): meter values (`accuracy`, `altitude`) to 1 decimal, `bearing` to 0 decimals (whole degrees), `speed` and `avg_ping_ms` to 2 decimals. `radius` stays a whole-meter integer.
 - `bearing` is sourced from `CLLocation.course` (degrees from true north) and matches the Android `geo_locations` field name.
 - `accuracy` is omitted when the source reading had no valid horizontal accuracy (`<= 0`), rather than reported as `0`. Resent fences preserve whatever accuracy was persisted.
 - `offset_ms` is relative to the session anchor used for submission.

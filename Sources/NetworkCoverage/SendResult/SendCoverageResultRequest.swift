@@ -44,7 +44,7 @@ public class SendCoverageResultRequest: BasicRequest {
 
         private(set) var timestamp: UInt64
         private(set) var location: Location
-        private(set) var avgPingMilliseconds: Int?
+        private(set) var avgPingMilliseconds: Decimal?
         private(set) var offsetMiliseconds: Int
         private(set) var durationMiliseconds: Int?
         static let noNetworkTechnology = "NONE"
@@ -62,10 +62,10 @@ public class SendCoverageResultRequest: BasicRequest {
                 longitude: loc.coordinate.longitude.exactDecimal,
                 accuracy: loc.horizontalAccuracy > 0 ? Decimal(loc.horizontalAccuracy).roundedToDecimalPlaces(1) : nil,
                 altitude: loc.verticalAccuracy >= 0 ? Decimal(loc.altitude).roundedToDecimalPlaces(1) : nil,
-                bearing: loc.course >= 0 ? Decimal(loc.course).roundedToDecimalPlaces(1) : nil,
-                speed: loc.speed >= 0 ? Decimal(loc.speed).roundedToDecimalPlaces(1) : nil
+                bearing: loc.course >= 0 ? Decimal(loc.course).roundedToDecimalPlaces(0) : nil,
+                speed: loc.speed >= 0 ? Decimal(loc.speed).roundedToDecimalPlaces(2) : nil
             )
-            avgPingMilliseconds = fence.averagePing
+            avgPingMilliseconds = fence.averagePingMilliseconds.map { Decimal($0).roundedToDecimalPlaces(2) }
 
             offsetMiliseconds = Int(fence.dateEntered.timeIntervalSince(coverageStartDate) * 1000)
 
