@@ -76,7 +76,7 @@ LocationUpdate (transport):
 - `location: CLLocation`, `timestamp: Date`.
 
 PersistentFence (SwiftData):
-- `timestamp` (µs since epoch of `dateEntered`), `latitude`, `longitude`, `avgPingMilliseconds?`, `technology?`, `testUUID`, `exitTimestamp?` (µs), `radiusMeters`.
+- `timestamp` (µs since epoch of `dateEntered`), `latitude`, `longitude`, `avgPingMilliseconds?`, `technology?`, `testUUID`, `exitTimestamp?` (µs), `radiusMeters`, `accuracy?`, `altitude?`, `bearing?`, `speed?` (location extras carried so resent fences resubmit them).
 
 SendCoverageResultRequest (API payload):
 - Top level: `fences`, `test_uuid`, `client_uuid?`.
@@ -88,7 +88,7 @@ Notes:
 - All `location` values are encoded as JSON numbers via `Decimal` (not `Double`) so the wire form has no floating-point tail (e.g. `48.2082`, not `48.208199999999998`).
 - `latitude`/`longitude` keep full precision; `accuracy`, `altitude`, `bearing`, `speed` are rounded to 1 decimal place.
 - `bearing` is sourced from `CLLocation.course` (degrees from true north) and matches the Android `geo_locations` field name.
-- `accuracy` is omitted when no valid horizontal accuracy is available (e.g. resent fences reconstructed from persistence), rather than reported as `0`.
+- `accuracy` is omitted when the source reading had no valid horizontal accuracy (`<= 0`), rather than reported as `0`. Resent fences preserve whatever accuracy was persisted.
 - `offset_ms` is relative to the session anchor used for submission.
 - For the live in-memory session, that anchor is the control-server session initialization time.
 - For persisted resend, that anchor is the stored `PersistentCoverageSession.anchorAt`.
@@ -223,7 +223,7 @@ Resend on startup / session init
 Submission
 - Uses `ControlServerCoverageResultsService` → `RMBTControlServer.submitCoverageResult`.
 - Acceptable status codes: 200..<300.
-- Payload includes `radius`, location extras (accuracy/altitude/bearing/speed when available), `offset_ms`, and optional `duration_ms`. Resent fences reconstructed from persistence currently carry only latitude/longitude, so their accuracy/altitude/bearing/speed are absent.
+- Payload includes `radius`, location extras (accuracy/altitude/bearing/speed when available), `offset_ms`, and optional `duration_ms`. `PersistentFence` persists these extras too, so resent fences reconstruct and resubmit the same values; readings without a valid extra stay absent.
 - `PersistenceManagingCoverageResultsService` submits only fences whose `sessionUUID` matches the current `test_uuid`.
 - If the current session has no matching fences, the send path falls back to resend-only behavior for previously finalized persisted sessions.
 - If the current measurement never obtained a `test_uuid`, send fails with `missingTestUUID`; the view model finalizes the local persisted session and **keeps it on disk** (issue #60). The resender will anchor it on the next online opportunity via `SessionAnchoringService`.

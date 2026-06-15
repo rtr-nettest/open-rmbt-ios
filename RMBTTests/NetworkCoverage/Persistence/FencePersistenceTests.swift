@@ -182,6 +182,75 @@ struct FencePersistenceTests {
             #expect(mappedFence.significantTechnology == expectedTechnology)
             #expect(mappedFence.averagePing == expectedPing)
         }
+
+        @Test func whenSendingPersistedFenceWithLocationExtras_thenReconstructsThemForResubmission() async throws {
+            let persistentSession = PersistentCoverageSession(testUUID: "persisted", startedAt: 1, anchorAt: 1, finalizedAt: 2)
+            let persistentFence = PersistentFence(
+                timestamp: 1640995200000000,
+                latitude: 50.1, longitude: 14.6,
+                avgPingMilliseconds: 100, technology: "5G", radiusMeters: 20,
+                accuracy: 12.3, altitude: 250.5, bearing: 90, speed: 5
+            )
+            let (sut, _, sendService) = makeSUT(
+                testUUID: "main",
+                sendResults: [.success(()), .success(())],
+                previouslyPersistedSessions: [(persistentSession, [persistentFence])]
+            )
+
+            try await sut.persistAndSend(fences: [makeFence(sessionUUID: "main")], sessionID: "main")
+
+            let resentFence = try #require(sendService.capturedSendCalls.last?.fences.first)
+            let location = resentFence.startingLocation
+            #expect(location.horizontalAccuracy == 12.3)
+            #expect(location.altitude == 250.5)
+            #expect(location.verticalAccuracy >= 0)
+            #expect(location.course == 90)
+            #expect(location.speed == 5)
+
+            // The reconstructed fence must also encode the extras into the resend payload.
+            let request = SendCoverageResultRequest(
+                fences: [resentFence], testUUID: "main", coverageStartDate: Date(timeIntervalSinceReferenceDate: 0)
+            )
+            let encodedFences = try #require(request.toJSON()["fences"] as? [[String: Any]])
+            let encodedLocation = try #require(encodedFences.first?["location"] as? [String: Any])
+            #expect((encodedLocation["accuracy"] as? NSNumber)?.decimalValue == Decimal(string: "12.3"))
+            #expect((encodedLocation["altitude"] as? NSNumber)?.decimalValue == Decimal(string: "250.5"))
+            #expect((encodedLocation["bearing"] as? NSNumber)?.decimalValue == Decimal(string: "90"))
+            #expect((encodedLocation["speed"] as? NSNumber)?.decimalValue == Decimal(string: "5"))
+        }
+
+        @Test func whenSendingPersistedFenceWithoutLocationExtras_thenTheyStayAbsentOnResubmission() async throws {
+            let persistentSession = PersistentCoverageSession(testUUID: "persisted", startedAt: 1, anchorAt: 1, finalizedAt: 2)
+            let persistentFence = PersistentFence(
+                timestamp: 1640995200000000,
+                latitude: 50.1, longitude: 14.6,
+                avgPingMilliseconds: 100, technology: "5G", radiusMeters: 20
+            )
+            let (sut, _, sendService) = makeSUT(
+                testUUID: "main",
+                sendResults: [.success(()), .success(())],
+                previouslyPersistedSessions: [(persistentSession, [persistentFence])]
+            )
+
+            try await sut.persistAndSend(fences: [makeFence(sessionUUID: "main")], sessionID: "main")
+
+            let resentFence = try #require(sendService.capturedSendCalls.last?.fences.first)
+            let location = resentFence.startingLocation
+            #expect(location.horizontalAccuracy <= 0)
+            #expect(location.verticalAccuracy < 0)
+            #expect(location.course < 0)
+            #expect(location.speed < 0)
+
+            let request = SendCoverageResultRequest(
+                fences: [resentFence], testUUID: "main", coverageStartDate: Date(timeIntervalSinceReferenceDate: 0)
+            )
+            let encodedFences = try #require(request.toJSON()["fences"] as? [[String: Any]])
+            let encodedLocation = try #require(encodedFences.first?["location"] as? [String: Any])
+            #expect(encodedLocation["accuracy"] == nil)
+            #expect(encodedLocation["altitude"] == nil)
+            #expect(encodedLocation["bearing"] == nil)
+            #expect(encodedLocation["speed"] == nil)
+        }
     }
 
     @Suite("Given Has Persistent Fences Older Than Max Resend Age")
@@ -621,6 +690,31 @@ struct FencePersistenceTests {
 
             let session2Lats = session2Fences.map(\.latitude).sorted()
             #expect(session2Lats == [1.0, 2.0, 3.0])
+        }
+    }
+
+    @Suite("PersistentFence Location Extras")
+    struct PersistentFenceLocationExtras {
+        @Test func whenFenceHasValidLocationExtras_thenPersistsThem() {
+            let persisted = PersistentFence(from: makeFence(
+                altitude: 250.5, horizontalAccuracy: 12.3, verticalAccuracy: 4, course: 90, speed: 5
+            ))
+
+            #expect(persisted.accuracy == 12.3)
+            #expect(persisted.altitude == 250.5)
+            #expect(persisted.bearing == 90)
+            #expect(persisted.speed == 5)
+        }
+
+        @Test func whenFenceHasInvalidLocationExtras_thenPersistsNil() {
+            let persisted = PersistentFence(from: makeFence(
+                horizontalAccuracy: 0, verticalAccuracy: -1, course: -1, speed: -1
+            ))
+
+            #expect(persisted.accuracy == nil)
+            #expect(persisted.altitude == nil)
+            #expect(persisted.bearing == nil)
+            #expect(persisted.speed == nil)
         }
     }
 }
