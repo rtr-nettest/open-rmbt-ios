@@ -81,10 +81,14 @@ PersistentFence (SwiftData):
 SendCoverageResultRequest (API payload):
 - Top level: `fences`, `test_uuid`, `client_uuid?`.
 - Fence item:
-  - `timestamp_microseconds`, `location` (lat, lon, accuracy?, altitude?, heading?, speed?),
-  - `avg_ping_ms?`, `offset_ms`, `duration_ms?`, `technology?`, `technology_id?`, `radius_m`.
+  - `timestamp_microseconds`, `location` (latitude, longitude, accuracy?, altitude?, bearing?, speed?),
+  - `avg_ping_ms?`, `offset_ms`, `duration_ms?`, `technology?`, `technology_id?`, `radius`.
 
 Notes:
+- All `location` values are encoded as JSON numbers via `Decimal` (not `Double`) so the wire form has no floating-point tail (e.g. `48.2082`, not `48.208199999999998`).
+- `latitude`/`longitude` keep full precision; `accuracy`, `altitude`, `bearing`, `speed` are rounded to 1 decimal place.
+- `bearing` is sourced from `CLLocation.course` (degrees from true north) and matches the Android `geo_locations` field name.
+- `accuracy` is omitted when no valid horizontal accuracy is available (e.g. resent fences reconstructed from persistence), rather than reported as `0`.
 - `offset_ms` is relative to the session anchor used for submission.
 - For the live in-memory session, that anchor is the control-server session initialization time.
 - For persisted resend, that anchor is the stored `PersistentCoverageSession.anchorAt`.
@@ -219,7 +223,7 @@ Resend on startup / session init
 Submission
 - Uses `ControlServerCoverageResultsService` → `RMBTControlServer.submitCoverageResult`.
 - Acceptable status codes: 200..<300.
-- Payload includes `radius_m`, location extras (accuracy/altitude/heading/speed when available), `offset_ms`, and optional `duration_ms`.
+- Payload includes `radius`, location extras (accuracy/altitude/bearing/speed when available), `offset_ms`, and optional `duration_ms`. Resent fences reconstructed from persistence currently carry only latitude/longitude, so their accuracy/altitude/bearing/speed are absent.
 - `PersistenceManagingCoverageResultsService` submits only fences whose `sessionUUID` matches the current `test_uuid`.
 - If the current session has no matching fences, the send path falls back to resend-only behavior for previously finalized persisted sessions.
 - If the current measurement never obtained a `test_uuid`, send fails with `missingTestUUID`; the view model finalizes the local persisted session and **keeps it on disk** (issue #60). The resender will anchor it on the next online opportunity via `SessionAnchoringService`.

@@ -60,12 +60,70 @@ struct SendCoverageResultRequestTests {
         #expect(json["duration_ms"] as? Int == 2000)
 
         let location = try #require(json["location"] as? [String: Any])
-        #expect(location["latitude"] as? Double == 48.2082)
-        #expect(location["longitude"] as? Double == 16.3738)
-        #expect(location["accuracy"] as? Double == 7)
-        #expect(location["altitude"] as? Double == 123)
-        #expect(location["heading"] as? Double == 42)
-        #expect(location["speed"] as? Double == 1.5)
+        #expect((location["latitude"] as? NSNumber)?.doubleValue == 48.2082)
+        #expect((location["longitude"] as? NSNumber)?.doubleValue == 16.3738)
+        #expect((location["accuracy"] as? NSNumber)?.doubleValue == 7)
+        #expect((location["altitude"] as? NSNumber)?.doubleValue == 123)
+        #expect((location["bearing"] as? NSNumber)?.doubleValue == 42)
+        #expect((location["speed"] as? NSNumber)?.doubleValue == 1.5)
+    }
+
+    @Test("WHEN coordinates have full GPS precision THEN encodes them losslessly without a floating-point tail")
+    func whenCoordinatesHaveFullPrecision_thenEncodesLosslessly() throws {
+        let json = try encodedFence(from: makeFence(lat: 48.20820123456789, lon: 16.373812345678))
+        let location = try #require(json["location"] as? [String: Any])
+
+        let serialized = try #require(String(
+            data: JSONSerialization.data(withJSONObject: location),
+            encoding: .utf8
+        ))
+        #expect(serialized.contains("\"latitude\":48.20820123456789"))
+        #expect(serialized.contains("\"longitude\":16.373812345678"))
+        #expect(!serialized.contains("99999"))
+    }
+
+    @Test("WHEN altitude, speed and bearing have excessive precision THEN rounds each to 1 decimal place")
+    func whenMetricsHaveExcessivePrecision_thenRoundsEachToOneDecimal() throws {
+        let json = try encodedFence(from: makeFence(
+            altitude: 287.65432198, verticalAccuracy: 5, course: 42.98765, speed: 1.523423
+        ))
+        let location = try #require(json["location"] as? [String: Any])
+
+        #expect((location["altitude"] as? NSNumber)?.decimalValue == Decimal(string: "287.7"))
+        #expect((location["bearing"] as? NSNumber)?.decimalValue == Decimal(string: "43"))
+        #expect((location["speed"] as? NSNumber)?.decimalValue == Decimal(string: "1.5"))
+    }
+
+    @Test("WHEN location course is the device bearing THEN encodes it under the bearing key")
+    func whenLocationHasCourse_thenEncodesUnderBearingKey() throws {
+        let json = try encodedFence(from: makeFence(course: 137))
+
+        let location = try #require(json["location"] as? [String: Any])
+        #expect((location["bearing"] as? NSNumber)?.doubleValue == 137)
+        #expect(location["heading"] == nil)
+    }
+
+    @Test("WHEN accuracy has excessive precision THEN encodes a clean 1-decimal number without a floating-point tail")
+    func whenAccuracyHasExcessivePrecision_thenEncodesCleanOneDecimal() throws {
+        let json = try encodedFence(from: makeFence(horizontalAccuracy: 9.1425325252252362))
+        let location = try #require(json["location"] as? [String: Any])
+
+        #expect((location["accuracy"] as? NSNumber)?.decimalValue == Decimal(string: "9.1"))
+
+        let serialized = try #require(String(
+            data: JSONSerialization.data(withJSONObject: location),
+            encoding: .utf8
+        ))
+        #expect(serialized.contains("\"accuracy\":9.1"))
+        #expect(!serialized.contains("9.0999"))
+    }
+
+    @Test("WHEN location has no valid accuracy THEN omits accuracy rather than reporting zero")
+    func whenLocationHasNoValidAccuracy_thenOmitsAccuracy() throws {
+        let json = try encodedFence(from: makeFence(horizontalAccuracy: 0))
+
+        let location = try #require(json["location"] as? [String: Any])
+        #expect(location["accuracy"] == nil)
     }
 }
 
