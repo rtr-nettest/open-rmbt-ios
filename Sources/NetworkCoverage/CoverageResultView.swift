@@ -62,8 +62,8 @@ struct CoverageResultView: View {
         case .insufficientLocationAccuracy(let duration):
             let minutes = Int(duration / 60)
             return (
-                title: "Waiting for GPS",
-                description: "No sufficiently accurate location was obtained within \(minutes) minutes."
+                title: NSLocalizedString("Waiting for GPS", comment: ""),
+                description: String(format: NSLocalizedString("No sufficiently accurate location was obtained within %d minutes.", comment: ""), minutes)
             )
         }
     }

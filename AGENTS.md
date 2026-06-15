@@ -32,7 +32,7 @@ Explain clearly your reasoning behind your decisions and pros/cons of chosen sol
 - **SwiftUI Network Coverage**: Modern view-model layering, heavy reliance on dependency injection and async sequences.
 - **Measurement engine**: `RMBTTestRunner` orchestrates parallel `RMBTTestWorker`s for ping/download/upload; QoS suite covers TCP, UDP, DNS, HTTP checks.
 - **Data flow**: Test run → progress callbacks → local persistence → submission via `RMBTControlServer` → history rendering in `RMBTHistoryIndexViewController`.
-- **Localization**: English, German, Croatian string tables under `Resources/**/Localizable.strings`.
+- **Localization**: string tables under `Resources/<lang>.lproj/Localizable.strings`. Active locales: `en`, `Base`, `de`, `ar`, `cs`, `es`, `fr`, `hr`, `hu` (kept in sync with the Xcode project's `knownRegions`). See the **Localization workflow** section below before adding or changing strings.
 
 ## Key Integration Points
 - **RTR Control Backend** via `RMBTControlServer` (Alamofire-based). Keep endpoints synced in `Configs/RMBTConfig.swift`.
@@ -48,6 +48,19 @@ Explain clearly your reasoning behind your decisions and pros/cons of chosen sol
 - Avoid force unwraps except in guarded test helpers; prefer `guard let` with logged failures.
 - Keep public/private configs mirrored; add comments when temporary divergence is intentional.
 - Update localization strings for any user-facing copy changes.
+
+## Localization workflow
+Translations are maintained by humans and are intentionally behind. When you add or change user-facing copy, follow this workflow so nothing ships as a raw key and translators have a clear backlog.
+
+- **Never auto-translate / machine-translate.** Only provide real values for the source language (English). All other locales get an English placeholder until a human translates them.
+- **New user-facing strings** go into `Base` and `en` with the real English value (these are the source of truth).
+- **All other locales** (`de`, `ar`, `cs`, `es`, `fr`, `hr`, `hu`) get the same key with the **English text as a placeholder**, appended under the per-file comment block:
+  `/* ===== TODO: NEEDS TRANSLATION (English placeholder) ===== */`
+  Keep these entries grouped under that header so the translation backlog is easy to find. German is included here too — do not translate it inline unless explicitly asked.
+- **iOS fallback reality**: there is no per-key fallback to English. A locale missing a key renders the **key string itself**, so every active locale must contain every key (English placeholder is acceptable). Run a key-parity check across locales after edits.
+- **SwiftUI**: `Text("literal")`, `LabeledContent("literal")`, `.navigationTitle("literal")`, `Toggle("literal", …)`, etc. take a `LocalizedStringKey` — the literal *is* the lookup key, so registering that literal in the `.strings` files localizes it with no code change. Prefer this over inventing identifier keys for SwiftUI views. (`Text(someStringVariable)` is NOT localized.)
+- **Adding a new locale**: drop `Resources/<lang>.lproj/Localizable.strings`, then add `<lang>` to the Xcode project's `knownRegions` AND to the `Localizable.strings` variant group (use the `xcodeproj` gem; do not hand-edit `project.pbxproj`). Verify with a build that `<lang>.lproj` is bundled into the `.app`.
+- **Validate**: run `plutil -lint` on every changed `.strings` file and check for duplicate keys before finishing.
 
 ## Workflow
 - Ask for clarification when requirements are ambiguous; surface 2–3 options when trade-offs matter

@@ -378,6 +378,7 @@
 		1C605E59889E3DF77EFDC8CF /* Pods-RMBTTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RMBTTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-RMBTTests/Pods-RMBTTests.release.xcconfig"; sourceTree = "<group>"; };
 		1F9C078F216F751C00F1FC10 /* RMBT.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RMBT.entitlements; sourceTree = "<group>"; };
 		243AF8E44A4D00F1B9A6B503 /* SIMInfoViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SIMInfoViewModel.swift; sourceTree = "<group>"; };
+		29B9B495B5A7A93665FE974D /* fr */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
 		32DE166B881B73366FE005F9 /* Pods_RMBT.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RMBT.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		34EAAD260B73771684B942BA /* Pods_RMBTTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RMBTTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		361443472732793D00D0FC26 /* RMBTHistorySyncModalViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTHistorySyncModalViewController.swift; sourceTree = "<group>"; };
@@ -466,6 +467,7 @@
 		66A000012F10000000000002 /* FenceRadiusCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FenceRadiusCalculator.swift; sourceTree = "<group>"; };
 		66A000022F20000000000002 /* CoverageButtonGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverageButtonGate.swift; sourceTree = "<group>"; };
 		66A000022F20000000000004 /* CoverageButtonGateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverageButtonGateTests.swift; sourceTree = "<group>"; };
+		72D05593EDAA909A64A4E7C4 /* cs */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = cs; path = cs.lproj/Localizable.strings; sourceTree = "<group>"; };
 		89CA21386C488DD817CA1DC2 /* Pods-RMBT.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RMBT.debug.xcconfig"; path = "Pods/Target Support Files/Pods-RMBT/Pods-RMBT.debug.xcconfig"; sourceTree = "<group>"; };
 		94ACDE3F34869D6346ADEA9F /* FenceFactory.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FenceFactory.swift; sourceTree = "<group>"; };
 		9E95B2179B357FF985E9D9D7 /* CoverageHistoryDetailServiceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CoverageHistoryDetailServiceTests.swift; sourceTree = "<group>"; };
@@ -475,6 +477,8 @@
 		AA000001303A000000000003 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = Base; path = Base.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
 		AA000001303A000000000005 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = de; path = de.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
 		B14EBFEF9713BCFE2072175F /* Pods-RMBTTest.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RMBTTest.release.xcconfig"; path = "Pods/Target Support Files/Pods-RMBTTest/Pods-RMBTTest.release.xcconfig"; sourceTree = "<group>"; };
+		B7B98F5DD78F977D540EE172 /* ar */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = ar; path = ar.lproj/Localizable.strings; sourceTree = "<group>"; };
+		B951DF56C7B2219C8CC4BD4F /* es */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/Localizable.strings; sourceTree = "<group>"; };
 		BD5A35E71C9764DC5843686A /* SIMInfoModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SIMInfoModels.swift; sourceTree = "<group>"; };
 		C573F2A4175281D300C728FC /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
 		C573F2B0175294A500C728FC /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
@@ -505,6 +509,7 @@
 		C7F08F691769F37600741844 /* CoreTelephony.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreTelephony.framework; path = System/Library/Frameworks/CoreTelephony.framework; sourceTree = SDKROOT; };
 		C7F599A61A2A81940020ADC4 /* RMBTHistoryIndexCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = RMBTHistoryIndexCell.xib; sourceTree = "<group>"; };
 		D77B2B18701D00583CC5E7CF /* SIMInfoView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SIMInfoView.swift; sourceTree = "<group>"; };
+		E1DCF69863D6E1970538CB5B /* hu */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = hu; path = hu.lproj/Localizable.strings; sourceTree = "<group>"; };
 		E91316AC26AD72F200368DCD /* RMBT-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "RMBT-Bridging-Header.h"; sourceTree = "<group>"; };
 		E91316AD26AD72F200368DCD /* RMBTTOSViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTTOSViewController.swift; sourceTree = "<group>"; };
 		E91316AF26AD95B300368DCD /* RMBTTOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RMBTTOS.swift; sourceTree = "<group>"; };
@@ -751,6 +756,7 @@
 		E9E9E90227429B6B005EB393 /* RMBTTestLandscapeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTTestLandscapeView.swift; sourceTree = "<group>"; };
 		E9E9E90427429B90005EB393 /* RMBTTestLandscapeView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = RMBTTestLandscapeView.xib; sourceTree = "<group>"; };
 		F620A48D0EF31330DAC04D48 /* Pods-RMBT.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RMBT.release.xcconfig"; path = "Pods/Target Support Files/Pods-RMBT/Pods-RMBT.release.xcconfig"; sourceTree = "<group>"; };
+		FE1B81F436EF91634924FBE8 /* hr */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = hr; path = hr.lproj/Localizable.strings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1837,6 +1843,12 @@
 				en,
 				Base,
 				de,
+				ar,
+				cs,
+				es,
+				fr,
+				hr,
+				hu,
 			);
 			mainGroup = C7DE146F173E8F610079477A;
 			packageReferences = (
@@ -2381,6 +2393,12 @@
 				E9555EA72727D478003547B0 /* en */,
 				E9C13F91272C289D00DA60D4 /* Base */,
 				E9C13F92272C28CD00DA60D4 /* de */,
+				B7B98F5DD78F977D540EE172 /* ar */,
+				72D05593EDAA909A64A4E7C4 /* cs */,
+				B951DF56C7B2219C8CC4BD4F /* es */,
+				29B9B495B5A7A93665FE974D /* fr */,
+				FE1B81F436EF91634924FBE8 /* hr */,
+				E1DCF69863D6E1970538CB5B /* hu */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";

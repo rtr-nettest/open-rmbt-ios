@@ -88,7 +88,7 @@ struct SIMInfoView: View {
 
     private func serviceSection(for item: SIMInfoItem) -> some View {
         Section {
-            LabeledContent("Technology", value: item.technologyLabel ?? "No service")
+            LabeledContent("Technology", value: item.technologyLabel ?? NSLocalizedString("No service", comment: ""))
             if let generation = item.generationLabel {
                 LabeledContent("Generation", value: generation)
             }
@@ -139,13 +139,13 @@ struct SIMInfoView: View {
                         .foregroundStyle(.secondary)
                 }
             } else {
-                LabeledContent("Carrier", value: carrier.carrierName ?? "Unknown")
+                LabeledContent("Carrier", value: carrier.carrierName ?? NSLocalizedString("Unknown", comment: ""))
             }
         }
     }
 
     @ViewBuilder
-    private func rawRow(_ title: String, _ value: String?) -> some View {
+    private func rawRow(_ title: LocalizedStringKey, _ value: String?) -> some View {
         LabeledContent(title) {
             Text(value ?? "nil")
                 .foregroundStyle(value == nil ? .secondary : .primary)

@@ -213,9 +213,9 @@ extension View {
                 isPresented: isPresented,
                 title: title,
                 subtitle: subtitle,
-                primaryButtonTitle: "Stop test",
+                primaryButtonTitle: NSLocalizedString("Stop test", comment: ""),
                 primaryButtonColor: Color("greenButtonBackground"),
-                secondaryButtonTitle: "Continue test",
+                secondaryButtonTitle: NSLocalizedString("Continue test", comment: ""),
                 onPrimaryAction: onStopTest,
                 onSecondaryAction: {}, // Continue just dismisses
                 allowBackgroundDismiss: false

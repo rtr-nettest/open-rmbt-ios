@@ -701,15 +701,15 @@ extension NetworkCoverageViewModel {
 
         static var inaccurateLocationWarning: Self {
             .init(
-                title: "Waiting for GPS",
-                description: "Currently the location accuracy is insufficient. Please measure outdoors."
+                title: NSLocalizedString("Waiting for GPS", comment: ""),
+                description: NSLocalizedString("Currently the location accuracy is insufficient. Please measure outdoors.", comment: "")
             )
         }
 
         static var wifiWarning: Self {
             .init(
-                title: "Disable Wi‑Fi",
-                description: "Please turn off Wi‑Fi to measure cellular coverage."
+                title: NSLocalizedString("Disable Wi‑Fi", comment: ""),
+                description: NSLocalizedString("Please turn off Wi‑Fi to measure cellular coverage.", comment: "")
             )
         }
     }

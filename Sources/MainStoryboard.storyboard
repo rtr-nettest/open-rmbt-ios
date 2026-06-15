@@ -1462,6 +1462,9 @@
                                 <fontDescription key="fontDescription" name="Roboto-Regular" family="Roboto" pointSize="17"/>
                                 <color key="textColor" red="0.54662710430000006" green="0.54661077260000002" blue="0.54662001130000004" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="localizableText" value="history_empty_label"/>
+                                </userDefinedRuntimeAttributes>
                             </label>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="WmF-xe-ryW">
                                 <rect key="frame" x="132.66666666666666" y="400" width="124.99999999999997" height="52"/>

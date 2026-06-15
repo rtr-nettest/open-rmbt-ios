@@ -93,8 +93,8 @@ struct NetworkCoverageView: View {
             }
             .testStopPopup(
                 isPresented: $showStopTestPopup,
-                title: "Stop Coverage Test",
-                subtitle: "The test will be stopped and results will be sent to the server.",
+                title: NSLocalizedString("Stop Coverage Test", comment: ""),
+                subtitle: NSLocalizedString("The test will be stopped and results will be sent to the server.", comment: ""),
                 onStopTest: {
                     Task {
                         await viewModel.toggleMeasurement()
