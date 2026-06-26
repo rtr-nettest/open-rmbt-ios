@@ -513,3 +513,7 @@
 "No connection (radio is on)" = "No connection (radio is on)";
 "Likely airplane mode or offline" = "Likely airplane mode or offline";
 "This information is a best-effort guess from iOS APIs and may be incomplete or inconsistent." = "This information is a best-effort guess from iOS APIs and may be incomplete or inconsistent.";
+
+/* ===== TODO: NEEDS TRANSLATION — Coverage unavailable feedback (English placeholder) ===== */
+"coverage_unavailable_title" = "Signal measurement unavailable";
+"coverage_unavailable_message" = "Signal measurement requires Wi‑Fi to be turned off and good GPS reception. Please adjust and try again.";

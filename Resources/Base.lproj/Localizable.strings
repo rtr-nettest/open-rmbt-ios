@@ -446,6 +446,8 @@
 "coverage_intro_title" = "Signal Measurement";
 "coverage_intro_description" = "The signal measurement allows outdoor mobile network measurements along a path. It monitors connectivity, technology and signal strength. Connectivity is measured using regular network pings. The measurement requires good GPS coverage and Wifi must be turned off. It consumes much less data compared to speed measurement. The signal measurement is (only) intended for use within the EU and the EEA.";
 "coverage_intro_start_button" = "Start test";
+"coverage_unavailable_title" = "Signal measurement unavailable";
+"coverage_unavailable_message" = "Signal measurement requires Wi‑Fi to be turned off and good GPS reception. Please adjust and try again.";
 
 /* ===== Coverage & SIM Info UI — English source (added; translate in other locales) ===== */
 "Technology" = "Technology";

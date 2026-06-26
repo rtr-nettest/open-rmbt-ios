@@ -9,9 +9,11 @@ Feature: Coverage measurement start button on the intro screen
   no mobile signal at all — but never on Wi-Fi, since Wi-Fi tells us
   nothing about cellular coverage.
 
-  The button has exactly two visible states:
-    * Green  → enabled, tapping starts a coverage measurement.
-    * Gray   → disabled, tapping does nothing.
+  The button has exactly two visible states, but is always tappable:
+    * Green  → available, tapping starts a coverage measurement.
+    * Gray   → unavailable, tapping shows feedback explaining the
+               requirements (Wi-Fi off and good GPS reception) instead
+               of starting a measurement.
 
   Background:
     Given I am on the app intro screen
@@ -21,16 +23,16 @@ Feature: Coverage measurement start button on the intro screen
 
   Scenario: Button is gray while no GPS fix is available
     Given the device has no location fix yet
-    Then the start-coverage button is gray and disabled
+    Then the start-coverage button is gray and unavailable
 
   Scenario: Button is gray when GPS accuracy is worse than 15 meters
     Given the latest location accuracy is 15.001 meters or worse
-    Then the start-coverage button is gray and disabled
+    Then the start-coverage button is gray and unavailable
 
   Scenario Outline: Button is green at the GPS accuracy boundaries
     Given the latest location accuracy is <accuracy> meters
     And the active network type is cellular
-    Then the start-coverage button is green and enabled
+    Then the start-coverage button is green and available
 
     Examples:
       | accuracy |
@@ -42,12 +44,12 @@ Feature: Coverage measurement start button on the intro screen
   Scenario: Button is gray on Wi-Fi
     Given the latest location accuracy is acceptable
     And the active network type is Wi-Fi
-    Then the start-coverage button is gray and disabled
+    Then the start-coverage button is gray and unavailable
 
   Scenario Outline: Button is green on any non-Wi-Fi network state
     Given the latest location accuracy is acceptable
     And the active network type is <network>
-    Then the start-coverage button is green and enabled
+    Then the start-coverage button is green and available
 
     Examples:
       | network                                          |
@@ -56,6 +58,21 @@ Feature: Coverage measurement start button on the intro screen
       | unknown                                          |
       | none (offline)                                   |
       | browser (legacy hybrid context)                  |
+
+  # --- Feedback when unavailable (issue #95) -----------------------------
+
+  Scenario: Tapping the gray button explains why coverage is unavailable
+    Given the start-coverage button is gray and unavailable
+    When I tap the start-coverage button
+    Then I see feedback telling me that signal measurement requires
+      Wi-Fi to be turned off and good GPS reception
+    And no coverage measurement is started
+
+  Scenario: Tapping the green button starts a measurement
+    Given the start-coverage button is green and available
+    When I tap the start-coverage button
+    Then a coverage measurement starts
+    And no feedback alert is shown
 
   # --- Rationale -----------------------------------------------------------
 
@@ -66,14 +83,16 @@ Feature: Coverage measurement start button on the intro screen
   # coverage run on Wi-Fi would produce no mobile-coverage information
   # by construction.
   #
-  # Tint and enablement always agree: the button is green iff it is
-  # tappable. There is no "green but disabled" or "gray but tappable"
-  # combination.
+  # The button is always tappable; the tint communicates availability.
+  # Green means tapping starts a measurement; gray means tapping shows
+  # feedback explaining the unmet requirements (issue #95). This is the
+  # only way a user learns why they cannot start while on Wi-Fi or
+  # without a sufficient GPS fix.
 ```
 
 ## Notes
 
-- Debug builds short-circuit the enablement check and always enable the button; the tint still tracks the real rule. This is a developer convenience and is not part of the user-visible contract.
+- The button is tappable in both states (green and gray). Earlier the gray button was inert and Debug builds force-enabled it as a developer convenience; that split was removed when issue #95 made the gray tap surface feedback in every build.
 
 ## References
 - Sources/NetworkCoverage/CoverageButtonGate.swift

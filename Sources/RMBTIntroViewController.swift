@@ -300,6 +300,17 @@ class RMBTIntroViewController: UIViewController {
     }
 
     private func coverageTapHandler(_ tintColor: UIColor) {
+        guard coverageCanStart else {
+            UIAlertController.presentAlert(
+                title: NSLocalizedString("coverage_unavailable_title", comment: "Alert title when signal measurement cannot start"),
+                text: NSLocalizedString("coverage_unavailable_message", comment: "Alert message listing signal measurement requirements"),
+                cancelTitle: NSLocalizedString("input_setting_dialog_ok", comment: "OK button"),
+                otherTitle: nil,
+                cancelAction: { _ in },
+                otherAction: nil
+            )
+            return
+        }
         let coverageView = NetworkCoverageView(onClose: { [weak self] in
             self?.dismiss(animated: true)
         })
@@ -442,18 +453,19 @@ class RMBTIntroViewController: UIViewController {
         }
     }
 
-    private func updateCoverageTint() {
-        let canStart = CoverageButtonGate.canStart(
+    private var coverageCanStart: Bool {
+        CoverageButtonGate.canStart(
             accuracy: RMBTLocationTracker.shared.location?.horizontalAccuracy,
             networkType: connectivity?.networkType,
             minAccuracy: NetworkCoverageFactory.minimumLocationAccuracy
         )
-        currentView.coverageTintColor = canStart ? .ipAvailable : .coverageUnavailable
-#if DEBUG
+    }
+
+    private func updateCoverageTint() {
+        currentView.coverageTintColor = coverageCanStart ? .ipAvailable : .coverageUnavailable
+        // Always tappable: when coverage is unavailable the tap surfaces feedback
+        // explaining why (see coverageTapHandler) instead of doing nothing.
         currentView.isCoverageEnabled = true
-#else
-        currentView.isCoverageEnabled = canStart
-#endif
     }
 
     private var networkName: String? {
