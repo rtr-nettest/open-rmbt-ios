@@ -2,13 +2,12 @@
 //  SIMInfoView.swift
 //  RMBT
 //
-//  Proof-of-concept screen that displays the cellular services iOS currently exposes, including
-//  which one carries data and its radio technology. Used to verify what dual-SIM information is
-//  actually obtainable on current iOS versions.
+//  Diagnostic screen that displays the cellular services iOS currently exposes, including which one
+//  carries data and its radio technology, plus a best-effort offline/airplane-mode hint. Used to
+//  verify what dual-SIM information is actually obtainable on current iOS versions.
 //
 //  The screen deliberately frames everything as "cellular services exposed by CoreTelephony"
-//  rather than physical SIMs, and separates reliable (non-deprecated API) data from low-confidence
-//  deprecated carrier data.
+//  rather than physical SIMs, and uses only the reliable, non-deprecated API.
 //
 
 import SwiftUI
@@ -16,18 +15,17 @@ import SwiftUI
 struct SIMInfoView: View {
     @State private var viewModel: SIMInfoViewModel
 
+    // `@autoclosure @MainActor` defers the default so the main-actor-isolated `SIMInfoViewModel()`
+    // is built inside this isolated init rather than at the (nonisolated) default-argument site.
     @MainActor
-    init() {
-        self.init(viewModel: SIMInfoViewModel())
-    }
-
-    init(viewModel: SIMInfoViewModel) {
-        _viewModel = State(initialValue: viewModel)
+    init(viewModel: @autoclosure @MainActor () -> SIMInfoViewModel = SIMInfoViewModel()) {
+        _viewModel = State(initialValue: viewModel())
     }
 
     var body: some View {
         List {
             overviewSection
+            connectivitySection
 
             if viewModel.summary.hasCellularService {
                 ForEach(viewModel.items) { item in
@@ -67,20 +65,38 @@ struct SIMInfoView: View {
 
     private var overviewSection: some View {
         Section {
-            LabeledContent("Cellular services", value: "\(viewModel.summary.reliableServiceCount)")
-            if viewModel.summary.subscriberServiceCount > 0 {
-                LabeledContent("Carrier records (deprecated API)", value: "\(viewModel.summary.subscriberServiceCount)")
-            }
+            LabeledContent("Cellular services", value: "\(viewModel.summary.serviceCount)")
         } header: {
             Text("Overview")
-        } footer: {
-            VStack(alignment: .leading, spacing: 6) {
-                Text("\"Cellular services\" comes from the reliable, non-deprecated API (current radio access technology + data service identifier).")
-                if viewModel.summary.subscriberCountDiffersFromReliable && viewModel.summary.subscriberServiceCount > 0 {
-                    Text("The deprecated carrier API reports a different number of services; treat carrier-only entries as low confidence.")
-                        .foregroundStyle(.orange)
-                }
-            }
+        }
+    }
+
+    // MARK: - Connectivity / airplane-mode hint
+
+    private var connectivitySection: some View {
+        Section {
+            LabeledContent("Status", value: connectivityStatusText)
+                .foregroundStyle(connectivityStatusColor)
+        } header: {
+            Text("Connectivity")
+        }
+    }
+
+    private var connectivityStatusText: String {
+        switch viewModel.airplaneModeHint {
+        case .undetermined: return NSLocalizedString("Checking…", comment: "")
+        case .connected: return NSLocalizedString("Network path available", comment: "")
+        case .noPathButRadioPresent: return NSLocalizedString("No connection (radio is on)", comment: "")
+        case .likelyAirplaneModeOrOffline: return NSLocalizedString("Likely airplane mode or offline", comment: "")
+        }
+    }
+
+    private var connectivityStatusColor: Color {
+        switch viewModel.airplaneModeHint {
+        case .undetermined: return .secondary
+        case .connected: return .green
+        case .noPathButRadioPresent: return .orange
+        case .likelyAirplaneModeOrOffline: return .red
         }
     }
 
@@ -97,21 +113,6 @@ struct SIMInfoView: View {
                     .foregroundStyle(item.isDataService ? Color.green : Color.secondary)
             }
             LabeledContent("Registered", value: item.isRegistered ? "Yes" : "No")
-            if !item.isReportedByReliableAPI {
-                Text("Only reported by the deprecated carrier API — low confidence.")
-                    .font(.footnote)
-                    .foregroundStyle(.orange)
-            }
-            carrierRows(for: item.carrier)
-            DisclosureGroup("Raw values") {
-                rawRow("Service identifier", item.serviceIdentifier)
-                rawRow("Carrier name", item.carrier?.carrierName)
-                rawRow("Mobile country code (MCC)", item.carrier?.mobileCountryCode)
-                rawRow("Mobile network code (MNC)", item.carrier?.mobileNetworkCode)
-                rawRow("ISO country code", item.carrier?.isoCountryCode)
-                rawRow("Allows VoIP", item.carrier?.allowsVOIP.map { $0 ? "Yes" : "No" })
-            }
-            .font(.footnote)
         } header: {
             HStack {
                 Text(item.displayName)
@@ -124,62 +125,33 @@ struct SIMInfoView: View {
                         .foregroundStyle(.green)
                 }
             }
-        } footer: {
-            Text("Service ID: \(item.serviceIdentifier) (opaque; not a physical slot or SIM name)")
-                .font(.caption2)
-        }
-    }
-
-    @ViewBuilder
-    private func carrierRows(for carrier: CarrierDetails?) -> some View {
-        if let carrier {
-            if carrier.looksLikePlaceholder {
-                LabeledContent("Carrier") {
-                    Text("Not available")
-                        .foregroundStyle(.secondary)
-                }
-            } else {
-                LabeledContent("Carrier", value: carrier.carrierName ?? NSLocalizedString("Unknown", comment: ""))
-            }
-        }
-    }
-
-    @ViewBuilder
-    private func rawRow(_ title: LocalizedStringKey, _ value: String?) -> some View {
-        LabeledContent(title) {
-            Text(value ?? "nil")
-                .foregroundStyle(value == nil ? .secondary : .primary)
-                .textSelection(.enabled)
         }
     }
 
     private var disclaimerSection: some View {
         Section {
-            Text("""
-            What iOS reliably exposes: the radio technology per service and which service carries \
-            cellular data (dataServiceIdentifier). What it does NOT expose: the physical SIM slot, \
-            eSIM vs physical SIM, ICCID, a user-facing SIM name, or a primary/secondary identity — \
-            so the "Cellular service 1/2" labels are positional only. "Used for data" means the \
-            current cellular data service; it does not identify the voice/SMS line, nor which path \
-            traffic takes while on Wi-Fi. Carrier identity (name, MCC/MNC) was deprecated in iOS 16 \
-            with no replacement and returns placeholder values on iOS 16.4+, so it must not be used \
-            for business logic.
-            """)
-            .font(.footnote)
-            .foregroundStyle(.secondary)
+            Text("This information is a best-effort guess from iOS APIs and may be incomplete or inconsistent.")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
         }
     }
 }
 
 #Preview("Two services") {
     NavigationStack {
-        SIMInfoView(viewModel: SIMInfoViewModel(provider: PreviewCellularSnapshotProvider.twoServices))
+        SIMInfoView(viewModel: SIMInfoViewModel(
+            provider: PreviewCellularSnapshotProvider.twoServices,
+            pathMonitor: PreviewNetworkPathMonitor(hasNetworkPath: true)
+        ))
     }
 }
 
-#Preview("Single service") {
+#Preview("Airplane mode") {
     NavigationStack {
-        SIMInfoView(viewModel: SIMInfoViewModel(provider: PreviewCellularSnapshotProvider.singleService))
+        SIMInfoView(viewModel: SIMInfoViewModel(
+            provider: PreviewCellularSnapshotProvider.noService,
+            pathMonitor: PreviewNetworkPathMonitor(hasNetworkPath: false)
+        ))
     }
 }
 
@@ -193,16 +165,17 @@ private struct PreviewCellularSnapshotProvider: CellularSnapshotProviding {
             "0000000100000001": "CTRadioAccessTechnologyNR",
             "0000000100000002": "CTRadioAccessTechnologyLTE"
         ],
-        carrierByService: [
-            "0000000100000001": CarrierDetails(carrierName: "--", mobileCountryCode: "65535", mobileNetworkCode: "65535", isoCountryCode: nil, allowsVOIP: true),
-            "0000000100000002": CarrierDetails(carrierName: "--", mobileCountryCode: "65535", mobileNetworkCode: "65535", isoCountryCode: nil, allowsVOIP: true)
-        ],
         dataServiceIdentifier: "0000000100000001"
     ))
 
-    static let singleService = PreviewCellularSnapshotProvider(snapshot: CellularSnapshot(
-        radioTechnologyByService: ["0000000100000001": "CTRadioAccessTechnologyLTE"],
-        carrierByService: ["0000000100000001": CarrierDetails(carrierName: "--", mobileCountryCode: "65535", mobileNetworkCode: "65535", isoCountryCode: nil, allowsVOIP: true)],
-        dataServiceIdentifier: "0000000100000001"
-    ))
+    static let noService = PreviewCellularSnapshotProvider(snapshot: CellularSnapshot())
+}
+
+/// Static path monitor used only for SwiftUI previews.
+@MainActor
+private final class PreviewNetworkPathMonitor: NetworkPathMonitoring {
+    private(set) var hasNetworkPath: Bool?
+    init(hasNetworkPath: Bool?) { self.hasNetworkPath = hasNetworkPath }
+    func startMonitoring(_ onChange: @escaping @MainActor () -> Void) {}
+    func stopMonitoring() {}
 }

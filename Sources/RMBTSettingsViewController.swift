@@ -72,7 +72,7 @@ class RMBTSettingsViewController: UITableViewController {
         
         prepareGeneralSettings()
         prepareAdvancedSettings()
-        
+
         self.title = NSLocalizedString("preferences_general_settings", comment: "")
         self.navigationItem.leftBarButtonItem = self.closeBarButtonItem
         
@@ -246,6 +246,8 @@ class RMBTSettingsViewController: UITableViewController {
         
         if settings.expertMode {
             self.advancedSettings.append(IndexPath(row: 4, section: RMBTSettingsSection.advanced.rawValue))
+            // SIM Information (diagnostic) sits right below IPv4 only; both are expert-only.
+            self.advancedSettings.append(IndexPath(row: 5, section: RMBTSettingsSection.advanced.rawValue))
         }
     }
     
@@ -374,8 +376,6 @@ class RMBTSettingsViewController: UITableViewController {
         }
         if (section == RMBTSettingsSection.advanced.rawValue) {
             return self.advancedSettings.count
-        } else if (section == RMBTSettingsSection.advanced.rawValue && !settings.loopMode) {
-            return 1 // hide customization
         } else if (section == RMBTSettingsSection.debugCustomControlServer.rawValue && !settings.debugControlServerCustomizationEnabled) {
             return 1 // hide customization
         } else if (section == RMBTSettingsSection.logging.rawValue && !settings.debugLoggingEnabled) {
@@ -485,9 +485,9 @@ class RMBTSettingsViewController: UITableViewController {
                 presentLogShareSheet(from: indexPath)
             default: break
             }
-        } else if (indexPath.section == RMBTSettingsSection.info.rawValue) {
-            // Row 0 = Client UUID, row 1 = Test Counter, row 2 = SIM Information (diagnostic).
-            if indexPath.row == 2 {
+        } else if (indexPath.section == RMBTSettingsSection.advanced.rawValue) {
+            // SIM Information is storyboard row 5 — the only tappable advanced row (others are toggles/fields).
+            if advancedSettings[indexPath.row].row == 5 {
                 presentSIMInfo()
             }
         }

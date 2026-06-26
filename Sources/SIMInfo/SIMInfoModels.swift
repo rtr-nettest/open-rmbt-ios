@@ -2,38 +2,21 @@
 //  SIMInfoModels.swift
 //  RMBT
 //
-//  Proof-of-concept models that describe the cellular services iOS exposes through
-//  CoreTelephony, used to verify what dual-SIM information is actually available.
+//  Models that describe the cellular services iOS exposes through CoreTelephony, used to verify
+//  what dual-SIM information is actually available, plus a best-effort offline/airplane-mode hint.
 //
 //  Important: CoreTelephony exposes opaque *service* identifiers, not physical SIM cards.
 //  It does not surface the user's SIM label, physical slot, eSIM vs pSIM, ICCID, or a
 //  "primary/secondary" identity. These models therefore describe "cellular services exposed
 //  by CoreTelephony", and deliberately avoid claiming anything about physical SIMs.
 //
+//  Only the reliable, non-deprecated API is used: `serviceCurrentRadioAccessTechnology` and
+//  `dataServiceIdentifier`. The deprecated `serviceSubscriberCellularProviders` / `CTCarrier`
+//  carrier API was dropped because it returns placeholder values on iOS 16.4+ and yields nothing
+//  useful.
+//
 
 import Foundation
-
-/// Carrier metadata as reported by `CTCarrier`.
-///
-/// `CTCarrier` and `serviceSubscriberCellularProviders` are deprecated since iOS 16.0 with no
-/// replacement and return placeholder values (`"--"`, `"65535"`) on iOS 16.4+. We still surface
-/// whatever the OS returns so the diagnostic screen reflects reality, but it must never be used
-/// for business logic or backend truth.
-struct CarrierDetails: Equatable, Sendable {
-    var carrierName: String?
-    var mobileCountryCode: String?
-    var mobileNetworkCode: String?
-    var isoCountryCode: String?
-    var allowsVOIP: Bool?
-
-    /// Apple returns these placeholders once the per-SIM carrier identity was locked down.
-    var looksLikePlaceholder: Bool {
-        let placeholderName = carrierName == nil || carrierName == "--" || carrierName?.isEmpty == true
-        let placeholderMCC = mobileCountryCode == nil || mobileCountryCode == "65535"
-        let placeholderMNC = mobileNetworkCode == nil || mobileNetworkCode == "65535"
-        return placeholderName && placeholderMCC && placeholderMNC
-    }
-}
 
 /// Raw, OS-provided snapshot of all cellular services. This is the pure input to
 /// `SIMInfoSnapshotBuilder`, deliberately free of CoreTelephony so it can be unit tested.
@@ -42,20 +25,15 @@ struct CellularSnapshot: Equatable, Sendable {
     /// `CTRadioAccessTechnology*` constant. Mirrors `serviceCurrentRadioAccessTechnology`
     /// (public, non-deprecated).
     var radioTechnologyByService: [String: String]
-    /// Keyed by the same service identifiers. Mirrors `serviceSubscriberCellularProviders`
-    /// (deprecated since iOS 16.0, no replacement).
-    var carrierByService: [String: CarrierDetails]
     /// The service identifier currently carrying cellular **data** (`dataServiceIdentifier`,
     /// public, non-deprecated). Does not describe the voice/SMS line.
     var dataServiceIdentifier: String?
 
     init(
         radioTechnologyByService: [String: String] = [:],
-        carrierByService: [String: CarrierDetails] = [:],
         dataServiceIdentifier: String? = nil
     ) {
         self.radioTechnologyByService = radioTechnologyByService
-        self.carrierByService = carrierByService
         self.dataServiceIdentifier = dataServiceIdentifier
     }
 }
@@ -81,55 +59,32 @@ struct SIMInfoItem: Equatable, Sendable, Identifiable {
     let isDataService: Bool
     /// Whether the service is registered to a radio (has a current radio technology).
     let isRegistered: Bool
-    /// Whether the service is reported by a non-deprecated API (the radio-technology dictionary or
-    /// `dataServiceIdentifier`). `false` means it was only seen via the deprecated carrier API and
-    /// should be treated as low confidence.
-    let isReportedByReliableAPI: Bool
-    /// Carrier details (deprecated API; may be placeholders on iOS 16.4+).
-    let carrier: CarrierDetails?
 }
 
 /// High-level summary across all detected services.
-///
-/// Counts are split by data source so the UI never presents deprecated, low-confidence data as a
-/// definitive SIM count.
 struct SIMInfoSummary: Equatable, Sendable {
-    /// Services reported by non-deprecated APIs: `serviceCurrentRadioAccessTechnology` keys plus
-    /// `dataServiceIdentifier`. This is the reliable count.
-    let reliableServiceCount: Int
-    /// Services reported by the deprecated `serviceSubscriberCellularProviders` API. Low confidence.
-    let subscriberServiceCount: Int
-    /// Distinct services across both sources (equals the number of listed items).
-    let totalServiceCount: Int
+    /// Number of cellular services exposed by the non-deprecated API.
+    let serviceCount: Int
     let dataServiceIdentifier: String?
 
     /// Whether any cellular service is exposed at all.
-    var hasCellularService: Bool { totalServiceCount >= 1 }
-    /// Whether the reliable (non-deprecated) API exposes more than one cellular service. Used in
-    /// preference to the total so a deprecated placeholder carrier entry cannot imply dual SIM.
-    var exposesMultipleReliableServices: Bool { reliableServiceCount >= 2 }
-    /// Whether the deprecated carrier API reports a different number of services than the reliable
-    /// API — worth surfacing so the discrepancy is visible rather than silently resolved.
-    var subscriberCountDiffersFromReliable: Bool { subscriberServiceCount != reliableServiceCount }
+    var hasCellularService: Bool { serviceCount >= 1 }
+    /// Whether more than one cellular service is exposed (i.e. dual SIM is observable).
+    var exposesMultipleServices: Bool { serviceCount >= 2 }
 }
 
 /// Pure transformation from an OS snapshot into display models. No CoreTelephony here so it is
 /// fully unit testable.
 enum SIMInfoSnapshotBuilder {
     static func makeSummary(from snapshot: CellularSnapshot) -> SIMInfoSummary {
-        let reliable = reliableServiceIdentifiers(in: snapshot)
-        let subscriber = Set(snapshot.carrierByService.keys)
-        return SIMInfoSummary(
-            reliableServiceCount: reliable.count,
-            subscriberServiceCount: subscriber.count,
-            totalServiceCount: reliable.union(subscriber).count,
+        SIMInfoSummary(
+            serviceCount: serviceIdentifiers(in: snapshot).count,
             dataServiceIdentifier: snapshot.dataServiceIdentifier
         )
     }
 
     static func makeItems(from snapshot: CellularSnapshot) -> [SIMInfoItem] {
-        let reliable = reliableServiceIdentifiers(in: snapshot)
-        let allIdentifiers = reliable.union(snapshot.carrierByService.keys).sorted()
+        let allIdentifiers = serviceIdentifiers(in: snapshot).sorted()
 
         return allIdentifiers.enumerated().map { index, serviceID in
             let rawTechnology = snapshot.radioTechnologyByService[serviceID]
@@ -142,18 +97,15 @@ enum SIMInfoSnapshotBuilder {
                 technologyLabel: technologyLabel,
                 generationLabel: generation(from: technologyLabel),
                 isDataService: serviceID == snapshot.dataServiceIdentifier,
-                isRegistered: isRegistered,
-                isReportedByReliableAPI: reliable.contains(serviceID),
-                carrier: snapshot.carrierByService[serviceID]
+                isRegistered: isRegistered
             )
         }
     }
 
-    /// Service identifiers known through non-deprecated APIs: the radio-technology dictionary and
-    /// the current data service identifier. Including `dataServiceIdentifier` ensures a transient
-    /// snapshot that has a data identifier but momentarily empty dictionaries is not reported as
-    /// "no cellular".
-    private static func reliableServiceIdentifiers(in snapshot: CellularSnapshot) -> Set<String> {
+    /// Service identifiers from the radio-technology dictionary plus the current data service.
+    /// Including `dataServiceIdentifier` ensures a transient snapshot that has a data identifier but
+    /// momentarily empty dictionaries is not reported as "no cellular".
+    private static func serviceIdentifiers(in snapshot: CellularSnapshot) -> Set<String> {
         var identifiers = Set(snapshot.radioTechnologyByService.keys)
         if let dataServiceIdentifier = snapshot.dataServiceIdentifier {
             identifiers.insert(dataServiceIdentifier)
@@ -171,5 +123,39 @@ enum SIMInfoSnapshotBuilder {
     private static func generation(from technologyLabel: String?) -> String? {
         guard let technologyLabel else { return nil }
         return technologyLabel.split(separator: "/").first.map(String.init)
+    }
+}
+
+// MARK: - Airplane-mode / offline heuristic
+
+/// Best-effort interpretation of the device's connectivity. iOS exposes no airplane-mode API, so
+/// this is inferred from two signals and is never a certainty.
+enum AirplaneModeHint: Equatable, Sendable {
+    /// The network path status has not been evaluated yet.
+    case undetermined
+    /// At least one network path is available — the device is online.
+    case connected
+    /// No usable network path, but the cellular radio still reports a technology. Usually means
+    /// mobile data is off or the device is briefly out of a data path rather than airplane mode.
+    case noPathButRadioPresent
+    /// No usable network path and the cellular radio reports nothing. The strongest "probably
+    /// offline / airplane mode" signal available — but indistinguishable from being out of coverage
+    /// with Wi-Fi and mobile data both off.
+    case likelyAirplaneModeOrOffline
+}
+
+enum ConnectivityHeuristic {
+    /// Combines whether any network path is satisfied (`NWPathMonitor`) with whether the cellular
+    /// radio reports a technology. `hasNetworkPath == nil` means the path has not been evaluated yet.
+    static func airplaneModeHint(hasNetworkPath: Bool?, hasCellularRadio: Bool) -> AirplaneModeHint {
+        guard let hasNetworkPath else { return .undetermined }
+        if hasNetworkPath { return .connected }
+        return hasCellularRadio ? .noPathButRadioPresent : .likelyAirplaneModeOrOffline
+    }
+
+    /// Whether any cellular service reports a non-empty radio access technology, i.e. the cellular
+    /// radio is powered up and registered.
+    static func hasCellularRadio(in snapshot: CellularSnapshot) -> Bool {
+        snapshot.radioTechnologyByService.values.contains { !$0.isEmpty }
     }
 }

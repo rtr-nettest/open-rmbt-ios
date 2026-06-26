@@ -12,28 +12,26 @@ struct SIMInfoSnapshotBuilderTests {
 
     // MARK: - Summary
 
-    @Test("WHEN no services are present THEN every count is zero and no cellular is reported")
-    func whenNoServices_thenAllCountsZeroAndNoCellular() {
+    @Test("WHEN no services are present THEN the count is zero and no cellular is reported")
+    func whenNoServices_thenCountZeroAndNoCellular() {
         let summary = SIMInfoSnapshotBuilder.makeSummary(from: makeSnapshot())
 
-        #expect(summary.reliableServiceCount == 0)
-        #expect(summary.subscriberServiceCount == 0)
-        #expect(summary.totalServiceCount == 0)
+        #expect(summary.serviceCount == 0)
         #expect(summary.hasCellularService == false)
-        #expect(summary.exposesMultipleReliableServices == false)
+        #expect(summary.exposesMultipleServices == false)
     }
 
     @Test(
-        "WHEN the reliable radio API exposes N services THEN reliable count and multiplicity reflect N",
+        "WHEN the radio API exposes N services THEN the count and multiplicity reflect N",
         arguments: [
             ([String: String](), 0, false, false),
             ([oneServiceID: CTRadioAccessTechnologyLTE], 1, false, true),
             ([oneServiceID: CTRadioAccessTechnologyNR, twoServiceID: CTRadioAccessTechnologyLTE], 2, true, true)
         ]
     )
-    func whenRadioServicesVary_thenReliableCountAndMultiplicityMatch(
+    func whenRadioServicesVary_thenCountAndMultiplicityMatch(
         radioTechnologyByService: [String: String],
-        expectedReliableCount: Int,
+        expectedCount: Int,
         expectedExposesMultiple: Bool,
         expectedHasCellular: Bool
     ) {
@@ -41,28 +39,9 @@ struct SIMInfoSnapshotBuilderTests {
             from: makeSnapshot(radioTechnologyByService: radioTechnologyByService)
         )
 
-        #expect(summary.reliableServiceCount == expectedReliableCount)
-        #expect(summary.exposesMultipleReliableServices == expectedExposesMultiple)
+        #expect(summary.serviceCount == expectedCount)
+        #expect(summary.exposesMultipleServices == expectedExposesMultiple)
         #expect(summary.hasCellularService == expectedHasCellular)
-    }
-
-    @Test("WHEN the reliable API exposes one service but the deprecated carrier API exposes two THEN reliable count stays one and the carrier-only service is flagged low confidence")
-    func whenDeprecatedCarrierAddsExtraService_thenNotCountedAsReliable() throws {
-        let snapshot = makeSnapshot(
-            radioTechnologyByService: [oneServiceID: CTRadioAccessTechnologyLTE],
-            carrierByService: [oneServiceID: placeholderCarrier, twoServiceID: placeholderCarrier],
-            dataServiceIdentifier: oneServiceID
-        )
-
-        let summary = SIMInfoSnapshotBuilder.makeSummary(from: snapshot)
-        #expect(summary.reliableServiceCount == 1)
-        #expect(summary.subscriberServiceCount == 2)
-        #expect(summary.totalServiceCount == 2)
-        #expect(summary.exposesMultipleReliableServices == false)
-        #expect(summary.subscriberCountDiffersFromReliable == true)
-
-        let items = SIMInfoSnapshotBuilder.makeItems(from: snapshot)
-        #expect(items.map(\.isReportedByReliableAPI) == [true, false])
     }
 
     @Test("WHEN only a data service identifier is present with empty dictionaries THEN it still counts as cellular")
@@ -71,12 +50,11 @@ struct SIMInfoSnapshotBuilderTests {
 
         let summary = SIMInfoSnapshotBuilder.makeSummary(from: snapshot)
         #expect(summary.hasCellularService == true)
-        #expect(summary.reliableServiceCount == 1)
+        #expect(summary.serviceCount == 1)
 
         let item = try #require(SIMInfoSnapshotBuilder.makeItems(from: snapshot).first)
         #expect(item.serviceIdentifier == oneServiceID)
         #expect(item.isDataService == true)
-        #expect(item.isReportedByReliableAPI == true)
         #expect(item.isRegistered == false)
     }
 
@@ -112,7 +90,7 @@ struct SIMInfoSnapshotBuilderTests {
 
     @Test("WHEN a service has empty technology THEN it is not registered and has no technology")
     func whenEmptyTechnology_thenNotRegistered() throws {
-        let snapshot = makeSnapshot(carrierByService: [oneServiceID: placeholderCarrier])
+        let snapshot = makeSnapshot(radioTechnologyByService: [oneServiceID: ""])
 
         let item = try #require(SIMInfoSnapshotBuilder.makeItems(from: snapshot).first)
         #expect(item.isRegistered == false)
@@ -183,20 +161,84 @@ struct SIMInfoSnapshotBuilderTests {
         #expect(items.map(\.serviceIdentifier) == [oneServiceID, twoServiceID])
         #expect(items.map(\.displayName) == ["Cellular service 1", "Cellular service 2"])
     }
+}
 
-    // MARK: - Carrier placeholder detection
+// MARK: - ConnectivityHeuristic (best-effort airplane-mode / offline hint)
 
-    @Test(
-        "WHEN carrier fields are inspected THEN iOS 16.4 placeholders are detected and real values are not",
-        arguments: [
-            (placeholderCarrier, true),
-            (realCarrier, false),
-            (CarrierDetails(carrierName: "A1", mobileCountryCode: "65535", mobileNetworkCode: "65535"), false),
-            (CarrierDetails(), true)
-        ]
-    )
-    func whenCarrierInspected_thenPlaceholderDetected(carrier: CarrierDetails, expectedPlaceholder: Bool) {
-        #expect(carrier.looksLikePlaceholder == expectedPlaceholder)
+@Suite("ConnectivityHeuristic")
+struct ConnectivityHeuristicTests {
+
+    @Test("WHEN the network path has not been evaluated yet THEN the hint is undetermined")
+    func whenPathNotEvaluated_thenUndetermined() {
+        #expect(ConnectivityHeuristic.airplaneModeHint(hasNetworkPath: nil, hasCellularRadio: false) == .undetermined)
+        #expect(ConnectivityHeuristic.airplaneModeHint(hasNetworkPath: nil, hasCellularRadio: true) == .undetermined)
+    }
+
+    @Test("WHEN a network path is available THEN the device is reported connected regardless of the radio")
+    func whenNetworkPathAvailable_thenConnected() {
+        #expect(ConnectivityHeuristic.airplaneModeHint(hasNetworkPath: true, hasCellularRadio: true) == .connected)
+        #expect(ConnectivityHeuristic.airplaneModeHint(hasNetworkPath: true, hasCellularRadio: false) == .connected)
+    }
+
+    @Test("WHEN there is no network path but the cellular radio is up THEN it is not flagged as airplane mode")
+    func whenNoPathButRadioUp_thenNotAirplaneMode() {
+        #expect(ConnectivityHeuristic.airplaneModeHint(hasNetworkPath: false, hasCellularRadio: true) == .noPathButRadioPresent)
+    }
+
+    @Test("WHEN there is no network path and no cellular radio THEN airplane mode / offline is the best-effort guess")
+    func whenNoPathAndNoRadio_thenLikelyAirplaneMode() {
+        #expect(ConnectivityHeuristic.airplaneModeHint(hasNetworkPath: false, hasCellularRadio: false) == .likelyAirplaneModeOrOffline)
+    }
+
+    @Test("WHEN any service reports a non-empty radio technology THEN the cellular radio is considered active")
+    func whenServiceReportsTechnology_thenRadioActive() {
+        let snapshot = CellularSnapshot(radioTechnologyByService: [oneServiceID: CTRadioAccessTechnologyLTE])
+        #expect(ConnectivityHeuristic.hasCellularRadio(in: snapshot) == true)
+    }
+
+    @Test("WHEN no service reports a non-empty radio technology THEN the cellular radio is considered inactive")
+    func whenNoServiceReportsTechnology_thenRadioInactive() {
+        #expect(ConnectivityHeuristic.hasCellularRadio(in: CellularSnapshot()) == false)
+        #expect(ConnectivityHeuristic.hasCellularRadio(in: CellularSnapshot(radioTechnologyByService: [oneServiceID: ""])) == false)
+    }
+}
+
+// MARK: - CTTelephonyCellularSnapshotProvider (live observation lifecycle)
+
+@MainActor
+@Suite("CTTelephonyCellularSnapshotProvider")
+struct CTTelephonyCellularSnapshotProviderTests {
+
+    // A private NotificationCenter keeps each test isolated from the system and from parallel tests.
+    @Test("WHEN observeChanges is registered repeatedly THEN a single radio-technology change fires exactly one callback")
+    func whenObserveChangesRegisteredTwice_thenSingleCallbackPerChange() async {
+        let center = NotificationCenter()
+        let provider = CTTelephonyCellularSnapshotProvider(notificationCenter: center)
+
+        // expectedCount: 1 fails if the prior registration leaked and double-fires.
+        await confirmation("change handler fires once", expectedCount: 1) { fired in
+            provider.observeChanges { fired() }
+            provider.observeChanges { fired() }   // must replace, not stack, the observer
+
+            center.post(name: .CTServiceRadioAccessTechnologyDidChange, object: nil)
+            // Let the main-queue notification block and the @MainActor hop both run.
+            try? await Task.sleep(for: .milliseconds(100))
+            provider.stopObserving()
+        }
+    }
+
+    @Test("WHEN observation is stopped THEN a later radio-technology change fires no callback")
+    func whenStopped_thenLaterChangeIgnored() async {
+        let center = NotificationCenter()
+        let provider = CTTelephonyCellularSnapshotProvider(notificationCenter: center)
+
+        await confirmation("change handler never fires after stop", expectedCount: 0) { fired in
+            provider.observeChanges { fired() }
+            provider.stopObserving()
+
+            center.post(name: .CTServiceRadioAccessTechnologyDidChange, object: nil)
+            try? await Task.sleep(for: .milliseconds(100))
+        }
     }
 }
 
@@ -208,28 +250,28 @@ struct SIMInfoViewModelTests {
 
     @Test("WHEN initialized THEN it exposes the summary and items derived from the provider snapshot")
     func whenInitialized_thenExposesProviderSnapshot() {
-        let (sut, _) = makeSUT(snapshot: dualServiceSnapshot)
+        let (sut, _, _) = makeSUT(snapshot: dualServiceSnapshot)
 
-        #expect(sut.summary.reliableServiceCount == 2)
+        #expect(sut.summary.serviceCount == 2)
         #expect(sut.items.map(\.serviceIdentifier) == [oneServiceID, twoServiceID])
     }
 
     @Test("WHEN refreshed THEN it re-reads the provider and reflects the latest snapshot")
     func whenRefreshed_thenReflectsLatestSnapshot() {
-        let (sut, provider) = makeSUT(snapshot: dualServiceSnapshot)
+        let (sut, provider, _) = makeSUT(snapshot: dualServiceSnapshot)
         let callsAfterInit = provider.currentSnapshotCallCount
 
         provider.snapshot = singleServiceSnapshot
         sut.refresh()
 
         #expect(provider.currentSnapshotCallCount == callsAfterInit + 1)
-        #expect(sut.summary.reliableServiceCount == 1)
+        #expect(sut.summary.serviceCount == 1)
         #expect(sut.items.map(\.serviceIdentifier) == [oneServiceID])
     }
 
     @Test("WHEN observing and the provider signals a change THEN the items refresh automatically")
     func whenObservingAndProviderChanges_thenItemsRefresh() {
-        let (sut, provider) = makeSUT(snapshot: singleServiceSnapshot)
+        let (sut, provider, _) = makeSUT(snapshot: singleServiceSnapshot)
         sut.startObserving()
 
         provider.simulateChange(to: dualServiceSnapshot)
@@ -237,36 +279,66 @@ struct SIMInfoViewModelTests {
         #expect(sut.items.map(\.serviceIdentifier) == [oneServiceID, twoServiceID])
     }
 
-    @Test("WHEN observing stops THEN the provider is told to stop and later changes are ignored")
-    func whenStopObserving_thenProviderStopsAndIgnoresLaterChanges() {
-        let (sut, provider) = makeSUT(snapshot: singleServiceSnapshot)
+    @Test("WHEN observing stops THEN both the provider and the path monitor are told to stop and later changes are ignored")
+    func whenStopObserving_thenProviderAndPathMonitorStop() {
+        let (sut, provider, pathMonitor) = makeSUT(snapshot: singleServiceSnapshot)
         sut.startObserving()
 
         sut.stopObserving()
         provider.simulateChange(to: dualServiceSnapshot)
 
         #expect(provider.stopObservingCallCount == 1)
+        #expect(pathMonitor.stopMonitoringCallCount == 1)
         #expect(sut.items.map(\.serviceIdentifier) == [oneServiceID])
+    }
+
+    @Test("WHEN the path monitor has not evaluated yet THEN the airplane-mode hint is undetermined")
+    func whenPathNotEvaluated_thenHintUndetermined() {
+        let (sut, _, _) = makeSUT(snapshot: singleServiceSnapshot, hasNetworkPath: nil)
+
+        #expect(sut.airplaneModeHint == .undetermined)
+    }
+
+    @Test("WHEN there is no network path and no cellular radio THEN the hint becomes likely airplane mode after a path change")
+    func whenNoPathAndNoRadio_thenHintLikelyAirplaneMode() {
+        let (sut, _, pathMonitor) = makeSUT(snapshot: noServiceSnapshot, hasNetworkPath: nil)
+        sut.startObserving()
+
+        pathMonitor.simulatePathChange(hasNetworkPath: false)
+
+        #expect(sut.airplaneModeHint == .likelyAirplaneModeOrOffline)
+    }
+
+    @Test("WHEN a network path becomes available THEN the hint reports connected")
+    func whenNetworkPathAvailable_thenHintConnected() {
+        let (sut, _, pathMonitor) = makeSUT(snapshot: noServiceSnapshot, hasNetworkPath: nil)
+        sut.startObserving()
+
+        pathMonitor.simulatePathChange(hasNetworkPath: true)
+
+        #expect(sut.airplaneModeHint == .connected)
     }
 }
 
 // MARK: - makeSUT & Factories
 
 @MainActor
-private func makeSUT(snapshot: CellularSnapshot) -> (SIMInfoViewModel, CellularSnapshotProviderSpy) {
+private func makeSUT(
+    snapshot: CellularSnapshot,
+    hasNetworkPath: Bool? = true
+) -> (SIMInfoViewModel, CellularSnapshotProviderSpy, NetworkPathMonitoringSpy) {
     let provider = CellularSnapshotProviderSpy(snapshot: snapshot)
-    let sut = SIMInfoViewModel(provider: provider)
-    return (sut, provider)
+    let pathMonitor = NetworkPathMonitoringSpy(hasNetworkPath: hasNetworkPath)
+    let sut = SIMInfoViewModel(provider: provider, pathMonitor: pathMonitor)
+    return (sut, provider, pathMonitor)
 }
 
 private func makeSnapshot(
     radioTechnologyByService: [String: String] = [:],
-    carrierByService: [String: CarrierDetails] = [:],
     dataServiceIdentifier: String? = nil
 ) -> CellularSnapshot {
     CellularSnapshot(
         radioTechnologyByService: radioTechnologyByService,
-        carrierByService: carrierByService,
         dataServiceIdentifier: dataServiceIdentifier
     )
 }
@@ -275,14 +347,7 @@ private func makeSnapshot(
 private let oneServiceID = "0000000100000001"
 private let twoServiceID = "0000000100000002"
 
-private let placeholderCarrier = CarrierDetails(carrierName: "--", mobileCountryCode: "65535", mobileNetworkCode: "65535")
-private let realCarrier = CarrierDetails(
-    carrierName: "A1 Telekom",
-    mobileCountryCode: "232",
-    mobileNetworkCode: "01",
-    isoCountryCode: "at",
-    allowsVOIP: true
-)
+private let noServiceSnapshot = CellularSnapshot()
 
 private let singleServiceSnapshot = CellularSnapshot(
     radioTechnologyByService: [oneServiceID: CTRadioAccessTechnologyLTE],
@@ -329,5 +394,32 @@ private final class CellularSnapshotProviderSpy: CellularSnapshotProviding {
     func simulateChange(to newSnapshot: CellularSnapshot) {
         snapshot = newSnapshot
         changeHandler?()
+    }
+}
+
+/// Stands in for the live `NWPathMonitor`. Exposes a controllable path status and lets tests drive
+/// the change callback deterministically via `simulatePathChange`.
+@MainActor
+private final class NetworkPathMonitoringSpy: NetworkPathMonitoring {
+    private(set) var hasNetworkPath: Bool?
+    private(set) var stopMonitoringCallCount = 0
+    private var onChange: (@MainActor () -> Void)?
+
+    init(hasNetworkPath: Bool?) {
+        self.hasNetworkPath = hasNetworkPath
+    }
+
+    func startMonitoring(_ onChange: @escaping @MainActor () -> Void) {
+        self.onChange = onChange
+    }
+
+    func stopMonitoring() {
+        stopMonitoringCallCount += 1
+        onChange = nil
+    }
+
+    func simulatePathChange(hasNetworkPath: Bool) {
+        self.hasNetworkPath = hasNetworkPath
+        onChange?()
     }
 }

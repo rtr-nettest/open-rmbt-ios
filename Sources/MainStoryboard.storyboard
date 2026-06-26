@@ -626,6 +626,40 @@
                                             <constraint firstAttribute="trailingMargin" secondItem="euJ-U0-xKW" secondAttribute="trailing" id="LA7-up-BNk"/>
                                         </constraints>
                                     </tableViewCell>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" id="Sm1-In-f00">
+                                        <rect key="frame" x="0.0" y="871.33333015441895" width="390" height="56"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="Sm1-In-f00" id="Sm1-In-cv0">
+                                            <rect key="frame" x="0.0" y="0.0" width="390" height="56"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <label opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="left" horizontalCompressionResistancePriority="753" text="SIM Information" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Sm1-In-lb0">
+                                                    <rect key="frame" x="20" y="18.666666666666668" width="325.33333333333331" height="19.000000000000004"/>
+                                                    <fontDescription key="fontDescription" name="Roboto-Regular" family="Roboto" pointSize="16"/>
+                                                    <color key="textColor" red="0.25882352939999997" green="0.25882352939999997" blue="0.25882352939999997" alpha="1" colorSpace="calibratedRGB"/>
+                                                    <nil key="highlightedColor"/>
+                                                    <userDefinedRuntimeAttributes>
+                                                        <userDefinedRuntimeAttribute type="string" keyPath="localizableText" value="preferences_sim_info"/>
+                                                    </userDefinedRuntimeAttributes>
+                                                </label>
+                                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Sm1-In-sp0">
+                                                    <rect key="frame" x="20" y="55" width="350" height="1"/>
+                                                    <color key="backgroundColor" red="0.93333333330000001" green="0.93333333330000001" blue="0.93333333330000001" alpha="1" colorSpace="calibratedRGB"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="height" constant="1" id="Sm1-In-h01"/>
+                                                    </constraints>
+                                                </view>
+                                            </subviews>
+                                        </tableViewCellContentView>
+                                        <constraints>
+                                            <constraint firstItem="Sm1-In-lb0" firstAttribute="leading" secondItem="Sm1-In-f00" secondAttribute="leadingMargin" id="Sm1-In-c01"/>
+                                            <constraint firstItem="Sm1-In-lb0" firstAttribute="centerY" secondItem="Sm1-In-f00" secondAttribute="centerY" id="Sm1-In-c02"/>
+                                            <constraint firstAttribute="trailingMargin" secondItem="Sm1-In-lb0" secondAttribute="trailing" id="Sm1-In-c03"/>
+                                            <constraint firstItem="Sm1-In-sp0" firstAttribute="leading" secondItem="Sm1-In-f00" secondAttribute="leading" constant="20" id="Sm1-In-c04"/>
+                                            <constraint firstAttribute="trailing" secondItem="Sm1-In-sp0" secondAttribute="trailing" constant="20" id="Sm1-In-c05"/>
+                                            <constraint firstAttribute="bottom" secondItem="Sm1-In-sp0" secondAttribute="bottom" id="Sm1-In-c06"/>
+                                        </constraints>
+                                    </tableViewCell>
                                 </cells>
                             </tableViewSection>
                             <tableViewSection headerTitle="Kontakt" id="ujY-Gf-flZ">
@@ -808,40 +842,6 @@
                                             <constraint firstItem="Q03-vM-ws7" firstAttribute="leading" secondItem="Ba3-8b-KQM" secondAttribute="leadingMargin" id="Ra8-IS-xm9"/>
                                             <constraint firstAttribute="trailing" secondItem="gaw-Tm-ZSX" secondAttribute="trailing" constant="20" id="Sub-AX-89U"/>
                                             <constraint firstItem="Q03-vM-ws7" firstAttribute="centerY" secondItem="Ba3-8b-KQM" secondAttribute="centerY" id="osL-Yh-azg"/>
-                                        </constraints>
-                                    </tableViewCell>
-                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" id="Sm1-In-f00">
-                                        <rect key="frame" x="0.0" y="871.33333015441895" width="390" height="56"/>
-                                        <autoresizingMask key="autoresizingMask"/>
-                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="Sm1-In-f00" id="Sm1-In-cv0">
-                                            <rect key="frame" x="0.0" y="0.0" width="390" height="56"/>
-                                            <autoresizingMask key="autoresizingMask"/>
-                                            <subviews>
-                                                <label opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="left" horizontalCompressionResistancePriority="753" text="SIM Information" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Sm1-In-lb0">
-                                                    <rect key="frame" x="20" y="18.666666666666668" width="325.33333333333331" height="19.000000000000004"/>
-                                                    <fontDescription key="fontDescription" name="Roboto-Regular" family="Roboto" pointSize="16"/>
-                                                    <color key="textColor" red="0.25882352939999997" green="0.25882352939999997" blue="0.25882352939999997" alpha="1" colorSpace="calibratedRGB"/>
-                                                    <nil key="highlightedColor"/>
-                                                    <userDefinedRuntimeAttributes>
-                                                        <userDefinedRuntimeAttribute type="string" keyPath="localizableText" value="preferences_sim_info"/>
-                                                    </userDefinedRuntimeAttributes>
-                                                </label>
-                                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Sm1-In-sp0">
-                                                    <rect key="frame" x="20" y="55" width="350" height="1"/>
-                                                    <color key="backgroundColor" red="0.93333333330000001" green="0.93333333330000001" blue="0.93333333330000001" alpha="1" colorSpace="calibratedRGB"/>
-                                                    <constraints>
-                                                        <constraint firstAttribute="height" constant="1" id="Sm1-In-h01"/>
-                                                    </constraints>
-                                                </view>
-                                            </subviews>
-                                        </tableViewCellContentView>
-                                        <constraints>
-                                            <constraint firstItem="Sm1-In-lb0" firstAttribute="leading" secondItem="Sm1-In-f00" secondAttribute="leadingMargin" id="Sm1-In-c01"/>
-                                            <constraint firstItem="Sm1-In-lb0" firstAttribute="centerY" secondItem="Sm1-In-f00" secondAttribute="centerY" id="Sm1-In-c02"/>
-                                            <constraint firstAttribute="trailingMargin" secondItem="Sm1-In-lb0" secondAttribute="trailing" id="Sm1-In-c03"/>
-                                            <constraint firstItem="Sm1-In-sp0" firstAttribute="leading" secondItem="Sm1-In-f00" secondAttribute="leading" constant="20" id="Sm1-In-c04"/>
-                                            <constraint firstAttribute="trailing" secondItem="Sm1-In-sp0" secondAttribute="trailing" constant="20" id="Sm1-In-c05"/>
-                                            <constraint firstAttribute="bottom" secondItem="Sm1-In-sp0" secondAttribute="bottom" id="Sm1-In-c06"/>
                                         </constraints>
                                     </tableViewCell>
                                 </cells>

@@ -460,22 +460,13 @@
 "Refresh" = "Refresh";
 "Overview" = "Overview";
 "Cellular services" = "Cellular services";
-"Carrier records (deprecated API)" = "Carrier records (deprecated API)";
-"\"Cellular services\" comes from the reliable, non-deprecated API (current radio access technology + data service identifier)." = "\"Cellular services\" comes from the reliable, non-deprecated API (current radio access technology + data service identifier).";
-"The deprecated carrier API reports a different number of services; treat carrier-only entries as low confidence." = "The deprecated carrier API reports a different number of services; treat carrier-only entries as low confidence.";
 "Generation" = "Generation";
 "Used for data" = "Used for data";
 "Registered" = "Registered";
-"Only reported by the deprecated carrier API — low confidence." = "Only reported by the deprecated carrier API — low confidence.";
-"Raw values" = "Raw values";
 "DATA" = "DATA";
-"Carrier" = "Carrier";
-"Not available" = "Not available";
 "No cellular service detected. The device may have no SIM, be Wi-Fi only, or be in airplane mode." = "No cellular service detected. The device may have no SIM, be Wi-Fi only, or be in airplane mode.";
-"Service ID: %@ (opaque; not a physical slot or SIM name)" = "Service ID: %@ (opaque; not a physical slot or SIM name)";
 "Yes" = "Yes";
 "No" = "No";
-"What iOS reliably exposes: the radio technology per service and which service carries cellular data (dataServiceIdentifier). What it does NOT expose: the physical SIM slot, eSIM vs physical SIM, ICCID, a user-facing SIM name, or a primary/secondary identity — so the \"Cellular service 1/2\" labels are positional only. \"Used for data\" means the current cellular data service; it does not identify the voice/SMS line, nor which path traffic takes while on Wi-Fi. Carrier identity (name, MCC/MNC) was deprecated in iOS 16 with no replacement and returns placeholder values on iOS 16.4+, so it must not be used for business logic." = "What iOS reliably exposes: the radio technology per service and which service carries cellular data (dataServiceIdentifier). What it does NOT expose: the physical SIM slot, eSIM vs physical SIM, ICCID, a user-facing SIM name, or a primary/secondary identity — so the \"Cellular service 1/2\" labels are positional only. \"Used for data\" means the current cellular data service; it does not identify the voice/SMS line, nor which path traffic takes while on Wi-Fi. Carrier identity (name, MCC/MNC) was deprecated in iOS 16 with no replacement and returns placeholder values on iOS 16.4+, so it must not be used for business logic.";
 
 
 /* ===== Coverage popups & results — English source (added; translate in other locales) ===== */
@@ -493,15 +484,19 @@
 "Disable Wi‑Fi" = "Disable Wi‑Fi";
 "Please turn off Wi‑Fi to measure cellular coverage." = "Please turn off Wi‑Fi to measure cellular coverage.";
 "Network Coverage" = "Network Coverage";
-"Service identifier" = "Service identifier";
-"Carrier name" = "Carrier name";
-"Mobile country code (MCC)" = "Mobile country code (MCC)";
-"Mobile network code (MNC)" = "Mobile network code (MNC)";
-"ISO country code" = "ISO country code";
-"Allows VoIP" = "Allows VoIP";
 "No service" = "No service";
 "Unknown" = "Unknown";
 
 
 /* ===== History empty state — English source (added; translate later) ===== */
 "history_empty_label" = "No tests have been performed from this device yet";
+
+
+/* ===== Connectivity / airplane-mode hint (SIM Info) — English source (added; translate in other locales) ===== */
+"Connectivity" = "Connectivity";
+"Status" = "Status";
+"Checking…" = "Checking…";
+"Network path available" = "Network path available";
+"No connection (radio is on)" = "No connection (radio is on)";
+"Likely airplane mode or offline" = "Likely airplane mode or offline";
+"This information is a best-effort guess from iOS APIs and may be incomplete or inconsistent." = "This information is a best-effort guess from iOS APIs and may be incomplete or inconsistent.";

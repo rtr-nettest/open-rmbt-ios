@@ -3,11 +3,13 @@
 //  RMBT
 //
 //  Reads the current cellular service information from CoreTelephony and converts it into a
-//  CoreTelephony-free `CellularSnapshot`, and reports live changes.
+//  CoreTelephony-free `CellularSnapshot`, and reports live changes. Also provides a best-effort
+//  network-path monitor used by the offline/airplane-mode hint.
 //
 
 import Foundation
 import CoreTelephony
+import Network
 
 /// Supplies a snapshot of the device's cellular services and, optionally, notifies when that state
 /// changes. Abstracted so the view model can be driven with deterministic data in tests / previews.
@@ -32,24 +34,28 @@ extension CellularSnapshotProviding {
 /// hops to the main actor before invoking the handler.
 final class CTTelephonyCellularSnapshotProvider: NSObject, CellularSnapshotProviding, CTTelephonyNetworkInfoDelegate {
     private let networkInfo: CTTelephonyNetworkInfo
+    private let notificationCenter: NotificationCenter
     private var changeHandler: (@MainActor () -> Void)?
     private var radioTechnologyObserver: NSObjectProtocol?
 
-    init(networkInfo: CTTelephonyNetworkInfo = CTTelephonyNetworkInfo()) {
+    init(
+        networkInfo: CTTelephonyNetworkInfo = CTTelephonyNetworkInfo(),
+        notificationCenter: NotificationCenter = .default
+    ) {
         self.networkInfo = networkInfo
+        self.notificationCenter = notificationCenter
         super.init()
     }
 
     deinit {
         if let radioTechnologyObserver {
-            NotificationCenter.default.removeObserver(radioTechnologyObserver)
+            notificationCenter.removeObserver(radioTechnologyObserver)
         }
     }
 
     func currentSnapshot() -> CellularSnapshot {
         CellularSnapshot(
             radioTechnologyByService: networkInfo.serviceCurrentRadioAccessTechnology ?? [:],
-            carrierByService: carrierDetailsByService(),
             dataServiceIdentifier: networkInfo.dataServiceIdentifier
         )
     }
@@ -57,11 +63,14 @@ final class CTTelephonyCellularSnapshotProvider: NSObject, CellularSnapshotProvi
     // MARK: - Live updates
 
     func observeChanges(_ handler: @escaping @MainActor () -> Void) {
+        // Idempotent: drop any previous registration so repeated calls don't leak the prior
+        // NotificationCenter observer or fire duplicate callbacks.
+        stopObserving()
         changeHandler = handler
         // Fires when dataServiceIdentifier changes (e.g. data SIM switch).
         networkInfo.delegate = self
         // Fires when a service's current radio access technology changes (non-deprecated, iOS 12+).
-        radioTechnologyObserver = NotificationCenter.default.addObserver(
+        radioTechnologyObserver = notificationCenter.addObserver(
             forName: .CTServiceRadioAccessTechnologyDidChange,
             object: nil,
             queue: .main
@@ -73,7 +82,7 @@ final class CTTelephonyCellularSnapshotProvider: NSObject, CellularSnapshotProvi
     func stopObserving() {
         networkInfo.delegate = nil
         if let radioTechnologyObserver {
-            NotificationCenter.default.removeObserver(radioTechnologyObserver)
+            notificationCenter.removeObserver(radioTechnologyObserver)
         }
         radioTechnologyObserver = nil
         changeHandler = nil
@@ -89,28 +98,56 @@ final class CTTelephonyCellularSnapshotProvider: NSObject, CellularSnapshotProvi
         guard let handler = changeHandler else { return }
         Task { @MainActor in handler() }
     }
+}
 
-    // MARK: - Carrier (deprecated)
+// MARK: - Network path monitoring
 
-    /// `serviceSubscriberCellularProviders` / `CTCarrier` are deprecated since iOS 16.0 with no
-    /// replacement and return placeholder values on iOS 16.4+. We intentionally still read them for
-    /// this diagnostic so the screen shows exactly what the OS reports today.
-    private func carrierDetailsByService() -> [String: CarrierDetails] {
-        guard let providers = legacySubscriberProviders() else { return [:] }
-        return providers.reduce(into: [:]) { result, entry in
-            let carrier = entry.value
-            result[entry.key] = CarrierDetails(
-                carrierName: carrier.carrierName,
-                mobileCountryCode: carrier.mobileCountryCode,
-                mobileNetworkCode: carrier.mobileNetworkCode,
-                isoCountryCode: carrier.isoCountryCode,
-                allowsVOIP: carrier.allowsVOIP
-            )
+/// Reports whether any network path is currently satisfied. Abstracted so the view model can be
+/// driven deterministically in tests.
+@MainActor
+protocol NetworkPathMonitoring {
+    /// `nil` until the first path evaluation arrives; otherwise whether any interface has a
+    /// satisfied path.
+    var hasNetworkPath: Bool? { get }
+    func startMonitoring(_ onChange: @escaping @MainActor () -> Void)
+    func stopMonitoring()
+}
+
+/// Live `NWPathMonitor`-backed implementation.
+///
+/// `NWPathMonitor` delivers updates on a background queue, so each update hops to the main actor
+/// before mutating state or invoking the handler. A monitor cannot be restarted after `cancel()`,
+/// so a fresh one is created on every `startMonitoring` call.
+@MainActor
+final class NWPathNetworkMonitor: NetworkPathMonitoring {
+    private let queue = DispatchQueue(label: "at.rtr.rmbt.sim-info.path-monitor")
+    private var monitor: NWPathMonitor?
+    private var onChange: (@MainActor () -> Void)?
+    private(set) var hasNetworkPath: Bool?
+
+    nonisolated init() {}
+
+    func startMonitoring(_ onChange: @escaping @MainActor () -> Void) {
+        stopMonitoring()
+        self.onChange = onChange
+        let monitor = NWPathMonitor()
+        self.monitor = monitor
+        monitor.pathUpdateHandler = { [weak self] path in
+            let satisfied = path.status == .satisfied
+            Task { @MainActor in
+                // Ignore late callbacks from a monitor that was already replaced or cancelled.
+                guard let self, self.monitor === monitor else { return }
+                self.hasNetworkPath = satisfied
+                self.onChange?()
+            }
         }
+        monitor.start(queue: queue)
     }
 
-    @available(iOS, deprecated: 16.0, message: "Deprecated by Apple; used intentionally for SIM diagnostics.")
-    private func legacySubscriberProviders() -> [String: CTCarrier]? {
-        networkInfo.serviceSubscriberCellularProviders
+    func stopMonitoring() {
+        monitor?.cancel()
+        monitor = nil
+        onChange = nil
+        hasNetworkPath = nil
     }
 }
