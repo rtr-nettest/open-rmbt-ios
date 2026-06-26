@@ -24,7 +24,6 @@ struct SIMInfoView: View {
 
     var body: some View {
         List {
-            overviewSection
             connectivitySection
 
             if viewModel.summary.hasCellularService {
@@ -58,16 +57,6 @@ struct SIMInfoView: View {
         }
         .onDisappear {
             viewModel.stopObserving()
-        }
-    }
-
-    // MARK: - Overview
-
-    private var overviewSection: some View {
-        Section {
-            LabeledContent("Cellular services", value: "\(viewModel.summary.serviceCount)")
-        } header: {
-            Text("Overview")
         }
     }
 
