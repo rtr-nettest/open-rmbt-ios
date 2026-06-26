@@ -19,9 +19,11 @@ Explain clearly your reasoning behind your decisions and pros/cons of chosen sol
 - **Private data**: Secrets and branded assets live under `private/`; never commit them publicly.
 
 ## Commands
-- Build (simulator default): `xcodebuild -workspace RMBT.xcworkspace -scheme RMBT -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.1' build`
+- Build (simulator default):
+Always build for latest iPhone 17 Pro simulator available, example:`xcodebuild -workspace RMBT.xcworkspace -scheme RMBT -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.1' build`
 - Clean build: `xcodebuild -workspace RMBT.xcworkspace -scheme RMBT clean`
-- Unit tests: `xcodebuild -workspace RMBT.xcworkspace -scheme RMBT -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.1' test`
+- Unit tests:
+Always test for latest iPhone 17 Pro simulator available, example: `xcodebuild -workspace RMBT.xcworkspace -scheme RMBT -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.1' test`
 - Focused tests: append `-only-testing:RMBTTests/<TestClass>`
 - CocoaPods (bundled): `bundle install` → `bundle exec pod install --repo-update`
 - Pretty build logs: pipe any `xcodebuild` invocation to `| bundle exec xcpretty`
