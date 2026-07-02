@@ -1,0 +1,76 @@
+name: iOS Build (compile check)
+
+# Quality gate only: verifies the app compiles and links on a macOS runner.
+# No code signing, no device run, no test execution — just "does it build".
+# Builds against the committed `public/` config stubs (private/ secrets are not needed).
+
+on:
+  push:
+    branches: [ feature/qostls13 ]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ios-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build (simulator, unsigned)
+    runs-on: macos-15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Pick the newest stable Xcode this runner offers. The repo targets Xcode 26
+      # locally, but GitHub-hosted runners lag; latest-stable is fine for a compile check.
+      - name: Select latest stable Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Show toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+
+      # Guard against the CocoaPods "object version 71/77" incompatibility: xcodeproj
+      # (pinned via cocoapods ~> 1.16) refuses objectVersion > 77. The committed value
+      # is already 77, but cap it defensively in case a tool bumped it.
+      - name: Cap pbxproj objectVersion at 77
+        run: |
+          perl -i -pe 's/objectVersion = (\d+);/"objectVersion = " . ($1 > 77 ? 77 : $1) . ";"/e' \
+            RMBT.xcodeproj/project.pbxproj
+          grep -m1 objectVersion RMBT.xcodeproj/project.pbxproj
+
+      - name: Setup Ruby + Bundler cache
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+
+      - name: Cache CocoaPods
+        uses: actions/cache@v4
+        with:
+          path: Pods
+          key: pods-${{ runner.os }}-${{ hashFiles('Podfile.lock') }}
+          restore-keys: pods-${{ runner.os }}-
+
+      - name: Install pods
+        run: bundle exec pod install --repo-update
+
+      - name: Build for simulator (no signing)
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -workspace RMBT.xcworkspace \
+            -scheme RMBT \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            build \
+            | bundle exec xcpretty
