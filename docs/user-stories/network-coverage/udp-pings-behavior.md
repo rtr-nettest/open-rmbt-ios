@@ -34,11 +34,11 @@ Feature: UDP ping session behavior for RTR NetTest coverage
     Then the app shall stop the coverage measurement and show results
 
   # UDP transport requirements
-  Scenario: UDP transport must be unconnected
-    Given the server may respond to a UDP ping from a different IP address than the destination
+  Scenario: UDP transport is strict on server source address
+    Given the server responds to a UDP ping from the same IP address the client sent to
     When the client sends a UDP ping to the server address returned by ping_host
-    Then the client shall accept the reply regardless of which server source address it arrives from
-    And response validity shall be determined only by protocol fields (RR01/RE01) and sequence number
+    Then the client shall only accept replies arriving from that destination address
+    And response validity shall additionally be determined by protocol fields (RR01/RE01) and sequence number
 
   # UDP packet protocol mapping (Appendix: Specification Ping)
   Scenario: Successful ping response (RR01)

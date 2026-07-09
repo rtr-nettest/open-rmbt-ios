@@ -10,11 +10,9 @@ import CocoaAsyncSocket
 
 /// Unconnected UDP transport using `GCDAsyncUdpSocket`.
 ///
-/// This is the default transport for Network Coverage pings. It binds to an
-/// ephemeral local port and sends each datagram with an explicit destination,
-/// so replies from any server source address are accepted. This fixes IPv6
-/// scenarios where the server responds from a different address than the one
-/// the client originally targeted.
+/// It binds to an ephemeral local port and sends each datagram with an
+/// explicit destination, so replies from any server source address are
+/// accepted, i.e. it is lenient on the server source address.
 ///
 /// All mutable state is confined to `delegateQueue`. The class is marked
 /// `@unchecked Sendable` because Swift concurrency cannot verify serial-queue

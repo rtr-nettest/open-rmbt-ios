@@ -132,9 +132,9 @@ High‑level flow
 UDP transport
 - The UDP transport is abstracted behind the `UDPConnectable` protocol (`send(data:)` is enqueue‑only / synchronous; `receive()` is async).
 - Two concrete implementations exist:
-  - `AsyncSocketUDPConnection` (default): unconnected `GCDAsyncUdpSocket` that binds to an ephemeral local port and sends each datagram with an explicit destination host/port. This accepts replies from any server source address, which is required on IPv6 where the server may respond from a different address than the one the client targeted.
-  - `NWUDPConnection`: connected `NWConnection`‑based transport retained for comparison and debugging. Not used by default because a connected UDP endpoint drops replies arriving from a different IPv6 source address.
-- Response validity is determined by protocol fields and sequence/token semantics, not by source endpoint identity.
+  - `NWUDPConnection` (default): connected `NWConnection`‑based transport. A connected UDP endpoint only accepts replies from the address the client sent to — the desired strict behavior now that the UDP ping server responds from the correct source address (rtr-nettest/open-rmbt-ios-private#32).
+  - `AsyncSocketUDPConnection`: unconnected `GCDAsyncUdpSocket` that binds to an ephemeral local port and sends each datagram with an explicit destination host/port, accepting replies from any server source address. Used as a workaround while the server responded from a different IPv6 address; retained as a fallback.
+- Response validity is additionally determined by protocol fields and sequence/token semantics.
 
 UDP session and protocol
 - `UDPPingSession` (actor) encapsulates the RTR UDP ping protocol.

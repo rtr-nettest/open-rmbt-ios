@@ -11,9 +11,8 @@ import Network
 
 /// Connected UDP transport using `NWConnection` from Network.framework.
 ///
-/// Retained for comparison and debugging. Not the default transport for
-/// Network Coverage pings because a connected UDP endpoint drops replies
-/// arriving from a different server IPv6 address than the original destination.
+/// A connected UDP endpoint only accepts replies from the address the client
+/// sent to, i.e. it is strict on the server source address.
 final class NWUDPConnection: UDPConnectable {
     private var connection: NWConnection?
 
