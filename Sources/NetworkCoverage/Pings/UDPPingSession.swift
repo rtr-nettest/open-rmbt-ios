@@ -18,7 +18,7 @@ actor UDPPingSession {
         func initiate() async throws -> SessionInitiation
     }
 
-    struct SessionInitiation {
+    struct SessionInitiation: Sendable {
         let serverAddress: String
         let serverPort: String
         let token: PingSessionToken
@@ -48,6 +48,12 @@ actor UDPPingSession {
 
     private var continuations: [UInt32: PingRequest] = [:]
     private var receiverTask: Task<Void, Never>?
+    /// Incremented on every activation. A receive loop belonging to a superseded transport must not touch state
+    /// owned by a newer one — its `receive()` can only unwind asynchronously, well after the new transport is up.
+    private var transportEpoch = 0
+    /// `activateSession` suspends while the transport restarts. The actor is re-entrant during that suspension, so
+    /// sends queued for the session being replaced must not run against a transport that is mid-swap.
+    private var isActivating = false
 
     init(
         sessionInitiator: any SessionInitiating,
@@ -62,21 +68,50 @@ actor UDPPingSession {
         self.now = now
     }
 
-    func initiatePingSession() async throws -> PingSessionToken {
-        let sessionInitiation = try await sessionInitiator.initiate()
-        Log.logger.info("UDPPingSession: Starting UDP connection to \(sessionInitiation.serverAddress):\(sessionInitiation.serverPort) (ipVersion: \(sessionInitiation.ipVersion?.description ?? "any"))")
-        try await udpConnection.start(
-            host: sessionInitiation.serverAddress,
-            port: sessionInitiation.serverPort,
-            ipVersion: sessionInitiation.ipVersion
-        )
-        Log.logger.info("UDPPingSession: UDP connection started")
-        return sessionInitiation.token
+    /// Fetches the credentials of a new session. Deliberately does not touch `udpConnection`, so that an
+    /// already running session keeps being able to send pings while this (potentially long) call is in flight.
+    func prepareSession() async throws -> SessionInitiation {
+        try await sessionInitiator.initiate()
     }
 
-    func sendPing(in authToken: PingSessionToken) async throws(PingSendingError) {
+    /// Points the transport at the prepared session. This tears the previous connection down, so it is only
+    /// ever run once the credentials it belongs to are already committed.
+    func activateSession(_ session: SessionInitiation) async throws {
+        Log.logger.info("UDPPingSession: Starting UDP connection to \(session.serverAddress):\(session.serverPort) (ipVersion: \(session.ipVersion?.description ?? "any"))")
+
+        // Retire the previous transport's receive loop before the transport goes away. Its `receive()` unwinds
+        // asynchronously (`NWUDPConnection`) or not at all (`AsyncSocketUDPConnection` never resumes a pending
+        // receive on restart), so it must neither fail the next session's requests nor block a new loop from
+        // starting by leaving `receiverTask` populated.
+        transportEpoch += 1
+        receiverTask?.cancel()
+        receiverTask = nil
+        isActivating = true
+        defer { isActivating = false }
+
+        // Requests still waiting on the previous transport can never be answered now.
+        failPendingRequests(with: .networkIssue)
+
+        try await udpConnection.start(
+            host: session.serverAddress,
+            port: session.serverPort,
+            ipVersion: session.ipVersion
+        )
+        Log.logger.info("UDPPingSession: UDP connection started")
+    }
+
+    func sendPing(in session: SessionInitiation) async throws(PingSendingError) {
+        // Fail fast rather than register a request against a transport that is being swapped: doing so would also
+        // start a receive loop on the outgoing connection, which then either parks (blocking the replacement's loop
+        // from ever starting) or fails the replacement session's requests when it unwinds.
+        guard !isActivating else {
+            Log.logger.debug("UDPPingSession: Dropping ping queued for a session whose transport is being replaced")
+            throw .networkIssue
+        }
+
         cleanupExpiredPings()
 
+        let authToken = session.token
         sequenceNumber &+= 1
         let currentSequence = sequenceNumber
         let message = try makePingMessage(sequence: currentSequence, authToken: authToken)
@@ -127,21 +162,28 @@ actor UDPPingSession {
 
     private func startReceiveLoopIfNeeded() {
         guard receiverTask == nil else { return }
+        let epoch = transportEpoch
         receiverTask = Task { [weak self] in
             guard let self else { return }
-            await self.receiveResponses()
+            await self.receiveResponses(epoch: epoch)
         }
     }
 
-    private func receiveResponses() async {
-        defer { receiverTask = nil }
+    private func receiveResponses(epoch: Int) async {
+        defer {
+            // Only clear the shared handle if it still refers to this loop; a newer activation may already own it.
+            if epoch == transportEpoch { receiverTask = nil }
+        }
         while !Task.isCancelled {
             do {
                 let response = try await udpConnection.receive()
+                guard epoch == transportEpoch else { break }
                 receivedPingResponse(response)
             } catch is CancellationError {
                 break
             } catch {
+                // A superseded transport's failure says nothing about the requests of the current one.
+                guard epoch == transportEpoch else { break }
                 Log.logger.warning("UDPPingSession: Receive loop failed with error: \(error), failing \(continuations.count) pending request(s)")
                 failPendingRequests(with: .networkIssue)
                 break

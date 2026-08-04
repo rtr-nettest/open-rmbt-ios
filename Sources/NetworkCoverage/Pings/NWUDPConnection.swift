@@ -16,6 +16,16 @@ import Network
 final class NWUDPConnection: UDPConnectable {
     private var connection: NWConnection?
 
+    /// Send outcomes reported by Network.framework. Without these, a run of failed pings cannot be attributed:
+    /// "the datagrams left the device and nothing came back" and "the datagrams never went out" look identical.
+    /// Mutated from the connection's queue, so guarded.
+    private let sendOutcomesLock = NSLock()
+    private var acceptedDatagrams = 0
+    private var rejectedDatagrams = 0
+    private var isSendFailing = false
+
+    private static let sendSummaryInterval = 100
+
     func start(host: String, port: String, ipVersion: IPVersion?) async throws(UDPConnectionError) {
         connection?.cancel()
 
@@ -38,26 +48,43 @@ final class NWUDPConnection: UDPConnectable {
 
         let conn = NWConnection(host: nwHost, port: nwPort, using: params)
 
+        // `.waiting` (e.g. no route yet) is not resumed here on purpose — the connection may still become ready.
+        // The caller bounds this call instead, so the bridge must be cancellation-aware or that bound cannot work.
+        let resumeOnce = OneShotContinuation<Void>()
         do {
-            try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, any Error>) in
-                conn.stateUpdateHandler = { state in
-                    switch state {
-                    case .ready:
-                        conn.stateUpdateHandler = nil
-                        continuation.resume()
-                    case .failed(let error):
-                        conn.stateUpdateHandler = nil
-                        continuation.resume(throwing: error)
-                    case .cancelled:
-                        conn.stateUpdateHandler = nil
-                        continuation.resume(throwing: UDPConnectionError.connectionNotAvailable)
-                    default:
-                        break
+            try await withTaskCancellationHandler {
+                try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, any Error>) in
+                    resumeOnce.install(continuation)
+                    guard !Task.isCancelled else {
+                        resumeOnce.resume(throwing: CancellationError())
+                        return
                     }
+                    conn.stateUpdateHandler = { state in
+                        switch state {
+                        case .ready:
+                            conn.stateUpdateHandler = nil
+                            resumeOnce.resume(returning: ())
+                        case .failed(let error):
+                            conn.stateUpdateHandler = nil
+                            resumeOnce.resume(throwing: error)
+                        case .cancelled:
+                            conn.stateUpdateHandler = nil
+                            resumeOnce.resume(throwing: UDPConnectionError.connectionNotAvailable)
+                        case .waiting(let error):
+                            Log.logger.info("NWUDPConnection: Connection waiting: \(error)")
+                        default:
+                            break
+                        }
+                    }
+                    conn.start(queue: .global())
                 }
-                conn.start(queue: .global())
+            } onCancel: {
+                resumeOnce.resume(throwing: CancellationError())
+                conn.cancel()
             }
         } catch {
+            conn.stateUpdateHandler = nil
+            conn.cancel()
             throw .connectionNotAvailable
         }
 
@@ -73,7 +100,53 @@ final class NWUDPConnection: UDPConnectable {
         guard let connection else {
             throw UDPConnectionError.connectionNotAvailable
         }
-        connection.send(content: data, completion: .idempotent)
+        // `.contentProcessed` rather than `.idempotent`: the completion is the only evidence that a datagram was
+        // actually handed to the network stack. It cannot be surfaced as a `throw` (it arrives asynchronously,
+        // after this call returned), so it is reported to the log instead.
+        connection.send(content: data, completion: .contentProcessed { [weak self] error in
+            self?.recordSendOutcome(error: error)
+        })
+    }
+
+    private func recordSendOutcome(error: NWError?) {
+        enum Outcome {
+            case startedFailing(NWError)
+            case recovered
+            case summary(accepted: Int, rejected: Int)
+        }
+
+        var outcomes: [Outcome] = []
+        sendOutcomesLock.lock()
+        if let error {
+            rejectedDatagrams += 1
+            if !isSendFailing {
+                isSendFailing = true
+                outcomes.append(.startedFailing(error))
+            }
+        } else {
+            acceptedDatagrams += 1
+            if isSendFailing {
+                isSendFailing = false
+                outcomes.append(.recovered)
+            }
+        }
+        if (acceptedDatagrams + rejectedDatagrams) % Self.sendSummaryInterval == 0 {
+            outcomes.append(.summary(accepted: acceptedDatagrams, rejected: rejectedDatagrams))
+        }
+        sendOutcomesLock.unlock()
+
+        // Only transitions and periodic totals are logged: at the 100 ms ping cadence, one line per datagram would
+        // bury the field log it exists to make readable.
+        for outcome in outcomes {
+            switch outcome {
+            case .startedFailing(let error):
+                Log.logger.warning("NWUDPConnection: Datagrams are no longer leaving the device: \(error)")
+            case .recovered:
+                Log.logger.info("NWUDPConnection: Datagrams are leaving the device again")
+            case .summary(let accepted, let rejected):
+                Log.logger.info("NWUDPConnection: \(accepted) datagram(s) accepted by the network stack, \(rejected) rejected")
+            }
+        }
     }
 
     func receive() async throws -> Data {

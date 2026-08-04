@@ -52,6 +52,74 @@ Feature: UDP ping session behavior for RTR NetTest coverage
     Then the ping is considered failed with needsReinitialization
     And the app shall reinitialize the UDP ping session before continuing
 
+  # No pings while on Wi-Fi
+  Scenario: No pings are sent while the active path is Wi-Fi
+    Given a coverage measurement is running
+    When the active network path becomes Wi-Fi
+    Then the app shall stop sending UDP pings
+    And it shall not report any ping results, successful or failed
+    And a ping that was already in flight when Wi-Fi appeared shall not be reported either
+
+  Scenario: Returning from Wi-Fi refreshes the ping session
+    Given a coverage measurement paused its pings because the active path was Wi-Fi
+    When the active path becomes cellular again
+    Then the app shall obtain a fresh ping session via /coverageRequest
+    And it shall use the freshly returned ping_host, ping_port, ping_token and ip_version
+    And the previous session shall keep sending pings until the new credentials arrive
+
+  Scenario: A working ping does not settle an owed Wi-Fi refresh
+    Given the app owes a ping session refresh because it returned from Wi-Fi
+    And the refresh is still throttled by the recovery backoff
+    When pings in the previous session keep succeeding
+    Then the app shall still refresh the session once the backoff window elapses
+    Because the previous session's ip_version may be wrong for the new path
+
+  Scenario: Repeated Wi-Fi flapping does not create a session per flap
+    Given a coverage measurement is running
+    When the active path flaps between Wi-Fi and cellular several times within one backoff window
+    Then the app shall create at most one new ping session in that window
+    And the refresh owed by the remaining flaps shall be deferred, not lost
+
+  Scenario: Starting a measurement on Wi-Fi creates exactly one session
+    Given the active path is Wi-Fi when the measurement starts
+    Then the app shall not call /coverageRequest while it stays on Wi-Fi
+    When the active path becomes cellular
+    Then the app shall create exactly one ping session, not one followed by a refresh
+
+  # Recovery from a dead ping path
+  Scenario: Recover the session after a run of failed pings
+    Given a coverage measurement is running with a working ping session
+    When 30 consecutive ping outcomes fail or time out (about 3 seconds at the 100 ms cadence)
+    Then the app shall obtain a replacement ping session via /coverageRequest
+    And the previous session shall keep sending and reporting pings until the replacement's credentials arrive
+
+  Scenario: Do not recover while failures stay below the threshold
+    Given a coverage measurement is running
+    When fewer than 30 consecutive ping outcomes fail
+    Or a ping succeeds before the threshold is reached
+    Then the app shall keep using the current ping session
+
+  Scenario: Throttle repeated recoveries with a doubling backoff
+    Given the ping path stays broken
+    Then the first recovery shall happen immediately
+    And subsequent recoveries shall be spaced 10, 20, 40, 80 and then at most 120 seconds apart
+    And a successful ping shall restart that ladder
+
+  Scenario: A recovery attempt never silences the measurement
+    Given a coverage measurement is running with a working ping session
+    When a recovery attempt to /coverageRequest hangs or fails
+    Then the attempt shall be abandoned after 15 seconds
+    And the app shall continue using the previous ping session
+    And it shall retry the recovery at the next backoff slot
+    # The credentials fetch is bounded by 15 s; bringing the transport up is bounded by a tighter 5 s, because
+    # that is the only window in which nothing can send.
+
+  Scenario: Keep reporting failed pings while offline on cellular
+    Given a coverage measurement is running on a cellular or unavailable path
+    And no ping receives a response
+    Then the app shall keep reporting failed pings
+    So that the affected fences are rendered as "no coverage"
+
   # UI behavior during reinitialization
   Scenario: UI remains uninterrupted during ping session reinitialization
     Given the app must reinitialize the ping session (due to timeout or RE01)

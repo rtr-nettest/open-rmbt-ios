@@ -20,12 +20,24 @@ Feature: Wi‑Fi connection warning during Network Coverage measurement
     Then the "Disable Wi-Fi" warning is displayed
     And the message reads "Please turn off Wi‑Fi to measure cellular coverage."
 
-  Scenario: Location and ping updates are ignored while on Wi‑Fi
+  Scenario: No pings are sent while on Wi‑Fi
+    Given a measurement is running
+    And the active network path is Wi‑Fi
+    Then no UDP pings are sent at all
+    And no ping results are reported, successful or failed
+    And returning to cellular refreshes the ping session
+    # See udp-pings-behavior.md for the full pause/refresh rules.
+
+  Scenario: Ping updates are ignored while on Wi‑Fi but location updates are not
     Given a measurement is running
     And the network connection type is Wi‑Fi
-    When location updates arrive
-    And ping updates arrive
+    When ping updates arrive
     Then they are ignored and do not affect fences or latest ping
+    When location updates arrive
+    Then they are still processed and continue to create and progress fences
+    And those fences simply carry no pings for the Wi‑Fi stretch
+    # Confirmed as the intended behaviour: fences keep tracking the route while on Wi‑Fi; only the
+    # (meaningless) Wi‑Fi ping results are discarded.
 
   Scenario: Warning hides and measurement resumes when switching back to cellular
     Given the "Disable Wi-Fi" warning is displayed during a measurement

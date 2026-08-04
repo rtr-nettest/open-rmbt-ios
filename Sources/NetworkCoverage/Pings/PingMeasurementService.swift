@@ -16,10 +16,17 @@ enum PingSendingError: Error {
     case networkIssue
 }
 
-protocol PingSending<PingSession> {
-    associatedtype PingSession
+protocol PingSending<PingSession>: Sendable {
+    associatedtype PingSession: Sendable
 
-    func initiatePingSession() async throws -> PingSession
+    /// Fetches the credentials of a new ping session. May take arbitrarily long and must leave the
+    /// currently running transport untouched, so that an already active session can keep measuring
+    /// while a replacement is being prepared.
+    func prepareSession() async throws -> PingSession
+
+    /// Brings the transport up for an already prepared session. Fast, but destroys the previous transport.
+    func activateSession(_ session: PingSession) async throws
+
     func sendPing(in session: PingSession) async throws(PingSendingError)
 }
 
@@ -33,15 +40,71 @@ struct PingResult: Hashable {
     let timestamp: Date
 }
 
+/// Rules for recovering a ping session whose send path stopped working.
+struct RecoveryPolicy: Sendable {
+    /// Number of consecutive failed ping outcomes after which a replacement session is prepared.
+    let maxConsecutiveFailures: Int
+
+    /// Delay enforced between the first and the second recovery. Doubled after every recovery, capped at `maxBackoff`.
+    /// The first recovery of a run is not delayed.
+    let initialBackoff: Duration
+
+    let maxBackoff: Duration
+
+    /// Upper bound for a recovery preparation. The very first preparation of a run is deliberately unbounded,
+    /// because parking until the device gets online is the existing offline-start behaviour.
+    let recoveryPrepareTimeout: Duration
+
+    /// Upper bound for bringing the transport up. Always applied, including for the first session of a run: this is
+    /// the only window in which nothing can send, so it is kept far shorter than the credentials fetch.
+    let activationTimeout: Duration
+
+    /// Minimum delay before retrying a preparation that failed while no usable session was left.
+    let retryDelay: Duration
+
+    init(
+        maxConsecutiveFailures: Int,
+        initialBackoff: Duration,
+        maxBackoff: Duration,
+        recoveryPrepareTimeout: Duration,
+        activationTimeout: Duration,
+        retryDelay: Duration
+    ) {
+        precondition(maxConsecutiveFailures > 0, "A threshold of 0 would owe a recovery on every tick")
+        precondition(initialBackoff >= .zero && maxBackoff >= .zero, "Backoff delays cannot be negative")
+        precondition(initialBackoff <= maxBackoff, "The backoff ladder must not start above its own cap")
+        precondition(recoveryPrepareTimeout > .zero, "A non-positive timeout would abandon every attempt at once")
+        precondition(activationTimeout > .zero, "A non-positive timeout would abandon every activation at once")
+        precondition(retryDelay >= .zero, "A negative retry delay cannot gate anything")
+        self.maxConsecutiveFailures = maxConsecutiveFailures
+        self.initialBackoff = initialBackoff
+        self.maxBackoff = maxBackoff
+        self.recoveryPrepareTimeout = recoveryPrepareTimeout
+        self.activationTimeout = activationTimeout
+        self.retryDelay = retryDelay
+    }
+
+    static let `default` = RecoveryPolicy(
+        maxConsecutiveFailures: 30,
+        initialBackoff: .seconds(10),
+        maxBackoff: .seconds(120),
+        recoveryPrepareTimeout: .seconds(15),
+        activationTimeout: .seconds(5),
+        retryDelay: .seconds(1)
+    )
+}
+
 struct PingMeasurementService {
     static func pings2<T>(
         clock: some Clock<Duration>,
         pingSender: some PingSending<T>,
         now: @escaping () -> Date = Date.init,
         frequency: Duration,
-        sessionMaxDuration: @escaping () -> TimeInterval? = { nil }
+        sessionMaxDuration: @escaping () -> TimeInterval? = { nil },
+        networkTypeProvider: (any CurrentNetworkTypeProvider)? = nil,
+        recovery: RecoveryPolicy = .default
     ) -> some PingsAsyncSequence {
-        let state = PingSessionStateController<T>()
+        let state = PingSessionStateController<T>(policy: recovery)
 
         return AsyncStream { continuation in
             let start = clock.now
@@ -51,58 +114,59 @@ struct PingMeasurementService {
                 await withDiscardingTaskGroup { group in
                     while !Task.isCancelled {
                         let tick = clock.now
-                        let duration = start.duration(to: tick)
-                        let currentDate = startDate.advanced(by: TimeInterval(duration.milliseconds) / 1000)
+                        let currentDate = startDate.advanced(by: start.duration(to: tick).timeInterval)
                         let nextInstant = tick.advanced(by: frequency)
 
+                        // Decided on the ordered tick, so that pausing, failure thresholds and the recovery
+                        // gate never observe out-of-order timestamps of concurrently completing child tasks.
+                        let action = state.actionForTick(
+                            at: currentDate,
+                            sessionMaxDuration: sessionMaxDuration(),
+                            networkType: networkTypeProvider?.currentNetworkType()
+                        )
+
                         group.addTask {
-                            let action = await state.actionForTick(
-                                at: currentDate,
-                                sessionMaxDuration: sessionMaxDuration()
-                            )
+                            guard !Task.isCancelled else { return }
 
-                            do {
-                                try Task.checkCancellation()
+                            switch action {
+                            case .prepare(let generation, let isPreparationBounded):
+                                await prepareAndActivateSession(
+                                    sender: pingSender,
+                                    state: state,
+                                    clock: clock,
+                                    generation: generation,
+                                    at: currentDate,
+                                    preparationTimeout: isPreparationBounded
+                                        ? recovery.recoveryPrepareTimeout
+                                        : nil,
+                                    activationTimeout: recovery.activationTimeout
+                                )
 
-                                switch action {
-                                case .initiate(let generation):
-                                    Log.logger.info("UDPPing: Initiating new ping session")
-                                    let session = try await pingSender.initiatePingSession()
-                                    await state.didInitiateSession(
-                                        session,
-                                        at: currentDate,
-                                        generation: generation
-                                    )
-                                    Log.logger.info("UDPPing: Ping session initiated successfully")
-                                case .send(let session, let generation):
-                                    if let result = await pingResult(
-                                        sender: pingSender,
-                                        session: session,
-                                        clock: clock,
-                                        at: currentDate,
-                                        reinitializeSession: {
-                                            await state.requestReinitialization(for: generation)
-                                        }
-                                    ) {
-                                        continuation.yield(result)
+                            case .send(let session, let generation):
+                                switch await measureSend(sender: pingSender, session: session, clock: clock) {
+                                case .needsReinitialization:
+                                    state.requestReinitialization(for: generation)
+
+                                case .failed:
+                                    if state.recordFailure(generation: generation) {
+                                        continuation.yield(PingResult(result: .error, timestamp: currentDate))
                                     }
-                                case .skip:
-                                    break
+
+                                case .succeeded(let elapsed):
+                                    if state.recordSuccess(generation: generation) {
+                                        continuation.yield(
+                                            PingResult(result: .interval(elapsed), timestamp: currentDate)
+                                        )
+                                    }
                                 }
-                            } catch is CancellationError {
-                                return
-                            } catch {
-                                if case .initiate(let generation) = action {
-                                    await state.didFailInitiation(generation: generation)
-                                }
-                                continuation.yield(PingResult(result: .error, timestamp: currentDate))
+
+                            case .skip:
+                                break
                             }
                         }
 
                         do {
                             try await clock.sleep(until: nextInstant, tolerance: .milliseconds(1))
-                        } catch is CancellationError {
-                            break
                         } catch {
                             break
                         }
@@ -119,14 +183,57 @@ struct PingMeasurementService {
         }
     }
 
-    private static func pingResult<T>(
+    // MARK: - Action execution
+
+    private struct PreparationTimedOutError: Error {}
+
+    private enum SendOutcome {
+        case succeeded(Duration)
+        case failed
+        case needsReinitialization
+    }
+
+    /// Runs the two phases of bringing a session up, reporting each of them separately: the state controller
+    /// keeps the previous session usable until the credentials of the replacement are in hand.
+    private static func prepareAndActivateSession<T>(
+        sender: some PingSending<T>,
+        state: PingSessionStateController<T>,
+        clock: some Clock<Duration>,
+        generation: Int,
+        at date: Date,
+        preparationTimeout: Duration?,
+        activationTimeout: Duration
+    ) async {
+        do {
+            let session = try await withTimeout(preparationTimeout, clock: clock) {
+                try await sender.prepareSession()
+            }
+            state.didPrepareSession(generation: generation)
+
+            // Activation is *always* bounded, including for the first session of a run: `NWUDPConnection.start`
+            // never resumes while the path stays `.waiting`, and a hang here leaves nothing able to send and
+            // nothing to retry it. Only the credentials fetch may park, because waiting for the device to come
+            // online is the offline-start behaviour.
+            try await withTimeout(activationTimeout, clock: clock) {
+                try await sender.activateSession(session)
+            }
+            state.didActivateSession(session, at: date, generation: generation)
+            Log.logger.info("UDPPing: Ping session activated")
+        } catch {
+            // Only a genuine shutdown may go unreported: leaving the controller in `.preparing` means every later
+            // tick skips, so any other error — including a spurious `CancellationError` — must be reported.
+            guard !Task.isCancelled else { return }
+            Log.logger.warning("UDPPing: Ping session preparation failed: \(error)")
+            state.didFailPreparation(generation: generation, launchedAt: date)
+        }
+    }
+
+    private static func measureSend<T>(
         sender: some PingSending<T>,
         session: T,
-        clock: some Clock<Duration>,
-        at date: Date,
-        reinitializeSession: () async -> Void
-    ) async -> PingResult? {
-        var capturedError: PingSendingError? = nil
+        clock: some Clock<Duration>
+    ) async -> SendOutcome {
+        var capturedError: PingSendingError?
         let elapsed = await clock.measure {
             do throws(PingSendingError) {
                 try await sender.sendPing(in: session)
@@ -134,87 +241,351 @@ struct PingMeasurementService {
                 capturedError = error
             }
         }
-        if let capturedError {
-            if capturedError == .needsReinitialization {
-                Log.logger.info("UDPPing: Server responded with reinitialisation request (RE01), will start new session")
-                await reinitializeSession()
+
+        guard let capturedError else { return .succeeded(elapsed) }
+
+        if capturedError == .needsReinitialization {
+            Log.logger.info("UDPPing: Server responded with reinitialisation request (RE01), will start new session")
+            return .needsReinitialization
+        }
+        return .failed
+    }
+
+    private static func withTimeout<R>(
+        _ timeout: Duration?,
+        clock: some Clock<Duration>,
+        operation: @escaping () async throws -> R
+    ) async throws -> R {
+        guard let timeout else {
+            return try await operation()
+        }
+
+        return try await withThrowingTaskGroup(of: Optional<R>.self) { group in
+            group.addTask { try await operation() }
+            group.addTask {
+                try await clock.sleep(for: timeout)
                 return nil
-            } else {
-                return PingResult(result: .error, timestamp: date)
             }
-        } else {
-            return PingResult(result: .interval(elapsed), timestamp: date)
+
+            while let result = try await group.next() {
+                group.cancelAll()
+                guard let result else { throw PreparationTimedOutError() }
+                return result
+            }
+            throw CancellationError()
         }
     }
 }
 
-private actor PingSessionStateController<Session> {
+// MARK: - Session state
+
+/// Deadlines and tick timestamps are both floating-point seconds derived from independent additions, so
+/// they are compared with a tolerance far below the ping cadence.
+private let deadlineComparisonTolerance: TimeInterval = 0.001
+
+/// Why a replacement session was asked for. Kept so that a failed attempt can re-latch its own cause.
+private struct RecoveryCauses: OptionSet {
+    let rawValue: Int
+
+    static let networkTypeChange = RecoveryCauses(rawValue: 1 << 0)
+    static let failureRun = RecoveryCauses(rawValue: 1 << 1)
+}
+
+/// Serialised with a lock rather than an actor on purpose: every transition here is a short, synchronous
+/// state update, and keeping it non-suspending is what lets the cadence loop decide a tick's action
+/// without a suspension point between reading the tick's timestamp and acting on it.
+private final class PingSessionStateController<Session: Sendable>: @unchecked Sendable {
     enum TickAction {
-        case initiate(generation: Int)
+        case prepare(generation: Int, isPreparationBounded: Bool)
         case send(session: Session, generation: Int)
         case skip
     }
 
-    private enum State {
-        case needsInitiation
-        case inProgress(generation: Int)
-        case finished(session: Session, generation: Int, startedAt: Date)
+    private struct SessionInfo {
+        let value: Session
+        let generation: Int
+        /// The tick this session's preparation was launched from, not the tick it became usable. The server counts
+        /// `max_coverage_measurement_seconds` from `/coverageRequest`, so the client's window has to start there too.
+        /// After a long park that leaves the first session with little budget left — deliberate, and unchanged
+        /// from the behaviour before the prepare/activate split.
+        let startedAt: Date
     }
 
-    private var state: State = .needsInitiation
+    private enum State {
+        /// Nothing usable, nothing in flight.
+        case idle
+        /// A replacement is being fetched. While `old` is non-nil it keeps measuring (make before break).
+        case preparing(generation: Int, old: SessionInfo?, causes: RecoveryCauses)
+        case active(SessionInfo)
+    }
+
+    private let policy: RecoveryPolicy
+
+    private var state: State = .idle
     private var nextGeneration = 0
+
+    private var isPaused = false
+    private var pendingNetworkTypeRecovery = false
+    private var pendingFailureRecovery = false
+    private var consecutiveFailures = 0
+    private var hardCutRequested = false
+
+    private var backoff: Duration
+    private var nextRecoveryAllowedAt: Date?
+    private var nextPrepareAllowedAt: Date?
+    private var isRecoveryThrottleClampPending = false
+    /// Only the very first credentials fetch of a run may park indefinitely (offline start). Set as soon as that
+    /// fetch is launched, so a retry after it fails is bounded like every other one.
+    private var hasLaunchedFirstPreparation = false
+
+    private let lock = NSLock()
+
+    init(policy: RecoveryPolicy) {
+        self.policy = policy
+        self.backoff = policy.initialBackoff
+    }
 
     func actionForTick(
         at currentDate: Date,
-        sessionMaxDuration: TimeInterval?
+        sessionMaxDuration: TimeInterval?,
+        networkType: NetworkTypeUpdate.NetworkConnectionType?
     ) -> TickAction {
+        lock.lock()
+        defer { lock.unlock() }
+
+        // Wi-Fi results are meaningless for coverage, so pings pause. An unsatisfied path (`nil`) must keep
+        // pinging: its failures are what renders a fence as "no coverage".
+        if networkType == .wifi {
+            if !isPaused {
+                Log.logger.info("UDPPing: Wi-Fi path active, pausing ping measurement")
+                isPaused = true
+            }
+            pendingNetworkTypeRecovery = true
+            pendingFailureRecovery = false
+            consecutiveFailures = 0
+            return .skip
+        }
+
+        if isPaused {
+            isPaused = false
+            Log.logger.info("UDPPing: Wi-Fi path left, resuming ping measurement")
+        }
+
+        applyHardCutIfNeeded(at: currentDate, sessionMaxDuration: sessionMaxDuration)
+
+        // A working path restarts the ladder, but it must not unlock an immediate recovery: otherwise
+        // flapping Wi-Fi would mint a new session on every single flap. All deadline arithmetic stays on
+        // the ordered tick so it never runs against a stale timestamp.
+        if isRecoveryThrottleClampPending {
+            isRecoveryThrottleClampPending = false
+            if let deadline = nextRecoveryAllowedAt {
+                nextRecoveryAllowedAt = min(deadline, currentDate.addingTimeInterval(policy.initialBackoff.timeInterval))
+            }
+        }
+
+        if consecutiveFailures >= policy.maxConsecutiveFailures {
+            Log.logger.info("UDPPing: \(consecutiveFailures) consecutive ping failures, session recovery owed")
+            pendingFailureRecovery = true
+            consecutiveFailures = 0
+        }
+
         if
-            case let .finished(_, _, startedAt) = state,
-            let sessionMaxDuration,
-            currentDate.timeIntervalSince(startedAt) >= sessionMaxDuration
+            pendingNetworkTypeRecovery || pendingFailureRecovery,
+            case .active(let session) = state,
+            hasReached(nextRecoveryAllowedAt, at: currentDate)
         {
-            Log.logger.info(
-                "UDPPing: Session timeout reached (\(sessionMaxDuration)s elapsed since \(startedAt)), requesting reinitialisation"
-            )
-            state = .needsInitiation
+            nextRecoveryAllowedAt = currentDate.addingTimeInterval(backoff.timeInterval)
+            backoff = min(backoff * 2, policy.maxBackoff)
+            return startPreparation(replacing: session, isRecovery: true)
         }
 
         switch state {
-        case .needsInitiation:
-            nextGeneration += 1
-            let generation = nextGeneration
-            state = .inProgress(generation: generation)
-            return .initiate(generation: generation)
-        case .inProgress:
-            return .skip
-        case .finished(let session, let generation, _):
-            return .send(session: session, generation: generation)
+        case .idle:
+            if !hasReached(nextPrepareAllowedAt, at: currentDate) {
+                return .skip
+            }
+            nextPrepareAllowedAt = nil
+            return startPreparation(replacing: nil, isRecovery: false)
+
+        case .preparing(_, let old, _):
+            guard let old else { return .skip }
+            return .send(session: old.value, generation: old.generation)
+
+        case .active(let session):
+            return .send(session: session.value, generation: session.generation)
         }
     }
 
-    func didInitiateSession(
-        _ session: Session,
-        at currentDate: Date,
-        generation: Int
-    ) {
-        guard case .inProgress(let currentGeneration) = state, currentGeneration == generation else {
-            return
-        }
-        state = .finished(session: session, generation: generation, startedAt: currentDate)
+    /// `true` when the outcome was accepted, meaning it belongs to the session currently in use and the
+    /// measurement is not paused. Rejected outcomes are neither counted nor reported.
+    func recordFailure(generation: Int) -> Bool {
+        lock.lock()
+        defer { lock.unlock() }
+
+        guard accepts(generation) else { return false }
+        consecutiveFailures += 1
+        return true
     }
 
-    func didFailInitiation(generation: Int) {
-        guard case .inProgress(let currentGeneration) = state, currentGeneration == generation else {
-            return
+    func recordSuccess(generation: Int) -> Bool {
+        lock.lock()
+        defer { lock.unlock() }
+
+        guard accepts(generation) else { return false }
+        consecutiveFailures = 0
+        pendingFailureRecovery = false
+        backoff = policy.initialBackoff
+        isRecoveryThrottleClampPending = true
+
+        // A working path settles the failure cause for good, including for an attempt already in flight: otherwise a
+        // preparation that later fails would resurrect the cause from its snapshot and recover a path that recovered
+        // on its own. An owed network-type refresh is deliberately left in place.
+        if case .preparing(let preparingGeneration, let old, var causes) = state, causes.contains(.failureRun) {
+            causes.remove(.failureRun)
+            state = .preparing(generation: preparingGeneration, old: old, causes: causes)
         }
-        state = .needsInitiation
+        return true
     }
 
     func requestReinitialization(for generation: Int) {
-        guard case .finished(_, let currentGeneration, _) = state, currentGeneration == generation else {
+        lock.lock()
+        defer { lock.unlock() }
+
+        guard accepts(generation) else { return }
+        hardCutRequested = true
+    }
+
+    /// Credentials are in hand — this is the commit point. The previous session is dropped here, because
+    /// its `test_uuid` has already been superseded by the announcement the fetch made.
+    func didPrepareSession(generation: Int) {
+        lock.lock()
+        defer { lock.unlock() }
+
+        guard case .preparing(let currentGeneration, _, let causes) = state, currentGeneration == generation else {
             return
         }
-        state = .needsInitiation
+        state = .preparing(generation: generation, old: nil, causes: causes)
+    }
+
+    func didActivateSession(_ session: Session, at currentDate: Date, generation: Int) {
+        lock.lock()
+        defer { lock.unlock() }
+
+        guard case .preparing(let currentGeneration, _, _) = state, currentGeneration == generation else { return }
+        state = .active(.init(value: session, generation: generation, startedAt: currentDate))
+        consecutiveFailures = 0
+        hardCutRequested = false
+        // Failures observed on the session being replaced are settled by this activation: the fresh
+        // credentials and transport are exactly what the owed failure recovery was asking for. An owed
+        // network-type refresh is deliberately kept — this candidate may have been fetched on the old path.
+        pendingFailureRecovery = false
+    }
+
+    /// `launchedAt` is the tick the failed attempt started from. The retry deadline is anchored to it rather than
+    /// to whichever tick happens to observe the failure: an attempt that failed fast is throttled, while one that
+    /// already spent longer than `retryDelay` failing retries at once.
+    func didFailPreparation(generation: Int, launchedAt: Date) {
+        lock.lock()
+        defer { lock.unlock() }
+
+        guard case .preparing(let currentGeneration, let old, let causes) = state, currentGeneration == generation
+        else { return }
+
+        // Re-latch whatever asked for this attempt, so the retry actually happens at the next gate slot.
+        if causes.contains(.networkTypeChange) { pendingNetworkTypeRecovery = true }
+        if causes.contains(.failureRun) { pendingFailureRecovery = true }
+
+        if let old {
+            // Nothing was committed and the transport was never touched — the old session is still good.
+            Log.logger.info("UDPPing: Keeping the previous ping session after a failed preparation")
+            state = .active(old)
+        } else {
+            Log.logger.info("UDPPing: No usable ping session left, retrying after \(policy.retryDelay)")
+            state = .idle
+            nextPrepareAllowedAt = launchedAt.addingTimeInterval(policy.retryDelay.timeInterval)
+        }
+    }
+
+    // MARK: - Private helpers
+
+    private var sessionInUse: SessionInfo? {
+        switch state {
+        case .idle: nil
+        case .preparing(_, let old, _): old
+        case .active(let session): session
+        }
+    }
+
+    private func accepts(_ generation: Int) -> Bool {
+        !isPaused && sessionInUse?.generation == generation
+    }
+
+    /// Deadlines and tick timestamps are both floating-point seconds derived from independent additions, so
+    /// they are compared with a tolerance far below the ping cadence. Without it a deadline that lands
+    /// exactly on a tick can be missed and slip by a whole cadence period.
+    private func hasReached(_ deadline: Date?, at currentDate: Date) -> Bool {
+        guard let deadline else { return true }
+        return currentDate.timeIntervalSince(deadline) >= -deadlineComparisonTolerance
+    }
+
+    private func startPreparation(replacing old: SessionInfo?, isRecovery: Bool) -> TickAction {
+        // Only the genuine first credentials fetch of a run may park indefinitely — waiting for the device to come
+        // online is the offline-start feature. Every later one is bounded, otherwise a parked mid-run
+        // `/coverageRequest` silences the measurement with nothing left to retry it.
+        let isPreparationBounded = hasLaunchedFirstPreparation
+        hasLaunchedFirstPreparation = true
+        var causes: RecoveryCauses = []
+        if pendingNetworkTypeRecovery { causes.insert(.networkTypeChange) }
+        if pendingFailureRecovery { causes.insert(.failureRun) }
+
+        // Any preparation fetches fresh credentials, so every owed recovery is satisfied by it.
+        pendingNetworkTypeRecovery = false
+        pendingFailureRecovery = false
+        consecutiveFailures = 0
+
+        nextGeneration += 1
+        let generation = nextGeneration
+        state = .preparing(generation: generation, old: old, causes: causes)
+
+        Log.logger.info(
+            "UDPPing: Preparing ping session (generation \(generation), recovery: \(isRecovery), keeps previous session: \(old != nil), bounded: \(isPreparationBounded))"
+        )
+        return .prepare(generation: generation, isPreparationBounded: isPreparationBounded)
+    }
+
+    /// `RE01` and `max_coverage_measurement_seconds` are hard cuts: the session in use must stop being used
+    /// immediately. They are evaluated before the soft recovery gate so that a rejected session is never
+    /// kept alive as the fallback of a recovery attempt.
+    private func applyHardCutIfNeeded(at currentDate: Date, sessionMaxDuration: TimeInterval?) {
+        guard let sessionInUse else {
+            hardCutRequested = false
+            return
+        }
+
+        let reason: String
+        if hardCutRequested {
+            hardCutRequested = false
+            reason = "server requested reinitialisation (RE01)"
+        } else if
+            let sessionMaxDuration,
+            hasReached(sessionInUse.startedAt.addingTimeInterval(sessionMaxDuration), at: currentDate)
+        {
+            reason = "session timeout reached (\(sessionMaxDuration)s elapsed since \(sessionInUse.startedAt))"
+        } else {
+            return
+        }
+
+        Log.logger.info("UDPPing: Dropping current ping session: \(reason)")
+
+        switch state {
+        case .idle:
+            break
+        case .active:
+            state = .idle
+        case .preparing(let generation, _, let causes):
+            // Keep the very same candidate — a hard cut must never start a second request.
+            state = .preparing(generation: generation, old: nil, causes: causes)
+        }
     }
 }
 
@@ -228,6 +599,10 @@ extension AsyncStream: PingsAsyncSequence where Element == PingResult {}
 extension Duration {
     var milliseconds: Int64 {
         components.seconds * 1000 + Int64(Double(components.attoseconds) / 1e15)
+    }
+
+    var timeInterval: TimeInterval {
+        TimeInterval(milliseconds) / 1000
     }
 }
 

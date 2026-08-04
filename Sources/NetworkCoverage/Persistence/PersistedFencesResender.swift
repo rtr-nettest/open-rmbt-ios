@@ -48,6 +48,9 @@ struct PersistedFencesResender {
 
         // Submit oldest first (FIFO order)
         for (index, session) in sessions.reversed().enumerated() {
+            // A bounded ping-session preparation runs this resend first; stop between submissions once it gave up.
+            try Task.checkCancellation()
+
             let startedAtDate = Date(timeIntervalSince1970: Double(session.startedAt) / 1_000_000)
             let anchorAtDate = session.anchorAt.map { Date(timeIntervalSince1970: Double($0) / 1_000_000) }
             let finalizedAtDate = session.finalizedAt.map { Date(timeIntervalSince1970: Double($0) / 1_000_000) }

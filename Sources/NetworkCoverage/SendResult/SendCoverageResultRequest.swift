@@ -165,15 +165,28 @@ struct ControlServerCoverageResultsService: SendCoverageResultsService {
             throw Failure.missingStartDate
         }
 
-        _ = try await withCheckedThrowingContinuation { continuation in
-            controlServer.submitCoverageResult(
-                .init(fences: fences, testUUID: testUUID, coverageStartDate: coverageStartDate),
-                acceptableStatusCodes: NetworkCoverageFactory.acceptableSubmitResultsRequestStatusCodes
-            ) { response in
-                continuation.resume(returning: response)
-            } error: { error in
-                continuation.resume(throwing: error)
+        // Cancellation-aware: every ping-session preparation runs a resend first, and that preparation is bounded.
+        // Without this, giving up on the preparation would still wait for this submission to call back.
+        let resumeOnce = OneShotContinuation<Any?>()
+
+        _ = try await withTaskCancellationHandler {
+            try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Any?, any Error>) in
+                resumeOnce.install(continuation)
+                guard !Task.isCancelled else {
+                    resumeOnce.resume(throwing: CancellationError())
+                    return
+                }
+                controlServer.submitCoverageResult(
+                    .init(fences: fences, testUUID: testUUID, coverageStartDate: coverageStartDate),
+                    acceptableStatusCodes: NetworkCoverageFactory.acceptableSubmitResultsRequestStatusCodes
+                ) { response in
+                    resumeOnce.resume(returning: response)
+                } error: { error in
+                    resumeOnce.resume(throwing: error)
+                }
             }
+        } onCancel: {
+            resumeOnce.resume(throwing: CancellationError())
         }
     }
 }

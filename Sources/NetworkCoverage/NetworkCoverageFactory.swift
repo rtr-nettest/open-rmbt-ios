@@ -167,7 +167,8 @@ struct NetworkCoverageFactory {
                 now: RMBTHelpers.RMBTCurrentNanos
             ),
             frequency: .milliseconds(100),
-            sessionMaxDuration: { sessionInitializer.maxCoverageMeasurementDuration }
+            sessionMaxDuration: { sessionInitializer.maxCoverageMeasurementDuration },
+            networkTypeProvider: networkTypeProvider
         ) }
 
         // Allow location updates regardless of initialization to support offline start

@@ -20,15 +20,15 @@ struct UDPPingSessionTests {
             let ipVersion: IPVersion? = .IPv4
             let token = "Z7kKKZqSYU/j7nSGbjoRLw=="
 
-            let (sut, udp, returnedToken) = makeSUT(sessionInitiation: .init(
+            let (sut, udp, expectedSession) = makeSUT(sessionInitiation: .init(
                 serverAddress: host,
                 serverPort: port,
                 token: token,
                 ipVersion: ipVersion
             ))
 
-            let obtained = try await sut.initiatePingSession()
-            #expect(obtained == returnedToken)
+            let obtained = try await sut.startSession()
+            #expect(obtained.token == expectedSession.token)
 
             #expect(udp.capturedStartParameters == [
                 .init(host: host, port: port, ipVersion: ipVersion)
@@ -43,10 +43,10 @@ struct UDPPingSessionTests {
                 token: "dummy-token",
                 ipVersion: nil
             )
-            let (sut, udp, token) = makeSUT(sessionInitiation: initiation)
+            let (sut, udp, expectedSession) = makeSUT(sessionInitiation: initiation)
 
-            let returned = try await sut.initiatePingSession()
-            #expect(returned == token)
+            let returned = try await sut.startSession()
+            #expect(returned.token == expectedSession.token)
 
             #expect(udp.capturedStartParameters == [
                 .init(host: "ping.rtr.example", port: "1919", ipVersion: nil)
@@ -57,35 +57,63 @@ struct UDPPingSessionTests {
         func whenSendingPingsAfterInitiation_thenStartCalledExactlyOnce() async throws {
             let (sut, udp, _) = makeSUT()
 
-            _ = try await sut.initiatePingSession()
+            let session = try await sut.startSession()
             #expect(udp.capturedStartParameters.count == 1)
 
             udp.onSend = { data in
                 udp.nextResponse = makeResponse(protocol: "RR01", sequence: decodeSequence(from: data))
             }
 
-            try await sut.sendPing(in: "Z7kKKZqSYU/j7nSGbjoRLw==")
-            try await sut.sendPing(in: "Z7kKKZqSYU/j7nSGbjoRLw==")
+            try await sut.sendPing(in: session)
+            try await sut.sendPing(in: session)
 
             #expect(udp.capturedStartParameters.count == 1)
         }
 
-        @Test("WHEN session initiator fails THEN initiatePingSession propagates error")
-        func whenSessionInitiatorFails_thenInitiatePingSessionPropagatesError() async throws {
+        @Test("WHEN session initiator fails THEN preparing a session propagates the error")
+        func whenSessionInitiatorFails_thenPreparingSessionPropagatesError() async throws {
             let (sut, _, _) = makeSUT(initiateError: makeError())
 
             await #expect(throws: (any Error).self) {
-                try await sut.initiatePingSession()
+                try await sut.startSession()
             }
         }
 
-        @Test("WHEN UDP connection start fails THEN initiatePingSession propagates error")
-        func whenUDPConnectionStartFails_thenInitiatePingSessionPropagatesError() async throws {
+        @Test("WHEN UDP connection start fails THEN activating the session propagates the error")
+        func whenUDPConnectionStartFails_thenActivatingSessionPropagatesError() async throws {
             let (sut, udp, _) = makeSUT()
             udp.startError = .connectionNotAvailable
 
             await #expect(throws: (any Error).self) {
-                try await sut.initiatePingSession()
+                try await sut.startSession()
+            }
+        }
+
+        @Test("WHEN preparing a session THEN the transport is left untouched")
+        func whenPreparingSession_thenTransportIsNotTouched() async throws {
+            let (sut, udp, _) = makeSUT()
+
+            _ = try await sut.prepareSession()
+
+            // The previous session must stay able to send while a replacement is being fetched.
+            #expect(udp.capturedStartParameters.isEmpty)
+            #expect(udp.cancelCallCount == 0)
+        }
+
+        @Test("WHEN a session is activated THEN pings still pending on the previous transport fail")
+        func whenSessionIsActivated_thenPingsPendingOnPreviousTransportFail() async throws {
+            let (sut, udp, _) = makeSUT()
+            let session = try await sut.startSession()
+
+            let sendStarted = Signal()
+            udp.onSend = { _ in sendStarted.send() }
+            let pendingPing = Task { try await sut.sendPing(in: session) }
+            await sendStarted.wait()
+
+            try await sut.activateSession(session)
+
+            await #expect(throws: PingSendingError.networkIssue) {
+                try await pendingPing.value
             }
         }
     }
@@ -94,7 +122,7 @@ struct UDPPingSessionTests {
     struct ProtocolEncodingTests {
         @Test("WHEN sending ping THEN payload contains RP01, sequence and token bytes")
         func whenSendingPing_thenPayloadContainsRP01SequenceAndTokenBytes() async throws {
-            let (sut, udp, token) = makeSUT()
+            let (sut, udp, expectedSession) = makeSUT()
 
             var capturedRequest: Data?
             udp.onSend = { data in
@@ -103,19 +131,19 @@ struct UDPPingSessionTests {
                 udp.nextResponse = makeResponse(protocol: "RR01", sequence: seq)
             }
 
-            let auth = try await sut.initiatePingSession()
-            try await sut.sendPing(in: auth)
+            let session = try await sut.startSession()
+            try await sut.sendPing(in: session)
 
             let data = try #require(capturedRequest)
 
             #expect(String(decoding: data[0...3], as: UTF8.self) == "RP01")
-            #expect(data.dropFirst(8) == Data(base64Encoded: token))
+            #expect(data.dropFirst(8) == Data(base64Encoded: expectedSession.token))
         }
 
         @Test("WHEN sending multiple pings THEN each uses an incrementing sequence number")
         func whenSendingMultiplePings_thenEachUsesIncrementingSequenceNumber() async throws {
             let (sut, udp, _) = makeSUT()
-            let token = try await sut.initiatePingSession()
+            let session = try await sut.startSession()
 
             var capturedSequences: [UInt32] = []
             udp.onSend = { data in
@@ -124,9 +152,9 @@ struct UDPPingSessionTests {
                 udp.nextResponse = makeResponse(protocol: "RR01", sequence: seq)
             }
 
-            try await sut.sendPing(in: token)
-            try await sut.sendPing(in: token)
-            try await sut.sendPing(in: token)
+            try await sut.sendPing(in: session)
+            try await sut.sendPing(in: session)
+            try await sut.sendPing(in: session)
 
             #expect(capturedSequences.count == 3)
             #expect(Set(capturedSequences).count == 3)
@@ -139,35 +167,35 @@ struct UDPPingSessionTests {
     struct ResponseHandlingTests {
         @Test("WHEN RR01 matches sequence THEN succeeds")
         func whenRR01WithMatchingSeq_thenSucceeds() async throws {
-            let (sut, udp, token) = makeSUT()
-            let auth = try await sut.initiatePingSession()
-            #expect(auth == token)
+            let (sut, udp, expectedSession) = makeSUT()
+            let session = try await sut.startSession()
+            #expect(session.token == expectedSession.token)
 
             udp.onSend = { data in
                 udp.nextResponse = makeResponse(protocol: "RR01", sequence: decodeSequence(from: data))
             }
 
-            try await sut.sendPing(in: auth)
+            try await sut.sendPing(in: session)
         }
 
         @Test("WHEN RE01 matches sequence THEN throws needsReinitialization")
         func whenRE01WithMatchingSeq_thenThrowsNeedsReinitialization() async throws {
             let (sut, udp, _) = makeSUT()
-            let token = try await sut.initiatePingSession()
+            let session = try await sut.startSession()
 
             udp.onSend = { data in
                 udp.nextResponse = makeResponse(protocol: "RE01", sequence: decodeSequence(from: data))
             }
 
             await #expect(throws: PingSendingError.needsReinitialization) {
-                try await sut.sendPing(in: token)
+                try await sut.sendPing(in: session)
             }
         }
 
         @Test("WHEN RE01 without matching sequence THEN request stays pending and valid response succeeds")
         func whenRE01WithoutMatchingSequence_thenRequestStaysPending() async throws {
             let (sut, udp, _) = makeSUT()
-            let token = try await sut.initiatePingSession()
+            let session = try await sut.startSession()
 
             udp.onSend = { data in
                 let seq = decodeSequence(from: data)
@@ -177,24 +205,24 @@ struct UDPPingSessionTests {
                 udp.nextResponse = makeResponse(protocol: "RR01", sequence: seq)
             }
 
-            try await sut.sendPing(in: token)
+            try await sut.sendPing(in: session)
         }
 
         @Test("WHEN token is invalid base64 THEN sendPing throws needsReinitialization")
         func whenTokenIsInvalidBase64_thenSendPingThrowsNeedsReinitialization() async throws {
             let (sut, _, _) = makeSUT()
-            _ = try await sut.initiatePingSession()
+            _ = try await sut.startSession()
 
-            let invalidToken = "not-valid-base64!!!"
+            let sessionWithInvalidToken = makeSessionInitiation(token: "not-valid-base64!!!")
             await #expect(throws: PingSendingError.needsReinitialization) {
-                try await sut.sendPing(in: invalidToken)
+                try await sut.sendPing(in: sessionWithInvalidToken)
             }
         }
 
         @Test("WHEN response is shorter than 8 bytes THEN it is ignored and valid response succeeds")
         func whenResponseShorterThan8Bytes_thenIgnoredAndValidResponseSucceeds() async throws {
             let (sut, udp, _) = makeSUT()
-            let token = try await sut.initiatePingSession()
+            let session = try await sut.startSession()
 
             udp.onSend = { data in
                 let seq = decodeSequence(from: data)
@@ -203,13 +231,13 @@ struct UDPPingSessionTests {
                 udp.nextResponse = makeResponse(protocol: "RR01", sequence: seq)
             }
 
-            try await sut.sendPing(in: token)
+            try await sut.sendPing(in: session)
         }
 
         @Test("WHEN response has unknown protocol THEN it is ignored and valid response succeeds")
         func whenResponseHasUnknownProtocol_thenIgnoredAndValidResponseSucceeds() async throws {
             let (sut, udp, _) = makeSUT()
-            let token = try await sut.initiatePingSession()
+            let session = try await sut.startSession()
 
             udp.onSend = { data in
                 let seq = decodeSequence(from: data)
@@ -217,7 +245,7 @@ struct UDPPingSessionTests {
                 udp.nextResponse = makeResponse(protocol: "RR01", sequence: seq)
             }
 
-            try await sut.sendPing(in: token)
+            try await sut.sendPing(in: session)
         }
     }
 
@@ -227,7 +255,7 @@ struct UDPPingSessionTests {
         func whenPendingPingTimesOut_thenIsCleanedUp() async throws {
             var nowNanos: UInt64 = 0
             let (sut, udp, _) = makeSUT(timeoutIntervalMs: 100, now: { nowNanos })
-            let token = try await sut.initiatePingSession()
+            let session = try await sut.startSession()
 
             await #expect(throws: PingSendingError.timedOut) {
                 try await confirmation("Ping continuation registered and cleaned up", expectedCount: 1) { confirmation in
@@ -238,7 +266,7 @@ struct UDPPingSessionTests {
                             confirmation.confirm()
                         }
                     }
-                    try await sut.sendPing(in: token)
+                    try await sut.sendPing(in: session)
                 }
             }
         }
@@ -249,19 +277,19 @@ struct UDPPingSessionTests {
         @Test("WHEN transport send fails THEN sendPing throws networkIssue")
         func whenTransportSendFails_thenSendPingThrowsNetworkIssue() async throws {
             let (sut, udp, _) = makeSUT()
-            let token = try await sut.initiatePingSession()
+            let session = try await sut.startSession()
 
             udp.sendError = UDPConnectionError.connectionNotAvailable
 
             await #expect(throws: PingSendingError.networkIssue) {
-                try await sut.sendPing(in: token)
+                try await sut.sendPing(in: session)
             }
         }
 
         @Test("WHEN transport send fails THEN failed sequence is removed from pending requests")
         func whenTransportSendFails_thenFailedSequenceIsRemovedFromPendingRequests() async throws {
             let (sut, udp, _) = makeSUT()
-            let token = try await sut.initiatePingSession()
+            let session = try await sut.startSession()
 
             var capturedSequence: UInt32?
             udp.sendError = UDPConnectionError.connectionNotAvailable
@@ -271,7 +299,7 @@ struct UDPPingSessionTests {
 
             // First ping fails
             await #expect(throws: PingSendingError.networkIssue) {
-                try await sut.sendPing(in: token)
+                try await sut.sendPing(in: session)
             }
 
             // Now allow sends, and send a late RR01 for the failed sequence —
@@ -286,20 +314,20 @@ struct UDPPingSessionTests {
                 let seq = decodeSequence(from: data)
                 udp.nextResponse = makeResponse(protocol: "RR01", sequence: seq)
             }
-            try await sut.sendPing(in: token)
+            try await sut.sendPing(in: session)
         }
 
         @Test("WHEN receive loop fails THEN pending pings fail with networkIssue")
         func whenReceiveLoopFails_thenPendingPingsFailWithNetworkIssue() async throws {
             let (sut, udp, _) = makeSUT()
-            let token = try await sut.initiatePingSession()
+            let session = try await sut.startSession()
 
             udp.onSend = { _ in
                 udp.failNextReceive(with: makeError())
             }
 
             await #expect(throws: PingSendingError.networkIssue) {
-                try await sut.sendPing(in: token)
+                try await sut.sendPing(in: session)
             }
         }
     }
@@ -320,7 +348,7 @@ struct UDPPingSessionTests {
                 timeoutIntervalMs: 1000,
                 now: { 0 }
             )
-            _ = try await sut!.initiatePingSession()
+            _ = try await sut!.startSession()
 
             #expect(udp.cancelCallCount == 0)
             sut = nil
@@ -334,12 +362,12 @@ struct UDPPingSessionTests {
         @Test("WHEN multiple ping requests overlap THEN only one UDP receive is pending at a time")
         func whenMultiplePingRequestsOverlap_thenOnlySingleReceiveInFlight() async throws {
             let (sut, trackingUDP, _) = makeSUTWithTracking()
-            let token = try await sut.initiatePingSession()
+            let session = try await sut.startSession()
 
             var sendTasks: [Task<Void, Error>] = []
             for _ in 0..<3 {
                 sendTasks.append(Task {
-                    try await sut.sendPing(in: token)
+                    try await sut.sendPing(in: session)
                 })
                 await trackingUDP.waitForPendingReceives(count: sendTasks.count)
             }
@@ -367,16 +395,16 @@ private func makeSUT(
     initiateError: (any Error)? = nil,
     timeoutIntervalMs: Int = 1000,
     now: @escaping () -> UInt64 = { 0 }
-) -> (UDPPingSession, UDPConnectionStub, String) {
+) -> (UDPPingSession, UDPConnectionStub, UDPPingSession.SessionInitiation) {
     let initiator = SessionInitiatorStub(sessionInitiation: sessionInitiation, error: initiateError)
     let udp = UDPConnectionStub()
-    let session = UDPPingSession(
+    let sut = UDPPingSession(
         sessionInitiator: initiator,
         udpConnection: udp,
         timeoutIntervalMs: timeoutIntervalMs,
         now: now
     )
-    return (session, udp, sessionInitiation.token)
+    return (sut, udp, sessionInitiation)
 }
 
 private func makeSUTWithTracking(
@@ -388,16 +416,34 @@ private func makeSUTWithTracking(
     ),
     timeoutIntervalMs: Int = 1000,
     now: @escaping () -> UInt64 = { 0 }
-) -> (UDPPingSession, TrackingUDPConnectionStub, String) {
+) -> (UDPPingSession, TrackingUDPConnectionStub, UDPPingSession.SessionInitiation) {
     let initiator = SessionInitiatorStub(sessionInitiation: sessionInitiation)
     let udp = TrackingUDPConnectionStub()
-    let session = UDPPingSession(
+    let sut = UDPPingSession(
         sessionInitiator: initiator,
         udpConnection: udp,
         timeoutIntervalMs: timeoutIntervalMs,
         now: now
     )
-    return (session, udp, sessionInitiation.token)
+    return (sut, udp, sessionInitiation)
+}
+
+private func makeSessionInitiation(
+    serverAddress: String = "example.org",
+    serverPort: String = "444",
+    token: String = "Z7kKKZqSYU/j7nSGbjoRLw==",
+    ipVersion: IPVersion? = .IPv4
+) -> UDPPingSession.SessionInitiation {
+    .init(serverAddress: serverAddress, serverPort: serverPort, token: token, ipVersion: ipVersion)
+}
+
+/// Brings a session up through both phases, which is what the ping loop does for a fresh session.
+private extension UDPPingSession {
+    func startSession() async throws -> SessionInitiation {
+        let session = try await prepareSession()
+        try await activateSession(session)
+        return session
+    }
 }
 
 private func makeResponse(protocol proto: String, sequence: UInt32) -> Data {
@@ -420,6 +466,26 @@ private func makeError(
 
 
 // MARK: - Test Doubles
+
+/// One-shot signal used to await a step that happens inside a synchronous transport callback.
+private final class Signal: @unchecked Sendable {
+    private let lock = NSLock()
+    private var isSent = false
+
+    func send() {
+        lock.lock()
+        defer { lock.unlock() }
+        isSent = true
+    }
+
+    func wait() async {
+        while true {
+            let isSent = lock.withLock { self.isSent }
+            if isSent { return }
+            await Task.yield()
+        }
+    }
+}
 
 private final class SessionInitiatorStub: UDPPingSession.SessionInitiating {
     let sessionInitiation: UDPPingSession.SessionInitiation

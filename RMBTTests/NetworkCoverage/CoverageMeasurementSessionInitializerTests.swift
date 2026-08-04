@@ -136,6 +136,99 @@ struct CoverageMeasurementSessionInitializerTests {
             _ = try await sut.startNewSession()
         }
     }
+
+    @Test("WHEN a session start is abandoned THEN no session initialized event is emitted")
+    func whenStartNewSessionIsCancelled_thenNoSessionInitializedEventIsEmitted() async throws {
+        // The ping loop bounds a recovery preparation and gives up on it, but the HTTP bridge underneath is not
+        // cancellation-aware, so the server can still answer afterwards. Announcing that session would make the view
+        // model close the active fence and anchor every later fence to a test_uuid whose ping path never came up.
+        let spy = SlowControlServerSpy(testUUID: "T-late")
+        let database = UserDatabase(useInMemoryStore: true)
+        let factory = NetworkCoverageFactory(
+            database: database,
+            dateNow: { Date() },
+            coverageAPIService: spy
+        )
+        let sut = factory.makeSessionInitializer(onlineStatusService: nil)
+
+        var capturedEvents: [SessionInitializedUpdate] = []
+        let eventReader = Task {
+            for await event in sut.sessionInitializedEvents() {
+                capturedEvents.append(event)
+            }
+        }
+
+        let sessionStart = Task { try await sut.startNewSession() }
+        await spy.waitUntilRequested()
+        sessionStart.cancel()
+        await spy.respondToPendingRequest()
+        _ = await sessionStart.result
+
+        eventReader.cancel()
+        await eventReader.value
+
+        #expect(capturedEvents.isEmpty)
+        #expect(sut.lastTestUUID == nil)
+    }
+}
+
+
+@Suite("OneShotContinuation")
+struct OneShotContinuationTests {
+    @Test("WHEN resumed before the continuation is installed THEN the result is delivered at install time")
+    func whenResumedBeforeInstall_thenResultIsDeliveredAtInstallTime() async throws {
+        let resumeOnce = OneShotContinuation<Int>()
+        resumeOnce.resume(returning: 42)
+
+        let value = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Int, any Error>) in
+            resumeOnce.install(continuation)
+        }
+
+        #expect(value == 42)
+    }
+
+    @Test("WHEN resumed twice THEN only the first result is delivered")
+    func whenResumedTwice_thenOnlyFirstResultIsDelivered() async throws {
+        let resumeOnce = OneShotContinuation<Int>()
+
+        let value = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Int, any Error>) in
+            resumeOnce.install(continuation)
+            resumeOnce.resume(returning: 1)
+            // A late callback arriving after the task already resumed must be dropped, not resumed again —
+            // resuming a checked continuation twice traps.
+            resumeOnce.resume(returning: 2)
+            resumeOnce.resume(throwing: CancellationError())
+        }
+
+        #expect(value == 1)
+    }
+
+    @Test("WHEN cancelled before install AND the callback arrives later THEN the cancellation wins and the callback is dropped")
+    func whenCancelledBeforeInstall_thenCancellationWinsAndLateCallbackIsDropped() async throws {
+        let resumeOnce = OneShotContinuation<Int>()
+        resumeOnce.resume(throwing: CancellationError())
+
+        await #expect(throws: CancellationError.self) {
+            try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Int, any Error>) in
+                resumeOnce.install(continuation)
+                resumeOnce.resume(returning: 99)
+            }
+        }
+    }
+
+    @Test("WHEN resumed concurrently from many tasks THEN exactly one result is delivered")
+    func whenResumedConcurrently_thenExactlyOneResultIsDelivered() async throws {
+        let resumeOnce = OneShotContinuation<Int>()
+
+        let value = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Int, any Error>) in
+            resumeOnce.install(continuation)
+            DispatchQueue.concurrentPerform(iterations: 32) { iteration in
+                resumeOnce.resume(returning: iteration)
+            }
+        }
+
+        #expect((0..<32).contains(value))
+    }
 }
 
 // MARK: - Test Helpers
@@ -326,5 +419,61 @@ private final class OnlineStatusServiceStub: OnlineStatusService, @unchecked Sen
                 lock.unlock()
             }
         }
+    }
+}
+
+/// Holds the /coverageRequest until the test releases it, so a cancellation can be delivered while it is in flight.
+private final class SlowControlServerSpy: CoverageAPIService, @unchecked Sendable {
+    private let lock = NSLock()
+    private let testUUID: String
+    private var pendingSuccess: ((SignalRequestResponse) -> Void)?
+    private var didReceiveRequest = false
+
+    init(testUUID: String) {
+        self.testUUID = testUUID
+    }
+
+    func getCoverageRequest(
+        _ request: CoverageRequestRequest,
+        loopUUID: String?,
+        success: @escaping (_ response: SignalRequestResponse) -> (),
+        error failure: @escaping ErrorCallback
+    ) {
+        lock.lock()
+        pendingSuccess = success
+        didReceiveRequest = true
+        lock.unlock()
+    }
+
+    func waitUntilRequested() async {
+        while true {
+            let received = lock.withLock { didReceiveRequest }
+            if received { return }
+            await Task.yield()
+        }
+    }
+
+    func respondToPendingRequest() async {
+        let success = lock.withLock { () -> ((SignalRequestResponse) -> Void)? in
+            defer { pendingSuccess = nil }
+            return pendingSuccess
+        }
+        guard let success else { return }
+
+        let response = SignalRequestResponse()
+        response.testUUID = testUUID
+        response.pingHost = "host"
+        response.pingPort = "444"
+        response.pingToken = "Z7kKKZqSYU/j7nSGbjoRLw=="
+        success(response)
+        await Task.yield()
+    }
+}
+
+private extension NSLock {
+    func withLock<T>(_ body: () -> T) -> T {
+        lock()
+        defer { unlock() }
+        return body()
     }
 }

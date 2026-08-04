@@ -2140,6 +2140,54 @@ import Clocks
             #expect(fenceSavedBeforeReinit?.dateExited != nil, "Persisted fence should be closed")
         }
 
+        @Test func whenSessionReinitialized_thenExactlyOneOldFenceIsPersistedAndExactlyOneNewUUIDIsAnchored() async throws {
+            let uuid1 = "uuid-1"
+            let uuid2 = "uuid-2"
+            let persistenceService = FencePersistenceServiceSpy()
+            let sut = makeSUT(
+                updates: [
+                    makeSessionInitializedUpdate(at: 0, sessionID: uuid1),
+                    makeLocationUpdate(at: 1, lat: 1.0, lon: 1.0),
+                    makePingUpdate(at: 2, ms: 50),
+                    // A ping-session recovery reaches the view model as exactly this event.
+                    makeSessionInitializedUpdate(at: 3, sessionID: uuid2),
+                    makeLocationUpdate(at: 4, lat: 2.0, lon: 2.0),
+                    makePingUpdate(at: 5, ms: 60)
+                ],
+                persistenceService: persistenceService
+            )
+
+            await sut.startTest()
+
+            // Exactly one fence is persisted for the previous session and exactly one anchor is written for the new
+            // one, and — the part that actually matters — the save happens *before* the anchor. `save()` writes to
+            // the latest unfinished persisted session, which is still the old one until `assign` runs, so the
+            // opposite order would file the previous session's fence under the new session.
+            let messages = await persistenceService.capturedMessages
+            let saveIndices = messages.indices.filter {
+                if case .save(let fence) = messages[$0] { return fence.sessionUUID == uuid1 }
+                return false
+            }
+            let anchorIndices = messages.indices.filter {
+                if case .assign(let testUUID, _) = messages[$0] { return testUUID == uuid2 }
+                return false
+            }
+
+            #expect(saveIndices.count == 1)
+            #expect(anchorIndices.count == 1)
+
+            let saveIndex = try #require(saveIndices.first)
+            let anchorIndex = try #require(anchorIndices.first)
+            #expect(saveIndex < anchorIndex, "The previous session's fence must be persisted before the new anchor")
+
+            // The fence must be closed at the moment of the recovery, not later when the next location arrives.
+            guard case .save(let persistedFence) = messages[saveIndex] else {
+                Issue.record("Expected the previous session's fence to have been persisted")
+                return
+            }
+            #expect(persistedFence.dateExited == makeDate(offset: 3))
+        }
+
         @Test func whenRapidSessionReinits_thenEachFenceStaysOnItsOriginalSession() async throws {
             let uuid1 = "uuid-1"
             let uuid2 = "uuid-2"

@@ -12,7 +12,9 @@ struct HTTPPingSender: /*PingsSequence.*/PingSending {
     let pingURL: URL
     let urlSession: URLSession
 
-    func initiatePingSession() async throws {}
+    func prepareSession() async throws {}
+
+    func activateSession(_ session: Void) async throws {}
 
     func sendPing(in session: Void) async throws(PingSendingError) {
         let request = URLRequest(url: pingURL, cachePolicy: .reloadIgnoringLocalAndRemoteCacheData)

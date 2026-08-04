@@ -71,6 +71,11 @@ class CoreSessionInitializer {
         Log.logger.info("Starting new session, loopID: \(loopID ?? "nil")")
         let response = try await request(loopID: loopID)
 
+        // The HTTP bridge below is not cancellation-aware, so a caller that gave up on this attempt (e.g. the ping
+        // loop's bounded recovery preparation) can still be waiting here when the server answers. Recording that
+        // response would publish a session nobody is going to use.
+        try Task.checkCancellation()
+
         lastTestUUID = response.testUUID
         lastLoopUUID = response.loopUUID
         lastTestStartDate = now()
@@ -103,18 +108,108 @@ class CoreSessionInitializer {
         )
     }
 
+    /// Cancellation-aware bridge over the callback API. The HTTP request itself cannot be cancelled, but the *task*
+    /// must be: a caller that bounds this call (the ping loop's recovery preparation) has to be able to give up
+    /// without waiting for the server. A callback arriving after cancellation is dropped.
     private func request(loopID: String?) async throws -> SignalRequestResponse {
-        try await withCheckedThrowingContinuation { continuation in
-            coverageAPIService.getCoverageRequest(
-                CoverageRequestRequest(time: Int(now().timeIntervalSince1970 * 1000), measurementType: "dedicated"),
-                loopUUID: loopID
-            ) { response in
-                continuation.resume(returning: response)
-            } error: { error in
-                Log.logger.error("API request failed: \(error.localizedDescription)")
-                continuation.resume(throwing: error)
+        // Nothing to gain from firing a request the caller has already given up on.
+        try Task.checkCancellation()
+
+        let resumeOnce = OneShotContinuation<SignalRequestResponse>()
+
+        return try await withTaskCancellationHandler {
+            try await withCheckedThrowingContinuation { continuation in
+                resumeOnce.install(continuation)
+                guard !Task.isCancelled else {
+                    resumeOnce.resume(throwing: CancellationError())
+                    return
+                }
+                coverageAPIService.getCoverageRequest(
+                    CoverageRequestRequest(time: Int(now().timeIntervalSince1970 * 1000), measurementType: "dedicated"),
+                    loopUUID: loopID
+                ) { response in
+                    resumeOnce.resume(returning: response)
+                } error: { error in
+                    Log.logger.error("API request failed: \(error.localizedDescription)")
+                    resumeOnce.resume(throwing: error)
+                }
             }
+        } onCancel: {
+            resumeOnce.resume(throwing: CancellationError())
         }
+    }
+}
+
+
+/// Resumes a `CheckedContinuation` exactly once, whichever of several racing sources gets there first, and tolerates
+/// being resumed before the continuation is installed (a cancellation handler can run before the operation body).
+final class OneShotContinuation<Value>: @unchecked Sendable {
+    private let lock = NSLock()
+    private var continuation: CheckedContinuation<Value, any Error>?
+    private var pendingResult: Result<Value, any Error>?
+    private var isFinished = false
+
+    private enum InstallOutcome {
+        case deliver(Result<Value, any Error>)
+        case stored
+        case alreadyInstalled
+    }
+
+    func install(_ continuation: CheckedContinuation<Value, any Error>) {
+        let outcome: InstallOutcome = lock.withLock {
+            guard self.continuation == nil else { return .alreadyInstalled }
+            if let pendingResult {
+                isFinished = true
+                self.pendingResult = nil
+                return .deliver(pendingResult)
+            }
+            guard !isFinished else { return .alreadyInstalled }
+            self.continuation = continuation
+            return .stored
+        }
+
+        switch outcome {
+        case .deliver(let result):
+            continuation.resume(with: result)
+        case .stored:
+            break
+        case .alreadyInstalled:
+            // Resuming nothing would strand this continuation, which hangs the caller forever. Installing twice is
+            // always a programming error, so fail loudly instead.
+            preconditionFailure("OneShotContinuation was installed more than once")
+        }
+    }
+
+    func resume(returning value: Value) {
+        resume(with: .success(value))
+    }
+
+    func resume(throwing error: any Error) {
+        resume(with: .failure(error))
+    }
+
+    private func resume(with result: Result<Value, any Error>) {
+        let continuation: CheckedContinuation<Value, any Error>? = lock.withLock {
+            guard !isFinished else { return nil }
+            guard let installed = self.continuation else {
+                // Resumed before the continuation existed — hand the first result over at install time. Later
+                // results are dropped, so whoever got here first wins even in this window.
+                if pendingResult == nil { pendingResult = result }
+                return nil
+            }
+            isFinished = true
+            self.continuation = nil
+            return installed
+        }
+        continuation?.resume(with: result)
+    }
+}
+
+private extension NSLock {
+    func withLock<T>(_ body: () -> T) -> T {
+        lock()
+        defer { unlock() }
+        return body()
     }
 }
 
@@ -149,6 +244,10 @@ class PersistenceAwareSessionInitializer {
         // Before starting new session, try to resend failed-to-be-sent coverage test results, if any
         Log.logger.info("Attempting to resend persistent areas before starting new session")
         try? await resendBeforeNewSession()
+
+        // `try?` above swallows cancellation along with everything else, so a caller that already gave up on this
+        // attempt (the ping loop's bounded preparation) would otherwise still go on to issue `/coverageRequest`.
+        try Task.checkCancellation()
 
         return try await wrapped.startNewSession(loopID: loopID)
     }
@@ -200,8 +299,11 @@ class OnlineAwareSessionInitializer {
     func startNewSession(loopID: String? = nil) async throws -> CoreSessionInitializer.SessionCredentials {
         do {
             let credentials = try await wrapped.startNewSession(loopID: loopID)
+            try Task.checkCancellation()
             emitInitialized(credentials)
             return credentials
+        } catch is CancellationError {
+            throw CancellationError()
         } catch {
             guard let service = onlineStatusService else { throw error }
             Log.logger.info("Session start failed, waiting for online status...")
@@ -214,6 +316,7 @@ class OnlineAwareSessionInitializer {
                 try await Task.sleep(for: retryDelay)
                 do {
                     let credentials = try await wrapped.startNewSession(loopID: loopID)
+                    try Task.checkCancellation()
                     emitInitialized(credentials)
                     return credentials
                 } catch is CancellationError {
