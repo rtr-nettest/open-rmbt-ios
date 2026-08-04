@@ -63,6 +63,7 @@ final class NWUDPConnection: UDPConnectable {
                         switch state {
                         case .ready:
                             conn.stateUpdateHandler = nil
+                            Log.logger.info("NWUDPConnection: Ready over \(Self.describe(conn.currentPath))")
                             resumeOnce.resume(returning: ())
                         case .failed(let error):
                             conn.stateUpdateHandler = nil
@@ -71,7 +72,12 @@ final class NWUDPConnection: UDPConnectable {
                             conn.stateUpdateHandler = nil
                             resumeOnce.resume(throwing: UDPConnectionError.connectionNotAvailable)
                         case .waiting(let error):
-                            Log.logger.info("NWUDPConnection: Connection waiting: \(error)")
+                            // `unsatisfiedReason` is what distinguishes "the user turned cellular off for this app"
+                            // from "no service at all" — otherwise both look like an unexplained stall.
+                            let reason = conn.currentPath?.unsatisfiedReason
+                            Log.logger.info(
+                                "NWUDPConnection: Connection waiting: \(error), unsatisfied reason: \(reason.map(String.init(describing:)) ?? "unknown")"
+                            )
                         default:
                             break
                         }
@@ -94,6 +100,26 @@ final class NWUDPConnection: UDPConnectable {
     func cancel() {
         connection?.cancel()
         connection = nil
+    }
+
+    /// Describes the interface a connection actually ended up on. The device-level network type says what iOS
+    /// prefers overall; this says what this measurement is really using, which is the distinction #70 turned on.
+    private static func describe(_ path: NWPath?) -> String {
+        guard let path else { return "an unknown path" }
+
+        var interfaces: [String] = []
+        if path.usesInterfaceType(.cellular) { interfaces.append("cellular") }
+        if path.usesInterfaceType(.wifi) { interfaces.append("wifi") }
+        if path.usesInterfaceType(.wiredEthernet) { interfaces.append("ethernet") }
+        if path.usesInterfaceType(.other) { interfaces.append("other/tunnel") }
+        let interfaceDescription = interfaces.isEmpty ? "unknown interface" : interfaces.joined(separator: "+")
+
+        var attributes: [String] = []
+        if path.isExpensive { attributes.append("expensive") }
+        if path.isConstrained { attributes.append("constrained") }
+        let attributeDescription = attributes.isEmpty ? "" : " (\(attributes.joined(separator: ", ")))"
+
+        return "\(interfaceDescription)\(attributeDescription), local endpoint \(path.localEndpoint?.debugDescription ?? "unknown")"
     }
 
     func send(data: Data) throws {

@@ -125,6 +125,12 @@ struct PingMeasurementService {
                             networkType: networkTypeProvider?.currentNetworkType()
                         )
 
+                        // A rolling picture of what the ping engine is doing. Transition logs alone leave a long
+                        // field run unreadable: they say what changed, never what the steady state looks like.
+                        if let summary = state.periodicSummary(at: currentDate) {
+                            Log.logger.info("UDPPing: \(summary)")
+                        }
+
                         group.addTask {
                             guard !Task.isCancelled else { return }
 
@@ -147,8 +153,8 @@ struct PingMeasurementService {
                                 case .needsReinitialization:
                                     state.requestReinitialization(for: generation)
 
-                                case .failed:
-                                    if state.recordFailure(generation: generation) {
+                                case .failed(let error):
+                                    if state.recordFailure(generation: generation, kind: error) {
                                         continuation.yield(PingResult(result: .error, timestamp: currentDate))
                                     }
 
@@ -189,7 +195,7 @@ struct PingMeasurementService {
 
     private enum SendOutcome {
         case succeeded(Duration)
-        case failed
+        case failed(PingSendingError)
         case needsReinitialization
     }
 
@@ -248,7 +254,7 @@ struct PingMeasurementService {
             Log.logger.info("UDPPing: Server responded with reinitialisation request (RE01), will start new session")
             return .needsReinitialization
         }
-        return .failed
+        return .failed(capturedError)
     }
 
     private static func withTimeout<R>(
@@ -282,6 +288,9 @@ struct PingMeasurementService {
 /// Deadlines and tick timestamps are both floating-point seconds derived from independent additions, so
 /// they are compared with a tolerance far below the ping cadence.
 private let deadlineComparisonTolerance: TimeInterval = 0.001
+
+/// How often the ping loop emits its rolling field-log summary.
+private let pingSummaryInterval: TimeInterval = 10
 
 /// Why a replacement session was asked for. Kept so that a failed attempt can re-latch its own cause.
 private struct RecoveryCauses: OptionSet {
@@ -334,6 +343,16 @@ private final class PingSessionStateController<Session: Sendable>: @unchecked Se
     private var nextRecoveryAllowedAt: Date?
     private var nextPrepareAllowedAt: Date?
     private var isRecoveryThrottleClampPending = false
+
+    // Counters behind the periodic field-log summary. Reset on every emitted summary, so each line describes the
+    // interval it covers rather than the whole run.
+    private var repliedCount = 0
+    private var timedOutCount = 0
+    private var networkIssueCount = 0
+    private var lastSummaryAt: Date?
+    /// Whether the session currently in use has ever had a reply. Turning false→true is the only direct evidence
+    /// that bringing up a replacement actually fixed anything.
+    private var hasCurrentSessionReplied = false
     /// Only the very first credentials fetch of a run may park indefinitely (offline start). Set as soon as that
     /// fetch is launched, so a retry after it fails is bounded like every other one.
     private var hasLaunchedFirstPreparation = false
@@ -416,14 +435,73 @@ private final class PingSessionStateController<Session: Sendable>: @unchecked Se
         }
     }
 
+    /// Returns a one-line field-log summary once per `summaryInterval`, or `nil` in between. Counters are collected
+    /// under the lock and formatted by the caller so no logging happens while it is held.
+    func periodicSummary(at currentDate: Date) -> String? {
+        lock.lock()
+
+        guard let since = lastSummaryAt else {
+            lastSummaryAt = currentDate
+            lock.unlock()
+            return nil
+        }
+        guard currentDate.timeIntervalSince(since) >= pingSummaryInterval else {
+            lock.unlock()
+            return nil
+        }
+        lastSummaryAt = currentDate
+
+        let elapsed = Int(currentDate.timeIntervalSince(since).rounded())
+        let replied = repliedCount
+        let timedOut = timedOutCount
+        let networkIssues = networkIssueCount
+        repliedCount = 0
+        timedOutCount = 0
+        networkIssueCount = 0
+
+        let sessionDescription: String
+        switch state {
+        case .idle:
+            sessionDescription = "no session"
+        case .preparing(let generation, let old, _):
+            sessionDescription = old == nil
+                ? "activating generation \(generation)"
+                : "preparing generation \(generation), still sending on the previous one"
+        case .active(let session):
+            sessionDescription = "generation \(session.generation)"
+        }
+
+        var owed: [String] = []
+        if pendingNetworkTypeRecovery { owed.append("network-type") }
+        if pendingFailureRecovery { owed.append("failure-run") }
+        let owedDescription = owed.isEmpty ? "none" : owed.joined(separator: "+")
+
+        let paused = isPaused
+        let failures = consecutiveFailures
+        lock.unlock()
+
+        return [
+            "\(elapsed)s: \(replied) replied, \(timedOut) timed out, \(networkIssues) network error(s)",
+            sessionDescription,
+            "paused: \(paused)",
+            "consecutive failures: \(failures)",
+            "recovery owed: \(owedDescription)"
+        ].joined(separator: "; ")
+    }
+
     /// `true` when the outcome was accepted, meaning it belongs to the session currently in use and the
     /// measurement is not paused. Rejected outcomes are neither counted nor reported.
-    func recordFailure(generation: Int) -> Bool {
+    func recordFailure(generation: Int, kind: PingSendingError) -> Bool {
         lock.lock()
         defer { lock.unlock() }
 
         guard accepts(generation) else { return false }
         consecutiveFailures += 1
+        switch kind {
+        case .timedOut: timedOutCount += 1
+        case .networkIssue: networkIssueCount += 1
+        case .needsReinitialization: break
+        }
         return true
     }
 
@@ -436,6 +514,12 @@ private final class PingSessionStateController<Session: Sendable>: @unchecked Se
         pendingFailureRecovery = false
         backoff = policy.initialBackoff
         isRecoveryThrottleClampPending = true
+        repliedCount += 1
+
+        if !hasCurrentSessionReplied {
+            hasCurrentSessionReplied = true
+            Log.logger.info("UDPPing: First reply in ping session generation \(generation)")
+        }
 
         // A working path settles the failure cause for good, including for an attempt already in flight: otherwise a
         // preparation that later fails would resurrect the cause from its snapshot and recover a path that recovered
@@ -473,6 +557,7 @@ private final class PingSessionStateController<Session: Sendable>: @unchecked Se
 
         guard case .preparing(let currentGeneration, _, _) = state, currentGeneration == generation else { return }
         state = .active(.init(value: session, generation: generation, startedAt: currentDate))
+        hasCurrentSessionReplied = false
         consecutiveFailures = 0
         hardCutRequested = false
         // Failures observed on the session being replaced are settled by this activation: the fresh
