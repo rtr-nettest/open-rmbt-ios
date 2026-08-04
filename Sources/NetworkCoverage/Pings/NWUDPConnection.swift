@@ -13,7 +13,17 @@ import Network
 ///
 /// A connected UDP endpoint only accepts replies from the address the client
 /// sent to, i.e. it is strict on the server source address.
+///
+/// On physical devices the flow is pinned to a cellular interface, otherwise a measurement carried over Wi-Fi would
+/// still be labelled cellular.
 final class NWUDPConnection: UDPConnectable {
+    /// The simulator has no cellular interface, so a pinned socket there could never become ready.
+    #if targetEnvironment(simulator)
+    private static let requiresCellularInterface = false
+    #else
+    private static let requiresCellularInterface = true
+    #endif
+
     private var connection: NWConnection?
 
     /// Send outcomes reported by Network.framework. Without these, a run of failed pings cannot be attributed:
@@ -28,6 +38,8 @@ final class NWUDPConnection: UDPConnectable {
 
     func start(host: String, port: String, ipVersion: IPVersion?) async throws(UDPConnectionError) {
         connection?.cancel()
+        // A failed start must not leave a cancelled connection installed.
+        connection = nil
 
         let params = NWParameters.udp
         let ip = params.defaultProtocolStack.internetProtocol! as! NWProtocolIP.Options
@@ -39,6 +51,10 @@ final class NWUDPConnection: UDPConnectable {
             ip.version = .v4
         case .some(.IPv6):
             ip.version = .v6
+        }
+
+        if Self.requiresCellularInterface {
+            params.requiredInterfaceType = .cellular
         }
 
         let nwHost = NWEndpoint.Host(host)
@@ -63,7 +79,21 @@ final class NWUDPConnection: UDPConnectable {
                         switch state {
                         case .ready:
                             conn.stateUpdateHandler = nil
-                            Log.logger.info("NWUDPConnection: Ready over \(Self.describe(conn.currentPath))")
+                            let path = conn.currentPath
+                            // `requiredInterfaceType` should already make this impossible; rejecting here is what
+                            // makes the guarantee observed rather than assumed.
+                            guard Self.isPathAcceptable(
+                                usesCellular: path?.usesInterfaceType(.cellular) ?? false,
+                                usesWiFi: path?.usesInterfaceType(.wifi) ?? false,
+                                requiresCellularInterface: Self.requiresCellularInterface
+                            ) else {
+                                Log.logger.warning(
+                                    "NWUDPConnection: Rejecting non-cellular path: \(Self.describe(path))"
+                                )
+                                resumeOnce.resume(throwing: UDPConnectionError.connectionNotAvailable)
+                                return
+                            }
+                            Log.logger.info("NWUDPConnection: Ready over \(Self.describe(path))")
                             resumeOnce.resume(returning: ())
                         case .failed(let error):
                             conn.stateUpdateHandler = nil
@@ -102,8 +132,16 @@ final class NWUDPConnection: UDPConnectable {
         connection = nil
     }
 
-    /// Describes the interface a connection actually ended up on. The device-level network type says what iOS
-    /// prefers overall; this says what this measurement is really using, which is the distinction #70 turned on.
+    /// Path *eligibility*, not proof of a single physical egress — `usesInterfaceType` is also true for a tunnel
+    /// whose underlay is of that type.
+    static func isPathAcceptable(usesCellular: Bool, usesWiFi: Bool, requiresCellularInterface: Bool) -> Bool {
+        guard requiresCellularInterface else { return true }
+        return usesCellular && !usesWiFi
+    }
+
+    /// Describes which interface types a connection's path is eligible to send over. The device-level network type
+    /// says what iOS prefers overall; this says what this measurement's own connection may use, which is the
+    /// distinction #70 turned on.
     private static func describe(_ path: NWPath?) -> String {
         guard let path else { return "an unknown path" }
 

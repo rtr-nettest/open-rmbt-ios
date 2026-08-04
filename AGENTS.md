@@ -19,14 +19,26 @@ Explain clearly your reasoning behind your decisions and pros/cons of chosen sol
 - **Private data**: Secrets and branded assets live under `private/`; never commit them publicly.
 
 ## Commands
-- Build (simulator default):
-Always build for latest iPhone 17 Pro simulator available, example:`xcodebuild -workspace RMBT.xcworkspace -scheme RMBT -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.1' build`
+- Build (simulator default): `xcodebuild -workspace RMBT.xcworkspace -scheme RMBT -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=latest' build`
 - Clean build: `xcodebuild -workspace RMBT.xcworkspace -scheme RMBT clean`
-- Unit tests:
-Always test for latest iPhone 17 Pro simulator available, example: `xcodebuild -workspace RMBT.xcworkspace -scheme RMBT -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.1' test`
-- Focused tests: append `-only-testing:RMBTTests/<TestClass>`
+- Unit tests: `xcodebuild -workspace RMBT.xcworkspace -scheme RMBT -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=latest' -parallel-testing-enabled NO test`
+- Always use `OS=latest` rather than pinning a version — the installed runtime moves (it was 26.1, now 26.5) and a stale
+  pin fails with a confusing "ineligible destination" list.
+- Focused tests: append `-only-testing:RMBTTests/<TestClass>` (Swift Testing suites: `-only-testing:RMBTTests/<SuiteType>`)
+- **Always pass `-parallel-testing-enabled NO`.** XCTest's parallel testing clones the destination simulator once per
+  worker into `~/Library/Developer/XCTestDevices` and never deletes the clones — on another project 79 unattended runs
+  left 283 GB and 2.79 M files behind. This suite mixes XCTest and Swift Testing, and Swift Testing already runs test
+  functions concurrently *in-process*; the whole `RMBTTests` suite finishes in a few seconds, so clone + boot time
+  dwarfs any gain. Never re-enable it to "make tests faster".
+- Stale clones are invisible to `simctl list devices` — they live in a separate device set. Inspect with
+  `xcrun simctl --set ~/Library/Developer/XCTestDevices list devices`; sweep with
+  `pgrep -f "xcodebuild.*test" >/dev/null || xcrun simctl --set ~/Library/Developer/XCTestDevices delete all`.
+  **The `pgrep` guard is mandatory** — an unguarded sweep deletes the live clones of a test run in another session or
+  another project.
 - CocoaPods (bundled): `bundle install` → `bundle exec pod install --repo-update`
-- Pretty build logs: pipe any `xcodebuild` invocation to `| bundle exec xcpretty`
+- Pretty build logs: pipe any `xcodebuild` invocation to `| bundle exec xcpretty`. **Caution:** `xcpretty` does not
+  understand Swift Testing and silently reports `Executed 0 tests` for suites written with it. Check the raw
+  `xcodebuild` output (grep for `✘` / `Test run with`) to confirm test results.
 - Reset pods only if needed: `bundle exec pod deintegrate && bundle exec pod install`
 
 ## Architecture & Patterns
@@ -76,12 +88,16 @@ Translations are maintained by humans and are intentionally behind. When you add
 - Test only business behavior, not implementation details.
 - Trigger `@ai-rules/testing.md` whenever you modify tests, fixtures, or concurrency-sensitive code paths.
 - Unit tests should be aligned with user stories in `@docs/user-stories`. Uf you add new behavior into use stories, make sure also test are added. If you change test behavior, make sure relevant user stories are updated.
-- Use `bundle exec xcpretty` when running `xcodebuild` tests locally to keep logs readable.
+- Use `bundle exec xcpretty` when running `xcodebuild` tests locally to keep logs readable, but read Swift Testing
+  results from the raw output — see the caution under **Commands**.
+- Run the suite with the exact command under **Commands**, including `-parallel-testing-enabled NO`. A test that passes
+  in isolation but fails in the full suite is usually a `TestClock` race, not a real regression — the whole suite runs
+  in a few seconds, so re-run it a few times before believing either result.
 
 ## Environment
 - Use Homebrew Ruby ≥ 3.1; update PATH via `eval "$(/opt/homebrew/bin/brew shellenv)"` then prepend `/opt/homebrew/opt/ruby/bin`.
 - CocoaPods must run through Bundler to match the pinned version in `Gemfile.lock`. Run `bundle install` once after a fresh clone; gems land in `./vendor/bundle` (per `.bundle/config`).
-- Xcode 26+, iOS deployment target 17.0+. Simulator defaults to iPhone 17 Pro / iOS 26.1 (visionOS style naming by Apple).
+- Xcode 26+, iOS deployment target 17.0+. Simulator defaults to iPhone 17 Pro at `OS=latest` (visionOS style naming by Apple).
 
 ### Known issues / workarounds
 - **`pod install` fails with `Unable to find compatibility version string for object version 71`**: Xcode 26.x bumps `objectVersion` in `project.pbxproj` past what `xcodeproj 1.27.0` supports (cap = 77). Temporarily edit the line to `objectVersion = 77` before running `bundle exec pod install`; Xcode silently bumps it back on the next save. Tracked upstream as CocoaPods #12805 / #12840.

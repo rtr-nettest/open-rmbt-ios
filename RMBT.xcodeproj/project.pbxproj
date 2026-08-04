@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		17CAE37F76166381D9D66810 /* NWUDPConnectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E55EB25A9BF044C2410508FA /* NWUDPConnectionTests.swift */; };
 		2F5A8C4958A5EC9724752D6A /* SIMInfoModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD5A35E71C9764DC5843686A /* SIMInfoModels.swift */; };
 		361443482732793E00D0FC26 /* RMBTHistorySyncModalViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 361443472732793D00D0FC26 /* RMBTHistorySyncModalViewController.swift */; };
 		3628C539275639E40001E885 /* RMBTHistoryQoSTitledResultCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3628C538275639E40001E885 /* RMBTHistoryQoSTitledResultCell.xib */; };
@@ -81,7 +82,6 @@
 		49EDC79B2EAA35630009D9A6 /* LocationUpdate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC7672EAA35630009D9A6 /* LocationUpdate.swift */; };
 		49EDC79C2EAA35630009D9A6 /* PersistedFencesResender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC76E2EAA35630009D9A6 /* PersistedFencesResender.swift */; };
 		49EDC79D2EAA35630009D9A6 /* Color+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC75C2EAA35630009D9A6 /* Color+Ext.swift */; };
-		49EDC79F2EAA35630009D9A6 /* HTTPPingSender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC7752EAA35630009D9A6 /* HTTPPingSender.swift */; };
 		49EDC7A02EAA35630009D9A6 /* UDPConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC7772EAA35630009D9A6 /* UDPConnection.swift */; };
 		49EDC7A12EAA35630009D9A6 /* AsynchronousSequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC7652EAA35630009D9A6 /* AsynchronousSequence.swift */; };
 		49EDC7A22EAA35630009D9A6 /* CoverageHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49EDC75D2EAA35630009D9A6 /* CoverageHeader.swift */; };
@@ -445,7 +445,6 @@
 		49EDC76F2EAA35630009D9A6 /* PersistenceManagingCoverageResultsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceManagingCoverageResultsService.swift; sourceTree = "<group>"; };
 		49EDC7702EAA35630009D9A6 /* PersistenceServiceActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceServiceActor.swift; sourceTree = "<group>"; };
 		49EDC7722EAA35630009D9A6 /* PersistentFence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistentFence.swift; sourceTree = "<group>"; };
-		49EDC7752EAA35630009D9A6 /* HTTPPingSender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPPingSender.swift; sourceTree = "<group>"; };
 		49EDC7762EAA35630009D9A6 /* PingMeasurementService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PingMeasurementService.swift; sourceTree = "<group>"; };
 		49EDC7772EAA35630009D9A6 /* UDPConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UDPConnection.swift; sourceTree = "<group>"; };
 		49EDC7782EAA35630009D9A6 /* UDPPingSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UDPPingSession.swift; sourceTree = "<group>"; };
@@ -510,6 +509,7 @@
 		C7F599A61A2A81940020ADC4 /* RMBTHistoryIndexCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = RMBTHistoryIndexCell.xib; sourceTree = "<group>"; };
 		D77B2B18701D00583CC5E7CF /* SIMInfoView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SIMInfoView.swift; sourceTree = "<group>"; };
 		E1DCF69863D6E1970538CB5B /* hu */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = hu; path = hu.lproj/Localizable.strings; sourceTree = "<group>"; };
+		E55EB25A9BF044C2410508FA /* NWUDPConnectionTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NWUDPConnectionTests.swift; sourceTree = "<group>"; };
 		E91316AC26AD72F200368DCD /* RMBT-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "RMBT-Bridging-Header.h"; sourceTree = "<group>"; };
 		E91316AD26AD72F200368DCD /* RMBTTOSViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTTOSViewController.swift; sourceTree = "<group>"; };
 		E91316AF26AD95B300368DCD /* RMBTTOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RMBTTOS.swift; sourceTree = "<group>"; };
@@ -886,6 +886,7 @@
 				49FBC0002F00A0000009D9A6 /* AsyncSocketUDPConnectionTests.swift */,
 				49EDC7382EAA2E000009D9A6 /* UDPPingSessionTests.swift */,
 				49EDC7392EAA2E000009D9A6 /* UDPPingsSequenceTests.swift */,
+				E55EB25A9BF044C2410508FA /* NWUDPConnectionTests.swift */,
 			);
 			path = Pings;
 			sourceTree = "<group>";
@@ -979,7 +980,6 @@
 		49EDC7792EAA35630009D9A6 /* Pings */ = {
 			isa = PBXGroup;
 			children = (
-				49EDC7752EAA35630009D9A6 /* HTTPPingSender.swift */,
 				49EDC7762EAA35630009D9A6 /* PingMeasurementService.swift */,
 				49EDC7772EAA35630009D9A6 /* UDPConnection.swift */,
 				49EDC7782EAA35630009D9A6 /* UDPPingSession.swift */,
@@ -2062,6 +2062,7 @@
 				520219059FE77FE975227F1E /* CoverageHistoryDetailServiceTests.swift in Sources */,
 				C03F8268CF6845028CBEDA4C /* FenceFactory.swift in Sources */,
 				84E47A49B75644EAAD976F5A /* SIMInfoSnapshotBuilderTests.swift in Sources */,
+				17CAE37F76166381D9D66810 /* NWUDPConnectionTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2169,7 +2170,6 @@
 				49EDC79C2EAA35630009D9A6 /* PersistedFencesResender.swift in Sources */,
 				49EDC79D2EAA35630009D9A6 /* Color+Ext.swift in Sources */,
 				66A000012F10000000000001 /* FenceRadiusCalculator.swift in Sources */,
-				49EDC79F2EAA35630009D9A6 /* HTTPPingSender.swift in Sources */,
 				49EDC7A02EAA35630009D9A6 /* UDPConnection.swift in Sources */,
 				49EDC7A12EAA35630009D9A6 /* AsynchronousSequence.swift in Sources */,
 				49EDC7A32EAA35630009D9A6 /* KeepScreenAwakeModifier.swift in Sources */,

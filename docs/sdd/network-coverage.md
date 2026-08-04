@@ -150,12 +150,39 @@ UDP transport
 - The UDP transport is abstracted behind the `UDPConnectable` protocol (`send(data:)` is enqueue‑only / synchronous; `receive()` is async).
 - Two concrete implementations exist:
   - `NWUDPConnection` (default): connected `NWConnection`‑based transport. A connected UDP endpoint only accepts replies from the address the client sent to — the desired strict behavior now that the UDP ping server responds from the correct source address (rtr-nettest/open-rmbt-ios-private#32).
-  - `AsyncSocketUDPConnection`: unconnected `GCDAsyncUdpSocket` that binds to an ephemeral local port and sends each datagram with an explicit destination host/port, accepting replies from any server source address. Used as a workaround while the server responded from a different IPv6 address; retained as a fallback.
+  - `AsyncSocketUDPConnection`: unconnected `GCDAsyncUdpSocket` that binds to an ephemeral local port and sends each datagram with an explicit destination host/port, accepting replies from any server source address. Used as a workaround while the server responded from a different IPv6 address; kept for diagnostics only and **not** wired into production — it binds a wildcard port with no interface scoping, so it cannot satisfy the cellular pinning below.
 - Response validity is additionally determined by protocol fields and sequence/token semantics.
 - `NWUDPConnection` sends with `.contentProcessed` and logs the outcome (failure transitions, plus a running
   accepted/rejected total every 100 datagrams). This is what lets a run of failed pings be attributed: datagrams
   accepted by the network stack but unanswered points at the server or the return path, whereas rejected datagrams
   point at the client's route or `ip_version`.
+
+Cellular pinning
+- On physical devices `NWUDPConnection` sets `NWParameters.requiredInterfaceType = .cellular`, and after `.ready` it
+  rejects any path that does not use cellular or that also uses Wi‑Fi (`isPathAcceptable`). A rejected path takes the
+  same route as `.failed`: the connection is cancelled and `start` throws, so no connection is ever installed on an
+  unverified path.
+- This is a guarantee rather than a preference, and it is deliberately redundant with the Wi‑Fi pause above. The pause
+  samples the device's **primary** path once per tick, so Wi‑Fi that is associated but not primary would leave it
+  unaware while the socket could still be carried over Wi‑Fi — the shape behind
+  rtr-nettest/open-rmbt-ios-private#70.
+- `prohibitedInterfaceTypes` is deliberately **not** set: requiring cellular is the meaningful constraint, and
+  prohibiting Wi‑Fi would add no guarantee while adding a way for a valid multi-interface path to be rejected.
+  `prohibitExpensivePaths`/`prohibitConstrainedPaths` stay at their `false` defaults — cellular is always expensive
+  and is constrained under Low Data Mode, so prohibiting either would contradict the pin.
+- Scope: only the ping transport is pinned. `/coverageRequest` goes through `URLSession`, which cannot be *required*
+  to use cellular, and is deliberately left unconstrained; its returned `ip_version` is still honoured. Because pings
+  are paused while Wi‑Fi is the active path, `/coverageRequest` normally runs while cellular is primary, and the
+  session is refreshed on return from a Wi‑Fi epoch. Note this is *not* a refresh on every path change — a
+  cellular→cellular or `nil`→cellular change triggers none — so a control request that completed over Wi‑Fi while
+  cellular was primary could still yield a family that is unreachable on the cellular path. That failure surfaces as
+  a run of activation failures rather than as a bad measurement.
+- On the simulator the pin is compiled out (`#if targetEnvironment(simulator)`), because there is no cellular
+  interface and a pinned socket could never become ready.
+- `usesInterfaceType` reports path *eligibility*, not physical egress: a tunnel whose underlay is cellular satisfies
+  the check. A measurement behind a VPN is therefore "cellular + VPN", and one with no usable cellular path at all
+  (full-tunnel VPN, cellular denied for the app) will fail to activate and produce no pings.
+- Only `NWUDPConnection` can satisfy this; see the transport list above.
 
 UDP session and protocol
 - `UDPPingSession` (actor) encapsulates the RTR UDP ping protocol.
@@ -178,7 +205,10 @@ Soft recovery — the session is replaced because its send path looks dead, whil
 - A run of `RecoveryPolicy.maxConsecutiveFailures` (30, ≈3 s at the 100 ms cadence) consecutive failed ping outcomes. "Consecutive" means consecutive *completions*, so a late success can delay recovery by up to roughly the 1 s ping timeout.
 - Returning from a Wi‑Fi epoch, because the previous session's `ip_version`, host and token were obtained on the other path. A successful ping does not settle this refresh; only a preparation does.
 - Recoveries are throttled by a doubling backoff: the first is immediate, then 10 s, 20 s, 40 s, 80 s, capped at 120 s. A successful ping restarts the ladder and clamps the pending throttle to at most `initialBackoff`, so a working path cannot unlock an immediate recovery storm while, for example, Wi‑Fi keeps flapping.
-- The phases are bounded separately: the credentials fetch by `RecoveryPolicy.recoveryPrepareTimeout` (15 s) and the activation by the tighter `RecoveryPolicy.activationTimeout` (5 s), so a worst-case bring-up is ~20 s. On timeout or failure the previous session is restored (preparation) or the state goes `idle` and is retried after `retryDelay` (activation). Only the very first *credentials fetch* of a run is unbounded — parking until the device gets online is the offline-start behaviour. Activation is always bounded, because it only runs once `/coverageRequest` has already succeeded.
+- The phases are bounded separately: the credentials fetch by `RecoveryPolicy.recoveryPrepareTimeout` (15 s) and the activation by the tighter `RecoveryPolicy.activationTimeout` (5 s), so a worst-case bring-up is ~20 s. On timeout or failure the previous session is restored (preparation) or the state goes `idle` and is retried on the activation backoff ladder described below (activation). Only the very first *credentials fetch* of a run is unbounded — parking until the device gets online is the offline-start behaviour. Activation is always bounded, because it only runs once `/coverageRequest` has already succeeded.
+- The two phases fail for different reasons and are reported separately (`didFailPreparation` vs `didFailActivation`), because they want opposite retry policies. A credentials failure usually means the device is briefly offline and keeps a flat, prompt `retryDelay`. An activation failure means the credentials were fine and the transport still would not come up — with the socket pinned to cellular that is frequently permanent for the rest of the run, so attempts escalate on their **own** doubling ladder (`activationBackoff`, first failure not delayed, capped at `maxBackoff`) and only a successful activation resets it. Without this, an unusable cellular path would mint a `/coverageRequest` and a `test_uuid` every few seconds for the whole walk.
+- An activation failure always drops the session: `didPrepareSession` has already released the previous one and `activateSession` has already torn down its transport, so `didFailActivation` fails closed into `idle` and never restores it.
+- A run of activation failures is surfaced in the rolling field-log summary (`consecutive activation failures: N`), which is what distinguishes "no cellular path available at all" from a genuine dead zone.
 - For those bounds to be real, the async bridges the phases sit on are cancellation-aware: `CoreSessionInitializer.request` and `NWUDPConnection.start` resume exactly once via `OneShotContinuation` and drop a late callback. The underlying HTTP request is not itself cancellable, so it may still complete server-side — the client ignores its result, which is what keeps fences consistent.
 - Every preparation first runs the persisted-fence resend (`PersistenceAwareSessionInitializer`). That leg is cancellation-aware too: `SendCoverageResultRequest.send` uses the same one-shot bridge, `PersistedFencesResender` checks for cancellation between submissions, and the `try?` around the resend is followed by an explicit `Task.checkCancellation()` so a swallowed cancellation cannot let the attempt proceed into `/coverageRequest`.
 - A retry is gated from the moment the failed attempt *started*, not from whichever tick observed the failure: an attempt that failed fast is throttled by `retryDelay`, one that already spent longer than that retries at the next tick.

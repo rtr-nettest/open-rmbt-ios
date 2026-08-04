@@ -220,8 +220,17 @@ struct PingMeasurementService {
             // never resumes while the path stays `.waiting`, and a hang here leaves nothing able to send and
             // nothing to retry it. Only the credentials fetch may park, because waiting for the device to come
             // online is the offline-start behaviour.
-            try await withTimeout(activationTimeout, clock: clock) {
-                try await sender.activateSession(session)
+            //
+            // Reported separately from a credentials failure because the two want opposite retry policies.
+            do {
+                try await withTimeout(activationTimeout, clock: clock) {
+                    try await sender.activateSession(session)
+                }
+            } catch {
+                guard !Task.isCancelled else { return }
+                Log.logger.warning("UDPPing: Ping session activation failed: \(error)")
+                state.didFailActivation(generation: generation, launchedAt: date)
+                return
             }
             state.didActivateSession(session, at: date, generation: generation)
             Log.logger.info("UDPPing: Ping session activated")
@@ -344,6 +353,10 @@ private final class PingSessionStateController<Session: Sendable>: @unchecked Se
     private var nextPrepareAllowedAt: Date?
     private var isRecoveryThrottleClampPending = false
 
+    /// Separate from `backoff`, which gates replacing a *working* session.
+    private var activationBackoff: Duration
+    private var consecutiveActivationFailures = 0
+
     // Counters behind the periodic field-log summary. The interval counters reset on every emitted summary so each
     // line describes its own window; the run totals never reset, so a summary line lost to a truncated log does not
     // take its counts with it.
@@ -366,6 +379,7 @@ private final class PingSessionStateController<Session: Sendable>: @unchecked Se
     init(policy: RecoveryPolicy) {
         self.policy = policy
         self.backoff = policy.initialBackoff
+        self.activationBackoff = policy.initialBackoff
     }
 
     func actionForTick(
@@ -488,6 +502,7 @@ private final class PingSessionStateController<Session: Sendable>: @unchecked Se
 
         let paused = isPaused
         let failures = consecutiveFailures
+        let activationFailures = consecutiveActivationFailures
         lock.unlock()
 
         var fields = [
@@ -498,6 +513,10 @@ private final class PingSessionStateController<Session: Sendable>: @unchecked Se
             "consecutive failures: \(failures)",
             "recovery owed: \(owedDescription)"
         ]
+        // A run of these is the signature of "no cellular path at all", otherwise hard to tell from a dead zone.
+        if activationFailures > 0 {
+            fields.append("consecutive activation failures: \(activationFailures)")
+        }
         if wasStalled {
             fields.insert("measurement loop was stalled for \(elapsed)s (app suspended?)", at: 0)
         }
@@ -581,6 +600,9 @@ private final class PingSessionStateController<Session: Sendable>: @unchecked Se
         hasCurrentSessionReplied = false
         consecutiveFailures = 0
         hardCutRequested = false
+        // Only a working transport settles the activation ladder.
+        consecutiveActivationFailures = 0
+        activationBackoff = policy.initialBackoff
         // Failures observed on the session being replaced are settled by this activation: the fresh
         // credentials and transport are exactly what the owed failure recovery was asking for. An owed
         // network-type refresh is deliberately kept — this candidate may have been fetched on the old path.
@@ -597,9 +619,7 @@ private final class PingSessionStateController<Session: Sendable>: @unchecked Se
         guard case .preparing(let currentGeneration, let old, let causes) = state, currentGeneration == generation
         else { return }
 
-        // Re-latch whatever asked for this attempt, so the retry actually happens at the next gate slot.
-        if causes.contains(.networkTypeChange) { pendingNetworkTypeRecovery = true }
-        if causes.contains(.failureRun) { pendingFailureRecovery = true }
+        relatch(causes)
 
         if let old {
             // Nothing was committed and the transport was never touched — the old session is still good.
@@ -612,7 +632,44 @@ private final class PingSessionStateController<Session: Sendable>: @unchecked Se
         }
     }
 
+    /// The credentials were fine and the transport still would not come up. For a cellular-pinned socket that is often
+    /// permanent for the rest of the run, so attempts escalate instead of repeating every few seconds all walk.
+    func didFailActivation(generation: Int, launchedAt: Date) {
+        lock.lock()
+        defer { lock.unlock() }
+
+        guard case .preparing(let currentGeneration, let old, let causes) = state, currentGeneration == generation
+        else { return }
+
+        relatch(causes)
+
+        // `activateSession` has already torn down the previous transport, so `old` must not be resurrected.
+        if old != nil {
+            Log.logger.error("UDPPing: A ping session unexpectedly survived into activation failure; dropping it")
+        }
+        state = .idle
+
+        consecutiveActivationFailures += 1
+        // A single failure is usually transient (handover, brief loss of service) and keeps the prompt retry.
+        let delay: Duration
+        if consecutiveActivationFailures == 1 {
+            delay = policy.retryDelay
+        } else {
+            delay = activationBackoff
+            activationBackoff = min(activationBackoff * 2, policy.maxBackoff)
+        }
+        nextPrepareAllowedAt = launchedAt.addingTimeInterval(delay.timeInterval)
+        Log.logger.info(
+            "UDPPing: Ping session activation failed \(consecutiveActivationFailures)x in a row, next attempt gated by \(delay)"
+        )
+    }
+
     // MARK: - Private helpers
+
+    private func relatch(_ causes: RecoveryCauses) {
+        if causes.contains(.networkTypeChange) { pendingNetworkTypeRecovery = true }
+        if causes.contains(.failureRun) { pendingFailureRecovery = true }
+    }
 
     private var sessionInUse: SessionInfo? {
         switch state {

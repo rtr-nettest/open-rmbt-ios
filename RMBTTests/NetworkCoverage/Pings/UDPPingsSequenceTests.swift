@@ -896,6 +896,172 @@ struct UDPPingsSequenceTests {
             await expectSentSessions(from: sender, ["S1", "S2"])
         }
     }
+
+    /// With the ping socket pinned to cellular, "no eligible cellular path" is often permanent for the whole run, so
+    /// activation failures get their own ladder rather than the credentials-retry cadence.
+    @Suite("Activation failure escalation")
+    struct ActivationFailureEscalation {
+        @Test func whenActivationKeepsFailing_thenPreparationAttemptsEscalateUpToMaxBackoff() async throws {
+            let clock = TestClock()
+            let (sut, sender, _) = makeSUT(
+                clock: clock,
+                activate: [.fails],
+                recovery: makeRecoveryPolicy(
+                    initialBackoff: .milliseconds(200),
+                    maxBackoff: .milliseconds(400),
+                    retryDelay: .milliseconds(100)
+                )
+            )
+            let consumer = consume(sut)
+            await advance(clock, by: .milliseconds(1150))
+            await finish(consumer)
+
+            // Gaps of 100 (retryDelay, first failure not escalated), 200, then 400 twice — doubled until clamped.
+            await expectPreparations(
+                from: sender,
+                [.zero, .milliseconds(100), .milliseconds(300), .milliseconds(700), .milliseconds(1100)]
+            )
+            await expectActivatedSessions(from: sender, ["S1", "S2", "S3", "S4", "S5"])
+        }
+
+        @Test func whenActivationKeepsTimingOut_thenTheLadderAppliesToTheTimeoutPath() async throws {
+            let clock = TestClock()
+            let (sut, sender, _) = makeSUT(
+                clock: clock,
+                activate: [.neverCompletes, .neverCompletes, .succeeds],
+                recovery: makeRecoveryPolicy(
+                    initialBackoff: .milliseconds(400),
+                    recoveryPrepareTimeout: .milliseconds(250),
+                    retryDelay: .milliseconds(100)
+                )
+            )
+            let consumer = consume(sut)
+            await advance(clock, by: .milliseconds(750))
+            await finish(consumer)
+
+            // A hung activation is the realistic shape of the VPN case. First gap is timeout-bound, second escalated.
+            await expectPreparations(from: sender, [.zero, .milliseconds(300), .milliseconds(700)])
+        }
+
+        @Test func whenActivationSucceedsAfterFailures_thenTheLadderRestartsFromTheShortestDelay() async throws {
+            let clock = TestClock()
+            let (sut, sender, _) = makeSUT(
+                clock: clock,
+                activate: [.fails, .fails, .succeeds, .fails, .succeeds],
+                send: [.fails(.networkIssue, after: .zero)],
+                recovery: makeRecoveryPolicy(
+                    maxConsecutiveFailures: 3,
+                    initialBackoff: .milliseconds(200),
+                    retryDelay: .milliseconds(100)
+                )
+            )
+            let consumer = consume(sut)
+            await advance(clock, by: .milliseconds(850))
+            await finish(consumer)
+
+            // S3 activates at 300; its failing pings trigger the failure-run recovery at 700, and that activation
+            // failure is gated by 100 again rather than the 400 the earlier run had climbed to.
+            await expectPreparations(
+                from: sender,
+                [.zero, .milliseconds(100), .milliseconds(300), .milliseconds(700), .milliseconds(800)]
+            )
+        }
+
+        @Test func whenCredentialsFailBetweenActivationFailures_thenEachRetryPolicyKeepsItsOwnDelay() async throws {
+            let clock = TestClock()
+            let (sut, sender, _) = makeSUT(
+                clock: clock,
+                prepare: [
+                    .succeeds(after: .zero),
+                    .succeeds(after: .zero),
+                    .fails(after: .zero),
+                    .succeeds(after: .zero)
+                ],
+                activate: [.fails, .fails, .fails, .succeeds],
+                recovery: makeRecoveryPolicy(
+                    initialBackoff: .milliseconds(200),
+                    retryDelay: .milliseconds(100)
+                )
+            )
+            let consumer = consume(sut)
+            await advance(clock, by: .milliseconds(850))
+            await finish(consumer)
+
+            // The credentials failure at 300 is gated by the flat 100 despite the ladder standing at 400, and it does
+            // not reset that ladder — so the activation failure at 400 is gated by 400, not 100.
+            await expectPreparations(
+                from: sender,
+                [.zero, .milliseconds(100), .milliseconds(300), .milliseconds(400), .milliseconds(800)]
+            )
+        }
+
+        @Test func whenWiFiIsEnteredDuringAnEscalatingActivationRetry_thenTheLadderKeepsEscalatingAfterwards() async throws {
+            let clock = TestClock()
+            let (sut, sender, network) = makeSUT(
+                clock: clock,
+                activate: [.fails, .fails, .fails, .succeeds],
+                recovery: makeRecoveryPolicy(
+                    initialBackoff: .milliseconds(200),
+                    retryDelay: .milliseconds(100)
+                )
+            )
+            let consumer = consume(sut)
+            await advance(clock, by: .milliseconds(150))
+            network.simulateNetworkType(.wifi)
+            await advance(clock, by: .milliseconds(200))
+            network.simulateNetworkType(.cellular)
+            await advance(clock, by: .milliseconds(500))
+            await finish(consumer)
+
+            // The 300 gate elapses while paused with nothing prepared. The fourth attempt proves the ladder itself
+            // survived the pause: 400 after the third, not the 100 a reset counter would give.
+            await expectPreparations(
+                from: sender,
+                [.zero, .milliseconds(100), .milliseconds(400), .milliseconds(800)]
+            )
+        }
+
+        @Test func whenCellularReturnsBeforeTheEscalatedGateElapses_thenTheGateIsStillHonoured() async throws {
+            let clock = TestClock()
+            let (sut, sender, network) = makeSUT(
+                clock: clock,
+                activate: [.fails, .fails, .succeeds],
+                recovery: makeRecoveryPolicy(
+                    initialBackoff: .milliseconds(300),
+                    retryDelay: .milliseconds(100)
+                )
+            )
+            let consumer = consume(sut)
+            await advance(clock, by: .milliseconds(150))
+            network.simulateNetworkType(.wifi)
+            await advance(clock, by: .milliseconds(100))
+            network.simulateNetworkType(.cellular)
+            await advance(clock, by: .milliseconds(200))
+            await finish(consumer)
+
+            // Cellular is back at 250, but the escalated 400 deadline is not cleared — the tick at 300 still skips.
+            await expectPreparations(from: sender, [.zero, .milliseconds(100), .milliseconds(400)])
+        }
+
+        @Test func whenStoppedDuringPendingActivation_thenTheSequenceTerminates() async throws {
+            let clock = TestClock()
+            let (sut, sender, _) = makeSUT(
+                clock: clock,
+                activate: [.neverCompletes],
+                recovery: makeRecoveryPolicy(recoveryPrepareTimeout: .seconds(5))
+            )
+            let results = PingResultsCollector()
+
+            let consumer = consume(sut, into: results)
+            await advance(clock, by: .milliseconds(200))
+            await finish(consumer)
+
+            // Only covers that shutdown yields nothing and prepares nothing further. `finish` awaits the consumer,
+            // not the producer, so a leaked activation would not be detected here.
+            await expectPreparations(from: sender, [.zero])
+            #expect(results.captured.isEmpty)
+        }
+    }
 }
 
 // MARK: - makeSUT & Factories

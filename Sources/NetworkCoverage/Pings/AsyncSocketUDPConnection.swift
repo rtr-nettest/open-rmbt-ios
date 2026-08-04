@@ -17,6 +17,9 @@ import CocoaAsyncSocket
 /// All mutable state is confined to `delegateQueue`. The class is marked
 /// `@unchecked Sendable` because Swift concurrency cannot verify serial-queue
 /// isolation.
+///
+/// The bind is a wildcard ephemeral port with no interface scoping, so this transport cannot constrain pings to a
+/// particular interface.
 final class AsyncSocketUDPConnection: NSObject, UDPConnectable, @unchecked Sendable {
     private let delegateQueue = DispatchQueue(label: "at.rmbt.coverage.udp.delegate")
 

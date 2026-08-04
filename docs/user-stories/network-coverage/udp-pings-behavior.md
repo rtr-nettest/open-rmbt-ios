@@ -120,6 +120,48 @@ Feature: UDP ping session behavior for RTR NetTest coverage
     Then the app shall keep reporting failed pings
     So that the affected fences are rendered as "no coverage"
 
+  # Pinning the ping transport to cellular
+  Scenario: UDP pings are never carried over Wi-Fi
+    Given a coverage measurement is running on a physical device
+    When the app brings up the UDP ping transport
+    Then the connection shall be constrained to a cellular interface
+    And a connection that becomes ready on a path which also includes Wi-Fi shall be rejected
+    So that a measurement can never be labelled cellular while carried over Wi-Fi
+    # This is a guarantee, not a preference: the device-level Wi-Fi pause reads the *primary* path, so Wi-Fi that is
+    # associated but not primary would otherwise leave it unaware.
+
+  Scenario: The control request is not constrained to cellular
+    Given the app needs a new ping session
+    Then /coverageRequest may be carried over any interface, including Wi-Fi
+    And the returned ip_version shall still be honoured for the UDP connection
+    # Only the pings must be cellular. Because pings pause on Wi-Fi, /coverageRequest normally runs while cellular is
+    # primary, and returning from a Wi-Fi epoch refreshes the session. That is not a refresh on every path change, so
+    # a mismatched family remains possible; it shows up as repeated activation failures, not as a bad measurement.
+
+  Scenario: No cellular path available at all
+    Given a coverage measurement is running on a physical device
+    And no cellular path can be used, for example behind a full-tunnel VPN
+    Then the UDP transport shall fail to become ready
+    And the app shall not keep requesting new sessions at the credentials-retry cadence
+    And it shall report no pings rather than pings measured over another interface
+
+  Scenario: Repeated transport activation failures back off
+    Given a ping session's credentials were obtained successfully
+    But the UDP transport cannot be brought up
+    Then the first attempt shall be retried promptly
+    And subsequent attempts shall be spaced by a doubling backoff, capped at the same maximum as recoveries
+    And a successful activation shall restart that ladder
+    # A single failure is usually transient (a handover), so it is not slowed down. Only a run of them indicates a
+    # condition that will not clear on its own.
+
+  Scenario: A failed credentials fetch does not inherit the activation backoff
+    Given transport activation has already failed several times
+    When a later /coverageRequest itself fails
+    Then that failure shall be retried at the ordinary short retry delay
+    And the activation backoff shall keep escalating independently
+    # Missing credentials usually means the device is briefly offline and should be retried promptly; the two
+    # conditions are unrelated and keep separate ladders.
+
   # UI behavior during reinitialization
   Scenario: UI remains uninterrupted during ping session reinitialization
     Given the app must reinitialize the ping session (due to timeout or RE01)
