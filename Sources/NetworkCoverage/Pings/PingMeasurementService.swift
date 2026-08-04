@@ -344,11 +344,15 @@ private final class PingSessionStateController<Session: Sendable>: @unchecked Se
     private var nextPrepareAllowedAt: Date?
     private var isRecoveryThrottleClampPending = false
 
-    // Counters behind the periodic field-log summary. Reset on every emitted summary, so each line describes the
-    // interval it covers rather than the whole run.
+    // Counters behind the periodic field-log summary. The interval counters reset on every emitted summary so each
+    // line describes its own window; the run totals never reset, so a summary line lost to a truncated log does not
+    // take its counts with it.
     private var repliedCount = 0
     private var timedOutCount = 0
     private var networkIssueCount = 0
+    private var totalRepliedCount = 0
+    private var totalTimedOutCount = 0
+    private var totalNetworkIssueCount = 0
     private var lastSummaryAt: Date?
     /// Whether the session currently in use has ever had a reply. Turning false→true is the only direct evidence
     /// that bringing up a replacement actually fixed anything.
@@ -451,13 +455,19 @@ private final class PingSessionStateController<Session: Sendable>: @unchecked Se
         }
         lastSummaryAt = currentDate
 
-        let elapsed = Int(currentDate.timeIntervalSince(since).rounded())
+        let interval = currentDate.timeIntervalSince(since)
+        let elapsed = Int(interval.rounded())
         let replied = repliedCount
         let timedOut = timedOutCount
         let networkIssues = networkIssueCount
         repliedCount = 0
         timedOutCount = 0
         networkIssueCount = 0
+        let totals = (replied: totalRepliedCount, timedOut: totalTimedOutCount, networkIssues: totalNetworkIssueCount)
+
+        // The cadence loop only ticks while the app is executing, so a long interval means it was stalled — most
+        // likely suspended. Saying so explicitly keeps that from reading like a truncated log.
+        let wasStalled = interval >= pingSummaryInterval * 2
 
         let sessionDescription: String
         switch state {
@@ -480,13 +490,18 @@ private final class PingSessionStateController<Session: Sendable>: @unchecked Se
         let failures = consecutiveFailures
         lock.unlock()
 
-        return [
+        var fields = [
             "\(elapsed)s: \(replied) replied, \(timedOut) timed out, \(networkIssues) network error(s)",
+            "run total: \(totals.replied) replied, \(totals.timedOut) timed out, \(totals.networkIssues) network error(s)",
             sessionDescription,
             "paused: \(paused)",
             "consecutive failures: \(failures)",
             "recovery owed: \(owedDescription)"
-        ].joined(separator: "; ")
+        ]
+        if wasStalled {
+            fields.insert("measurement loop was stalled for \(elapsed)s (app suspended?)", at: 0)
+        }
+        return fields.joined(separator: "; ")
     }
 
     /// `true` when the outcome was accepted, meaning it belongs to the session currently in use and the
@@ -498,9 +513,14 @@ private final class PingSessionStateController<Session: Sendable>: @unchecked Se
         guard accepts(generation) else { return false }
         consecutiveFailures += 1
         switch kind {
-        case .timedOut: timedOutCount += 1
-        case .networkIssue: networkIssueCount += 1
-        case .needsReinitialization: break
+        case .timedOut:
+            timedOutCount += 1
+            totalTimedOutCount += 1
+        case .networkIssue:
+            networkIssueCount += 1
+            totalNetworkIssueCount += 1
+        case .needsReinitialization:
+            break
         }
         return true
     }
@@ -515,6 +535,7 @@ private final class PingSessionStateController<Session: Sendable>: @unchecked Se
         backoff = policy.initialBackoff
         isRecoveryThrottleClampPending = true
         repliedCount += 1
+        totalRepliedCount += 1
 
         if !hasCurrentSessionReplied {
             hasCurrentSessionReplied = true

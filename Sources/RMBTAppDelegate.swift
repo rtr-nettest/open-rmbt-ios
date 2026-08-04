@@ -38,6 +38,12 @@ final class RMBTAppDelegate: UIResponder, UIApplicationDelegate {
     func applicationDidEnterBackground(_ application: UIApplication) {
         RMBTLocationTracker.shared.stop()
         NetworkReachability.shared.stopMonitoring()
+        // Log writes are queued off the calling thread, so drain them while we still have a chance to run.
+        LogConfig.flushLog()
+    }
+
+    func applicationWillTerminate(_ application: UIApplication) {
+        LogConfig.flushLog()
     }
 
     func applicationWillEnterForeground(_ application: UIApplication) {
