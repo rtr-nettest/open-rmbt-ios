@@ -99,8 +99,26 @@ Translations are maintained by humans and are intentionally behind. When you add
 - CocoaPods must run through Bundler to match the pinned version in `Gemfile.lock`. Run `bundle install` once after a fresh clone; gems land in `./vendor/bundle` (per `.bundle/config`).
 - Xcode 26+, iOS deployment target 17.0+. Simulator defaults to iPhone 17 Pro at `OS=latest` (visionOS style naming by Apple).
 
+### Fresh-clone setup
+A clean clone builds with no private access — `Scripts/update_configurations_from_private.sh` falls back to `public/Configurations/` whenever the `private/` submodule is absent or empty. **Clone without `--recursive`** unless you have access to `open-rmbt-ios-private`, otherwise the clone exits non-zero on a submodule SSH failure (the main worktree is still usable).
+
+The script is an unconditional `cp` on every build — there is no "write once" guard, and the `Update Configurations` build phase declares no outputs, so it always runs. It uses `cp -a` for `Configs/`, which preserves source mtimes and therefore does *not* trigger needless recompiles. Running the script by hand is exactly what the build phase does; it is idempotent and safe.
+
+Generated destinations — never edit these, edit `private/` or `public/` instead:
+- `Configs/RMBTConfig.swift` — untracked (`.gitignore`).
+- `Resources/Images.xcassets/AppIcon.appiconset/` — untracked (`.gitignore`).
+- `Resources/RMBT-Info.plist` — **tracked**. Regenerated every build, so it appears as a local modification whenever the active config differs from the committed content. The private version sets the `RTR-NetTest` display name, `rmbtat` URL scheme, `NSLocalNetworkUsageDescription` (DNS QoS test) and `UIBackgroundModes: location` (coverage measurements). **Do not commit it from a public-config build** — that silently strips RTR branding and background location. Revert with `git checkout -- Resources/RMBT-Info.plist`.
+
+Order matters, and both steps have failure modes that look unrelated to their real cause:
+1. `bundle install` — **must** run on Ruby ≥ 3.1. On macOS system Ruby 2.6 it fails with `Could not find 'bundler' (2.7.2) required by your Gemfile.lock`, because `Gemfile.lock` pins `BUNDLED WITH 2.7.2`. The error names bundler, not Ruby, and following its `gem install bundler:2.7.2` advice also fails. Fix the Ruby, not the bundler.
+2. `bundle exec pod install --repo-update` — always via `bundle exec`. A stray global `pod` (Homebrew's or an old `/usr/local/bin/pod`) resolves a different `xcodeproj` and reintroduces the `objectVersion` failure below.
+3. `./Scripts/update_configurations_from_private.sh` — run it manually once. The same script runs as a build phase, but Xcode resolves compiler input files *before* build phases execute, so the first build of a fresh clone fails with `Build input file cannot be found: '.../Configs/RMBTConfig.swift'`. Building a second time also works, since the phase has by then created the file.
+
+Then open `RMBT.xcworkspace`, never `RMBT.xcodeproj`. Without `Pods/` the build fails on missing `Pods-RMBT.*.xcconfig`, missing xcfilelists, or `The sandbox is not in sync with the Podfile.lock`.
+
 ### Known issues / workarounds
-- **`pod install` fails with `Unable to find compatibility version string for object version 71`**: Xcode 26.x bumps `objectVersion` in `project.pbxproj` past what `xcodeproj 1.27.0` supports (cap = 77). Temporarily edit the line to `objectVersion = 77` before running `bundle exec pod install`; Xcode silently bumps it back on the next save. Tracked upstream as CocoaPods #12805 / #12840.
+- **`pod install` fails with `Unable to find compatibility version string for object version 71`**: Xcode 16.2+ writes `objectVersion = 71`, which `xcodeproj` 1.27.0 does not recognise — Apple's numbering is not monotonic (16.0 = 77, 16.2 = 71), so this is an *unknown* value rather than one above a cap. **Fixed** by pinning `xcodeproj 1.28.1` in `Gemfile.lock`, which knows 70, 71 and 100; run `bundle install` to pick it up. Do not hand-edit `objectVersion` to 77 any more — that old workaround churned `project.pbxproj` on every Xcode save. Tracked upstream as CocoaPods #12805 / #12840.
+- **Do not downgrade `xcodeproj` below 1.28.1**, and if a future Xcode writes an `objectVersion` the gem does not know (Xcode 26.3 already writes 100), bump the gem rather than editing the project file.
 - **App Store upload fails with ITMS-90085 "No architectures in the binary"**: caused by header-only Pods (e.g. `libextobjc/EXTKeyPathCoding`) producing an empty `.framework` wrapper that Xcode 26+ no longer fills with a stub binary. Symptoms: framework folder in the IPA contains `_CodeSignature/` and `Info.plist` but no executable. Fix: drop the Pod from `Podfile` and remove the corresponding `import` (verify with `lipo -archs` on every Mach-O inside the .ipa).
 
 ## Special Notes
