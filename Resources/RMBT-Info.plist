@@ -73,7 +73,5 @@
 	<array>
 		<string>location</string>
 	</array>
-	<key>UIDesignRequiresCompatibility</key>
-	<true/>
 </dict>
 </plist>
