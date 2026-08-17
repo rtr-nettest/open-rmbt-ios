@@ -408,9 +408,9 @@
 
 "preferences_developer_control_server" = "Control szerver";
 "preferences_override_control_enabled" = "Control szerver felülírása";
-"preferences_override_control_server_host" = "Control host";
-"preferences_override_control_server_port" = "Control port";
-"preferences_override_control_server_ssl" = "Control SSL";
+"preferences_override_control_server_host" = "Vezérlő gazdagép";
+"preferences_override_control_server_port" = "Vezérlő port";
+"preferences_override_control_server_ssl" = "Vezérlő SSL";
 
 "preferences_developer_logging" = "Naplózás";
 "preferences_developer_logging_enabled" = "Naplózás engedélyezése";
@@ -448,64 +448,57 @@
 "Map" = "Térkép";
 "Coverage" = "Jelmérés";
 
-/* ===== TODO: NEEDS TRANSLATION (English placeholder used for now) ===== */
-"coverage_intro_title" = "Signal Measurement";
-"coverage_intro_description" = "The Signal Measurement allows outdoor mobile network measurements along a path. It monitors connectivity, technology and signal strength. Connectivity is measured using regular network pings. The measurement requires good GPS coverage and Wifi must be turned off. It consumes much less data compared to speed measurement. The Signal Measurement is (only) intended for use within the EU and the EEA.";
-"coverage_intro_start_button" = "Start test";
-"preferences_sim_info" = "SIM Information";
+"coverage_intro_title" = "Jelmérés";
+"coverage_intro_description" = "A Jelmérés lehetővé teszi a mobilhálózat szabadtéri mérését egy útvonal mentén. Figyeli a kapcsolatot, a technológiát és a jelerősséget. A kapcsolatot rendszeres hálózati pingekkel méri. A méréshez jó GPS-lefedettség szükséges, és a Wi-Fi-t ki kell kapcsolni. Sokkal kevesebb adatot használ, mint a sebességmérés. A Jelmérés (kizárólag) az EU-n és az EGT-n belüli használatra készült.";
+"coverage_intro_start_button" = "Teszt indítása";
+"preferences_sim_info" = "SIM-információk";
 
-/* ===== TODO: NEEDS TRANSLATION — Coverage & SIM Info UI (English placeholder) ===== */
-"Technology" = "Technology";
+"Technology" = "Technológia";
 "Ping" = "Ping";
-"Loc. accuracy" = "Loc. accuracy";
-"Experts details" = "Experts details";
-"Only locations at or below this accuracy contribute to fences and ping assignment." = "Only locations at or below this accuracy contribute to fences and ping assignment.";
-"Date:" = "Date:";
-"Technology:" = "Technology:";
+"Loc. accuracy" = "Hely pontossága";
+"Experts details" = "Szakértői részletek";
+"Only locations at or below this accuracy contribute to fences and ping assignment." = "Csak az ilyen vagy jobb pontosságú helyek járulnak hozzá a zónákhoz és a ping-hozzárendeléshez.";
+"Date:" = "Dátum:";
+"Technology:" = "Technológia:";
 "Ping:" = "Ping:";
-"SIM Information" = "SIM Information";
-"Refresh" = "Refresh";
-"Generation" = "Generation";
-"Used for data" = "Used for data";
-"Registered" = "Registered";
+"SIM Information" = "SIM-információk";
+"Refresh" = "Frissítés";
+"Generation" = "Generáció";
+"Used for data" = "Adatokhoz használt";
+"Registered" = "Regisztrálva";
 "DATA" = "DATA";
-"No cellular service detected. The device may have no SIM, be Wi-Fi only, or be in airplane mode." = "No cellular service detected. The device may have no SIM, be Wi-Fi only, or be in airplane mode.";
-"Yes" = "Yes";
-"No" = "No";
+"No cellular service detected. The device may have no SIM, be Wi-Fi only, or be in airplane mode." = "Nem észlelhető mobilhálózat. Előfordulhat, hogy a készülékben nincs SIM, csak Wi-Fi-t használ, vagy repülőgép üzemmódban van.";
+"Yes" = "Igen";
+"No" = "Nem";
 
 
-/* ===== TODO: NEEDS TRANSLATION — Coverage popups & results (English placeholder) ===== */
-"Stop Coverage Test" = "Stop Coverage Test";
-"The test will be stopped and results will be sent to the server." = "The test will be stopped and results will be sent to the server.";
-"Stop test" = "Stop test";
-"Continue test" = "Continue test";
-"Waiting for GPS" = "Waiting for GPS";
-"No sufficiently accurate location was obtained within %d minutes." = "No sufficiently accurate location was obtained within %d minutes.";
-"Signal Measurement Results" = "Signal Measurement Results";
+"Stop Coverage Test" = "Lefedettségi teszt leállítása";
+"The test will be stopped and results will be sent to the server." = "A teszt leáll, és az eredmények elküldésre kerülnek a szerverre.";
+"Stop test" = "Teszt leállítása";
+"Continue test" = "Teszt folytatása";
+"Waiting for GPS" = "Várakozás GPS-re";
+"No sufficiently accurate location was obtained within %d minutes." = "%d percen belül nem sikerült kellően pontos helyet meghatározni.";
+"Signal Measurement Results" = "Jelmérés eredményei";
 
 
-/* ===== TODO: NEEDS TRANSLATION — Coverage warnings, header & SIM raw fields (English placeholder) ===== */
-"Currently the location accuracy is insufficient. Please measure outdoors." = "Currently the location accuracy is insufficient. Please measure outdoors.";
-"Disable Wi‑Fi" = "Disable Wi‑Fi";
-"Please turn off Wi‑Fi to measure cellular coverage." = "Please turn off Wi‑Fi to measure cellular coverage.";
-"Network Coverage" = "Signal Measurement";
-"No service" = "No service";
-"Unknown" = "Unknown";
+"Currently the location accuracy is insufficient. Please measure outdoors." = "A helymeghatározás pontossága jelenleg nem elegendő. Kérjük, mérjen a szabadban.";
+"Disable Wi‑Fi" = "Wi‑Fi kikapcsolása";
+"Please turn off Wi‑Fi to measure cellular coverage." = "A mobilhálózati lefedettség méréséhez kapcsolja ki a Wi‑Fi-t.";
+"Network Coverage" = "Jelmérés";
+"No service" = "Nincs szolgáltatás";
+"Unknown" = "Ismeretlen";
 
 
-/* ===== TODO: NEEDS TRANSLATION — History empty state (English placeholder) ===== */
-"history_empty_label" = "No tests have been performed from this device yet";
+"history_empty_label" = "Erről az eszközről még nem végeztek teszteket";
 
 
-/* ===== TODO: NEEDS TRANSLATION — Connectivity / airplane-mode hint (SIM Info) (English placeholder) ===== */
-"Connectivity" = "Connectivity";
-"Status" = "Status";
-"Checking…" = "Checking…";
-"Network path available" = "Network path available";
-"No connection (radio is on)" = "No connection (radio is on)";
-"Likely airplane mode or offline" = "Likely airplane mode or offline";
-"This information is a best-effort guess from iOS APIs and may be incomplete or inconsistent." = "This information is a best-effort guess from iOS APIs and may be incomplete or inconsistent.";
+"Connectivity" = "Kapcsolat";
+"Status" = "Állapot";
+"Checking…" = "Ellenőrzés…";
+"Network path available" = "Hálózati útvonal elérhető";
+"No connection (radio is on)" = "Nincs kapcsolat (a rádió be van kapcsolva)";
+"Likely airplane mode or offline" = "Valószínűleg repülőgép üzemmód vagy offline";
+"This information is a best-effort guess from iOS APIs and may be incomplete or inconsistent." = "Ez az információ az iOS API-k alapján készült legjobb becslés, és lehet hiányos vagy ellentmondásos.";
 
-/* ===== TODO: NEEDS TRANSLATION — Coverage unavailable feedback (English placeholder) ===== */
-"coverage_unavailable_title" = "Signal Measurement unavailable";
-"coverage_unavailable_message" = "Signal Measurement requires Wi‑Fi to be turned off and good GPS reception. Please adjust and try again.";
+"coverage_unavailable_title" = "A jelmérés nem érhető el";
+"coverage_unavailable_message" = "A jelméréshez ki kell kapcsolni a Wi‑Fi-t, és jó GPS-vételre van szükség. Módosítsa, majd próbálja újra.";

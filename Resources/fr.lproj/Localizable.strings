@@ -448,64 +448,57 @@
 "Map" = "Carte";
 "Coverage" = "Mesure du signal";
 
-/* ===== TODO: NEEDS TRANSLATION (English placeholder used for now) ===== */
-"coverage_intro_title" = "Signal Measurement";
-"coverage_intro_description" = "The Signal Measurement allows outdoor mobile network measurements along a path. It monitors connectivity, technology and signal strength. Connectivity is measured using regular network pings. The measurement requires good GPS coverage and Wifi must be turned off. It consumes much less data compared to speed measurement. The Signal Measurement is (only) intended for use within the EU and the EEA.";
-"coverage_intro_start_button" = "Start test";
-"preferences_sim_info" = "SIM Information";
+"coverage_intro_title" = "Mesure du signal";
+"coverage_intro_description" = "La Mesure du signal permet des mesures du réseau mobile en extérieur le long d’un trajet. Elle surveille la connectivité, la technologie et la puissance du signal. La connectivité est mesurée à l’aide de pings réseau réguliers. La mesure nécessite une bonne couverture GPS et le Wi-Fi doit être désactivé. Elle consomme beaucoup moins de données que la mesure de débit. La Mesure du signal est (uniquement) destinée à être utilisée au sein de l’UE et de l’EEE.";
+"coverage_intro_start_button" = "Démarrer le test";
+"preferences_sim_info" = "Informations SIM";
 
-/* ===== TODO: NEEDS TRANSLATION — Coverage & SIM Info UI (English placeholder) ===== */
-"Technology" = "Technology";
+"Technology" = "Technologie";
 "Ping" = "Ping";
-"Loc. accuracy" = "Loc. accuracy";
-"Experts details" = "Experts details";
-"Only locations at or below this accuracy contribute to fences and ping assignment." = "Only locations at or below this accuracy contribute to fences and ping assignment.";
-"Date:" = "Date:";
-"Technology:" = "Technology:";
+"Loc. accuracy" = "Précision de localisation";
+"Experts details" = "Détails experts";
+"Only locations at or below this accuracy contribute to fences and ping assignment." = "Seules les localisations d’une précision égale ou supérieure contribuent aux zones et à l’attribution des pings.";
+"Date:" = "Date :";
+"Technology:" = "Technologie :";
 "Ping:" = "Ping:";
-"SIM Information" = "SIM Information";
-"Refresh" = "Refresh";
-"Generation" = "Generation";
-"Used for data" = "Used for data";
-"Registered" = "Registered";
+"SIM Information" = "Informations SIM";
+"Refresh" = "Actualiser";
+"Generation" = "Génération";
+"Used for data" = "Utilisé pour les données";
+"Registered" = "Enregistré";
 "DATA" = "DATA";
-"No cellular service detected. The device may have no SIM, be Wi-Fi only, or be in airplane mode." = "No cellular service detected. The device may have no SIM, be Wi-Fi only, or be in airplane mode.";
-"Yes" = "Yes";
-"No" = "No";
+"No cellular service detected. The device may have no SIM, be Wi-Fi only, or be in airplane mode." = "Aucun service cellulaire détecté. L’appareil n’a peut-être pas de SIM, est en Wi-Fi uniquement ou en mode avion.";
+"Yes" = "Oui";
+"No" = "Non";
 
 
-/* ===== TODO: NEEDS TRANSLATION — Coverage popups & results (English placeholder) ===== */
-"Stop Coverage Test" = "Stop Coverage Test";
-"The test will be stopped and results will be sent to the server." = "The test will be stopped and results will be sent to the server.";
-"Stop test" = "Stop test";
-"Continue test" = "Continue test";
-"Waiting for GPS" = "Waiting for GPS";
-"No sufficiently accurate location was obtained within %d minutes." = "No sufficiently accurate location was obtained within %d minutes.";
-"Signal Measurement Results" = "Signal Measurement Results";
+"Stop Coverage Test" = "Arrêter le test de couverture";
+"The test will be stopped and results will be sent to the server." = "Le test sera arrêté et les résultats seront envoyés au serveur.";
+"Stop test" = "Arrêter le test";
+"Continue test" = "Continuer le test";
+"Waiting for GPS" = "En attente du GPS";
+"No sufficiently accurate location was obtained within %d minutes." = "Aucune localisation suffisamment précise n’a été obtenue en %d minutes.";
+"Signal Measurement Results" = "Résultats de la mesure du signal";
 
 
-/* ===== TODO: NEEDS TRANSLATION — Coverage warnings, header & SIM raw fields (English placeholder) ===== */
-"Currently the location accuracy is insufficient. Please measure outdoors." = "Currently the location accuracy is insufficient. Please measure outdoors.";
-"Disable Wi‑Fi" = "Disable Wi‑Fi";
-"Please turn off Wi‑Fi to measure cellular coverage." = "Please turn off Wi‑Fi to measure cellular coverage.";
-"Network Coverage" = "Signal Measurement";
-"No service" = "No service";
-"Unknown" = "Unknown";
+"Currently the location accuracy is insufficient. Please measure outdoors." = "La précision de la localisation est actuellement insuffisante. Veuillez mesurer à l’extérieur.";
+"Disable Wi‑Fi" = "Désactiver le Wi‑Fi";
+"Please turn off Wi‑Fi to measure cellular coverage." = "Veuillez désactiver le Wi‑Fi pour mesurer la couverture cellulaire.";
+"Network Coverage" = "Mesure du signal";
+"No service" = "Aucun service";
+"Unknown" = "Inconnu";
 
 
-/* ===== TODO: NEEDS TRANSLATION — History empty state (English placeholder) ===== */
-"history_empty_label" = "No tests have been performed from this device yet";
+"history_empty_label" = "Aucun test n’a encore été effectué depuis cet appareil";
 
 
-/* ===== TODO: NEEDS TRANSLATION — Connectivity / airplane-mode hint (SIM Info) (English placeholder) ===== */
-"Connectivity" = "Connectivity";
-"Status" = "Status";
-"Checking…" = "Checking…";
-"Network path available" = "Network path available";
-"No connection (radio is on)" = "No connection (radio is on)";
-"Likely airplane mode or offline" = "Likely airplane mode or offline";
-"This information is a best-effort guess from iOS APIs and may be incomplete or inconsistent." = "This information is a best-effort guess from iOS APIs and may be incomplete or inconsistent.";
+"Connectivity" = "Connectivité";
+"Status" = "État";
+"Checking…" = "Vérification…";
+"Network path available" = "Chemin réseau disponible";
+"No connection (radio is on)" = "Aucune connexion (radio activée)";
+"Likely airplane mode or offline" = "Probablement mode avion ou hors ligne";
+"This information is a best-effort guess from iOS APIs and may be incomplete or inconsistent." = "Ces informations sont une estimation au mieux à partir des API iOS et peuvent être incomplètes ou incohérentes.";
 
-/* ===== TODO: NEEDS TRANSLATION — Coverage unavailable feedback (English placeholder) ===== */
-"coverage_unavailable_title" = "Signal Measurement unavailable";
-"coverage_unavailable_message" = "Signal Measurement requires Wi‑Fi to be turned off and good GPS reception. Please adjust and try again.";
+"coverage_unavailable_title" = "Mesure du signal indisponible";
+"coverage_unavailable_message" = "La Mesure du signal nécessite que le Wi‑Fi soit désactivé et une bonne réception GPS. Veuillez ajuster et réessayer.";

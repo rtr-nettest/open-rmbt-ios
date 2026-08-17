@@ -448,64 +448,57 @@
 "Map" = "Mapa";
 "Coverage" = "Měření signálu";
 
-/* ===== TODO: NEEDS TRANSLATION (English placeholder used for now) ===== */
-"coverage_intro_title" = "Signal Measurement";
-"coverage_intro_description" = "The Signal Measurement allows outdoor mobile network measurements along a path. It monitors connectivity, technology and signal strength. Connectivity is measured using regular network pings. The measurement requires good GPS coverage and Wifi must be turned off. It consumes much less data compared to speed measurement. The Signal Measurement is (only) intended for use within the EU and the EEA.";
-"coverage_intro_start_button" = "Start test";
-"preferences_sim_info" = "SIM Information";
+"coverage_intro_title" = "Měření signálu";
+"coverage_intro_description" = "Měření signálu umožňuje venkovní měření mobilní sítě podél trasy. Sleduje připojení, technologii a sílu signálu. Připojení se měří pomocí pravidelných síťových pingů. Měření vyžaduje dobré pokrytí GPS a Wi-Fi musí být vypnutá. Spotřebuje výrazně méně dat než měření rychlosti. Měření signálu je určeno (pouze) pro použití v rámci EU a EHP.";
+"coverage_intro_start_button" = "Spustit test";
+"preferences_sim_info" = "Informace o SIM";
 
-/* ===== TODO: NEEDS TRANSLATION — Coverage & SIM Info UI (English placeholder) ===== */
-"Technology" = "Technology";
+"Technology" = "Technologie";
 "Ping" = "Ping";
-"Loc. accuracy" = "Loc. accuracy";
-"Experts details" = "Experts details";
-"Only locations at or below this accuracy contribute to fences and ping assignment." = "Only locations at or below this accuracy contribute to fences and ping assignment.";
-"Date:" = "Date:";
-"Technology:" = "Technology:";
+"Loc. accuracy" = "Přesnost polohy";
+"Experts details" = "Podrobnosti pro experty";
+"Only locations at or below this accuracy contribute to fences and ping assignment." = "Do zón a přiřazení pingu se započítávají pouze polohy s touto nebo lepší přesností.";
+"Date:" = "Datum:";
+"Technology:" = "Technologie:";
 "Ping:" = "Ping:";
-"SIM Information" = "SIM Information";
-"Refresh" = "Refresh";
-"Generation" = "Generation";
-"Used for data" = "Used for data";
-"Registered" = "Registered";
+"SIM Information" = "Informace o SIM";
+"Refresh" = "Obnovit";
+"Generation" = "Generace";
+"Used for data" = "Použito pro data";
+"Registered" = "Registrováno";
 "DATA" = "DATA";
-"No cellular service detected. The device may have no SIM, be Wi-Fi only, or be in airplane mode." = "No cellular service detected. The device may have no SIM, be Wi-Fi only, or be in airplane mode.";
-"Yes" = "Yes";
-"No" = "No";
+"No cellular service detected. The device may have no SIM, be Wi-Fi only, or be in airplane mode." = "Nebyla zjištěna mobilní síť. Zařízení možná nemá SIM, je pouze na Wi-Fi nebo je v režimu letadlo.";
+"Yes" = "Ano";
+"No" = "Ne";
 
 
-/* ===== TODO: NEEDS TRANSLATION — Coverage popups & results (English placeholder) ===== */
-"Stop Coverage Test" = "Stop Coverage Test";
-"The test will be stopped and results will be sent to the server." = "The test will be stopped and results will be sent to the server.";
-"Stop test" = "Stop test";
-"Continue test" = "Continue test";
-"Waiting for GPS" = "Waiting for GPS";
-"No sufficiently accurate location was obtained within %d minutes." = "No sufficiently accurate location was obtained within %d minutes.";
-"Signal Measurement Results" = "Signal Measurement Results";
+"Stop Coverage Test" = "Zastavit test pokrytí";
+"The test will be stopped and results will be sent to the server." = "Test bude zastaven a výsledky budou odeslány na server.";
+"Stop test" = "Zastavit test";
+"Continue test" = "Pokračovat v testu";
+"Waiting for GPS" = "Čekání na GPS";
+"No sufficiently accurate location was obtained within %d minutes." = "Během %d minut nebyla získána dostatečně přesná poloha.";
+"Signal Measurement Results" = "Výsledky měření signálu";
 
 
-/* ===== TODO: NEEDS TRANSLATION — Coverage warnings, header & SIM raw fields (English placeholder) ===== */
-"Currently the location accuracy is insufficient. Please measure outdoors." = "Currently the location accuracy is insufficient. Please measure outdoors.";
-"Disable Wi‑Fi" = "Disable Wi‑Fi";
-"Please turn off Wi‑Fi to measure cellular coverage." = "Please turn off Wi‑Fi to measure cellular coverage.";
-"Network Coverage" = "Signal Measurement";
-"No service" = "No service";
-"Unknown" = "Unknown";
+"Currently the location accuracy is insufficient. Please measure outdoors." = "Přesnost polohy je momentálně nedostatečná. Měřte prosím venku.";
+"Disable Wi‑Fi" = "Vypnout Wi‑Fi";
+"Please turn off Wi‑Fi to measure cellular coverage." = "Vypněte prosím Wi‑Fi pro měření mobilního pokrytí.";
+"Network Coverage" = "Měření signálu";
+"No service" = "Žádná služba";
+"Unknown" = "Neznámé";
 
 
-/* ===== TODO: NEEDS TRANSLATION — History empty state (English placeholder) ===== */
-"history_empty_label" = "No tests have been performed from this device yet";
+"history_empty_label" = "Z tohoto zařízení zatím nebyly provedeny žádné testy";
 
 
-/* ===== TODO: NEEDS TRANSLATION — Connectivity / airplane-mode hint (SIM Info) (English placeholder) ===== */
-"Connectivity" = "Connectivity";
-"Status" = "Status";
-"Checking…" = "Checking…";
-"Network path available" = "Network path available";
-"No connection (radio is on)" = "No connection (radio is on)";
-"Likely airplane mode or offline" = "Likely airplane mode or offline";
-"This information is a best-effort guess from iOS APIs and may be incomplete or inconsistent." = "This information is a best-effort guess from iOS APIs and may be incomplete or inconsistent.";
+"Connectivity" = "Připojení";
+"Status" = "Stav";
+"Checking…" = "Kontrola…";
+"Network path available" = "Síťová cesta dostupná";
+"No connection (radio is on)" = "Bez připojení (rádio zapnuto)";
+"Likely airplane mode or offline" = "Pravděpodobně režim letadlo nebo offline";
+"This information is a best-effort guess from iOS APIs and may be incomplete or inconsistent." = "Tyto informace jsou nejlepším možným odhadem z rozhraní iOS API a mohou být neúplné nebo nekonzistentní.";
 
-/* ===== TODO: NEEDS TRANSLATION — Coverage unavailable feedback (English placeholder) ===== */
-"coverage_unavailable_title" = "Signal Measurement unavailable";
-"coverage_unavailable_message" = "Signal Measurement requires Wi‑Fi to be turned off and good GPS reception. Please adjust and try again.";
+"coverage_unavailable_title" = "Měření signálu není dostupné";
+"coverage_unavailable_message" = "Měření signálu vyžaduje vypnutou Wi‑Fi a dobrý příjem GPS. Upravte prosím nastavení a zkuste to znovu.";

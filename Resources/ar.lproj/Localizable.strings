@@ -146,7 +146,7 @@
 "Pinging" = "Ping";
 
 /* Phase status label */
-"Upload" = "Upload";
+"Upload" = "رفع";
 
 /* Phase status label */
 "Waiting for test server" = "في انتظار خادم الاختبار";
@@ -158,7 +158,7 @@
 "Mbps" = "Mbps";
 
 /* Phase status label */
-"Download" = "Download";
+"Download" = "تنزيل";
 
 /* Test intro screen title when thre's no connectivity */
 "No network connection available" = "لا يوجد اتصال بالشبكة";
@@ -359,8 +359,8 @@
 /* Test */
 "test.network.label" = "الشبكة";
 "test.technology.label" = "التقنية";
-"label_upload" = "Upload";
-"label_download" = "Download";
+"label_upload" = "رفع";
+"label_download" = "تنزيل";
 "label_ping" = "Ping";
 
 "measurement_ping" = "Ping";
@@ -448,64 +448,57 @@
 "Map" = "الخريطة";
 "Coverage" = "قياس الإشارة";
 
-/* ===== TODO: NEEDS TRANSLATION (English placeholder used for now) ===== */
-"coverage_intro_title" = "Signal Measurement";
-"coverage_intro_description" = "The Signal Measurement allows outdoor mobile network measurements along a path. It monitors connectivity, technology and signal strength. Connectivity is measured using regular network pings. The measurement requires good GPS coverage and Wifi must be turned off. It consumes much less data compared to speed measurement. The Signal Measurement is (only) intended for use within the EU and the EEA.";
-"coverage_intro_start_button" = "Start test";
-"preferences_sim_info" = "SIM Information";
+"coverage_intro_title" = "قياس الإشارة";
+"coverage_intro_description" = "يتيح قياس الإشارة إجراء قياسات للشبكة الخلوية في الهواء الطلق على طول مسار. يراقب الاتصال والتقنية وقوة الإشارة. يُقاس الاتصال باستخدام عمليات بينغ منتظمة للشبكة. يتطلب القياس تغطية GPS جيدة ويجب إيقاف تشغيل Wi-Fi. يستهلك بيانات أقل بكثير مقارنة بقياس السرعة. قياس الإشارة مُخصَّص (فقط) للاستخدام داخل الاتحاد الأوروبي والمنطقة الاقتصادية الأوروبية.";
+"coverage_intro_start_button" = "بدء الاختبار";
+"preferences_sim_info" = "معلومات SIM";
 
-/* ===== TODO: NEEDS TRANSLATION — Coverage & SIM Info UI (English placeholder) ===== */
-"Technology" = "Technology";
+"Technology" = "التقنية";
 "Ping" = "Ping";
-"Loc. accuracy" = "Loc. accuracy";
-"Experts details" = "Experts details";
-"Only locations at or below this accuracy contribute to fences and ping assignment." = "Only locations at or below this accuracy contribute to fences and ping assignment.";
-"Date:" = "Date:";
-"Technology:" = "Technology:";
+"Loc. accuracy" = "دقة الموقع";
+"Experts details" = "تفاصيل الخبراء";
+"Only locations at or below this accuracy contribute to fences and ping assignment." = "المواقع بهذه الدقة أو أفضل فقط تُسهم في المناطق وتعيين البينغ.";
+"Date:" = "التاريخ:";
+"Technology:" = "التقنية:";
 "Ping:" = "Ping:";
-"SIM Information" = "SIM Information";
-"Refresh" = "Refresh";
-"Generation" = "Generation";
-"Used for data" = "Used for data";
-"Registered" = "Registered";
+"SIM Information" = "معلومات SIM";
+"Refresh" = "تحديث";
+"Generation" = "الجيل";
+"Used for data" = "مُستخدَم للبيانات";
+"Registered" = "مُسجَّل";
 "DATA" = "DATA";
-"No cellular service detected. The device may have no SIM, be Wi-Fi only, or be in airplane mode." = "No cellular service detected. The device may have no SIM, be Wi-Fi only, or be in airplane mode.";
-"Yes" = "Yes";
-"No" = "No";
+"No cellular service detected. The device may have no SIM, be Wi-Fi only, or be in airplane mode." = "لم يتم اكتشاف خدمة خلوية. قد لا يحتوي الجهاز على شريحة SIM، أو يعمل عبر Wi-Fi فقط، أو في وضع الطيران.";
+"Yes" = "نعم";
+"No" = "لا";
 
 
-/* ===== TODO: NEEDS TRANSLATION — Coverage popups & results (English placeholder) ===== */
-"Stop Coverage Test" = "Stop Coverage Test";
-"The test will be stopped and results will be sent to the server." = "The test will be stopped and results will be sent to the server.";
-"Stop test" = "Stop test";
-"Continue test" = "Continue test";
-"Waiting for GPS" = "Waiting for GPS";
-"No sufficiently accurate location was obtained within %d minutes." = "No sufficiently accurate location was obtained within %d minutes.";
-"Signal Measurement Results" = "Signal Measurement Results";
+"Stop Coverage Test" = "إيقاف اختبار التغطية";
+"The test will be stopped and results will be sent to the server." = "سيتم إيقاف الاختبار وإرسال النتائج إلى الخادم.";
+"Stop test" = "إيقاف الاختبار";
+"Continue test" = "متابعة الاختبار";
+"Waiting for GPS" = "في انتظار GPS";
+"No sufficiently accurate location was obtained within %d minutes." = "لم يتم الحصول على موقع دقيق بما يكفي خلال %d دقيقة.";
+"Signal Measurement Results" = "نتائج قياس الإشارة";
 
 
-/* ===== TODO: NEEDS TRANSLATION — Coverage warnings, header & SIM raw fields (English placeholder) ===== */
-"Currently the location accuracy is insufficient. Please measure outdoors." = "Currently the location accuracy is insufficient. Please measure outdoors.";
-"Disable Wi‑Fi" = "Disable Wi‑Fi";
-"Please turn off Wi‑Fi to measure cellular coverage." = "Please turn off Wi‑Fi to measure cellular coverage.";
-"Network Coverage" = "Signal Measurement";
-"No service" = "No service";
-"Unknown" = "Unknown";
+"Currently the location accuracy is insufficient. Please measure outdoors." = "دقة تحديد الموقع غير كافية حاليًا. يُرجى القياس في الخارج.";
+"Disable Wi‑Fi" = "إيقاف Wi‑Fi";
+"Please turn off Wi‑Fi to measure cellular coverage." = "يرجى إيقاف تشغيل Wi‑Fi لقياس تغطية الشبكة الخلوية.";
+"Network Coverage" = "قياس الإشارة";
+"No service" = "لا توجد خدمة";
+"Unknown" = "غير معروف";
 
 
-/* ===== TODO: NEEDS TRANSLATION — History empty state (English placeholder) ===== */
-"history_empty_label" = "No tests have been performed from this device yet";
+"history_empty_label" = "لم يتم إجراء أي اختبارات من هذا الجهاز بعد";
 
 
-/* ===== TODO: NEEDS TRANSLATION — Connectivity / airplane-mode hint (SIM Info) (English placeholder) ===== */
-"Connectivity" = "Connectivity";
-"Status" = "Status";
-"Checking…" = "Checking…";
-"Network path available" = "Network path available";
-"No connection (radio is on)" = "No connection (radio is on)";
-"Likely airplane mode or offline" = "Likely airplane mode or offline";
-"This information is a best-effort guess from iOS APIs and may be incomplete or inconsistent." = "This information is a best-effort guess from iOS APIs and may be incomplete or inconsistent.";
+"Connectivity" = "الاتصال";
+"Status" = "الحالة";
+"Checking…" = "جارٍ التحقق…";
+"Network path available" = "مسار الشبكة متاح";
+"No connection (radio is on)" = "لا يوجد اتصال (الراديو قيد التشغيل)";
+"Likely airplane mode or offline" = "على الأرجح وضع الطيران أو غير متصل";
+"This information is a best-effort guess from iOS APIs and may be incomplete or inconsistent." = "هذه المعلومات هي أفضل تقدير ممكن من واجهات iOS البرمجية وقد تكون غير مكتملة أو غير متسقة.";
 
-/* ===== TODO: NEEDS TRANSLATION — Coverage unavailable feedback (English placeholder) ===== */
-"coverage_unavailable_title" = "Signal Measurement unavailable";
-"coverage_unavailable_message" = "Signal Measurement requires Wi‑Fi to be turned off and good GPS reception. Please adjust and try again.";
+"coverage_unavailable_title" = "قياس الإشارة غير متاح";
+"coverage_unavailable_message" = "يتطلب قياس الإشارة إيقاف تشغيل Wi‑Fi واستقبال GPS جيد. يُرجى الضبط والمحاولة مرة أخرى.";

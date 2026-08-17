@@ -258,7 +258,7 @@
 
 "video_telephony" = "Videotelefonija";
 "video_conferencing" = "Videokonferencije";
-"cloud" = "Cloud";
+"cloud" = "Oblak";
 "video_uhd" = "Video UHD";
 "video_sd" = "Video SD";
 "video_hd" = "Video HD";
@@ -354,7 +354,7 @@
 "The devices are already synchronized with each other." = "Uređaji su već sinkronizirani.";
 "The code you entered does not exist." = "Uneseni kôd ne postoji.";
 "history.result.connection" = "Vrsta";
-"history.result.operator" = "Operator";
+"history.result.operator" = "Operater";
 
 /* Test */
 "test.network.label" = "Mreža";
@@ -408,9 +408,9 @@
 
 "preferences_developer_control_server" = "Control poslužitelj";
 "preferences_override_control_enabled" = "Premosti Control poslužitelj";
-"preferences_override_control_server_host" = "Control host";
-"preferences_override_control_server_port" = "Control port";
-"preferences_override_control_server_ssl" = "Control SSL";
+"preferences_override_control_server_host" = "Kontrolni host";
+"preferences_override_control_server_port" = "Kontrolni port";
+"preferences_override_control_server_ssl" = "Kontrolni SSL";
 
 "preferences_developer_logging" = "Zapisivanje";
 "preferences_developer_logging_enabled" = "Omogući zapisivanje";
@@ -448,64 +448,57 @@
 "Map" = "Karta";
 "Coverage" = "Mjerenje signala";
 
-/* ===== TODO: NEEDS TRANSLATION (English placeholder used for now) ===== */
-"coverage_intro_title" = "Signal Measurement";
-"coverage_intro_description" = "The Signal Measurement allows outdoor mobile network measurements along a path. It monitors connectivity, technology and signal strength. Connectivity is measured using regular network pings. The measurement requires good GPS coverage and Wifi must be turned off. It consumes much less data compared to speed measurement. The Signal Measurement is (only) intended for use within the EU and the EEA.";
-"coverage_intro_start_button" = "Start test";
-"preferences_sim_info" = "SIM Information";
+"coverage_intro_title" = "Mjerenje signala";
+"coverage_intro_description" = "Mjerenje signala omogućuje vanjska mjerenja mobilne mreže duž rute. Prati povezivost, tehnologiju i jačinu signala. Povezivost se mjeri redovitim mrežnim pingovima. Mjerenje zahtijeva dobru GPS pokrivenost, a Wi-Fi mora biti isključen. Troši znatno manje podataka od mjerenja brzine. Mjerenje signala namijenjeno je (samo) za upotrebu unutar EU-a i EGP-a.";
+"coverage_intro_start_button" = "Pokreni test";
+"preferences_sim_info" = "Podaci o SIM-u";
 
-/* ===== TODO: NEEDS TRANSLATION — Coverage & SIM Info UI (English placeholder) ===== */
-"Technology" = "Technology";
+"Technology" = "Tehnologija";
 "Ping" = "Ping";
-"Loc. accuracy" = "Loc. accuracy";
-"Experts details" = "Experts details";
-"Only locations at or below this accuracy contribute to fences and ping assignment." = "Only locations at or below this accuracy contribute to fences and ping assignment.";
-"Date:" = "Date:";
-"Technology:" = "Technology:";
+"Loc. accuracy" = "Točnost lokacije";
+"Experts details" = "Stručni detalji";
+"Only locations at or below this accuracy contribute to fences and ping assignment." = "Samo lokacije s ovom ili boljom točnošću doprinose zonama i dodjeli pinga.";
+"Date:" = "Datum:";
+"Technology:" = "Tehnologija:";
 "Ping:" = "Ping:";
-"SIM Information" = "SIM Information";
-"Refresh" = "Refresh";
-"Generation" = "Generation";
-"Used for data" = "Used for data";
-"Registered" = "Registered";
+"SIM Information" = "Podaci o SIM-u";
+"Refresh" = "Osvježi";
+"Generation" = "Generacija";
+"Used for data" = "Koristi se za podatke";
+"Registered" = "Registrirano";
 "DATA" = "DATA";
-"No cellular service detected. The device may have no SIM, be Wi-Fi only, or be in airplane mode." = "No cellular service detected. The device may have no SIM, be Wi-Fi only, or be in airplane mode.";
-"Yes" = "Yes";
-"No" = "No";
+"No cellular service detected. The device may have no SIM, be Wi-Fi only, or be in airplane mode." = "Nije otkrivena mobilna mreža. Uređaj možda nema SIM, koristi samo Wi-Fi ili je u načinu rada u zrakoplovu.";
+"Yes" = "Da";
+"No" = "Ne";
 
 
-/* ===== TODO: NEEDS TRANSLATION — Coverage popups & results (English placeholder) ===== */
-"Stop Coverage Test" = "Stop Coverage Test";
-"The test will be stopped and results will be sent to the server." = "The test will be stopped and results will be sent to the server.";
-"Stop test" = "Stop test";
-"Continue test" = "Continue test";
-"Waiting for GPS" = "Waiting for GPS";
-"No sufficiently accurate location was obtained within %d minutes." = "No sufficiently accurate location was obtained within %d minutes.";
-"Signal Measurement Results" = "Signal Measurement Results";
+"Stop Coverage Test" = "Zaustavi test pokrivenosti";
+"The test will be stopped and results will be sent to the server." = "Test će biti zaustavljen, a rezultati poslani na poslužitelj.";
+"Stop test" = "Zaustavi test";
+"Continue test" = "Nastavi test";
+"Waiting for GPS" = "Čekanje na GPS";
+"No sufficiently accurate location was obtained within %d minutes." = "Unutar %d minuta nije dobivena dovoljno točna lokacija.";
+"Signal Measurement Results" = "Rezultati mjerenja signala";
 
 
-/* ===== TODO: NEEDS TRANSLATION — Coverage warnings, header & SIM raw fields (English placeholder) ===== */
-"Currently the location accuracy is insufficient. Please measure outdoors." = "Currently the location accuracy is insufficient. Please measure outdoors.";
-"Disable Wi‑Fi" = "Disable Wi‑Fi";
-"Please turn off Wi‑Fi to measure cellular coverage." = "Please turn off Wi‑Fi to measure cellular coverage.";
-"Network Coverage" = "Signal Measurement";
-"No service" = "No service";
-"Unknown" = "Unknown";
+"Currently the location accuracy is insufficient. Please measure outdoors." = "Trenutačna točnost lokacije je nedovoljna. Molimo mjerite na otvorenom.";
+"Disable Wi‑Fi" = "Onemogući Wi‑Fi";
+"Please turn off Wi‑Fi to measure cellular coverage." = "Isključite Wi‑Fi za mjerenje mobilne pokrivenosti.";
+"Network Coverage" = "Mjerenje signala";
+"No service" = "Nema usluge";
+"Unknown" = "Nepoznato";
 
 
-/* ===== TODO: NEEDS TRANSLATION — History empty state (English placeholder) ===== */
-"history_empty_label" = "No tests have been performed from this device yet";
+"history_empty_label" = "S ovog uređaja još nisu provedeni testovi";
 
 
-/* ===== TODO: NEEDS TRANSLATION — Connectivity / airplane-mode hint (SIM Info) (English placeholder) ===== */
-"Connectivity" = "Connectivity";
+"Connectivity" = "Povezivost";
 "Status" = "Status";
-"Checking…" = "Checking…";
-"Network path available" = "Network path available";
-"No connection (radio is on)" = "No connection (radio is on)";
-"Likely airplane mode or offline" = "Likely airplane mode or offline";
-"This information is a best-effort guess from iOS APIs and may be incomplete or inconsistent." = "This information is a best-effort guess from iOS APIs and may be incomplete or inconsistent.";
+"Checking…" = "Provjera…";
+"Network path available" = "Mrežni put dostupan";
+"No connection (radio is on)" = "Nema veze (radio je uključen)";
+"Likely airplane mode or offline" = "Vjerojatno način rada u zrakoplovu ili izvanmrežno";
+"This information is a best-effort guess from iOS APIs and may be incomplete or inconsistent." = "Ovi su podaci najbolja moguća procjena iz iOS API-ja i mogu biti nepotpuni ili nedosljedni.";
 
-/* ===== TODO: NEEDS TRANSLATION — Coverage unavailable feedback (English placeholder) ===== */
-"coverage_unavailable_title" = "Signal Measurement unavailable";
-"coverage_unavailable_message" = "Signal Measurement requires Wi‑Fi to be turned off and good GPS reception. Please adjust and try again.";
+"coverage_unavailable_title" = "Mjerenje signala nije dostupno";
+"coverage_unavailable_message" = "Mjerenje signala zahtijeva isključen Wi‑Fi i dobar GPS prijem. Prilagodite i pokušajte ponovno.";
