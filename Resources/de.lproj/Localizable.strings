@@ -245,9 +245,6 @@
 
 /* A11 */
 "Start" = "Start";
-"History" = "Verlauf";
-"Statistics" = "Statistiks";
-"Map" = "Karte";
 "Collapse results" = "Ergebnisse einklappen";
 "Expand results" = "Ergebnisse erweitern";
 "Share result" = "Ergebnis teilen";
@@ -288,7 +285,6 @@
 "public_ip_address" = "Öffentliche Adresse";
 "private_ip_address" = "Lokale Adresse";
 
-"title_loop_mode" = "Wiederholungsmodus";
 "title_coverage_series" = "Abdeckungsserie";
 "coverage_label" = "Signalmessung";
 
@@ -330,9 +326,6 @@
 "title_loop_count" = "Wählen Sie die Anzahl der Tests";
 "text_loop_start" = "Tests starten";
 "text_loop_mode" = "Neuer Test nach Wartezeit oder Zurücklegen der Distanz. Max. 2 Tage";
-"preferences_loop_mode_summary" = "Neuer Test nach Wartezeit oder Zurücklegen der Distanz. Max. 2 Tage";
-"preferences_loop_mode_min_delay" = "Wartezeit (in Minuten)";
-"preferences_loop_mode_max_movement" = "Distanz (in Metern)";
 
 "invalide_loop_mode_count" = "Ungültige Anzahl der Tests";
 "invalide_loop_mode_distance" = "Ungültige Wartedistanz";

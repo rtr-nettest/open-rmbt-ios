@@ -245,9 +245,6 @@
 
 /* A11 */
 "Start" = "Indítás";
-"History" = "Előzmények";
-"Statistics" = "Statisztika";
-"Map" = "Térkép";
 "Collapse results" = "Eredmények összecsukása";
 "Expand results" = "Eredmények kibontása";
 "Share result" = "Eredmény megosztása";
@@ -288,7 +285,6 @@
 "public_ip_address" = "Nyilvános cím";
 "private_ip_address" = "Helyi cím";
 
-"title_loop_mode" = "Ismétlődő mód";
 "title_coverage_series" = "Lefedettségi sorozat";
 "coverage_label" = "Jelmérés";
 
@@ -330,9 +326,6 @@
 "title_loop_count" = "Válassza ki a tesztek számát";
 "text_loop_start" = "Tesztek indítása";
 "text_loop_mode" = "Új teszt a várakozás vagy a távolság megtétele után. Max. 2 nap";
-"preferences_loop_mode_summary" = "Új teszt a várakozási idő vagy a távolság megtétele után. Max. 2 nap";
-"preferences_loop_mode_min_delay" = "Várakozási idő (percben)";
-"preferences_loop_mode_max_movement" = "Távolság (méterben)";
 
 "invalide_loop_mode_count" = "Érvénytelen tesztszám";
 "invalide_loop_mode_distance" = "Érvénytelen várakozási távolság";

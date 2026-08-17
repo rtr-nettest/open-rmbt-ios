@@ -245,9 +245,6 @@
 
 /* A11 */
 "Start" = "ابدأ";
-"History" = "السجل";
-"Statistics" = "الإحصائيات";
-"Map" = "الخريطة";
 "Collapse results" = "طي النتائج";
 "Expand results" = "توسيع النتائج";
 "Share result" = "مشاركة النتيجة";
@@ -288,7 +285,6 @@
 "public_ip_address" = "العنوان العام";
 "private_ip_address" = "العنوان الخاص";
 
-"title_loop_mode" = "وضع التكرار";
 "title_coverage_series" = "سلسلة التغطية";
 "coverage_label" = "قياس الإشارة";
 
@@ -330,9 +326,6 @@
 "title_loop_count" = "اختر عدد الاختبارات";
 "text_loop_start" = "بدء الاختبارات";
 "text_loop_mode" = "اختبار جديد بعد الانتظار أو قطع المسافة. بحد أقصى يومان";
-"preferences_loop_mode_summary" = "اختبار جديد بعد وقت الانتظار أو قطع المسافة. بحد أقصى يومان";
-"preferences_loop_mode_min_delay" = "وقت الانتظار (بالدقائق)";
-"preferences_loop_mode_max_movement" = "المسافة (بالأمتار)";
 
 "invalide_loop_mode_count" = "عدد اختبارات غير صالح";
 "invalide_loop_mode_distance" = "مسافة انتظار غير صالحة";

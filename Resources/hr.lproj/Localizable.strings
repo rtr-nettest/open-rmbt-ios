@@ -245,9 +245,6 @@
 
 /* A11 */
 "Start" = "Početak";
-"History" = "Povijest";
-"Statistics" = "Statistika";
-"Map" = "Karta";
 "Collapse results" = "Sažmi rezultate";
 "Expand results" = "Proširi rezultate";
 "Share result" = "Podijeli rezultat";
@@ -288,7 +285,6 @@
 "public_ip_address" = "Javna adresa";
 "private_ip_address" = "Privatna adresa";
 
-"title_loop_mode" = "Način petlje";
 "title_coverage_series" = "Serija pokrivenosti";
 "coverage_label" = "Mjerenje signala";
 
@@ -330,9 +326,6 @@
 "title_loop_count" = "Odaberite broj testova";
 "text_loop_start" = "Pokreni testove";
 "text_loop_mode" = "Novi test nakon vremena čekanja ili prijeđene udaljenosti. Maks. 2 dana";
-"preferences_loop_mode_summary" = "Novi test nakon vremena čekanja ili prijeđene udaljenosti. Maks. 2 dana";
-"preferences_loop_mode_min_delay" = "Vrijeme čekanja (u minutama)";
-"preferences_loop_mode_max_movement" = "Udaljenost (u metrima)";
 
 "invalide_loop_mode_count" = "Nevažeći broj testova";
 "invalide_loop_mode_distance" = "Nevažeća udaljenost čekanja";

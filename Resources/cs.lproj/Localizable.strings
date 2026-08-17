@@ -245,9 +245,6 @@
 
 /* A11 */
 "Start" = "Start";
-"History" = "Historie";
-"Statistics" = "Statistika";
-"Map" = "Mapa";
 "Collapse results" = "Skrýt výsledky";
 "Expand results" = "Zobrazit výsledky";
 "Share result" = "Sdílet výsledek";
@@ -288,7 +285,6 @@
 "public_ip_address" = "Veřejná adresa";
 "private_ip_address" = "Privátní adresa";
 
-"title_loop_mode" = "Opakované měření";
 "title_coverage_series" = "Série pokrytí";
 "coverage_label" = "Měření signálu";
 
@@ -330,9 +326,6 @@
 "title_loop_count" = "Zvolte počet testů";
 "text_loop_start" = "Spustit opakované měření";
 "text_loop_mode" = "Další test se spustí po uplynutí časové prodlevy nebo po překonání nastavené vzdálenosti (max. 2 dny).";
-"preferences_loop_mode_summary" = "Další test se spustí po uplynutí časové prodlevy nebo po překonání nastavené vzdálenosti (max. 2 dny).";
-"preferences_loop_mode_min_delay" = "Časová prodleva (v minutách)";
-"preferences_loop_mode_max_movement" = "Vzdálenost (v metrech)";
 
 "invalide_loop_mode_count" = "Neplatný počet testů";
 "invalide_loop_mode_distance" = "Neplatná vzdálenost";
