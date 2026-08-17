@@ -154,6 +154,18 @@ class RMBTIntroPortraitView: UIView, XibLoadable {
         self.coverageImageView.accessibilityTraits = .button
         self.coverageImageView.accessibilityLabel = .coverageImageViewA11Label
 
+        // Start with no mobile-class badge; the controller sets the real technology
+        // icon (or clears it) once connectivity is resolved. Avoids briefly showing a
+        // stale "3G" placeholder before the actual radio technology is known.
+        self.networkMobileClassImageView.image = nil
+
+        // Start the IPv4/IPv6/location indicators in a neutral grey ("not yet available")
+        // instead of the inherited blue tint. The controller replaces these with the real
+        // green/yellow/red status once connectivity is resolved.
+        self.ipV4TintColor = .statusUnknown
+        self.ipV6TintColor = .statusUnknown
+        self.locationTintColor = .statusUnknown
+
         self.coverageTintColor = .coverageUnavailable
 
         // Hidden feature: Network Coverage entry point visibility
@@ -314,6 +326,7 @@ private extension UIColor {
     static let noNetworkLogoAvailable = UIColor(red: 66.0 / 255, green: 66.0 / 255, blue: 66.0 / 255, alpha: 1.0)
     static let networkLogoAvailable = UIColor(red: 1, green: 1, blue: 1, alpha: 1.0)
 
+    static let statusUnknown = UIColor.systemGray
     static let ipNotAvailable = UIColor(red: 245.0 / 255.0, green: 0.0 / 255.0, blue: 28.0/255.0, alpha: 1.0)
     static let ipSemiAvailable = UIColor(red: 255.0 / 255.0, green: 186.0 / 255.0, blue: 0, alpha: 1.0)
     static let ipAvailable = UIColor(red: 89.0 / 255.0, green: 178.0 / 255.0, blue: 0, alpha: 1.0)
