@@ -228,8 +228,8 @@ extension View {
     ZStack {
         Color.gray.opacity(0.2)
         TestPopup(
-            title: "Start Coverage Test",
-            subtitle: "This will begin the network coverage test with your current settings.",
+            title: "Start Signal Measurement",
+            subtitle: "This will begin the Signal Measurement with your current settings.",
             primaryButtonTitle: "Start test",
             primaryButtonColor: Color("greenButtonBackground"),
             secondaryButtonTitle: "Cancel",

@@ -302,8 +302,8 @@ class RMBTIntroViewController: UIViewController {
     private func coverageTapHandler(_ tintColor: UIColor) {
         guard coverageCanStart else {
             UIAlertController.presentAlert(
-                title: NSLocalizedString("coverage_unavailable_title", comment: "Alert title when signal measurement cannot start"),
-                text: NSLocalizedString("coverage_unavailable_message", comment: "Alert message listing signal measurement requirements"),
+                title: NSLocalizedString("coverage_unavailable_title", comment: "Alert title when Signal Measurement cannot start"),
+                text: NSLocalizedString("coverage_unavailable_message", comment: "Alert message listing Signal Measurement requirements"),
                 cancelTitle: NSLocalizedString("input_setting_dialog_ok", comment: "OK button"),
                 otherTitle: nil,
                 cancelAction: { _ in },

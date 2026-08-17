@@ -293,7 +293,7 @@ private extension String {
     static let ipv4ImageViewA11Label = NSLocalizedString("Show IPv4 address", comment: "")
     static let ipv6ImageViewA11Label = NSLocalizedString("Show IPv6 address", comment: "")
     static let locationImageViewA11Label = NSLocalizedString("Show location", comment: "")
-    static let coverageImageViewA11Label = NSLocalizedString("Show network coverage", comment: "")
+    static let coverageImageViewA11Label = NSLocalizedString("Show Signal Measurement", comment: "")
 }
 
 private extension UIImage {

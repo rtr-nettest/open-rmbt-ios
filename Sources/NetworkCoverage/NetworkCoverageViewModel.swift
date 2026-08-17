@@ -71,7 +71,7 @@ struct FencePolylineSegment: Identifiable, Equatable {
 ///
 /// All values are deterministic to keep SwiftUI diffing stable and
 /// should be adjusted carefully because they directly affect
-/// performance on dense coverage measurements.
+/// performance on dense Signal Measurements.
 struct FencesRenderingConfiguration {
     /// Maximum number of circle annotations that can be rendered before switching to polylines.
     /// Lower values trade detail for better rendering performance in zoomed-out states.
@@ -340,7 +340,7 @@ struct SessionInitializedUpdate: Hashable {
             // Expected cancellation - no error
             return
         } catch {
-            errorMessage = "Network coverage measurement error: \(error.localizedDescription)"
+            errorMessage = "Signal Measurement error: \(error.localizedDescription)"
         }
     }
 

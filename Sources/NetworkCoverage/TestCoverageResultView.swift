@@ -19,7 +19,7 @@ struct TestCoverageResultView: View {
                 .environment(viewModel)
                 .safeAreaInset(edge: .top, spacing: -10) {
                     CoverageHeader(
-                        title: "Coverage Test Results",
+                        title: "Signal Measurement Results",
                         action: .init(title: "Close", action: onClose)
                     ) {
                         EmptyView()

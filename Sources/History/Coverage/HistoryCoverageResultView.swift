@@ -17,7 +17,7 @@ struct HistoryCoverageResultView: View {
     var body: some View {
         CoverageResultView(stopReasons: stopReasons)
             .environment(viewModel)
-            .navigationTitle(NSLocalizedString("Coverage Test Results", comment: ""))
+            .navigationTitle(NSLocalizedString("Signal Measurement Results", comment: ""))
             .navigationBarTitleDisplayMode(.inline)
     }
 }

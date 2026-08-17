@@ -587,8 +587,8 @@ extension RMBTSettingsViewController {
                 // Confirmation alert with default system "OK" button
                 let title = NSLocalizedString("Network Coverage", comment: "Alert title for coverage feature toggle")
                 let message = enableCoverage
-                    ? NSLocalizedString("The Network Coverage feature has been enabled.", comment: "Coverage enabled message")
-                    : NSLocalizedString("The Network Coverage feature has been disabled.", comment: "Coverage disabled message")
+                    ? NSLocalizedString("The Signal Measurement feature has been enabled.", comment: "Signal Measurement enabled message")
+                    : NSLocalizedString("The Signal Measurement feature has been disabled.", comment: "Signal Measurement disabled message")
 
                 _ = UIAlertController.presentAlert(title: title,
                                                     text: message,

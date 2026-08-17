@@ -459,7 +459,7 @@
    (German values below were reverted from machine translations and need human translation) */
 "preferences_sim_info" = "SIM Information";
 "coverage_intro_title" = "Signal Measurement";
-"coverage_intro_description" = "The signal measurement allows outdoor mobile network measurements along a path. It monitors connectivity, technology and signal strength. Connectivity is measured using regular network pings. The measurement requires good GPS coverage and Wifi must be turned off. It consumes much less data compared to speed measurement. The signal measurement is (only) intended for use within the EU and the EEA.";
+"coverage_intro_description" = "The Signal Measurement allows outdoor mobile network measurements along a path. It monitors connectivity, technology and signal strength. Connectivity is measured using regular network pings. The measurement requires good GPS coverage and Wifi must be turned off. It consumes much less data compared to speed measurement. The Signal Measurement is (only) intended for use within the EU and the EEA.";
 "coverage_intro_start_button" = "Start test";
 "Technology" = "Technology";
 "Ping" = "Ping";
@@ -487,14 +487,14 @@
 "Continue test" = "Continue test";
 "Waiting for GPS" = "Waiting for GPS";
 "No sufficiently accurate location was obtained within %d minutes." = "No sufficiently accurate location was obtained within %d minutes.";
-"Coverage Test Results" = "Coverage Test Results";
+"Signal Measurement Results" = "Signal Measurement Results";
 
 
 /* ===== TODO: NEEDS TRANSLATION — Coverage warnings, header & SIM raw fields (English placeholder) ===== */
 "Currently the location accuracy is insufficient. Please measure outdoors." = "Currently the location accuracy is insufficient. Please measure outdoors.";
 "Disable Wi‑Fi" = "Disable Wi‑Fi";
 "Please turn off Wi‑Fi to measure cellular coverage." = "Please turn off Wi‑Fi to measure cellular coverage.";
-"Network Coverage" = "Network Coverage";
+"Network Coverage" = "Signal Measurement";
 "No service" = "No service";
 "Unknown" = "Unknown";
 
@@ -513,5 +513,5 @@
 "This information is a best-effort guess from iOS APIs and may be incomplete or inconsistent." = "This information is a best-effort guess from iOS APIs and may be incomplete or inconsistent.";
 
 /* ===== TODO: NEEDS TRANSLATION — Coverage unavailable feedback (English placeholder) ===== */
-"coverage_unavailable_title" = "Signal measurement unavailable";
-"coverage_unavailable_message" = "Signal measurement requires Wi‑Fi to be turned off and good GPS reception. Please adjust and try again.";
+"coverage_unavailable_title" = "Signal Measurement unavailable";
+"coverage_unavailable_message" = "Signal Measurement requires Wi‑Fi to be turned off and good GPS reception. Please adjust and try again.";

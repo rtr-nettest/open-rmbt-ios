@@ -238,7 +238,7 @@ final class RMBTHistoryIndexViewController: UIViewController {
             
             for r in records {
                 if r.isCoverageFences == true {
-                    // Handle coverage measurements - create wrapper with HistoryItem
+                    // Handle Signal Measurements - create wrapper with HistoryItem
                     let result = RMBTHistoryCoverageResult(historyItem: r)
                     if let loopUuid = r.loopUuid {
                         if var _ = results[loopUuid] {

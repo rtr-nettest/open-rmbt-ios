@@ -185,7 +185,7 @@ class RMBTBaseTestViewController: UIViewController {
         testRunner = RMBTTestRunner(delegate: self)
         testRunner?.start(with: extraParams)
 
-        // when starting new test, try to resend failed-to-be-sent coverage test results, if any
+        // when starting new test, try to resend failed-to-be-sent Signal Measurement Results, if any
         // Use isLaunched: false because starting a speed test is NOT an app launch
         Task {
             try? await NetworkCoverageFactory().persistedFencesSender.resendPersistentAreas(isLaunched: false)

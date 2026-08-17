@@ -241,7 +241,7 @@ class PersistenceAwareSessionInitializer {
     }
 
     func startNewSession(loopID: String? = nil) async throws -> CoreSessionInitializer.SessionCredentials {
-        // Before starting new session, try to resend failed-to-be-sent coverage test results, if any
+        // Before starting new session, try to resend failed-to-be-sent Signal Measurement Results, if any
         Log.logger.info("Attempting to resend persistent areas before starting new session")
         try? await resendBeforeNewSession()
 
