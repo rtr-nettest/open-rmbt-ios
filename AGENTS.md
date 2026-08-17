@@ -95,7 +95,7 @@ Translations are maintained by humans and are intentionally behind. When you add
   in a few seconds, so re-run it a few times before believing either result.
 
 ## Environment
-- Use Homebrew Ruby ≥ 3.1; update PATH via `eval "$(/opt/homebrew/bin/brew shellenv)"` then prepend `/opt/homebrew/opt/ruby/bin`.
+- Use Homebrew Ruby; the `Gemfile` allows `>= 3.1, < 5.0`, so both the 3.x series and Ruby 4.0.x work. Update PATH via `eval "$(/opt/homebrew/bin/brew shellenv)"` then prepend `/opt/homebrew/opt/ruby/bin`. Note that Homebrew's `ruby`/`ruby@3.4` opt symlinks may point at Ruby 4.0.x after an upgrade — that is fine for this project; verified `bundle install` + `bundle exec pod` + `xcodebuild` all succeed on 4.0.6.
 - CocoaPods must run through Bundler to match the pinned version in `Gemfile.lock`. Run `bundle install` once after a fresh clone; gems land in `./vendor/bundle` (per `.bundle/config`).
 - Xcode 26+, iOS deployment target 17.0+. Simulator defaults to iPhone 17 Pro at `OS=latest` (visionOS style naming by Apple).
 
@@ -110,7 +110,7 @@ Generated destinations — never edit these, edit `private/` or `public/` instea
 - `Resources/RMBT-Info.plist` — **tracked**. Regenerated every build, so it appears as a local modification whenever the active config differs from the committed content. The private version sets the `RTR-NetTest` display name, `rmbtat` URL scheme, `NSLocalNetworkUsageDescription` (DNS QoS test) and `UIBackgroundModes: location` (coverage measurements). **Do not commit it from a public-config build** — that silently strips RTR branding and background location. Revert with `git checkout -- Resources/RMBT-Info.plist`.
 
 Order matters, and both steps have failure modes that look unrelated to their real cause:
-1. `bundle install` — **must** run on Ruby ≥ 3.1. On macOS system Ruby 2.6 it fails with `Could not find 'bundler' (2.7.2) required by your Gemfile.lock`, because `Gemfile.lock` pins `BUNDLED WITH 2.7.2`. The error names bundler, not Ruby, and following its `gem install bundler:2.7.2` advice also fails. Fix the Ruby, not the bundler.
+1. `bundle install` — **must** run on Ruby `>= 3.1, < 5.0`. On macOS system Ruby 2.6 it fails with `Could not find 'bundler' (2.7.2) required by your Gemfile.lock`, because `Gemfile.lock` pins `BUNDLED WITH 2.7.2`. The error names bundler, not Ruby, and following its `gem install bundler:2.7.2` advice also fails. Fix the Ruby, not the bundler. (`Gemfile.lock` still records `RUBY VERSION 3.4.6p54` for reference; it is informational and does not gate the install.)
 2. `bundle exec pod install --repo-update` — always via `bundle exec`. A stray global `pod` (Homebrew's or an old `/usr/local/bin/pod`) resolves a different `xcodeproj` and reintroduces the `objectVersion` failure below.
 3. `./Scripts/update_configurations_from_private.sh` — run it manually once. The same script runs as a build phase, but Xcode resolves compiler input files *before* build phases execute, so the first build of a fresh clone fails with `Build input file cannot be found: '.../Configs/RMBTConfig.swift'`. Building a second time also works, since the phase has by then created the file.
 
