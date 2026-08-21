@@ -162,6 +162,7 @@ class RMBTIntroViewController: UIViewController {
 
         NotificationCenter.default.addObserver(self, selector: #selector(forceUpdateNetwork(_:)), name: UIApplication.didBecomeActiveNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(locationDidUpdate(_:)), name: .RMBTLocationTracker, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(coverageAvailabilityChanged(_:)), name: .RMBTCoverageAvailabilityChanged, object: nil)
 
         RMBTControlServer.shared.updateWithCurrentSettings { [weak self] in
             guard let self = self else { return }
@@ -184,6 +185,12 @@ class RMBTIntroViewController: UIViewController {
     @objc private func locationDidUpdate(_ sender: Any) {
         DispatchQueue.main.async { [weak self] in
             self?.updateCoverageTint()
+        }
+    }
+
+    @objc private func coverageAvailabilityChanged(_ sender: Any) {
+        DispatchQueue.main.async { [weak self] in
+            self?.currentView.updateCoverageUI()
         }
     }
 

@@ -15,6 +15,12 @@ public typealias EmptyCallback = () -> Void
 
 public typealias HistoryFilterType = [String: [String]]
 
+public extension Notification.Name {
+    /// Posted when the control server's settings response changes the Signal Measurement
+    /// (coverage) availability flag, so the Intro screen can refresh its coverage button.
+    static let RMBTCoverageAvailabilityChanged = Notification.Name("RMBTCoverageAvailabilityChanged")
+}
+
 @objc final class RMBTControlServer: NSObject {
     @objc(sharedControlServer) static let shared = RMBTControlServer()
     
@@ -147,6 +153,21 @@ extension RMBTControlServer {
 
                     if let tos = set.termsAndConditions {
                         self.termsAndConditions = tos
+                    }
+
+                    // Server-driven Signal Measurement (coverage) availability.
+                    // Mirrors the enable/disable secret code (it persists `coverageFeatureEnabled`)
+                    // but shows no confirmation popup. A missing key or a null value leaves the
+                    // current setting untouched; only an explicit true/false changes it.
+                    if let available = set.signalMeasurementAvailable {
+                        let current = RMBTSettings.shared.coverageFeatureEnabled
+                        Log.logger.info("settings: signal_measurement_available=\(available), current coverageFeatureEnabled=\(current)")
+                        if available != current {
+                            RMBTSettings.shared.coverageFeatureEnabled = available
+                            NotificationCenter.default.post(name: .RMBTCoverageAvailabilityChanged, object: nil)
+                        }
+                    } else {
+                        Log.logger.info("settings: signal_measurement_available absent/null — leaving coverageFeatureEnabled=\(RMBTSettings.shared.coverageFeatureEnabled) unchanged")
                     }
                 }
 

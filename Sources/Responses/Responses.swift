@@ -10,6 +10,31 @@ import Foundation
 import ObjectMapper
 //
 
+/// Maps a JSON value to `Bool?`, accepting a native JSON boolean or a "true"/"false"
+/// (also "1"/"0", "yes"/"no") string. Any other value — including a missing key or an
+/// explicit null — yields `nil`, so callers can distinguish "unset" from `true`/`false`.
+struct BoolFromAnyTransform: TransformType {
+    typealias Object = Bool
+    typealias JSON = Any
+
+    func transformFromJSON(_ value: Any?) -> Bool? {
+        if let boolValue = value as? Bool { return boolValue }
+        if let numberValue = value as? NSNumber { return numberValue.boolValue }
+        if let stringValue = value as? String {
+            switch stringValue.lowercased() {
+            case "true", "1", "yes": return true
+            case "false", "0", "no": return false
+            default: return nil
+            }
+        }
+        return nil
+    }
+
+    func transformToJSON(_ value: Bool?) -> Any? {
+        return value
+    }
+}
+
 final public class MeasurementServerInfoResponse: BasicResponse {
     
     ///
@@ -401,10 +426,15 @@ public class SettingsResponse: BasicResponse {
         
         
         var surveySettings: SurveySettings?
-        
+
+        /// Server-driven Signal Measurement (coverage) availability.
+        /// `true` → feature available, `false` → unavailable, `nil` (key absent or value null)
+        /// → leave the persisted setting unchanged.
+        var signalMeasurementAvailable: Bool?
+
         ///
         init() {
-            
+
         }
         
         ///
@@ -430,6 +460,8 @@ public class SettingsResponse: BasicResponse {
             
             
             surveySettings <- map["survey_settings"]
+
+            signalMeasurementAvailable <- (map["signal_measurement_available"], BoolFromAnyTransform())
         }
         
         ///
