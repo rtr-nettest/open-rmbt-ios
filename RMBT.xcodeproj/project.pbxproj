@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		17CAE37F76166381D9D66810 /* NWUDPConnectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E55EB25A9BF044C2410508FA /* NWUDPConnectionTests.swift */; };
+		1A332B775B03A2BDC28DF9F5 /* RMBTIPVersionAvailability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9492E88A7428985BBD0742 /* RMBTIPVersionAvailability.swift */; };
 		2F5A8C4958A5EC9724752D6A /* SIMInfoModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD5A35E71C9764DC5843686A /* SIMInfoModels.swift */; };
 		361443482732793E00D0FC26 /* RMBTHistorySyncModalViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 361443472732793D00D0FC26 /* RMBTHistorySyncModalViewController.swift */; };
 		3628C539275639E40001E885 /* RMBTHistoryQoSTitledResultCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3628C538275639E40001E885 /* RMBTHistoryQoSTitledResultCell.xib */; };
@@ -94,6 +95,7 @@
 		4A0000032EAA35630009D9A6 /* CurrentNetworkTypeProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A0000022EAA35630009D9A6 /* CurrentNetworkTypeProvider.swift */; };
 		4DB4791A3F5C244D745CBAD6 /* NWUDPConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 008286A33D9AC4D0BF3936B3 /* NWUDPConnection.swift */; };
 		520219059FE77FE975227F1E /* CoverageHistoryDetailServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E95B2179B357FF985E9D9D7 /* CoverageHistoryDetailServiceTests.swift */; };
+		52F52E08127254C3C7D110D1 /* IPVersionRestrictionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBC8560ED2953015C89321EF /* IPVersionRestrictionTests.swift */; };
 		66A000012F10000000000001 /* FenceRadiusCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66A000012F10000000000002 /* FenceRadiusCalculator.swift */; };
 		66A000022F20000000000001 /* CoverageButtonGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66A000022F20000000000002 /* CoverageButtonGate.swift */; };
 		66A000022F20000000000003 /* CoverageButtonGateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66A000022F20000000000004 /* CoverageButtonGateTests.swift */; };
@@ -358,6 +360,7 @@
 		E9E9E9012742685E005EB393 /* UIView+XibLoadable.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9E9E9002742685E005EB393 /* UIView+XibLoadable.swift */; };
 		E9E9E90327429B6C005EB393 /* RMBTTestLandscapeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9E9E90227429B6B005EB393 /* RMBTTestLandscapeView.swift */; };
 		E9E9E90527429B90005EB393 /* RMBTTestLandscapeView.xib in Resources */ = {isa = PBXBuildFile; fileRef = E9E9E90427429B90005EB393 /* RMBTTestLandscapeView.xib */; };
+		EC5CC8F5D854A271E7B6DB2E /* SettingsResponseSignalMeasurementTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3648AFAC3A8D49621E24D430 /* SettingsResponseSignalMeasurementTests.swift */; };
 		F71B138A4E5F6DC41FF14268 /* Pods_RMBT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 32DE166B881B73366FE005F9 /* Pods_RMBT.framework */; };
 /* End PBXBuildFile section */
 
@@ -384,6 +387,7 @@
 		361443472732793D00D0FC26 /* RMBTHistorySyncModalViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTHistorySyncModalViewController.swift; sourceTree = "<group>"; };
 		3628C538275639E40001E885 /* RMBTHistoryQoSTitledResultCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = RMBTHistoryQoSTitledResultCell.xib; sourceTree = "<group>"; };
 		3628C53A27563AA40001E885 /* RMBTHistoryQoSTitledResultCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RMBTHistoryQoSTitledResultCell.swift; sourceTree = "<group>"; };
+		3648AFAC3A8D49621E24D430 /* SettingsResponseSignalMeasurementTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SettingsResponseSignalMeasurementTests.swift; sourceTree = "<group>"; };
 		3678AA7E291E35D70059D6CB /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = "en.lproj/RMBT-InfoPlist.strings"; sourceTree = "<group>"; };
 		3678AA80291E35DC0059D6CB /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = "de.lproj/RMBT-InfoPlist.strings"; sourceTree = "<group>"; };
 		367B46822923857400D84E87 /* A11y.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = A11y.swift; sourceTree = "<group>"; };
@@ -468,6 +472,7 @@
 		66A000022F20000000000004 /* CoverageButtonGateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverageButtonGateTests.swift; sourceTree = "<group>"; };
 		72D05593EDAA909A64A4E7C4 /* cs */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = cs; path = cs.lproj/Localizable.strings; sourceTree = "<group>"; };
 		89CA21386C488DD817CA1DC2 /* Pods-RMBT.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RMBT.debug.xcconfig"; path = "Pods/Target Support Files/Pods-RMBT/Pods-RMBT.debug.xcconfig"; sourceTree = "<group>"; };
+		8E9492E88A7428985BBD0742 /* RMBTIPVersionAvailability.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RMBTIPVersionAvailability.swift; sourceTree = "<group>"; };
 		94ACDE3F34869D6346ADEA9F /* FenceFactory.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FenceFactory.swift; sourceTree = "<group>"; };
 		9E95B2179B357FF985E9D9D7 /* CoverageHistoryDetailServiceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CoverageHistoryDetailServiceTests.swift; sourceTree = "<group>"; };
 		A0C545CF605E364BCA4F45EA /* Pods-RMBTTest.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RMBTTest.debug.xcconfig"; path = "Pods/Target Support Files/Pods-RMBTTest/Pods-RMBTTest.debug.xcconfig"; sourceTree = "<group>"; };
@@ -508,6 +513,7 @@
 		C7F08F691769F37600741844 /* CoreTelephony.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreTelephony.framework; path = System/Library/Frameworks/CoreTelephony.framework; sourceTree = SDKROOT; };
 		C7F599A61A2A81940020ADC4 /* RMBTHistoryIndexCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = RMBTHistoryIndexCell.xib; sourceTree = "<group>"; };
 		D77B2B18701D00583CC5E7CF /* SIMInfoView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SIMInfoView.swift; sourceTree = "<group>"; };
+		DBC8560ED2953015C89321EF /* IPVersionRestrictionTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = IPVersionRestrictionTests.swift; sourceTree = "<group>"; };
 		E1DCF69863D6E1970538CB5B /* hu */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = hu; path = hu.lproj/Localizable.strings; sourceTree = "<group>"; };
 		E55EB25A9BF044C2410508FA /* NWUDPConnectionTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NWUDPConnectionTests.swift; sourceTree = "<group>"; };
 		E91316AC26AD72F200368DCD /* RMBT-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "RMBT-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -1084,6 +1090,7 @@
 				E9400EEC26BA6BFD0067273A /* RMBTSettings.swift */,
 				E9C13F7E27298A6800DA60D4 /* RMBTSettingsViewController.swift */,
 				E9BF00EA2760F01F0092371F /* RMBTLoopModeConfirmationViewController.swift */,
+				8E9492E88A7428985BBD0742 /* RMBTIPVersionAvailability.swift */,
 			);
 			name = Settings;
 			sourceTree = "<group>";
@@ -1344,6 +1351,8 @@
 				E92E07B7277B4B4F008143FE /* RMBTProgressTest.swift */,
 				C7E46731177CDDB600AAF7F0 /* Supporting Files */,
 				159F6928E3EB869F2602D13A /* SIMInfo */,
+				DBC8560ED2953015C89321EF /* IPVersionRestrictionTests.swift */,
+				3648AFAC3A8D49621E24D430 /* SettingsResponseSignalMeasurementTests.swift */,
 			);
 			name = "Unit Tests";
 			path = RMBTTests;
@@ -2063,6 +2072,8 @@
 				C03F8268CF6845028CBEDA4C /* FenceFactory.swift in Sources */,
 				84E47A49B75644EAAD976F5A /* SIMInfoSnapshotBuilderTests.swift in Sources */,
 				17CAE37F76166381D9D66810 /* NWUDPConnectionTests.swift in Sources */,
+				52F52E08127254C3C7D110D1 /* IPVersionRestrictionTests.swift in Sources */,
+				EC5CC8F5D854A271E7B6DB2E /* SettingsResponseSignalMeasurementTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2318,6 +2329,7 @@
 				9BBE11FB131ED439EC173841 /* CellularSnapshotProvider.swift in Sources */,
 				A5EC6220FC2679D6070121B6 /* SIMInfoViewModel.swift in Sources */,
 				4987298CEEA3188EA459D916 /* SIMInfoView.swift in Sources */,
+				1A332B775B03A2BDC28DF9F5 /* RMBTIPVersionAvailability.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

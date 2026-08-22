@@ -502,3 +502,7 @@
 
 "coverage_unavailable_title" = "Mesure du signal indisponible";
 "coverage_unavailable_message" = "La Mesure du signal nécessite que le Wi‑Fi soit désactivé et une bonne réception GPS. Veuillez ajuster et réessayer.";
+
+/* IP-version restriction (expert mode) */
+"ip_version_not_available_message" = "Version IP non disponible, vérifiez les réglages experts";
+"ip_version_restriction_unavailable_message" = "%@ n’est pas disponible sur la connexion actuelle.";

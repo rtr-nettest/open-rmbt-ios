@@ -264,8 +264,18 @@ open class ConnectivityService: NSObject { // TODO: rewrite with ControlServerNe
             guard let self = self else { return }
             self.controlServer.getIpv4( success: { [weak self] response in
                 guard let self = self, checkId == self.activeCheckId else { return }
-                self.connectivityInfo.ipv4.connectionAvailable = true
-                self.connectivityInfo.ipv4.externalIp = response.ip
+                // Only report a public IPv4 when the device actually has a local IPv4 address.
+                // Otherwise (e.g. an IPv4-less / NAT64 network, or the IPv6-only restriction that
+                // strips local IPv4) we would show a public address with an empty private one and a
+                // red indicator. Mirror the IPv6 handling below.
+                if self.connectivityInfo.ipv4.internalIp != nil {
+                    self.connectivityInfo.ipv4.connectionAvailable = true
+                    self.connectivityInfo.ipv4.externalIp = response.ip
+                } else {
+                    self.log("ipv4 fetch returned external ip without local address; treating as unavailable", checkId: checkId)
+                    self.connectivityInfo.ipv4.connectionAvailable = false
+                    self.connectivityInfo.ipv4.externalIp = nil
+                }
                 self.finishIPv4Check(for: checkId)
             }, error: { [weak self] error in
                 guard let self = self, checkId == self.activeCheckId else { return }
@@ -499,7 +509,13 @@ extension ConnectivityService {
                     observed[key]?.ipv6 = nil
                 }
             }
-            
+
+            if RMBTSettings.shared.forceIPv6 || RMBTSettings.shared.debugForceIPv6 {
+                for key in observed.keys {
+                    observed[key]?.ipv4 = nil
+                }
+            }
+
             freeifaddrs(ifaddr)
         }
         return observed

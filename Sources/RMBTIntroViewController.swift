@@ -95,6 +95,11 @@ class RMBTIntroViewController: UIViewController {
 
     private var connectivityInfo: ConnectivityInfo? {
         didSet {
+            if let connectivityInfo {
+                // Cache IPv4/IPv6 reachability from the start-page IP request so the expert
+                // IPv4/IPv6-only restrictions can be gated in Settings and at test start.
+                RMBTIPVersionAvailability.shared.update(with: connectivityInfo)
+            }
             updateConnectivityInfo()
         }
     }
@@ -356,11 +361,38 @@ class RMBTIntroViewController: UIViewController {
     }
 
     private func startTest() {
+        guard ipVersionRestrictionSatisfied() else {
+            UIAlertController.presentAlert(
+                title: nil,
+                text: NSLocalizedString("ip_version_not_available_message", comment: "Shown when an IPv4/IPv6-only restriction is active but that IP version is not available on the current connection"),
+                cancelTitle: NSLocalizedString("input_setting_dialog_ok", comment: "OK button"),
+                otherTitle: nil,
+                cancelAction: { _ in },
+                otherAction: nil
+            )
+            return
+        }
+
         if isLoopMode {
             self.performSegue(withIdentifier: showLoopModeSettingsSegue, sender: self)
         } else {
             self.startTest(with: nil)
         }
+    }
+
+    /// Whether the currently active IP-version restriction (if any) can be satisfied by the
+    /// current connection. Uses the freshest connectivity result, falling back to the cached
+    /// start-page availability.
+    private func ipVersionRestrictionSatisfied() -> Bool {
+        let settings = RMBTSettings.shared
+        let ipv4Available = connectivityInfo?.ipv4.connectionAvailable ?? RMBTIPVersionAvailability.shared.ipv4Available
+        let ipv6Available = connectivityInfo?.ipv6.connectionAvailable ?? RMBTIPVersionAvailability.shared.ipv6Available
+        return RMBTIPVersionAvailability.restrictionSatisfied(
+            forceIPv4: settings.forceIPv4,
+            forceIPv6: settings.forceIPv6 || settings.debugForceIPv6,
+            ipv4Available: ipv4Available,
+            ipv6Available: ipv6Available
+        )
     }
 
     private func startTest(with loopModeInfo: RMBTLoopInfo?) {

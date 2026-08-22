@@ -232,7 +232,7 @@ extension RMBTControlServer {
         getSettings({
             // check for ip version force
             var baseUrl: URL?
-            if RMBTSettings.shared.debugForceIPv6 {
+            if RMBTSettings.shared.forceIPv6 || RMBTSettings.shared.debugForceIPv6 {
                 baseUrl = self.ipv6
             } else if RMBTSettings.shared.forceIPv4 {
                 baseUrl = self.ipv4

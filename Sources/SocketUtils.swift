@@ -47,17 +47,19 @@ extension GCDAsyncSocket {
 
 extension GCDAsyncSocket {
     func setupSocket() {
-        if RMBTSettings.shared.forceIPv4 {
+        let forceIPv4 = RMBTSettings.shared.forceIPv4
+        let forceIPv6 = RMBTSettings.shared.forceIPv6 || RMBTSettings.shared.debugForceIPv6
+        if forceIPv4 {
             self.isIPv6Enabled = false
             self.isIPv4Enabled = true
             self.isIPv4PreferredOverIPv6 = true
         }
-        if RMBTSettings.shared.debugForceIPv6 {
+        if forceIPv6 {
             self.isIPv4Enabled = false
             self.isIPv6Enabled = true
             self.isIPv4PreferredOverIPv6 = false
         }
-        if !RMBTSettings.shared.forceIPv4 && !RMBTSettings.shared.debugForceIPv6 {
+        if !forceIPv4 && !forceIPv6 {
             self.isIPv4Enabled = true
             self.isIPv6Enabled = true
             self.isIPv4PreferredOverIPv6 = false
@@ -67,15 +69,17 @@ extension GCDAsyncSocket {
 
 extension GCDAsyncUdpSocket {
     func setupSocket() {
-        if RMBTSettings.shared.forceIPv4 {
+        let forceIPv4 = RMBTSettings.shared.forceIPv4
+        let forceIPv6 = RMBTSettings.shared.forceIPv6 || RMBTSettings.shared.debugForceIPv6
+        if forceIPv4 {
             self.setIPv6Enabled(false)
             self.setPreferIPv4()
         }
-        if RMBTSettings.shared.debugForceIPv6 {
+        if forceIPv6 {
             self.setIPv4Enabled(false)
             self.setPreferIPv6()
         }
-        if !RMBTSettings.shared.forceIPv4 && !RMBTSettings.shared.debugForceIPv6 {
+        if !forceIPv4 && !forceIPv6 {
             self.setIPv6Enabled(true)
             self.setPreferIPv6()
         }

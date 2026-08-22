@@ -501,3 +501,7 @@
 
 "coverage_unavailable_title" = "Signalmessung nicht verfügbar";
 "coverage_unavailable_message" = "Die Signalmessung erfordert, dass WLAN ausgeschaltet ist und ein guter GPS-Empfang besteht. Bitte korrigieren und erneut versuchen.";
+
+/* IP-version restriction (expert mode) */
+"ip_version_not_available_message" = "IP-Version nicht verfügbar, siehe Experteneinstellungen";
+"ip_version_restriction_unavailable_message" = "%@ ist in der aktuellen Verbindung nicht verfügbar.";

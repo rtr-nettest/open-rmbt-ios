@@ -28,6 +28,7 @@ protocol RMBTSettingsViewControllerDelegate: AnyObject {
 
 class RMBTSettingsViewController: UITableViewController {
     @IBOutlet weak var forceIPv4Switch: UISwitch!
+    @IBOutlet weak var forceIPv6Switch: UISwitch!
     @IBOutlet weak var skipQoSSwitch: UISwitch!
     @IBOutlet weak var expertModeSwitch: UISwitch!
     
@@ -103,9 +104,38 @@ class RMBTSettingsViewController: UITableViewController {
         self.buildDetailsLabel.addGestureRecognizer(tapGestureRecognizer)
 
         self.bindSwitch(self.forceIPv4Switch, to: #keyPath(RMBTSettings.forceIPv4), onToggle: { value in
-            if (value && self.settings.debugUnlocked && self.debugForceIPv6Switch.isOn) {
+            guard value else { return }
+            // The restriction can only be enabled if IPv4 is actually reachable right now.
+            guard RMBTIPVersionAvailability.shared.ipv4Available else {
+                self.settings.forceIPv4 = false
+                self.forceIPv4Switch.setOn(false, animated: true)
+                self.presentIPVersionUnavailableAlert(for: .ipv4Only)
+                return
+            }
+            // Mutually exclusive with the IPv6-only restriction (and the debug IPv6 force).
+            if self.settings.forceIPv6 {
+                self.settings.forceIPv6 = false
+                self.forceIPv6Switch?.setOn(false, animated: true)
+            }
+            if self.settings.debugUnlocked && self.debugForceIPv6Switch.isOn {
                 self.settings.debugForceIPv6 = false
                 self.debugForceIPv6Switch.setOn(false, animated: true)
+            }
+        })
+
+        self.bindSwitch(self.forceIPv6Switch, to: #keyPath(RMBTSettings.forceIPv6), onToggle: { value in
+            guard value else { return }
+            // The restriction can only be enabled if IPv6 is actually reachable right now.
+            guard RMBTIPVersionAvailability.shared.ipv6Available else {
+                self.settings.forceIPv6 = false
+                self.forceIPv6Switch.setOn(false, animated: true)
+                self.presentIPVersionUnavailableAlert(for: .ipv6Only)
+                return
+            }
+            // Mutually exclusive with the IPv4-only restriction.
+            if self.settings.forceIPv4 {
+                self.settings.forceIPv4 = false
+                self.forceIPv4Switch.setOn(false, animated: true)
             }
         })
         
@@ -130,6 +160,8 @@ class RMBTSettingsViewController: UITableViewController {
             if (value == false) {
                 self.settings.forceIPv4 = false
                 self.forceIPv4Switch.setOn(false, animated: false)
+                self.settings.forceIPv6 = false
+                self.forceIPv6Switch?.setOn(false, animated: false)
             }
             self.prepareAdvancedSettings()
             self.tableView.reloadData()
@@ -245,10 +277,26 @@ class RMBTSettingsViewController: UITableViewController {
         self.advancedSettings.append(IndexPath(row: 3, section: RMBTSettingsSection.advanced.rawValue))
         
         if settings.expertMode {
-            self.advancedSettings.append(IndexPath(row: 4, section: RMBTSettingsSection.advanced.rawValue))
-            // SIM Information (diagnostic) sits right below IPv4 only; both are expert-only.
+            self.advancedSettings.append(IndexPath(row: 4, section: RMBTSettingsSection.advanced.rawValue)) // IPv4 only
+            self.advancedSettings.append(IndexPath(row: 6, section: RMBTSettingsSection.advanced.rawValue)) // IPv6 only
+            // SIM Information (diagnostic) sits right below the IP-version restrictions; all expert-only.
             self.advancedSettings.append(IndexPath(row: 5, section: RMBTSettingsSection.advanced.rawValue))
         }
+    }
+
+    /// Reverts a restriction toggle and explains that the chosen IP version is not currently reachable.
+    private func presentIPVersionUnavailableAlert(for restriction: IPVersionRestriction) {
+        let version = (restriction == .ipv4Only) ? "IPv4" : "IPv6"
+        let format = NSLocalizedString("ip_version_restriction_unavailable_message",
+                                       comment: "Shown when the user tries to restrict to an IP version that is not available on the current connection. %@ is IPv4 or IPv6")
+        UIAlertController.presentAlert(
+            title: nil,
+            text: String(format: format, version),
+            cancelTitle: NSLocalizedString("input_setting_dialog_ok", comment: "OK button"),
+            otherTitle: nil,
+            cancelAction: { _ in },
+            otherAction: nil
+        )
     }
     
     func refreshSection(_ section: RMBTSettingsSection) {

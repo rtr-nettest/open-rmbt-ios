@@ -502,3 +502,7 @@
 
 "coverage_unavailable_title" = "Měření signálu není dostupné";
 "coverage_unavailable_message" = "Měření signálu vyžaduje vypnutou Wi‑Fi a dobrý příjem GPS. Upravte prosím nastavení a zkuste to znovu.";
+
+/* IP-version restriction (expert mode) */
+"ip_version_not_available_message" = "Verze IP není dostupná, zkontrolujte expertní nastavení";
+"ip_version_restriction_unavailable_message" = "%@ není v aktuálním připojení dostupné.";

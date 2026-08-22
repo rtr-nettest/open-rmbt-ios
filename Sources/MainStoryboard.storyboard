@@ -660,6 +660,47 @@
                                             <constraint firstAttribute="bottom" secondItem="Sm1-In-sp0" secondAttribute="bottom" id="Sm1-In-c06"/>
                                         </constraints>
                                     </tableViewCell>
+                                    <tableViewCell contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="none" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" id="iP6-Yx-cel">
+                                        <rect key="frame" x="0.0" y="551.33333015441895" width="390" height="56"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" tableViewCell="iP6-Yx-cel" id="iP6-fG-cnt">
+                                            <rect key="frame" x="0.0" y="0.0" width="390" height="56"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <switch opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="iP6-U0-swt">
+                                                    <rect key="frame" x="321" y="12.666666666666664" width="51" height="31"/>
+                                                    <color key="onTintColor" red="0.34901960780000002" green="0.69803921570000005" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                </switch>
+                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="IPv6 Only" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="iP6-al-lbl">
+                                                    <rect key="frame" x="20" y="18.666666666666668" width="66.666666666666671" height="19.000000000000004"/>
+                                                    <fontDescription key="fontDescription" name="Roboto-Regular" family="Roboto" pointSize="16"/>
+                                                    <color key="textColor" red="0.25882352939999997" green="0.25882352939999997" blue="0.25882352939999997" alpha="1" colorSpace="calibratedRGB"/>
+                                                    <color key="highlightedColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    <userDefinedRuntimeAttributes>
+                                                        <userDefinedRuntimeAttribute type="string" keyPath="localizableText" value="preferences_ipv6_only"/>
+                                                    </userDefinedRuntimeAttributes>
+                                                </label>
+                                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="iP6-Wd-sep">
+                                                    <rect key="frame" x="20" y="55" width="350" height="1"/>
+                                                    <color key="backgroundColor" red="0.93333333333333335" green="0.93333333333333335" blue="0.93333333333333335" alpha="1" colorSpace="calibratedRGB"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="height" constant="1" id="iP6-jP-QM1"/>
+                                                    </constraints>
+                                                </view>
+                                            </subviews>
+                                            <constraints>
+                                                <constraint firstItem="iP6-al-lbl" firstAttribute="centerY" secondItem="iP6-fG-cnt" secondAttribute="centerY" id="iP6-oN-tv2"/>
+                                                <constraint firstAttribute="bottom" secondItem="iP6-Wd-sep" secondAttribute="bottom" id="iP6-Mi-r36"/>
+                                                <constraint firstItem="iP6-U0-swt" firstAttribute="centerY" secondItem="iP6-fG-cnt" secondAttribute="centerY" id="iP6-Xj-0VF"/>
+                                            </constraints>
+                                        </tableViewCellContentView>
+                                        <constraints>
+                                            <constraint firstItem="iP6-al-lbl" firstAttribute="leading" secondItem="iP6-Yx-cel" secondAttribute="leadingMargin" id="iP6-wt-4aS"/>
+                                            <constraint firstItem="iP6-Wd-sep" firstAttribute="leading" secondItem="iP6-Yx-cel" secondAttribute="leading" constant="20" id="iP6-iH-NIQ"/>
+                                            <constraint firstAttribute="trailing" secondItem="iP6-Wd-sep" secondAttribute="trailing" constant="20" id="iP6-qE-8C2"/>
+                                            <constraint firstAttribute="trailingMargin" secondItem="iP6-U0-swt" secondAttribute="trailing" id="iP6-up-BNk"/>
+                                        </constraints>
+                                    </tableViewCell>
                                 </cells>
                             </tableViewSection>
                             <tableViewSection headerTitle="Kontakt" id="ujY-Gf-flZ">
@@ -1426,6 +1467,7 @@
                         <outlet property="emailAddressLabel" destination="0uP-so-rVW" id="XzF-X1-LSG"/>
                         <outlet property="expertModeSwitch" destination="NCH-ny-506" id="S6v-oA-q23"/>
                         <outlet property="forceIPv4Switch" destination="euJ-U0-xKW" id="x2J-1J-2X3"/>
+                        <outlet property="forceIPv6Switch" destination="iP6-U0-swt" id="iP6-1J-2X4"/>
                         <outlet property="loopModeDistanceTextField" destination="4mQ-38-Pj5" id="QDa-tE-wrw"/>
                         <outlet property="loopModeSwitch" destination="r1o-4C-mD4" id="O35-LI-W0Y"/>
                         <outlet property="loopModeWaitTextField" destination="tEY-9P-PAu" id="arY-Qn-BTF"/>

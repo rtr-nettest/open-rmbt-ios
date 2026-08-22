@@ -502,3 +502,7 @@
 
 "coverage_unavailable_title" = "قياس الإشارة غير متاح";
 "coverage_unavailable_message" = "يتطلب قياس الإشارة إيقاف تشغيل Wi‑Fi واستقبال GPS جيد. يُرجى الضبط والمحاولة مرة أخرى.";
+
+/* IP-version restriction (expert mode) */
+"ip_version_not_available_message" = "إصدار IP غير متاح، تحقق من إعدادات الخبراء";
+"ip_version_restriction_unavailable_message" = "%@ غير متاح في الاتصال الحالي.";

@@ -237,6 +237,23 @@ final class ConnectivityServiceTests: XCTestCase {
         XCTAssertFalse(info.ipv6.connectionAvailable)
     }
 
+    // Regression: a public IPv4 must not be reported without a local IPv4 address, otherwise the
+    // intro screen shows the public address with an empty private one and a red indicator. This
+    // happens on IPv4-less / NAT64 networks and when the IPv6-only restriction strips local IPv4.
+    func test_whenIpv4ExternalArrivesWithoutLocalAddress_thenRemainsUnavailable() {
+        let (sut, controlServer, _, _) = makeSUT(localIps: (ipv4: nil, ipv6: "2001:db8::56"))
+
+        let info = expectConnectivity(of: sut, refresh: true) {
+            controlServer.completeSettingsSuccess()
+            controlServer.completeIpv4Success(ip: "203.0.113.21")
+            controlServer.completeIpv6Success(ip: "2001:db8::external")
+        }
+
+        XCTAssertNil(info.ipv4.internalIp)
+        XCTAssertNil(info.ipv4.externalIp)
+        XCTAssertFalse(info.ipv4.connectionAvailable)
+    }
+
     func test_whenNetworkTypeChangesDuringCheck_thenSubsequentResultUsesUpdatedInterfaces() {
         let (sut, controlServer, _, _) = makeSUT(useLocalOverrides: false)
         sut.updateActiveNetworkType(.wifi)
