@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		11C4619B1AAF4DF59FD20821 /* LinkQualitySignal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52460B62B66B3D905CBCB9B8 /* LinkQualitySignal.swift */; };
 		17CAE37F76166381D9D66810 /* NWUDPConnectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E55EB25A9BF044C2410508FA /* NWUDPConnectionTests.swift */; };
 		1A332B775B03A2BDC28DF9F5 /* RMBTIPVersionAvailability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9492E88A7428985BBD0742 /* RMBTIPVersionAvailability.swift */; };
 		2F5A8C4958A5EC9724752D6A /* SIMInfoModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD5A35E71C9764DC5843686A /* SIMInfoModels.swift */; };
@@ -466,6 +467,7 @@
 		49FBC0002F00A0000009D9A6 /* AsyncSocketUDPConnectionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncSocketUDPConnectionTests.swift; sourceTree = "<group>"; };
 		4A0000002EAA35630009D9A6 /* NWPathMonitorNetworkConnectionTypeUpdatesService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NWPathMonitorNetworkConnectionTypeUpdatesService.swift; sourceTree = "<group>"; };
 		4A0000022EAA35630009D9A6 /* CurrentNetworkTypeProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentNetworkTypeProvider.swift; sourceTree = "<group>"; };
+		52460B62B66B3D905CBCB9B8 /* LinkQualitySignal.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LinkQualitySignal.swift; sourceTree = "<group>"; };
 		64A52344AA25543676788609 /* SIMInfoSnapshotBuilderTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SIMInfoSnapshotBuilderTests.swift; sourceTree = "<group>"; };
 		66A000012F10000000000002 /* FenceRadiusCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FenceRadiusCalculator.swift; sourceTree = "<group>"; };
 		66A000022F20000000000002 /* CoverageButtonGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverageButtonGate.swift; sourceTree = "<group>"; };
@@ -1091,6 +1093,7 @@
 				E9C13F7E27298A6800DA60D4 /* RMBTSettingsViewController.swift */,
 				E9BF00EA2760F01F0092371F /* RMBTLoopModeConfirmationViewController.swift */,
 				8E9492E88A7428985BBD0742 /* RMBTIPVersionAvailability.swift */,
+				52460B62B66B3D905CBCB9B8 /* LinkQualitySignal.swift */,
 			);
 			name = Settings;
 			sourceTree = "<group>";
@@ -2330,6 +2333,7 @@
 				A5EC6220FC2679D6070121B6 /* SIMInfoViewModel.swift in Sources */,
 				4987298CEEA3188EA459D916 /* SIMInfoView.swift in Sources */,
 				1A332B775B03A2BDC28DF9F5 /* RMBTIPVersionAvailability.swift in Sources */,
+				11C4619B1AAF4DF59FD20821 /* LinkQualitySignal.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

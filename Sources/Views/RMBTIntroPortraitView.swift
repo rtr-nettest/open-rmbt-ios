@@ -94,6 +94,42 @@ class RMBTIntroPortraitView: UIView, XibLoadable {
         }
     }
 
+    /// Mobile signal strength as a 0–4 level derived from `NWPath.linkQuality` (iOS has no public
+    /// cellular signal-strength API). Renders real bars instead of the old static/fake icon.
+    var mobileSignalLevel: Int? {
+        didSet {
+            guard let level = mobileSignalLevel else { return }
+            // Render at the image view's own size so the bars fill the same footprint as the original
+            // icon (fall back to the storyboard size before layout has run).
+            let bounds = networkMobileTypeImageView.bounds.size
+            let size = bounds.width > 1 && bounds.height > 1 ? bounds : CGSize(width: 84, height: 56)
+            networkMobileTypeImageView.image = SignalBarsIcon.image(
+                level: level,
+                barCount: 4,
+                filled: .signalBarFilled,
+                empty: .signalBarEmpty,
+                size: size
+            )
+        }
+    }
+
+    /// Wi-Fi link-quality level as a 1–3 value from `NWPath.linkQuality`. Renders 3 bars into the
+    /// Wi-Fi type icon.
+    var wifiSignalLevel: Int? {
+        didSet {
+            guard let level = wifiSignalLevel else { return }
+            let bounds = networkWifiTypeImageView.bounds.size
+            let size = bounds.width > 1 && bounds.height > 1 ? bounds : CGSize(width: 84, height: 56)
+            networkWifiTypeImageView.image = SignalBarsIcon.image(
+                level: level,
+                barCount: 3,
+                filled: .signalBarFilled,
+                empty: .signalBarEmpty,
+                size: size
+            )
+        }
+    }
+
     @IBAction func startButtonClick(_ sender: Any) {
         startButtonHandler()
     }
@@ -327,6 +363,8 @@ private extension UIColor {
     static let networkLogoAvailable = UIColor(red: 1, green: 1, blue: 1, alpha: 1.0)
 
     static let statusUnknown = UIColor.systemGray
+    static let signalBarFilled = UIColor(red: 0.349, green: 0.698, blue: 0.0, alpha: 1.0)
+    static let signalBarEmpty = UIColor(red: 0.349, green: 0.698, blue: 0.0, alpha: 0.30)
     static let ipNotAvailable = UIColor(red: 245.0 / 255.0, green: 0.0 / 255.0, blue: 28.0/255.0, alpha: 1.0)
     static let ipSemiAvailable = UIColor(red: 255.0 / 255.0, green: 186.0 / 255.0, blue: 0, alpha: 1.0)
     static let ipAvailable = UIColor(red: 89.0 / 255.0, green: 178.0 / 255.0, blue: 0, alpha: 1.0)

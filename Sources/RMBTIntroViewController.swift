@@ -86,6 +86,12 @@ class RMBTIntroViewController: UIViewController {
     private var connectivityRefreshTimer: Timer?
     private let connectivityRefreshInterval: TimeInterval = 20
 
+    /// Real mobile signal level (0–4) from `NWPath.linkQuality` for the intro's mobile signal icon.
+    private let cellularSignalMonitor = LinkQualityMonitor(interfaceType: .cellular, label: "cellular")
+
+    /// Wi-Fi link quality (1–3) from `NWPath.linkQuality`, driving the 3-bar Wi-Fi icon.
+    private let wifiSignalMonitor = LinkQualityMonitor(interfaceType: .wifi, label: "wifi", levelMapper: LinkQualityLevel.wifiLevel)
+
     override var preferredStatusBarStyle: UIStatusBarStyle {
         guard let connectivity = connectivity else { return .default }
         if connectivity.networkType == .cellular || connectivity.networkType == .wifi {
@@ -227,12 +233,23 @@ class RMBTIntroViewController: UIViewController {
         })
         RMBTSettings.shared.activeMeasurementId = nil
         startConnectivityRefreshTimer()
+
+        cellularSignalMonitor.onLevel = { [weak self] level in
+            self?.currentView.mobileSignalLevel = level
+        }
+        cellularSignalMonitor.start()
+        wifiSignalMonitor.onLevel = { [weak self] level in
+            self?.currentView.wifiSignalLevel = level
+        }
+        wifiSignalMonitor.start()
     }
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         connectivityTracker.stop()
         stopConnectivityRefreshTimer()
+        cellularSignalMonitor.stop()
+        wifiSignalMonitor.stop()
     }
 
     private func startConnectivityRefreshTimer() {
