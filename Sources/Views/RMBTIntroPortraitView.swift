@@ -113,22 +113,6 @@ class RMBTIntroPortraitView: UIView, XibLoadable {
         }
     }
 
-    /// Wi-Fi link-quality level as a 1–3 value from `NWPath.linkQuality`. Renders 3 bars into the
-    /// Wi-Fi type icon.
-    var wifiSignalLevel: Int? {
-        didSet {
-            guard let level = wifiSignalLevel else { return }
-            let bounds = networkWifiTypeImageView.bounds.size
-            let size = bounds.width > 1 && bounds.height > 1 ? bounds : CGSize(width: 84, height: 56)
-            networkWifiTypeImageView.image = SignalBarsIcon.image(
-                level: level,
-                barCount: 3,
-                filled: .signalBarFilled,
-                empty: .signalBarEmpty,
-                size: size
-            )
-        }
-    }
 
     @IBAction func startButtonClick(_ sender: Any) {
         startButtonHandler()

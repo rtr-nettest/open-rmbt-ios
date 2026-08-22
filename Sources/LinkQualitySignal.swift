@@ -32,7 +32,7 @@ enum LinkQualityLevel {
         guard path.status == .satisfied else { return unavailableLevel }
         if #available(iOS 26.0, *) {
             switch path.linkQuality {
-            case .unknown: return 1
+            case .unknown: return unavailableLevel   // treat as the old 3/4 default
             case .minimal: return 2
             case .moderate: return 3
             case .good: return 4
@@ -42,25 +42,6 @@ enum LinkQualityLevel {
         return unavailableLevel
     }
 
-    /// Fallback for the 3-bar Wi-Fi icon when link quality can't be determined (previous static
-    /// "3 bars all active" default).
-    static let wifiUnavailableLevel = 3
-
-    /// Maps a network path's link quality to the 1–3 Wi-Fi level (Wi-Fi icon, 3 bars): good → 3,
-    /// moderate → 2, minimal → 1, unknown → 1, unavailable/error → 3.
-    static func wifiLevel(for path: NWPath) -> Int {
-        guard path.status == .satisfied else { return wifiUnavailableLevel }
-        if #available(iOS 26.0, *) {
-            switch path.linkQuality {
-            case .unknown: return 1
-            case .minimal: return 1
-            case .moderate: return 2
-            case .good: return 3
-            @unknown default: return wifiUnavailableLevel
-            }
-        }
-        return wifiUnavailableLevel
-    }
 
     /// Human-readable description of a path's link quality, for diagnostic logging.
     static func describe(_ path: NWPath) -> String {
