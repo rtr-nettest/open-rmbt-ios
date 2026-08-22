@@ -17,7 +17,6 @@ enum RMBTSettingsSection: Int {
     case contacts
     case info
     case support
-    case debug
     case debugCustomControlServer
     case logging
 }
@@ -36,7 +35,6 @@ class RMBTSettingsViewController: UITableViewController {
     @IBOutlet weak var loopModeWaitTextField: UITextField!
     @IBOutlet weak var loopModeDistanceTextField: UITextField!
 
-    @IBOutlet weak var debugForceIPv6Switch: UISwitch!
     @IBOutlet weak var debugControlServerCustomizationEnabledSwitch: UISwitch!
     @IBOutlet weak var debugControlServerHostnameTextField: UITextField!
     @IBOutlet weak var debugControlServerPortTextField: UITextField!
@@ -112,14 +110,10 @@ class RMBTSettingsViewController: UITableViewController {
                 self.presentIPVersionUnavailableAlert(for: .ipv4Only)
                 return
             }
-            // Mutually exclusive with the IPv6-only restriction (and the debug IPv6 force).
+            // Mutually exclusive with the IPv6-only restriction.
             if self.settings.forceIPv6 {
                 self.settings.forceIPv6 = false
                 self.forceIPv6Switch?.setOn(false, animated: true)
-            }
-            if self.settings.debugUnlocked && self.debugForceIPv6Switch.isOn {
-                self.settings.debugForceIPv6 = false
-                self.debugForceIPv6Switch.setOn(false, animated: true)
             }
         })
 
@@ -180,13 +174,6 @@ class RMBTSettingsViewController: UITableViewController {
         }
 
         rebindLoopModeSettings()
-        
-        self.bindSwitch(self.debugForceIPv6Switch, to: #keyPath(RMBTSettings.debugForceIPv6)) { value in
-            if (value && self.forceIPv4Switch.isOn) {
-                self.settings.forceIPv4 = false
-                self.forceIPv4Switch.setOn(false, animated: true)
-            }
-        }
 
         self.bindSwitch(self.debugControlServerCustomizationEnabledSwitch,
                         to: #keyPath(RMBTSettings.debugControlServerCustomizationEnabled)) { value in
@@ -474,8 +461,6 @@ class RMBTSettingsViewController: UITableViewController {
                 return NSLocalizedString("preferences_additional_Information", comment: "")
         case .support:
                 return NSLocalizedString("preferences_about", comment: "")
-        case .debug:
-                return NSLocalizedString("preferences_debug_options", comment: "")
         case .debugCustomControlServer:
                 return NSLocalizedString("preferences_developer_control_server", comment: "")
         case .logging:
@@ -619,9 +604,6 @@ extension RMBTSettingsViewController {
                 let isEnable = code == RMBTConfig.ACTIVATE_DEV_CODE
                 self.settings.isDevModeEnabled = isEnable
                 self.settings.debugUnlocked = isEnable
-                if !isEnable {
-                    self.settings.debugForceIPv6 = false
-                }
                 self.rebindLoopModeSettings()
                 self.tableView.reloadData()
                 return

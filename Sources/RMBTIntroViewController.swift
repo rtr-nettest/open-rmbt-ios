@@ -80,6 +80,12 @@ class RMBTIntroViewController: UIViewController {
         return RMBTConnectivityTracker(delegate: self, stopOnMixed: false)
     }()
 
+    /// Periodically re-runs the connectivity / IP-version status check while the intro screen is
+    /// visible, so a transient probe failure (e.g. the IPv6 /ip host momentarily unreachable)
+    /// recovers on its own without waiting for another user/system event.
+    private var connectivityRefreshTimer: Timer?
+    private let connectivityRefreshInterval: TimeInterval = 20
+
     override var preferredStatusBarStyle: UIStatusBarStyle {
         guard let connectivity = connectivity else { return .default }
         if connectivity.networkType == .cellular || connectivity.networkType == .wifi {
@@ -220,11 +226,25 @@ class RMBTIntroViewController: UIViewController {
             self.connectivityTracker.forceUpdate()
         })
         RMBTSettings.shared.activeMeasurementId = nil
+        startConnectivityRefreshTimer()
     }
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         connectivityTracker.stop()
+        stopConnectivityRefreshTimer()
+    }
+
+    private func startConnectivityRefreshTimer() {
+        connectivityRefreshTimer?.invalidate()
+        connectivityRefreshTimer = Timer.scheduledTimer(withTimeInterval: connectivityRefreshInterval, repeats: true) { [weak self] _ in
+            self?.connectivityTracker.forceUpdate()
+        }
+    }
+
+    private func stopConnectivityRefreshTimer() {
+        connectivityRefreshTimer?.invalidate()
+        connectivityRefreshTimer = nil
     }
 
     @objc private func didBecomeActive(_ sender: Any) {
@@ -362,9 +382,11 @@ class RMBTIntroViewController: UIViewController {
 
     private func startTest() {
         guard ipVersionRestrictionSatisfied() else {
+            let version = RMBTSettings.shared.forceIPv4 ? "IPv4" : "IPv6"
+            let format = NSLocalizedString("ip_version_not_available_message", comment: "Shown when an IPv4/IPv6-only restriction is active but that IP version is not available on the current connection. %@ is IPv4 or IPv6")
             UIAlertController.presentAlert(
                 title: nil,
-                text: NSLocalizedString("ip_version_not_available_message", comment: "Shown when an IPv4/IPv6-only restriction is active but that IP version is not available on the current connection"),
+                text: String(format: format, version),
                 cancelTitle: NSLocalizedString("input_setting_dialog_ok", comment: "OK button"),
                 otherTitle: nil,
                 cancelAction: { _ in },
@@ -389,7 +411,7 @@ class RMBTIntroViewController: UIViewController {
         let ipv6Available = connectivityInfo?.ipv6.connectionAvailable ?? RMBTIPVersionAvailability.shared.ipv6Available
         return RMBTIPVersionAvailability.restrictionSatisfied(
             forceIPv4: settings.forceIPv4,
-            forceIPv6: settings.forceIPv6 || settings.debugForceIPv6,
+            forceIPv6: settings.forceIPv6,
             ipv4Available: ipv4Available,
             ipv6Available: ipv6Available
         )

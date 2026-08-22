@@ -47,42 +47,22 @@ extension GCDAsyncSocket {
 
 extension GCDAsyncSocket {
     func setupSocket() {
-        let forceIPv4 = RMBTSettings.shared.forceIPv4
-        let forceIPv6 = RMBTSettings.shared.forceIPv6 || RMBTSettings.shared.debugForceIPv6
-        if forceIPv4 {
-            self.isIPv6Enabled = false
-            self.isIPv4Enabled = true
-            self.isIPv4PreferredOverIPv6 = true
-        }
-        if forceIPv6 {
-            self.isIPv4Enabled = false
-            self.isIPv6Enabled = true
-            self.isIPv4PreferredOverIPv6 = false
-        }
-        if !forceIPv4 && !forceIPv6 {
-            self.isIPv4Enabled = true
-            self.isIPv6Enabled = true
-            self.isIPv4PreferredOverIPv6 = false
-        }
+        // The IPv4-only / IPv6-only restriction is NOT applied at the socket level. It is applied by
+        // sending the measurement request (/testRequest, /coverageRequest) to the version-specific
+        // control host, and the server then runs the measurement over that IP version. Sockets stay
+        // dual-stack so nothing else (control, connectivity status) is affected.
+        self.isIPv4Enabled = true
+        self.isIPv6Enabled = true
+        self.isIPv4PreferredOverIPv6 = false
     }
 }
 
 extension GCDAsyncUdpSocket {
     func setupSocket() {
-        let forceIPv4 = RMBTSettings.shared.forceIPv4
-        let forceIPv6 = RMBTSettings.shared.forceIPv6 || RMBTSettings.shared.debugForceIPv6
-        if forceIPv4 {
-            self.setIPv6Enabled(false)
-            self.setPreferIPv4()
-        }
-        if forceIPv6 {
-            self.setIPv4Enabled(false)
-            self.setPreferIPv6()
-        }
-        if !forceIPv4 && !forceIPv6 {
-            self.setIPv6Enabled(true)
-            self.setPreferIPv6()
-        }
+        // See GCDAsyncSocket.setupSocket() above: the IP-version restriction is applied via the
+        // measurement request host, not at the socket level.
+        self.setIPv6Enabled(true)
+        self.setPreferIPv6()
     }
 }
 

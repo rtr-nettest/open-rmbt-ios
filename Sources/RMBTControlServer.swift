@@ -230,25 +230,20 @@ extension RMBTControlServer {
         
         // get settings of control server
         getSettings({
-            // check for ip version force
-            var baseUrl: URL?
-            if RMBTSettings.shared.forceIPv6 || RMBTSettings.shared.debugForceIPv6 {
-                baseUrl = self.ipv6
-            } else if RMBTSettings.shared.forceIPv4 {
-                baseUrl = self.ipv4
-            }
-
-            if let baseUrl = baseUrl {
-                self.baseUrl = baseUrl.absoluteString
-                self.mapServerURL = baseUrl.appendingPathComponent("RMBTMapServer")
-            }
+            // NOTE: The IPv4-only / IPv6-only expert restriction must NOT reroute the control server
+            // to a version-specific host. Doing so sent all control traffic (settings, news, and even
+            // the IPv4 connectivity probe's getSettings) through the IPv6-only / IPv4-only host, so a
+            // single unreachable host (e.g. the IPv6 control host on some carriers) broke the whole app
+            // and turned both IPv4 and IPv6 status red. The restriction is enforced where it belongs —
+            // at the measurement socket layer (see SocketUtils). The control server stays on its normal
+            // (dual-stack) host so connectivity status and app functionality are independent of it.
             self.statsURL = URL(string: RMBTHelpers.RMBTLocalize(urlString: RMBTConfig.RMBT_STATS_URL))
             self.lastNewsUid = UserDefaults.lastNewsUidPreference()
 
             successCallback()
-            
+
         }) { error in
-            
+
             failure(error)
         }
     }
@@ -301,11 +296,31 @@ extension RMBTControlServer {
         }, error: error)
     }
     
+    /// The version-specific control host to use for measurement requests (`/testRequest`,
+    /// `/coverageRequest`) when an IP-version restriction is active — routing the request over this
+    /// host makes the server run the measurement over that IP version. `nil` = no restriction, use the
+    /// normal (dual-stack) control host. The restriction applies ONLY to these measurement requests;
+    /// the connectivity status probes and all other control traffic are unaffected.
+    private var restrictedMeasurementBaseURL: URL? {
+        if RMBTSettings.shared.forceIPv4 { return ipv4 }
+        if RMBTSettings.shared.forceIPv6 { return ipv6 }
+        return nil
+    }
+
+    /// The `protocol_version` value for a measurement request ("ipv4"/"ipv6"), or nil to let the
+    /// server decide. Set from the expert IPv4-only / IPv6-only restriction.
+    private var restrictedProtocolVersion: String? {
+        if RMBTSettings.shared.forceIPv4 { return "ipv4" }
+        if RMBTSettings.shared.forceIPv6 { return "ipv6" }
+        return nil
+    }
+
     @objc(getTestParamsWithRequest:success:error:) func getTestParams(with speedMeasurementRequest: SpeedMeasurementRequest_Old, success: @escaping RMBTSuccessBlock, error failure: @escaping (_ error: Error?) -> Void) {
         ensureClientUuid(success: { uuid in
             speedMeasurementRequest.uuid = uuid
             speedMeasurementRequest.ndt = false
             speedMeasurementRequest.time = UInt64(RMBTHelpers.RMBTTimestamp(with: Date()))
+            speedMeasurementRequest.protocolVersion = self.restrictedProtocolVersion
             
             let success: (_ response: SpeedMeasurementResponse_Old) -> Void = { response in
                 guard let tp = RMBTTestParams(with: response.toJSON()) else {
@@ -314,8 +329,12 @@ extension RMBTControlServer {
                 }
                 success(tp)
             }
-            
-            self.request(.post, path: "/testRequest", requestObject: speedMeasurementRequest, success: success, error: failure)
+
+            // The IPv4-only / IPv6-only restriction is applied by sending the measurement request to
+            // the version-specific control host, so the server sets up the measurement over that IP
+            // version. Everything else (control server, connectivity status probes) keeps using its
+            // normal host and stays independent of the restriction.
+            self.request(.post, overrideBaseURL: self.restrictedMeasurementBaseURL, path: "/testRequest", requestObject: speedMeasurementRequest, success: success, error: failure)
         }, error: failure)
 //        NSMutableDictionary *requestParams = [NSMutableDictionary dictionaryWithDictionary:@{
 //            @"ndt": @NO,
@@ -541,7 +560,9 @@ extension RMBTControlServer {
                 request.clientUUID = uuid
                 request.uuid = uuid
                 request.loopUUID = loopUUID
-                self.request(.post, path: "/coverageRequest", requestObject: request, success: success, error: failure)
+                // Same IP-version restriction as /testRequest: route the signal/coverage request to the
+                // version-specific control host so the measurement runs over that IP version.
+                self.request(.post, overrideBaseURL: self.restrictedMeasurementBaseURL, path: "/coverageRequest", requestObject: request, success: success, error: failure)
             },
             error: failure
         )

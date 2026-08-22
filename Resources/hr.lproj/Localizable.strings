@@ -504,5 +504,5 @@
 "coverage_unavailable_message" = "Mjerenje signala zahtijeva isključen Wi‑Fi i dobar GPS prijem. Prilagodite i pokušajte ponovno.";
 
 /* IP-version restriction (expert mode) */
-"ip_version_not_available_message" = "IP verzija nije dostupna, provjerite stručne postavke";
+"ip_version_not_available_message" = "%@ nije dostupan. Ispravite stručne postavke.";
 "ip_version_restriction_unavailable_message" = "%@ nije dostupan na trenutačnoj vezi.";

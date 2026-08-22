@@ -1081,51 +1081,6 @@
                                     </tableViewCell>
                                 </cells>
                             </tableViewSection>
-                            <tableViewSection headerTitle="Debug Options" id="M1M-gv-ni1">
-                                <cells>
-                                    <tableViewCell contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="none" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" id="fmS-Bq-IHU">
-                                        <rect key="frame" x="0.0" y="1191.3333301544189" width="390" height="56"/>
-                                        <autoresizingMask key="autoresizingMask"/>
-                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" ambiguous="YES" preservesSuperviewLayoutMargins="YES" tableViewCell="fmS-Bq-IHU" id="0hM-Kk-tbb">
-                                            <rect key="frame" x="0.0" y="0.0" width="390" height="56"/>
-                                            <autoresizingMask key="autoresizingMask"/>
-                                            <subviews>
-                                                <switch opaque="NO" contentMode="scaleToFill" ambiguous="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ENG-Vg-amT">
-                                                    <rect key="frame" x="775" y="12.666666666666664" width="51" height="31"/>
-                                                    <color key="onTintColor" red="0.34901960780000002" green="0.69803921570000005" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                                </switch>
-                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" ambiguous="YES" text="IPv6 Only" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="FGY-fP-Hc7">
-                                                    <rect key="frame" x="20" y="18.666666666666668" width="66.666666666666671" height="19.000000000000004"/>
-                                                    <fontDescription key="fontDescription" name="Roboto-Regular" family="Roboto" pointSize="16"/>
-                                                    <color key="textColor" systemColor="darkTextColor"/>
-                                                    <color key="highlightedColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                                    <userDefinedRuntimeAttributes>
-                                                        <userDefinedRuntimeAttribute type="string" keyPath="localizableText" value="preferences_ipv6_only"/>
-                                                    </userDefinedRuntimeAttributes>
-                                                </label>
-                                                <view contentMode="scaleToFill" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="tuP-Z8-h4t">
-                                                    <rect key="frame" x="20" y="55" width="804" height="1"/>
-                                                    <color key="backgroundColor" red="0.93333333330000001" green="0.93333333330000001" blue="0.93333333330000001" alpha="1" colorSpace="calibratedRGB"/>
-                                                    <constraints>
-                                                        <constraint firstAttribute="height" constant="1" id="QgT-8p-nZc"/>
-                                                    </constraints>
-                                                </view>
-                                            </subviews>
-                                            <constraints>
-                                                <constraint firstItem="ENG-Vg-amT" firstAttribute="centerY" secondItem="0hM-Kk-tbb" secondAttribute="centerY" id="M2i-cg-WPp"/>
-                                                <constraint firstItem="FGY-fP-Hc7" firstAttribute="centerY" secondItem="0hM-Kk-tbb" secondAttribute="centerY" id="pQL-oq-wIA"/>
-                                            </constraints>
-                                        </tableViewCellContentView>
-                                        <constraints>
-                                            <constraint firstAttribute="trailingMargin" secondItem="ENG-Vg-amT" secondAttribute="trailing" id="0yR-ZH-Six"/>
-                                            <constraint firstItem="tuP-Z8-h4t" firstAttribute="leading" secondItem="fmS-Bq-IHU" secondAttribute="leading" constant="20" id="9bk-e5-6Vb"/>
-                                            <constraint firstItem="FGY-fP-Hc7" firstAttribute="leading" secondItem="fmS-Bq-IHU" secondAttribute="leadingMargin" id="b2I-Of-7iL"/>
-                                            <constraint firstAttribute="bottom" secondItem="tuP-Z8-h4t" secondAttribute="bottom" id="rZl-qE-Tjj"/>
-                                            <constraint firstAttribute="trailing" secondItem="tuP-Z8-h4t" secondAttribute="trailing" constant="20" id="sxg-hl-GZa"/>
-                                        </constraints>
-                                    </tableViewCell>
-                                </cells>
-                            </tableViewSection>
                             <tableViewSection headerTitle="Custom Control Server" id="D8A-FE-iL1">
                                 <cells>
                                     <tableViewCell contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="none" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" id="5XU-7o-d5k">
@@ -1459,7 +1414,6 @@
                         <outlet property="debugControlServerHostnameTextField" destination="deH-kU-Bd7" id="Lhf-Fn-h9y"/>
                         <outlet property="debugControlServerPortTextField" destination="olo-CY-5Dd" id="ymb-Pc-FyB"/>
                         <outlet property="debugControlServerUseSSLSwitch" destination="NtR-7V-P2J" id="HLA-wH-XeV"/>
-                        <outlet property="debugForceIPv6Switch" destination="ENG-Vg-amT" id="Jfa-LV-ezd"/>
                         <outlet property="debugLoggingEnabledSwitch" destination="Lq3-9T-1Le" id="4re-3N-Id5"/>
                         <outlet property="debugLoggingHostnameTextField" destination="l4T-hu-ebd" id="0SC-jy-0DG"/>
                         <outlet property="debugLoggingPortTextField" destination="ilL-IN-kyB" id="ty0-jr-WX8"/>

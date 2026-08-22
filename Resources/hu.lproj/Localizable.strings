@@ -504,5 +504,5 @@
 "coverage_unavailable_message" = "A jelméréshez ki kell kapcsolni a Wi‑Fi-t, és jó GPS-vételre van szükség. Módosítsa, majd próbálja újra.";
 
 /* IP-version restriction (expert mode) */
-"ip_version_not_available_message" = "Az IP-verzió nem érhető el, ellenőrizze a szakértői beállításokat";
+"ip_version_not_available_message" = "%@ nem érhető el. Kérjük, javítsa a szakértői beállítást.";
 "ip_version_restriction_unavailable_message" = "A(z) %@ nem érhető el a jelenlegi kapcsolaton.";

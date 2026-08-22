@@ -504,5 +504,5 @@
 "coverage_unavailable_message" = "La Medición de señal requiere que el Wi‑Fi esté apagado y buena recepción de GPS. Ajústelo e inténtelo de nuevo.";
 
 /* IP-version restriction (expert mode) */
-"ip_version_not_available_message" = "Versión de IP no disponible, revise los ajustes de experto";
+"ip_version_not_available_message" = "%@ no disponible. Corrija el ajuste de experto.";
 "ip_version_restriction_unavailable_message" = "%@ no está disponible en la conexión actual.";

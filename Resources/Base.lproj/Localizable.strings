@@ -502,5 +502,5 @@
 "This information is a best-effort guess from iOS APIs and may be incomplete or inconsistent." = "This information is a best-effort guess from iOS APIs and may be incomplete or inconsistent.";
 
 /* IP-version restriction (expert mode) */
-"ip_version_not_available_message" = "IP version not available, check expert settings";
+"ip_version_not_available_message" = "%@ not available. Please correct the expert setting.";
 "ip_version_restriction_unavailable_message" = "%@ is not available on the current connection.";

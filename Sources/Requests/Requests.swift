@@ -125,29 +125,34 @@ public class IPRequest_Old: BasicRequest {
     
     ///
     var measurementServerId: UInt64?
-    
-    
+
+    /// Forces the measurement to a specific IP version: "ipv4" or "ipv6". Nil/omitted lets the
+    /// server decide. Set from the expert IPv4-only / IPv6-only restriction.
+    var protocolVersion: String?
+
     ///
     public override func mapping(map: Map) {
         super.mapping(map: map)
-        
-        
+
+
         ndt         <- map["ndt"]
         anonymous   <- map["anonymous"]
         testCounter <- map["testCounter"]
-        
+
         geoLocation <- map["location"]
-        
+
         time <- map["time"]
         name <- map["name"]
         client <- map["client"]
-        
+
         //
         measurementServerId <- map["measurement_server_id"]
         measurementTypeFlag <- map["measurement_type_flag"]
-        
+
         loopModeEnabled     <- map["user_loop_mode"]
         loopModeInfo        <- map["loopmode_info"]
+
+        protocolVersion     <- map["protocol_version"]
     }
 }
 

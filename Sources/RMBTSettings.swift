@@ -54,12 +54,9 @@ import Foundation
     @objc public dynamic var forceIPv4 = false
 
     /// Expert-mode restriction: run the measurement over IPv6 only. Mutually exclusive
-    /// with `forceIPv4`. Counterpart to `forceIPv4`; see also the debug-only `debugForceIPv6`.
+    /// with `forceIPv4`. Counterpart to `forceIPv4`.
     @objc public dynamic var forceIPv6 = false
 
-    ///
-    @objc public dynamic var debugForceIPv6 = false
-    
     @objc public dynamic var isDarkMode = false
 
     ///
@@ -185,7 +182,6 @@ import Foundation
 
             "forceIPv4",
             "forceIPv6",
-            "debugForceIPv6",
 
             // nerd mode, advanced settings, qos
             "nerdModeQosEnabled",
