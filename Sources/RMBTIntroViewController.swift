@@ -343,6 +343,10 @@ class RMBTIntroViewController: UIViewController {
             )
             return
         }
+
+        // Same IPv4-only / IPv6-only availability gate as the speed test.
+        if presentIPVersionAlertIfRestrictionUnsatisfied() { return }
+
         let coverageView = NetworkCoverageView(onClose: { [weak self] in
             self?.dismiss(animated: true)
         })
@@ -381,25 +385,32 @@ class RMBTIntroViewController: UIViewController {
     }
 
     private func startTest() {
-        guard ipVersionRestrictionSatisfied() else {
-            let version = RMBTSettings.shared.forceIPv4 ? "IPv4" : "IPv6"
-            let format = NSLocalizedString("ip_version_not_available_message", comment: "Shown when an IPv4/IPv6-only restriction is active but that IP version is not available on the current connection. %@ is IPv4 or IPv6")
-            UIAlertController.presentAlert(
-                title: nil,
-                text: String(format: format, version),
-                cancelTitle: NSLocalizedString("input_setting_dialog_ok", comment: "OK button"),
-                otherTitle: nil,
-                cancelAction: { _ in },
-                otherAction: nil
-            )
-            return
-        }
+        if presentIPVersionAlertIfRestrictionUnsatisfied() { return }
 
         if isLoopMode {
             self.performSegue(withIdentifier: showLoopModeSettingsSegue, sender: self)
         } else {
             self.startTest(with: nil)
         }
+    }
+
+    /// If an IPv4-only / IPv6-only restriction is active but that IP version is not available on the
+    /// current connection, presents the "not available, check expert settings" alert and returns true
+    /// (the caller should abort). Returns false when there is no blocking restriction.
+    @discardableResult
+    private func presentIPVersionAlertIfRestrictionUnsatisfied() -> Bool {
+        guard !ipVersionRestrictionSatisfied() else { return false }
+        let version = RMBTSettings.shared.forceIPv4 ? "IPv4" : "IPv6"
+        let format = NSLocalizedString("ip_version_not_available_message", comment: "Shown when an IPv4/IPv6-only restriction is active but that IP version is not available on the current connection. %@ is IPv4 or IPv6")
+        UIAlertController.presentAlert(
+            title: nil,
+            text: String(format: format, version),
+            cancelTitle: NSLocalizedString("input_setting_dialog_ok", comment: "OK button"),
+            otherTitle: nil,
+            cancelAction: { _ in },
+            otherAction: nil
+        )
+        return true
     }
 
     /// Whether the currently active IP-version restriction (if any) can be satisfied by the
