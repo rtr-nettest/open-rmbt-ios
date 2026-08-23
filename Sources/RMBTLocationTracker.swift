@@ -81,6 +81,29 @@ public extension Notification.Name {
         locationManager.authorizationStatus == .authorizedAlways || locationManager.authorizationStatus == .authorizedWhenInUse
     }
 
+    private static let hasLocationBackgroundMode: Bool =
+        (Bundle.main.object(forInfoDictionaryKey: "UIBackgroundModes") as? [String])?.contains("location") ?? false
+
+    /// Enables/disables continuous background location delivery so a measurement can keep the app
+    /// alive while it runs in the background (paired with a `CLBackgroundActivitySession`). Holding a
+    /// background activity session is not enough on its own — location must keep being delivered.
+    /// No-op if the app lacks the "location" background mode (setting the flag would otherwise crash).
+    func setBackgroundUpdatesAllowed(_ enabled: Bool) {
+        guard Self.hasLocationBackgroundMode else { return }
+        let apply = { [weak self] in
+            guard let self else { return }
+            if enabled {
+                self.locationManager.allowsBackgroundLocationUpdates = true
+                self.locationManager.pausesLocationUpdatesAutomatically = false
+                self.locationManager.showsBackgroundLocationIndicator = true
+                if self.isAuthorized { self.locationManager.startUpdatingLocation() }
+            } else {
+                self.locationManager.allowsBackgroundLocationUpdates = false
+            }
+        }
+        if Thread.isMainThread { apply() } else { DispatchQueue.main.async(execute: apply) }
+    }
+
     var isLocationDenied: Bool {
         locationManager.authorizationStatus == .denied
     }

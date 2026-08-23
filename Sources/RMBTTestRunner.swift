@@ -144,7 +144,10 @@ class RMBTTestRunner: NSObject {
     }
 
     func start(with extraParams: [String: Any]? = nil) { // optional extra params like loop info
-        
+
+        // Start a background activity session so the measurement can run to completion in the background.
+        startBackgroundActivity()
+
         workerQueue.async { [weak self] in
             guard let self = self else { return }
             assert(self.phase == .none, "Invalid state")
@@ -324,8 +327,9 @@ class RMBTTestRunner: NSObject {
         // Stop observing
         connectivityTracker?.stop()
         NotificationCenter.default.removeObserver(self)
-        
+
         self.killTimer()
+        self.stopBackgroundActivity()
     }
 
     private func finishTest() {
@@ -564,12 +568,67 @@ class RMBTTestRunner: NSObject {
     }
     
     // MARK: - App state tracking
-    
-    @objc func applicationDidSwitchToBackground(_ notification: Notification) {
-        Log.logger.error("App backgrounded, aborting \(notification)")
-        workerQueue.async {
-            self.cancel(with: .appBackgrounded)
+
+    /// Keeps the measurement running when the app is backgrounded.
+    ///
+    /// Preferred path (location authorized): open-ended background runtime via the same mechanism as
+    /// the coverage measurement — a `CLBackgroundActivitySession` (shared, reference-counted
+    /// `BackgroundActivityActor`) paired with active background location delivery. This has no time cap.
+    ///
+    /// Fallback path (location not authorized): a finite `beginBackgroundTask` assertion (~30s). If it
+    /// expires before the test finishes, the test aborts gracefully with `.appBackgrounded`.
+    private var didStartBackgroundActivity = false
+    private var usingLocationBackground = false
+    private var backgroundTaskID: UIBackgroundTaskIdentifier = .invalid
+
+    private func startBackgroundActivity() {
+        guard !didStartBackgroundActivity else { return }
+        didStartBackgroundActivity = true
+
+        if RMBTLocationTracker.shared.isAuthorized {
+            usingLocationBackground = true
+            Task { await BackgroundActivityActor.shared.startActivity() }
+            RMBTLocationTracker.shared.setBackgroundUpdatesAllowed(true)
+        } else {
+            usingLocationBackground = false
+            beginBackgroundTask()
         }
+    }
+
+    private func stopBackgroundActivity() {
+        guard didStartBackgroundActivity else { return }
+        didStartBackgroundActivity = false
+
+        if usingLocationBackground {
+            Task { await BackgroundActivityActor.shared.stopActivity() }
+            RMBTLocationTracker.shared.setBackgroundUpdatesAllowed(false)
+        } else {
+            endBackgroundTask()
+        }
+    }
+
+    private func beginBackgroundTask() {
+        DispatchQueue.main.async {
+            guard self.backgroundTaskID == .invalid else { return }
+            self.backgroundTaskID = UIApplication.shared.beginBackgroundTask(withName: "RMBTMeasurement") { [weak self] in
+                Log.logger.error("Measurement background time expiring, aborting")
+                self?.workerQueue.async { self?.cancel(with: .appBackgrounded) }
+            }
+        }
+    }
+
+    private func endBackgroundTask() {
+        DispatchQueue.main.async {
+            guard self.backgroundTaskID != .invalid else { return }
+            UIApplication.shared.endBackgroundTask(self.backgroundTaskID)
+            self.backgroundTaskID = .invalid
+        }
+    }
+
+    @objc func applicationDidSwitchToBackground(_ notification: Notification) {
+        // The measurement keeps running in the background (location session when authorized, otherwise
+        // the finite background-task fallback); it is no longer aborted immediately on background.
+        Log.logger.debug("App backgrounded; measurement continues (\(usingLocationBackground ? "location session" : "background-task fallback"))")
     }
 
     // MARK: - Tracking location
@@ -853,7 +912,14 @@ extension RMBTTestRunner: RMBTTestWorkerDelegate {
     
     func testWorkerDidFail(_ worker: RMBTTestWorker) {
         ASSERT_ON_WORKER_QUEUE()
-        assert(!dead, "Invalid state");
+        // A worker socket can disconnect *after* the test has already finished or been cancelled —
+        // e.g. suspended download/upload sockets dropping when the app returns to the foreground after
+        // running in the background. Ignore such late failures instead of asserting/cancelling again
+        // (the assert previously crashed debug builds; a re-entrant cancel would double-clean up).
+        guard !dead else {
+            Log.logger.debug("Ignoring worker failure after test already ended (dead)")
+            return
+        }
         self.cancel(with: .noConnection)
     }
     

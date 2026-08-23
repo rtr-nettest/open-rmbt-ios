@@ -494,15 +494,19 @@ extension RMBTControlServer {
 //            if qosResult.uuid != nil {
 //                qosResult.clientUuid = uuid
                 
+                let point: String
                 if let endpoint = endpoint {
-                    var point = endpoint
+                    var p = endpoint
                     if endpoint.hasPrefix(self.baseUrl) {
-                        point.removeFirst(self.baseUrl.count)
+                        p.removeFirst(self.baseUrl.count)
                     }
-                    self.request(.post, path: point, requestObject: qosResult, success: success, error: failure)
+                    point = p
                 } else {
-                    self.request(.post, path: "/qosResult", requestObject: qosResult, success: success, error: failure)
+                    point = "/qosResult"
                 }
+                self.submitWithRetry(request: { s, e in
+                    self.request(.post, path: point, requestObject: qosResult, success: s, error: e)
+                }, success: success, error: failure)
                 
 //            } else {
 //                failure(NSError(domain: "controlServer", code: 134534, userInfo: nil)) // give error if no uuid was provided by caller
@@ -510,17 +514,56 @@ extension RMBTControlServer {
         }, error: failure)
     }
     
+    /// URL error codes worth retrying: typically a reused keep-alive connection that dropped across a
+    /// background/foreground transition (`-1005`) — common now that a measurement can run in the
+    /// background — or a transient timeout / connectivity blip.
+    private static let transientNetworkErrorCodes: Set<Int> = [
+        NSURLErrorNetworkConnectionLost,   // -1005
+        NSURLErrorTimedOut,                // -1001
+        NSURLErrorCannotConnectToHost,     // -1004
+        NSURLErrorNotConnectedToInternet,  // -1009
+    ]
+
+    private func isTransientNetworkError(_ error: Error) -> Bool {
+        if let underlying = (error as? AFError)?.underlyingError as NSError?, underlying.domain == NSURLErrorDomain {
+            return Self.transientNetworkErrorCodes.contains(underlying.code)
+        }
+        let ns = error as NSError
+        return ns.domain == NSURLErrorDomain && Self.transientNetworkErrorCodes.contains(ns.code)
+    }
+
+    /// Runs a request, retrying up to `maxAttempts` on transient network errors. Result submission is
+    /// otherwise lost to a single dropped connection when a measurement runs across background/
+    /// foreground transitions.
+    private func submitWithRetry<T: BasicResponse>(
+        maxAttempts: Int = 3,
+        attempt: Int = 1,
+        request operation: @escaping (_ success: @escaping (T) -> Void, _ error: @escaping ErrorCallback) -> Void,
+        success: @escaping (T) -> Void,
+        error failure: @escaping ErrorCallback
+    ) {
+        operation(success) { [weak self] err in
+            guard let self, attempt < maxAttempts, self.isTransientNetworkError(err) else {
+                failure(err)
+                return
+            }
+            Log.logger.debug("Result submission attempt \(attempt) failed (transient), retrying: \(err.localizedDescription)")
+            DispatchQueue.global().asyncAfter(deadline: .now() + Double(attempt) * 0.8) {
+                self.submitWithRetry(maxAttempts: maxAttempts, attempt: attempt + 1, request: operation, success: success, error: failure)
+            }
+        }
+    }
+
     @objc func submitResult(_ speedMeasurementResult: SpeedMeasurementResult, endpoint: String?, success: @escaping (_ response: SpeedMeasurementSubmitResponse) -> (), error failure: @escaping ErrorCallback) {
         ensureClientUuid(success: { uuid in
             if speedMeasurementResult.uuid != nil {
                 speedMeasurementResult.clientUuid = uuid
-                
-                if let endpoint = endpoint {
-                    self.request(.post, path: endpoint, requestObject: speedMeasurementResult, success: success, error: failure)
-                } else {
-                    self.request(.post, path: "/result", requestObject: speedMeasurementResult, success: success, error: failure)
-                }
-                
+
+                let path = endpoint ?? "/result"
+                self.submitWithRetry(request: { s, e in
+                    self.request(.post, path: path, requestObject: speedMeasurementResult, success: s, error: e)
+                }, success: success, error: failure)
+
             } else {
                 failure(NSError(domain: "controlServer", code: 134534, userInfo: nil)) // give error if no uuid was provided by caller
             }
