@@ -101,7 +101,7 @@
 "Aborted" = "Abgebrochen";
 
 /* Alert view button */
-"Close" = "Abbrechen";
+"Close" = "Schließen";
 
 /* Alert view title */
 "Connection Error" = "Verbindungsfehler";
