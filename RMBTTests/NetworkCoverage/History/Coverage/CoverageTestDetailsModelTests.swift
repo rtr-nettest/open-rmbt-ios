@@ -61,12 +61,34 @@ final class CoverageTestDetailsModelTests: XCTestCase {
         (sut, _) = makeSUT(timeString: nil)
         XCTAssertEqual(sut.title, NSLocalizedString("Test details", comment: ""))
     }
+
+    func test_shareURL_whenNoOpenTestUuid_thenNil() {
+        let (sut, provider) = makeSUT()
+        provider.openTestUuid = nil
+        XCTAssertNil(sut.shareURL)
+
+        provider.openTestUuid = ""
+        XCTAssertNil(sut.shareURL)
+    }
+
+    func test_shareURL_whenOpenTestUuidWithoutPrefix_thenPrependsO() {
+        let (sut, provider) = makeSUT()
+        provider.openTestUuid = "1234-5678"
+        XCTAssertEqual(sut.shareURL?.absoluteString, "https://www.netztest.at/share/O1234-5678")
+    }
+
+    func test_shareURL_whenOpenTestUuidAlreadyPrefixed_thenDoesNotDoublePrefix() {
+        let (sut, provider) = makeSUT()
+        provider.openTestUuid = "O1234-5678"
+        XCTAssertEqual(sut.shareURL?.absoluteString, "https://www.netztest.at/share/O1234-5678")
+    }
 }
 
 // Spy provider implementing HistoryDetailsProvider to control behavior in tests
 final class HistoryDetailsProviderSpy: HistoryDetailsProvider {
     var timeStringIn24hFormat: String?
     var fullDetailsItems: [Any]?
+    var openTestUuid: String?
 
     private var capturedSuccess: RMBTBlock?
 

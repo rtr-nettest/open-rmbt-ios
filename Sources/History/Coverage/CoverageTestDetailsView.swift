@@ -53,6 +53,11 @@ struct CoverageTestDetailsView: View {
                     dismiss()
                 }
             }
+            if let shareURL = model.shareURL {
+                ToolbarItem(placement: .topBarTrailing) {
+                    ShareLink(item: shareURL)
+                }
+            }
         }
         .onAppear { model.reload() }
     }
