@@ -180,6 +180,7 @@ struct SessionInitializedUpdate: Hashable {
     private(set) var latestPing: String = "N/A"
     private(set) var latestTechnology = "N/A"
     private(set) var locationAccuracy = "N/A"
+    private(set) var speed = "N/A"
     private(set) var currentDynamicRadius: CLLocationDistance?
     private(set) var fenceItems: [FenceItem] = [] {
         didSet { updateRenderedFencesIfNeeded() }
@@ -417,6 +418,7 @@ struct SessionInitializedUpdate: Hashable {
             }
             locations.append(location)
             locationAccuracy = String(format: "%.2fm", location.horizontalAccuracy)
+            speed = Self.speedDisplayValue(for: location)
             latestTechnology = displayValue(forRadioTechnology: radioTechnologyCode ?? "N/A")
 
             guard isLocationPreciseEnough(location) else {
@@ -570,6 +572,7 @@ struct SessionInitializedUpdate: Hashable {
         isStarted = false
         testStartTime = nil
         locationAccuracy = "N/A"
+        speed = "N/A"
         latestTechnology = "N/A"
         currentDynamicRadius = nil
         warningPopups.removeAll()
@@ -635,6 +638,14 @@ struct SessionInitializedUpdate: Hashable {
 
     private func isLocationPreciseEnough(_ location: CLLocation) -> Bool {
         location.horizontalAccuracy <= minimumLocationAccuracy
+    }
+
+    /// GPS speed formatted in km/h for display. `CLLocation.speed` is metres per second and is
+    /// negative when the fix carries no valid speed, in which case we show "N/A".
+    private static func speedDisplayValue(for location: CLLocation) -> String {
+        guard location.speed >= 0 else { return "N/A" }
+        let kmh = location.speed * 3.6
+        return "\(Int(kmh.rounded())) km/h"
     }
 }
 

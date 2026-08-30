@@ -51,7 +51,12 @@ struct NetworkCoverageView: View {
                 }
                 .safeAreaInset(edge: .top, spacing: -10) {
                     VStack(spacing: 0) {
-                        CoverageHeader(title: "Network Coverage") { topBarView }
+                        CoverageHeader(
+                            title: "Network Coverage",
+                            action: viewModel.isStarted
+                                ? .init(title: "Stop", action: { showStopTestPopup = true })
+                                : nil
+                        ) { topBarView }
 
                         VStack(alignment: .leading, spacing: 8) {
                             ForEach(viewModel.warningPopups) { item in
@@ -124,12 +129,6 @@ struct NetworkCoverageView: View {
         }
     }
 
-    func verticalSeparator() -> some View {
-        Rectangle()
-            .fill(Color.gray.opacity(0.2))
-            .frame(maxWidth: 1, maxHeight: .infinity, alignment: .center)
-    }
-
     func horizontalSeparator() -> some View {
         Rectangle()
             .fill(Color.gray.opacity(0.2))
@@ -176,47 +175,38 @@ struct NetworkCoverageView: View {
     }
 
     var topBarView: some View {
-        HStack {
-            HStack(spacing: 0) {
-                VStack(alignment: .leading) {
-                    Text("Technology")
-                        .font(.caption)
-                    Text(viewModel.latestTechnology)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-                VStack(alignment: .leading) {
-                    Text("Ping")
-                        .font(.caption)
-                    Text(viewModel.latestPing)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-                VStack(alignment: .leading) {
-                    Text("Loc. accuracy")
-                        .font(.caption)
-                    Text(viewModel.locationAccuracy)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
+        // A Grid keeps all four values on a single, shared-height row so they stay vertically
+        // aligned even when a caption wraps to two lines (e.g. German "Standortgenauigkeit" /
+        // "Geschwindigkeit"), which independent VStacks per column cannot guarantee.
+        Grid(horizontalSpacing: 0, verticalSpacing: 4) {
+            GridRow(alignment: .top) {
+                Text("Technology")
+                    .font(.caption)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                Text("Ping")
+                    .font(.caption)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                Text("Loc. accuracy")
+                    .font(.caption)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                Text(NSLocalizedString("location_dialog_label_speed", comment: ""))
+                    .font(.caption)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
-
-            Spacer()
-
-            verticalSeparator()
-                .frame(height: 44)
-
-            Spacer()
-
-            Button(viewModel.isStarted ? "Stop" : "") {
-                if viewModel.isStarted {
-                    showStopTestPopup = true
-                } else {
-                    showStartTestPopup = true
-                }
+            GridRow(alignment: .top) {
+                Text(viewModel.latestTechnology)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                Text(viewModel.latestPing)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                Text(viewModel.locationAccuracy)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                Text(viewModel.speed)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .frame(minWidth: 40) // to maintain space when the button text is empty (Start scenario)
-            .tint(.brand)
-            .padding(.horizontal, 16)
         }
         .frame(maxWidth: .infinity, alignment: .center)
         .padding(.horizontal, 16)

@@ -78,6 +78,22 @@ import Clocks
         #expect(sut.currentDynamicRadius == 40)
     }
 
+    @Test func whenReceivingLocationWithValidSpeed_thenSpeedIsDisplayedInKmH() async throws {
+        // 10 m/s == 36 km/h
+        let sut = makeSUT(updates: [makeLocationUpdate(at: 0, lat: 1.0, lon: 2.0, speed: 10)])
+        await sut.startTest()
+
+        #expect(sut.speed == "36 km/h")
+    }
+
+    @Test func whenReceivingLocationWithInvalidSpeed_thenSpeedIsNotAvailable() async throws {
+        // CLLocation reports a negative speed when the fix carries no valid speed
+        let sut = makeSUT(updates: [makeLocationUpdate(at: 0, lat: 1.0, lon: 2.0, speed: -1)])
+        await sut.startTest()
+
+        #expect(sut.speed == "N/A")
+    }
+
     @Test func whenReceivingMultiplePingsForOneLocation_thenCombinesPingTotalValue() async throws {
         let sut = makeSUT(updates: [
             makeLocationUpdate  (at: 1, lat: 1.0, lon: 1.0),
