@@ -211,7 +211,8 @@
                             <constraints>
                                 <constraint firstItem="MCl-Ue-4Yi" firstAttribute="top" secondItem="b2S-dN-C2P" secondAttribute="top" id="2vb-XQ-7a2"/>
                                 <constraint firstAttribute="bottom" secondItem="zKk-dx-7Nx" secondAttribute="bottom" id="SgQ-Rf-12O"/>
-                                <constraint firstItem="MCl-Ue-4Yi" firstAttribute="height" secondItem="zKk-dx-7Nx" secondAttribute="height" multiplier="0.461538" id="bcy-fS-PSf"/>
+                                <constraint firstItem="MCl-Ue-4Yi" firstAttribute="height" secondItem="zKk-dx-7Nx" secondAttribute="height" multiplier="0.928571" id="bcy-fS-PSf"/>
+                                <constraint firstItem="MCl-Ue-4Yi" firstAttribute="width" secondItem="zKk-dx-7Nx" secondAttribute="width" multiplier="0.571429" id="Wd5-gA-spb"/>
                                 <constraint firstAttribute="trailing" secondItem="zKk-dx-7Nx" secondAttribute="trailing" id="hwd-Ng-wBV"/>
                                 <constraint firstItem="zKk-dx-7Nx" firstAttribute="top" secondItem="MCl-Ue-4Yi" secondAttribute="bottom" constant="11" id="kPy-HO-IhF"/>
                                 <constraint firstItem="zKk-dx-7Nx" firstAttribute="leading" secondItem="b2S-dN-C2P" secondAttribute="leading" id="lrW-Wb-OFJ"/>
@@ -227,7 +228,7 @@
                         <constraint firstItem="DB2-U6-fMn" firstAttribute="centerX" secondItem="sA0-B7-9PA" secondAttribute="centerX" id="Cs8-Ov-9fu"/>
                         <constraint firstItem="DB2-U6-fMn" firstAttribute="centerY" secondItem="sA0-B7-9PA" secondAttribute="centerY" id="GCo-P2-SI2"/>
                         <constraint firstItem="b2S-dN-C2P" firstAttribute="centerY" secondItem="sA0-B7-9PA" secondAttribute="centerY" constant="-15" id="LYB-zK-A9i"/>
-                        <constraint firstItem="b2S-dN-C2P" firstAttribute="height" secondItem="sg2-WZ-vVY" secondAttribute="height" multiplier="0.16" id="NMx-kG-ZOP"/>
+                        <constraint firstItem="b2S-dN-C2P" firstAttribute="height" secondItem="sg2-WZ-vVY" secondAttribute="height" multiplier="0.205" id="NMx-kG-ZOP"/>
                         <constraint firstItem="sA0-B7-9PA" firstAttribute="centerX" secondItem="sg2-WZ-vVY" secondAttribute="centerX" id="TqH-GP-5dw"/>
                         <constraint firstItem="ba3-T5-wkc" firstAttribute="width" secondItem="Do7-jB-P7f" secondAttribute="width" multiplier="0.3" id="VEn-jL-vaR"/>
                         <constraint firstItem="Do7-jB-P7f" firstAttribute="centerY" secondItem="sA0-B7-9PA" secondAttribute="centerY" id="Z6N-7y-V3h"/>

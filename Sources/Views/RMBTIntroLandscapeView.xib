@@ -206,7 +206,8 @@
                                 <constraint firstAttribute="bottom" secondItem="h7h-wb-eUt" secondAttribute="bottom" id="HRQ-C4-wGw"/>
                                 <constraint firstItem="Ko9-F5-3as" firstAttribute="centerX" secondItem="ctX-c8-3cH" secondAttribute="centerX" id="MdM-O5-qqa"/>
                                 <constraint firstAttribute="trailing" secondItem="h7h-wb-eUt" secondAttribute="trailing" id="cl7-ji-Ns9"/>
-                                <constraint firstItem="Ko9-F5-3as" firstAttribute="height" secondItem="h7h-wb-eUt" secondAttribute="height" multiplier="0.461538" id="maH-KL-fNr"/>
+                                <constraint firstItem="Ko9-F5-3as" firstAttribute="height" secondItem="h7h-wb-eUt" secondAttribute="height" multiplier="0.928571" id="maH-KL-fNr"/>
+                                <constraint firstItem="Ko9-F5-3as" firstAttribute="width" secondItem="h7h-wb-eUt" secondAttribute="width" multiplier="0.571429" id="Wd5-gA-spc"/>
                                 <constraint firstItem="h7h-wb-eUt" firstAttribute="leading" secondItem="ctX-c8-3cH" secondAttribute="leading" id="rCk-EH-X6f"/>
                             </constraints>
                         </view>
@@ -225,7 +226,7 @@
                         <constraint firstItem="ctX-c8-3cH" firstAttribute="centerX" secondItem="2u0-nO-9xw" secondAttribute="centerX" id="TbA-Yn-gn6"/>
                         <constraint firstItem="LXa-8a-bNM" firstAttribute="height" secondItem="pwN-Am-Qnq" secondAttribute="height" multiplier="0.5" id="aPz-ru-8mC"/>
                         <constraint firstItem="OjE-aQ-oLZ" firstAttribute="height" secondItem="pwN-Am-Qnq" secondAttribute="height" multiplier="0.16" id="c41-gV-DmK"/>
-                        <constraint firstItem="ctX-c8-3cH" firstAttribute="height" secondItem="pwN-Am-Qnq" secondAttribute="height" multiplier="0.16" id="ccr-AN-wgi"/>
+                        <constraint firstItem="ctX-c8-3cH" firstAttribute="height" secondItem="pwN-Am-Qnq" secondAttribute="height" multiplier="0.2025" id="ccr-AN-wgi"/>
                         <constraint firstItem="bT2-kv-A94" firstAttribute="trailing" secondItem="LXa-8a-bNM" secondAttribute="trailing" id="kP3-tR-qaN"/>
                         <constraint firstItem="LXa-8a-bNM" firstAttribute="centerX" secondItem="2u0-nO-9xw" secondAttribute="centerX" id="oBJ-0q-JYF"/>
                         <constraint firstItem="2u0-nO-9xw" firstAttribute="centerY" secondItem="pwN-Am-Qnq" secondAttribute="centerY" id="oqY-Ff-ilO"/>
