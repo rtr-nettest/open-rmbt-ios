@@ -19,7 +19,6 @@ struct NetworkCoverageView: View {
         viewModel = NetworkCoverageFactory(database: UserDatabase.shared).makeCoverageViewModel(fences: fences)
     }
 
-    @State private var showStartTestPopup = false
     @State private var showStopTestPopup = false
     @State private var navigationPath = NavigationPath()
     @State private var resultStopReasons: [StopTestReason] = []
@@ -27,6 +26,26 @@ struct NetworkCoverageView: View {
     @State private var isExpertMode = false
 
     var body: some View {
+        Group {
+            switch viewModel.phase {
+            case .idle:
+                CoverageTermsView(
+                    onAccept: { Task { await viewModel.startTest() } },
+                    onDecline: onClose
+                )
+            case .preparing:
+                CoverageReadinessView(
+                    gps: viewModel.gpsReadiness,
+                    network: viewModel.networkReadiness,
+                    onAbort: { Task { await viewModel.stopTest(); onClose() } }
+                )
+            case .recording, .stopped:
+                recordingBody
+            }
+        }
+    }
+
+    private var recordingBody: some View {
         NavigationStack(path: $navigationPath) {
             ZStack {
                 FencesMapView(
@@ -77,22 +96,6 @@ struct NetworkCoverageView: View {
                         settingsView
                             .padding(.horizontal, 16)
                             .padding(.bottom, 80)
-                    }
-                }
-            }
-            .testStartPopup(
-                isPresented: $showStartTestPopup,
-                title: NSLocalizedString("coverage_intro_title", comment: ""),
-                subtitle: NSLocalizedString("coverage_intro_description", comment: ""),
-                onStartTest: {
-                    Task { await viewModel.toggleMeasurement() }
-                },
-                onCancel: onClose
-            )
-            .onAppear {
-                if !viewModel.isStarted {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                        showStartTestPopup = true
                     }
                 }
             }

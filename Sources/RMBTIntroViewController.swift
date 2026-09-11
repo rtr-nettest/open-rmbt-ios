@@ -332,17 +332,9 @@ class RMBTIntroViewController: UIViewController {
     }
 
     private func coverageTapHandler(_ tintColor: UIColor) {
-        guard coverageCanStart else {
-            UIAlertController.presentAlert(
-                title: NSLocalizedString("coverage_unavailable_title", comment: "Alert title when Signal Measurement cannot start"),
-                text: NSLocalizedString("coverage_unavailable_message", comment: "Alert message listing Signal Measurement requirements"),
-                cancelTitle: NSLocalizedString("input_setting_dialog_ok", comment: "OK button"),
-                otherTitle: nil,
-                cancelAction: { _ in },
-                otherAction: nil
-            )
-            return
-        }
+        // The readiness ("preparing") screen now handles waiting for a good GPS fix on a mobile network,
+        // so we no longer block opening the measurement when conditions are not yet met — the button tint
+        // (coverageCanStart) still hints at readiness, but tapping always opens into the readiness screen.
 
         // Same IPv4-only / IPv6-only availability gate as the speed test.
         if presentIPVersionAlertIfRestrictionUnsatisfied() { return }

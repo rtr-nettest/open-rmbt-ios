@@ -17,6 +17,27 @@ enum StopTestReason: Equatable, Hashable {
     case insufficientLocationAccuracy(duration: TimeInterval)
 }
 
+/// Lifecycle phase of a signal (coverage) measurement.
+///
+/// Mirrors Android's `SignalMeasurementProcessor` `_isPreparing` / `_isActive` gate: recording of
+/// fences does not begin until the phone genuinely has a fresh, accurate GPS fix on a mobile network
+/// (see `NetworkCoverageViewModel.isReadyToBegin`). `.preparing` drives the readiness screen;
+/// `.recording` is the existing live-measurement behaviour.
+enum MeasurementPhase: Equatable {
+    case idle
+    case preparing        // acquiring GPS + waiting for cellular; no fences yet
+    case recording        // live measurement, creating fences
+    case stopped
+}
+
+/// A single readiness row (icon + coloured text) shown while `.preparing`.
+/// Text and `isOK` are derived from the same facts so they can never disagree — mirroring Android's
+/// `applyStatusRow`.
+struct ReadinessRow: Equatable {
+    let isOK: Bool
+    let text: String
+}
+
 extension AsyncMerge2Sequence: AsynchronousSequence where Element == NetworkCoverageViewModel.Update {}
 
 @rethrows protocol PingsAsyncSequence: AsyncSequence where Element == PingResult { }
@@ -143,6 +164,15 @@ struct SessionInitializedUpdate: Hashable {
     @ObservationIgnored private var autoStopDueToInaccuracyTask: Task<Void, Never>?
     @ObservationIgnored private var hasEverHadAccurateLocation: Bool = false
     @ObservationIgnored private var isOnWiFi: Bool = false
+    /// Maximum age of a location fix (seconds) accepted when deciding readiness — a stale but accurate
+    /// fix is rejected. iOS analogue of Android's `maxAgeOfLocationInformationForSignalMeasurementMillis`.
+    @ObservationIgnored private let maxLocationFixAge: TimeInterval
+    /// A session-init event that arrived during `.preparing` (before persistence had a session row);
+    /// replayed once recording begins so the coverage session UUID is anchored correctly.
+    @ObservationIgnored private var pendingSessionInit: SessionInitializedUpdate?
+    /// Latest location seen while `.preparing`, used to compute the readiness rows without appending
+    /// to the recording `locations` trail (which only accumulates once recording begins).
+    @ObservationIgnored private var lastReadinessLocation: CLLocation?
     @ObservationIgnored private var currentTestUUID: String?
     @ObservationIgnored private var dirtyFenceIDs: Set<UUID> = []
     @ObservationIgnored private var lastLoggedRadioTech: String?
@@ -173,6 +203,8 @@ struct SessionInitializedUpdate: Hashable {
 
     // Observable state
     var minimumLocationAccuracy: CLLocationDistance
+    /// Current measurement lifecycle phase. Drives which screen is shown (readiness vs. live map).
+    private(set) var phase: MeasurementPhase = .idle
     private(set) var isStarted = false
     private(set) var errorMessage: String?
     private(set) var locations: [CLLocation] = []
@@ -181,6 +213,14 @@ struct SessionInitializedUpdate: Hashable {
     private(set) var latestTechnology = "N/A"
     private(set) var locationAccuracy = "N/A"
     private(set) var speed = "N/A"
+    /// Readiness rows shown while `.preparing`. Stored (not computed) so SwiftUI re-renders whenever GPS
+    /// or network status changes — including on a Wi‑Fi toggle, whose state is otherwise observation-ignored.
+    /// The two rows are independent: GPS reflects only the location fix, Network only the connection type.
+    private(set) var gpsReadiness: ReadinessRow = .init(isOK: false, text: NSLocalizedString("signal_readiness_gps_stale", comment: ""))
+    private(set) var networkReadiness: ReadinessRow = .init(
+        isOK: false,
+        text: String(format: NSLocalizedString("signal_readiness_network", comment: ""), "WiFi")
+    )
     private(set) var currentDynamicRadius: CLLocationDistance?
     private(set) var fenceItems: [FenceItem] = [] {
         didSet { updateRenderedFencesIfNeeded() }
@@ -224,6 +264,7 @@ struct SessionInitializedUpdate: Hashable {
         minimumLocationAccuracy: CLLocationDistance,
         locationInaccuracyWarningInitialDelay: TimeInterval,
         insufficientAccuracyAutoStopInterval: TimeInterval,
+        maxLocationFixAge: TimeInterval = 5,
         updates: @escaping @Sendable () -> some AsynchronousSequence<Update>,
         currentRadioTechnology: some CurrentRadioTechnologyService,
         sendResultsService: some SendCoverageResultsService,
@@ -242,6 +283,7 @@ struct SessionInitializedUpdate: Hashable {
         self.minimumLocationAccuracy = minimumLocationAccuracy
         self.locationInaccuracyWarningInitialDelay = locationInaccuracyWarningInitialDelay
         self.insufficientAccuracyAutoStopInterval = insufficientAccuracyAutoStopInterval
+        self.maxLocationFixAge = maxLocationFixAge
         self.currentRadioTechnology = currentRadioTechnology
         self.sendResultsService = sendResultsService
         self.persistenceService = persistenceService
@@ -328,7 +370,7 @@ struct SessionInitializedUpdate: Hashable {
         do {
             for try await update in sequence {
                 try Task.checkCancellation()
-                guard isStarted else { break }
+                guard phase == .preparing || phase == .recording else { break }
 
                 if let startTime = testStartTime, timeNow().timeIntervalSince(startTime) >= maxTestDuration() {
                     await stop()
@@ -347,6 +389,10 @@ struct SessionInitializedUpdate: Hashable {
 
     @MainActor
     private func processUpdate(_ update: Update) async {
+        if phase == .preparing {
+            await processPreparingUpdate(update)
+            return
+        }
         switch update {
         case .sessionInitialized(let sessionUpdate):
             let newUUID = sessionUpdate.sessionID
@@ -494,29 +540,89 @@ struct SessionInitializedUpdate: Hashable {
         }
     }
 
-    private func start() async {
-        guard !isStarted else { return }
-        let sessionStartDate = timeNow()
-        isStarted = true
-        testStartTime = sessionStartDate
+    /// Enter the `.preparing` phase: keep the app alive and start consuming the update stream so
+    /// location / network status update live, but do **not** create fences or start a session yet.
+    /// Recording begins on its own from `processPreparingUpdate` once `isReadyToBegin` is true.
+    /// The same update stream keeps running straight into `.recording` — no cold GPS restart.
+    private func prepare() async {
+        guard phase == .idle || phase == .stopped else { return }
+        phase = .preparing
         fences.removeAll()
         locations.removeAll()
+        pendingSessionInit = nil
+        lastReadinessLocation = nil
         canCheckForLocationInaccuracyWarning = false
         hasEverHadAccurateLocation = false
         stopTestReasons.removeAll()
-        if let networkTypeProvider, let currentType = networkTypeProvider.currentNetworkType() {
-            handleNetworkTypeChange(currentType)
-        } else {
-            isOnWiFi = false
-        }
+        isOnWiFi = (networkTypeProvider?.currentNetworkType() == .wifi)
         currentTestUUID = nil
         currentDynamicRadius = nil
         dirtyFenceIDs.removeAll()
         lastLoggedRadioTech = nil
-
-        try? await persistenceService.sessionStarted(at: sessionStartDate)
+        refreshReadiness() // seed the rows before the readiness screen is shown
 
         await BackgroundActivityActor.shared.startActivity()
+
+        iterationTask = Task { @MainActor in
+            await iterate(updates())
+        }
+        await iterationTask?.value
+    }
+
+    /// Handle an update while `.preparing`: refresh the live status that drives the readiness rows and,
+    /// when the phone becomes genuinely ready, flip to `.recording` and process the update normally so
+    /// the first accurate fix immediately becomes the first fence.
+    @MainActor
+    private func processPreparingUpdate(_ update: Update) async {
+        switch update {
+        case .networkType(let netUpdate):
+            isOnWiFi = (netUpdate.type == .wifi)
+            refreshReadiness()
+
+        case .location(let locationUpdate):
+            // Poll network type to catch background WiFi transitions, same as during recording.
+            if let polledType = networkTypeProvider?.currentNetworkType() {
+                isOnWiFi = (polledType == .wifi)
+            }
+            let location = locationUpdate.location
+            let radioTechnologyCode = currentRadioTechnology.technologyCode()
+            // Track for readiness only — do not append to the recording trail yet (that happens when
+            // this update is re-processed in `.recording` below), otherwise the fix is double-counted.
+            lastReadinessLocation = location
+            locationAccuracy = String(format: "%.2fm", location.horizontalAccuracy)
+            speed = Self.speedDisplayValue(for: location)
+            latestTechnology = displayValue(forRadioTechnology: radioTechnologyCode ?? "N/A")
+            refreshReadiness()
+
+            if isReadyToBegin(location, networkType: currentGateNetworkType) {
+                await beginRecording()
+                await processUpdate(update) // now `.recording`: create the first fence from this fix
+            }
+
+        case .sessionInitialized(let sessionUpdate):
+            // Buffer until a session row exists (created in beginRecording); replay afterwards.
+            pendingSessionInit = sessionUpdate
+
+        case .ping:
+            break // ignore pings before recording begins
+        }
+    }
+
+    /// Transition from `.preparing` to `.recording`. Equivalent to the former `start()` body, minus the
+    /// steps already done in `prepare()` (background activity + the update loop, which keep running).
+    private func beginRecording() async {
+        guard phase == .preparing else { return }
+        let sessionStartDate = timeNow()
+        phase = .recording
+        isStarted = true
+        testStartTime = sessionStartDate
+        canCheckForLocationInaccuracyWarning = false
+        // We only reach here on a fresh, accurate fix, so an accurate location has already been seen.
+        hasEverHadAccurateLocation = true
+        currentDynamicRadius = nil
+        lastLoggedRadioTech = nil
+
+        try? await persistenceService.sessionStarted(at: sessionStartDate)
 
         locationInaccuracyWarningTask = Task { @MainActor in
             try? await clock.sleep(for: .seconds(locationInaccuracyWarningInitialDelay))
@@ -538,10 +644,11 @@ struct SessionInitializedUpdate: Hashable {
             }
         }
 
-        iterationTask = Task { @MainActor in
-            await iterate(updates())
+        // Replay a session-init event that arrived while preparing, now that a session row exists.
+        if let pending = pendingSessionInit {
+            pendingSessionInit = nil
+            await processUpdate(.sessionInitialized(pending))
         }
-        await iterationTask?.value
     }
     
     private func handleNetworkTypeChange(_ type: NetworkTypeUpdate.NetworkConnectionType) {
@@ -568,7 +675,10 @@ struct SessionInitializedUpdate: Hashable {
     }
 
     private func stop() async {
+        // Whether we actually recorded anything. Aborting during `.preparing` has no session/fences.
+        let wasRecording = (phase == .recording)
         let finalizationDate = timeNow()
+        phase = .stopped
         isStarted = false
         testStartTime = nil
         locationAccuracy = "N/A"
@@ -585,9 +695,13 @@ struct SessionInitializedUpdate: Hashable {
         locationInaccuracyWarningTask = nil
         autoStopDueToInaccuracyTask?.cancel()
         autoStopDueToInaccuracyTask = nil
-        
+
         await BackgroundActivityActor.shared.stopActivity()
-        
+
+        // Aborted while still preparing: no session was started and no fences exist, so there is
+        // nothing to persist or send. Mirrors Android's decline handler.
+        guard wasRecording else { return }
+
         // Handle saving and sending results...
         if !fences.isEmpty {
             if var lastFence = fences.last, lastFence.dateExited == nil {
@@ -615,11 +729,69 @@ struct SessionInitializedUpdate: Hashable {
     }
 
     func toggleMeasurement() async {
-        if !isStarted {
-            await start()
-        } else {
+        switch phase {
+        case .idle, .stopped:
+            await prepare()
+        case .preparing, .recording:
             await stop()
         }
+    }
+
+    // MARK: - Readiness
+
+    /// Network type used by the readiness gate. We only distinguish Wi‑Fi from mobile here; an unknown
+    /// provider (e.g. in tests) is treated as mobile so the gate depends solely on Wi‑Fi + GPS.
+    private var currentGateNetworkType: RMBTNetworkType { isOnWiFi ? .wifi : .cellular }
+
+    /// Readiness predicate mirroring Android's `isReadyToBegin()`: a fresh, accurate fix on a mobile
+    /// (non‑Wi‑Fi) network. Freshness rejects a stale but accurate fix.
+    func isReadyToBegin(_ location: CLLocation?, networkType: RMBTNetworkType?) -> Bool {
+        guard let location, location.horizontalAccuracy >= 0 else { return false }
+        let age = timeNow().timeIntervalSince(location.timestamp)
+        let isFresh = age <= maxLocationFixAge
+        return isFresh && CoverageButtonGate.canStart(
+            accuracy: location.horizontalAccuracy,
+            networkType: networkType,
+            minAccuracy: minimumLocationAccuracy
+        )
+    }
+
+    /// Recompute both readiness rows from current state. Call whenever the location fix or the network
+    /// type changes while preparing, so the displayed rows always reflect current, independent status.
+    private func refreshReadiness() {
+        gpsReadiness = makeGpsReadiness()
+        networkReadiness = makeNetworkReadiness()
+    }
+
+    /// GPS readiness, derived only from the latest location fix. Text and colour come from the same facts
+    /// so they cannot disagree. A missing, invalid, or stale fix reads "no signal".
+    private func makeGpsReadiness() -> ReadinessRow {
+        guard
+            let location = lastReadinessLocation ?? currentUserLocation,
+            location.horizontalAccuracy >= 0,
+            timeNow().timeIntervalSince(location.timestamp) <= maxLocationFixAge
+        else {
+            return .init(isOK: false, text: NSLocalizedString("signal_readiness_gps_stale", comment: ""))
+        }
+        let accuracy = Int(location.horizontalAccuracy.rounded())
+        let limit = Int(minimumLocationAccuracy)
+        return accuracy <= limit
+            ? .init(isOK: true, text: NSLocalizedString("signal_readiness_gps_ok", comment: ""))
+            : .init(
+                isOK: false,
+                text: String(format: NSLocalizedString("signal_readiness_gps_accuracy", comment: ""), accuracy, limit)
+            )
+    }
+
+    /// Network readiness, derived only from the connection type. Mobile → OK with the technology name;
+    /// Wi‑Fi → not OK (the row text shows the connection type; colour/icon carries pass/fail, and the
+    /// "turn Wi‑Fi off" instruction lives in the screen subtitle — matching Android).
+    private func makeNetworkReadiness() -> ReadinessRow {
+        let connectionName = isOnWiFi ? "WiFi" : latestTechnology
+        return .init(
+            isOK: !isOnWiFi,
+            text: String(format: NSLocalizedString("signal_readiness_network", comment: ""), connectionName)
+        )
     }
     
     deinit {
@@ -655,8 +827,8 @@ struct SessionInitializedUpdate: Hashable {
     }
     
     func stopTest() async {
-        if isStarted {
-            await toggleMeasurement()
+        if phase == .preparing || phase == .recording {
+            await stop()
         }
     }
 }

@@ -1,5 +1,11 @@
 ## Location accuracy warning during Network Coverage measurement
 
+> **Behaviour note (readiness/preparing phase):** Recording now only begins once a fresh, accurate fix
+> on a mobile network is available — see [signal-measurement-readiness.md](signal-measurement-readiness.md).
+> The scenarios below therefore describe the **in-measurement** warning that applies *after* recording
+> has begun and accuracy later degrades. Insufficient accuracy *before* recording keeps the measurement
+> in the preparing phase (surfaced by the GPS readiness row), rather than showing this warning.
+
 ```gherkin
 Feature: Location accuracy warning during Network Coverage measurement
 
@@ -64,12 +70,12 @@ Feature: Location accuracy warning during Network Coverage measurement
     Then the "Waiting for GPS" warning is displayed
     And the previously rendered fences remain visible on the map
 
-  Scenario: Auto-stop and fail after 30 minutes without sufficient location accuracy
+  Scenario: Never obtaining an accurate fix keeps the measurement preparing (no auto-stop)
+    # Replaces the former "auto-stop and fail after 30 minutes" safeguard: the preparing phase now
+    # withholds recording until an accurate fix arrives, so the measurement simply keeps waiting.
     When I start a measurement
-    And 30 minutes pass
-    And during this time no location update is within 10 meters
-    Then the measurement is stopped automatically
-    And the test result status is "Failed"
-    And the failure reason is "Insufficient location accuracy for 30 minutes"
-    And the "Waiting for GPS" warning is not displayed
+    And no location update is ever within 10 meters
+    Then the measurement stays in the preparing phase
+    And it never begins recording
+    And no failure reason is reported
 ```

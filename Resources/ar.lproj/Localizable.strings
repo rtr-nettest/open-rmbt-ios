@@ -506,3 +506,15 @@
 /* IP-version restriction (expert mode) */
 "ip_version_not_available_message" = "%@ غير متاح. يُرجى تصحيح إعداد الخبراء.";
 "ip_version_restriction_unavailable_message" = "%@ غير متاح في الاتصال الحالي.";
+
+/* ===== TODO: NEEDS TRANSLATION (English placeholder) — wording aligned with open-rmbt-android ===== */
+"coverage_readiness_title" = "Waiting for start of signal measurement";
+"coverage_readiness_subtitle" = "The signal measurement requires WiFi turned off and good GPS reception. It will start automatically once these conditions are met.";
+"signal_readiness_status_heading" = "Status";
+"signal_readiness_gps_ok" = "GPS: OK";
+"signal_readiness_gps_accuracy" = "GPS: accuracy %d m (limit %d m)";
+"signal_readiness_gps_stale" = "GPS: no signal";
+"signal_readiness_network" = "Network: %@";
+"Abort" = "Abort";
+"coverage_terms_accept" = "Accept";
+"coverage_terms_decline" = "Decline";

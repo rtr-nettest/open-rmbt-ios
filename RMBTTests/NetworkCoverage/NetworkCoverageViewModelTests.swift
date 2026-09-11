@@ -728,7 +728,11 @@ import Clocks
          ], "140 ms")
     ])
     func whenReceivedPingsAfterCompletingRefreshInterval_thenLatestPingIsAverageOfAllPingsWithinLastCompletedRefreshInterva(arguments: (updates: [NetworkCoverageViewModel.Update], expectedLatestPing: String)) async {
-        let sut = makeSUT(refreshInterval: 10, updates: arguments.updates)
+        // Recording only begins once a fresh, accurate fix on a mobile network arrives (preparing gate),
+        // and pings are ignored before then. Warm up with an accurate location at t=0 so the ping-average
+        // windowing (the behaviour under test) starts from the first ping, as before the gate existed.
+        let warmUp = makeLocationUpdate(at: 0, lat: 0, lon: 0)
+        let sut = makeSUT(refreshInterval: 10, updates: [warmUp] + arguments.updates)
         await sut.startTest()
         #expect(sut.latestPing == arguments.expectedLatestPing)
     }
@@ -944,6 +948,9 @@ import Clocks
             let sessionID = "session-1"
             let sut = makeSUT(
                 updates: [
+                    // A fence is recorded first (accurate fix), which begins recording and persists the
+                    // session, then the session-init event anchors the UUID.
+                    makeLocationUpdate(at: 15, lat: 1.0, lon: 1.0),
                     makeSessionInitializedUpdate(at: sessionInitilalizedOffset, sessionID: sessionID)
                 ],
                 persistenceService: persistenceService,
@@ -1501,7 +1508,9 @@ import Clocks
             #expect(sut.warningPopups == [])
         }
 
-        @Test func whenDelayElapsedAndLocationAccuracyIsBad_thenInaccurateLocationWarningIsShown() async throws {
+        @Test func whenLocationAccuracyIsBad_thenStaysPreparingAndGpsReadinessIsNotOK() async throws {
+            // New behaviour: an inaccurate fix keeps the measurement in the preparing phase (recording is
+            // withheld) and is surfaced by the readiness row rather than the in-measurement warning popup.
             let minAccuracy: CLLocationDistance = 10
             let clock = TestClock()
             let sut = makeSUT(
@@ -1514,9 +1523,11 @@ import Clocks
             )
 
             await sut.startTest()
-            await clock.advance(by: .seconds(3.1))
 
-            #expect(sut.warningPopups == [makeInaccurateLocationWarningPopup()])
+            #expect(sut.phase == .preparing)
+            #expect(!sut.isStarted)
+            #expect(sut.warningPopups.isEmpty)
+            #expect(sut.gpsReadiness.isOK == false)
         }
 
         @Test func whenDelayElapsedAndLocationAccuracyIsGood_thenInaccurateLocationWarningIsHidden() async throws {
@@ -1538,12 +1549,15 @@ import Clocks
         }
 
         @Test func whenOverlayWouldBeShown_thenStoppingMeasurementHidesIt() async throws {
+            // Recording must begin first (accurate fix), after which a subsequent inaccurate fix shows the
+            // in-measurement warning; stopping then hides it.
             let minAccuracy: CLLocationDistance = 10
             let clock = TestClock()
             let sut = makeSUT(
                 minimumLocationAccuracy: minAccuracy,
                 updates: [
-                    makeLocationUpdate(at: 0, lat: 1.0, lon: 1.0, accuracy: minAccuracy * 2)
+                    makeLocationUpdate(at: 0, lat: 1.0, lon: 1.0, accuracy: minAccuracy / 2),
+                    makeLocationUpdate(at: 1, lat: 1.00001, lon: 1.00001, accuracy: minAccuracy * 2)
                 ],
                 overlayDelay: 3.0,
                 clock: clock
@@ -1598,30 +1612,29 @@ import Clocks
             #expect(sut.warningPopups.isEmpty)
         }
 
-        @Test func whenInsufficientAccuracyAutoStopIntervalPassedWithoutSufficientAccuracy_thenAutoStopsAndReportsReason() async throws {
+        @Test func whenOnlyInaccurateLocations_thenStaysPreparingAndNeverRecords() async throws {
+            // New behaviour: the preparing phase itself withholds recording until an accurate fix arrives,
+            // replacing the former "start then auto-stop after a timeout" safeguard. With only inaccurate
+            // fixes the measurement simply waits — it never records and reports no stop reason.
             let minAccuracy: CLLocationDistance = 10
             let clock = TestClock()
-            let timeout: TimeInterval = 30 * 60
             let sut = makeSUT(
                 minimumLocationAccuracy: minAccuracy,
                 updates: [
-                    // Only inaccurate locations during the whole period
                     makeLocationUpdate(at: 0, lat: 1, lon: 1, accuracy: minAccuracy * 2),
                     makeLocationUpdate(at: 60, lat: 1, lon: 1, accuracy: minAccuracy * 3),
-                    makeLocationUpdate(at: timeout - 10, lat: 1, lon: 1, accuracy: minAccuracy * 2),
-                    makeLocationUpdate(at: timeout + 10, lat: 1, lon: 1, accuracy: minAccuracy / 2)
+                    makeLocationUpdate(at: 120, lat: 1, lon: 1, accuracy: minAccuracy * 2)
                 ],
-                currentTime: { Date(timeIntervalSinceReferenceDate: 0) },
-                clock: clock,
-                insufficientAccuracyAutoStopInterval: timeout
+                clock: clock
             )
 
             await sut.startTest()
-            await clock.advance(by: .seconds(timeout))
-            await clock.run()
 
+            #expect(sut.phase == .preparing)
             #expect(!sut.isStarted)
-            #expect(sut.stopTestReasons == [.insufficientLocationAccuracy(duration: timeout)])
+            #expect(sut.fences.isEmpty)
+            #expect(sut.stopTestReasons.isEmpty)
+            #expect(sut.gpsReadiness.isOK == false)
         }
 
         @Test func whenAccurateLocationArrivesBeforeTimeout_thenDoesNotAutoStop() async throws {
@@ -1759,7 +1772,9 @@ import Clocks
             #expect(sut.fenceItems.first?.isSelected == false)
         }
 
-        @Test func whenOnWiFiAndAccuracyIsBad_thenBothWiFiAndGpsWarningsAreShown() async throws {
+        @Test func whenOnWiFiAndAccuracyIsBad_thenBothReadinessRowsAreNotReady() async throws {
+            // On Wi-Fi with a poor fix the measurement stays in the preparing phase and both readiness
+            // rows report not-ready.
             let clock = TestClock()
             let minAccuracy: CLLocationDistance = 10
             let sut = makeSUT(
@@ -1768,15 +1783,14 @@ import Clocks
                     makeNetworkTypeUpdate   (at: 0, type: .wifi),
                     makeLocationUpdate      (at: 2, lat: 1.0, lon: 1.0, accuracy: minAccuracy * 10)
                 ],
-                overlayDelay: 0.1,
                 clock: clock
             )
 
             await sut.startTest()
-            await clock.advance(by: .seconds(0.2))
 
-            #expect(sut.warningPopups.contains(makeWiFiWarningPopup()))
-            #expect(sut.warningPopups.contains(makeInaccurateLocationWarningPopup()))
+            #expect(sut.phase == .preparing)
+            #expect(sut.gpsReadiness.isOK == false)
+            #expect(sut.networkReadiness.isOK == false)
         }
         
         @Test func whenNotStarted_thenWiFiWarningIsNotDisplayed() async throws {
@@ -1789,14 +1803,15 @@ import Clocks
             #expect(!sut.warningPopups.contains(makeWiFiWarningPopup()))
         }
         
-        @Test func whenStartedOnWiFi_thenWarningAppearsImmediately() async throws {
+        @Test func whenStartedOnWiFi_thenNetworkReadinessIsNotReady() async throws {
             let sut = makeSUT(updates: [
                 makeNetworkTypeUpdate(at: 0, type: .wifi)
             ])
-            
+
             await sut.startTest()
-            
-            #expect(sut.warningPopups.contains(makeWiFiWarningPopup()))
+
+            #expect(sut.phase == .preparing)
+            #expect(sut.networkReadiness.isOK == false)
         }
         
         @Test func whenMultipleNetworkSwitches_thenWarningTogglesCorrectly() async throws {
@@ -1817,26 +1832,27 @@ import Clocks
             #expect(sut.fenceItems.isEmpty, "Dirty fences hidden from map")
         }
 
-        @Test func whenStayingOnWiFiBeyondInaccuracyTimeout_thenStillAutoStop() async throws {
+        @Test func whenStayingOnWiFi_thenNeverBeginsRecording() async throws {
+            // Even with an accurate GPS fix, staying on Wi-Fi keeps the measurement in the preparing phase:
+            // recording never begins and no stop reason is reported.
             let minAccuracy: CLLocationDistance = 10
             let clock = TestClock()
-            let timeout: TimeInterval = 30 * 60
             let sut = makeSUT(
                 minimumLocationAccuracy: minAccuracy,
                 updates: [
                     makeNetworkTypeUpdate   (at: 0, type: .wifi),
-                    makeLocationUpdate      (at: 0, lat: 1.0, lon: 1.0, accuracy: minAccuracy * 2)
+                    makeLocationUpdate      (at: 0, lat: 1.0, lon: 1.0, accuracy: minAccuracy / 2)
                 ],
-                overlayDelay: 0.0,
-                clock: clock,
-                insufficientAccuracyAutoStopInterval: timeout
+                clock: clock
             )
 
             await sut.startTest()
-            await clock.advance(by: .seconds(timeout))
 
+            #expect(sut.phase == .preparing)
             #expect(!sut.isStarted)
-            #expect(sut.stopTestReasons == [.insufficientLocationAccuracy(duration: timeout)])
+            #expect(sut.fences.isEmpty)
+            #expect(sut.stopTestReasons.isEmpty)
+            #expect(sut.networkReadiness.isOK == false)
         }
 
         @Test func whenNetworkConnectionIsUnknown_thenBehavesAsCellular() async throws {
@@ -1854,7 +1870,9 @@ import Clocks
 
         // MARK: - Initial WiFi State Tests
 
-        @Test func whenStartedWhileOnWiFi_thenWarningShownAndFencesCreatedAsDirty() async throws {
+        @Test func whenStartedWhileOnWiFi_thenDoesNotBeginRecording() async throws {
+            // Starting while the active network is Wi-Fi keeps the measurement preparing: no session, no
+            // fences. Recording can only begin on a mobile network.
             let provider = StubCurrentNetworkTypeProvider(type: .wifi)
             let sut = makeSUT(
                 updates: [
@@ -1868,17 +1886,16 @@ import Clocks
 
             await sut.startTest()
 
-            #expect(sut.warningPopups.contains(makeWiFiWarningPopup()),
-                    "WiFi warning should be shown immediately on start")
-            // Fences exist in memory but all dirty — hidden from map
-            #expect(sut.fences.count == 2)
-            #expect(sut.fenceItems.isEmpty, "Dirty fences hidden from map")
+            #expect(sut.phase == .preparing)
+            #expect(sut.fences.isEmpty, "No fences may be recorded while on Wi-Fi")
+            #expect(sut.networkReadiness.isOK == false)
         }
 
         // MARK: - Network Polling Tests
 
-        @Test func whenPollingDetectsWiFiOnLocationUpdate_thenWarningShownAndFencesCreatedAsDirty() async throws {
-            // Polling detects WiFi before location processing, fences continue but are dirty
+        @Test func whenPollingDetectsWiFiOnLocationUpdate_thenDoesNotBeginRecording() async throws {
+            // Polling detects Wi-Fi on the location update, so the readiness gate holds the measurement in
+            // the preparing phase and no fences are recorded.
             let provider = StubCurrentNetworkTypeProvider(type: .wifi)
             let sut = makeSUT(
                 updates: [
@@ -1892,10 +1909,9 @@ import Clocks
 
             await sut.startTest()
 
-            #expect(sut.warningPopups.contains(makeWiFiWarningPopup()),
-                    "Polling should trigger WiFi warning")
-            // Fences are created but dirty (polling detected WiFi on first location)
-            #expect(sut.fences.count == 2)
+            #expect(sut.phase == .preparing)
+            #expect(sut.fences.isEmpty)
+            #expect(sut.networkReadiness.isOK == false)
         }
 
         @Test func whenPollingDetectsCellularAfterWiFi_thenNewCleanFenceCreatedAfterDirtyOne() async throws {
@@ -1989,7 +2005,9 @@ import Clocks
             #expect(sentLats == [2.0, 3.0])
         }
 
-        @Test func whenFenceCreatedOnWiFi_thenBornDirty() async throws {
+        @Test func whenOnWiFiFromStart_thenNoFencesRecordedOrPersisted() async throws {
+            // With Wi-Fi active from the start, the measurement never leaves the preparing phase, so no
+            // fences are created and nothing is persisted.
             let persistenceService = FencePersistenceServiceSpy()
             let sut = makeSUT(
                 updates: [
@@ -2003,9 +2021,10 @@ import Clocks
 
             await sut.startTest()
 
-            #expect(sut.fences.count == 2)
+            #expect(sut.phase == .preparing)
+            #expect(sut.fences.isEmpty)
             let savedFences = await persistenceService.capturedSavedFences
-            #expect(savedFences.isEmpty, "Fences born on WiFi should not be persisted")
+            #expect(savedFences.isEmpty, "Nothing is persisted while preparing on Wi-Fi")
         }
 
         @Test func whenRapidWiFiFluctuation_thenAffectedFenceStaysDirty() async throws {
@@ -2343,6 +2362,98 @@ import Clocks
     }
 }
 
+@MainActor @Suite("Preparing Phase & Readiness")
+struct CoveragePreparingReadinessTests {
+    @Test func whenStartedWithoutReadyFix_thenStaysInPreparingPhase() async {
+        let sut = makeSUT(updates: [])
+        await sut.startTest()
+
+        #expect(sut.phase == .preparing)
+        #expect(!sut.isStarted)
+        #expect(sut.fenceItems.isEmpty)
+    }
+
+    @Test func whenFreshAccurateFixOnMobile_thenBeginsRecordingAndCreatesFence() async {
+        let sut = makeSUT(updates: [makeLocationUpdate(at: 0, lat: 1.0, lon: 2.0, accuracy: 5)])
+        await sut.startTest()
+
+        #expect(sut.phase == .recording)
+        #expect(sut.isStarted)
+        #expect(sut.fenceItems.count == 1)
+    }
+
+    @Test func whenAccurateFixIsStale_thenStaysPreparing() async {
+        // A stale but accurate fix is rejected by the freshness check, even though accuracy is fine.
+        let sut = makeSUT(
+            minimumLocationAccuracy: 100,
+            updates: [makeLocationUpdate(at: 0, lat: 1.0, lon: 2.0, accuracy: 5)],
+            currentTime: { makeDate(offset: 100) },
+            maxLocationFixAge: 5
+        )
+        await sut.startTest()
+
+        #expect(sut.phase == .preparing)
+        #expect(sut.gpsReadiness.isOK == false)
+        #expect(sut.gpsReadiness.text == "GPS: no signal")
+    }
+
+    @Test func whenAccurateFixButOnWiFi_thenGpsReadyButNetworkNotReady() async {
+        let sut = makeSUT(
+            minimumLocationAccuracy: 10,
+            updates: [
+                makeNetworkTypeUpdate(at: 0, type: .wifi),
+                makeLocationUpdate(at: 1, lat: 1.0, lon: 2.0, accuracy: 5)
+            ]
+        )
+        await sut.startTest()
+
+        #expect(sut.phase == .preparing)
+        #expect(sut.gpsReadiness.isOK)
+        #expect(sut.gpsReadiness.text == "GPS: OK")
+        #expect(sut.networkReadiness.isOK == false)
+    }
+
+    @Test func whenInaccurateFix_thenGpsReadinessShowsAccuracyAndLimit() async {
+        let sut = makeSUT(
+            minimumLocationAccuracy: 15,
+            updates: [makeLocationUpdate(at: 0, lat: 1.0, lon: 2.0, accuracy: 30)]
+        )
+        await sut.startTest()
+
+        #expect(sut.phase == .preparing)
+        #expect(sut.gpsReadiness.isOK == false)
+        #expect(sut.gpsReadiness.text == "GPS: accuracy 30 m (limit 15 m)")
+    }
+
+    @Test func whenNoLocationYet_thenGpsReadinessIsNoSignal() {
+        let sut = makeSUT(updates: [])
+
+        #expect(sut.gpsReadiness.isOK == false)
+        #expect(sut.gpsReadiness.text == "GPS: no signal")
+    }
+
+    @Test func whenAbortedWhilePreparing_thenStopsWithoutPersistingOrSending() async {
+        let persistence = FencePersistenceServiceSpy()
+        let sendService = SendCoverageResultsServiceSpy()
+        let sut = makeSUT(
+            minimumLocationAccuracy: 10,
+            updates: [makeLocationUpdate(at: 0, lat: 1.0, lon: 2.0, accuracy: 50)], // inaccurate → preparing
+            persistenceService: persistence,
+            sendResultsService: sendService
+        )
+        await sut.startTest()
+        #expect(sut.phase == .preparing)
+
+        await sut.stopTest()
+
+        #expect(sut.phase == .stopped)
+        #expect(sut.fenceItems.isEmpty)
+        let messages = await persistence.capturedMessages
+        #expect(messages.isEmpty, "No session is started or finalized when aborting during preparing")
+        #expect(sendService.capturedSentFences.isEmpty)
+    }
+}
+
 @MainActor func makeSUT(
     fences: [Fence] = [],
     refreshInterval: TimeInterval = 1,
@@ -2356,6 +2467,9 @@ import Clocks
     clock: some Clock<Duration> = ContinuousClock(),
     insufficientAccuracyAutoStopInterval: TimeInterval = 30 * 60,
     maxTestDuration: @escaping () -> TimeInterval = { 4 * 60 * 60 },
+    // Default to an effectively-infinite fix age so tests using synthetic (reference-date) timestamps
+    // pass the readiness freshness check. Tests that specifically exercise freshness override this.
+    maxLocationFixAge: TimeInterval = 100 * 365 * 24 * 60 * 60,
     networkTypeProvider: (any CurrentNetworkTypeProvider)? = nil,
     renderingConfiguration: FencesRenderingConfiguration = .default
 ) -> NetworkCoverageViewModel {
@@ -2365,6 +2479,7 @@ import Clocks
         minimumLocationAccuracy: minimumLocationAccuracy,
         locationInaccuracyWarningInitialDelay: overlayDelay,
         insufficientAccuracyAutoStopInterval: insufficientAccuracyAutoStopInterval,
+        maxLocationFixAge: maxLocationFixAge,
         updates: { updates.publisher.values },
         currentRadioTechnology: RadioTechnologyServiceStub(),
         sendResultsService: sendResultsService,

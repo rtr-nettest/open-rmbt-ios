@@ -1,5 +1,12 @@
 ## Wi‑Fi connection warning during Network Coverage measurement
 
+> **Behaviour note (readiness/preparing phase):** A measurement can no longer *begin* while on Wi‑Fi —
+> recording only starts on a mobile network (see
+> [signal-measurement-readiness.md](signal-measurement-readiness.md)); on Wi‑Fi the measurement stays in
+> the preparing phase and the Network readiness row reports not-ready. The scenarios below describe the
+> **in-measurement** behaviour that applies *after* recording has begun on a mobile network and the
+> connection later switches to Wi‑Fi (fences continue but become dirty; pings are dropped).
+
 ```gherkin
 Feature: Wi‑Fi connection warning during Network Coverage measurement
 
