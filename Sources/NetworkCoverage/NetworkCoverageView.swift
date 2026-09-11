@@ -24,6 +24,7 @@ struct NetworkCoverageView: View {
     @State private var resultStopReasons: [StopTestReason] = []
     @State private var showsSettings = false
     @State private var isExpertMode = false
+    @State private var didFinishMeasurement = false
 
     var body: some View {
         Group {
@@ -37,10 +38,23 @@ struct NetworkCoverageView: View {
                 CoverageReadinessView(
                     gps: viewModel.gpsReadiness,
                     network: viewModel.networkReadiness,
-                    onAbort: { Task { await viewModel.stopTest(); onClose() } }
+                    onAbort: { Task { await viewModel.stopTest() } }
                 )
             case .recording, .stopped:
                 recordingBody
+            }
+        }
+        // Whenever the measurement ends — user stop, auto max-duration stop, or the measurement dying —
+        // leave the map instead of stranding the user: show results if anything was recorded, otherwise
+        // return to the start screen. Runs once per presentation.
+        .onChange(of: viewModel.phase) { newPhase in
+            guard newPhase == .stopped, !didFinishMeasurement else { return }
+            didFinishMeasurement = true
+            if viewModel.fences.isEmpty {
+                onClose()
+            } else {
+                resultStopReasons = viewModel.stopTestReasons
+                navigationPath.append("results")
             }
         }
     }
@@ -72,9 +86,11 @@ struct NetworkCoverageView: View {
                     VStack(spacing: 0) {
                         CoverageHeader(
                             title: "Network Coverage",
+                            // Always offer an action so the user can never get stranded: "Stop" while the
+                            // measurement is recording, otherwise "Close" (e.g. if it auto-stopped or died).
                             action: viewModel.isStarted
                                 ? .init(title: "Stop", action: { showStopTestPopup = true })
-                                : nil
+                                : .init(title: "Close", action: onClose)
                         ) { topBarView }
 
                         VStack(alignment: .leading, spacing: 8) {
@@ -104,11 +120,8 @@ struct NetworkCoverageView: View {
                 title: NSLocalizedString("Stop Coverage Test", comment: ""),
                 subtitle: NSLocalizedString("The test will be stopped and results will be sent to the server.", comment: ""),
                 onStopTest: {
-                    Task {
-                        await viewModel.toggleMeasurement()
-                        resultStopReasons = []
-                        navigationPath.append("results")
-                    }
+                    // Stopping flips the phase to .stopped; the .onChange(phase) handler navigates to results.
+                    Task { await viewModel.toggleMeasurement() }
                 }
             )
             .toolbar(.hidden, for: .navigationBar)
@@ -119,16 +132,6 @@ struct NetworkCoverageView: View {
                 }
             }
             .keepScreenAwake(while: viewModel.isStarted)
-            .onChange(of: viewModel.stopTestReasons) { reasons in
-                // Navigate to results when auto-stop reason for insufficient accuracy is recorded
-                if reasons.contains(where: { reason in
-                    if case .insufficientLocationAccuracy = reason { return true }
-                    return false
-                }) {
-                    resultStopReasons = reasons
-                    navigationPath.append("results")
-                }
-            }
         }
     }
 
