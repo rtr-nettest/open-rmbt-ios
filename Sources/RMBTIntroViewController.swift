@@ -195,6 +195,7 @@ class RMBTIntroViewController: UIViewController {
 
     @objc private func locationDidUpdate(_ sender: Any) {
         DispatchQueue.main.async { [weak self] in
+            self?.updateLocationTint()
             self?.updateCoverageTint()
         }
     }
@@ -466,7 +467,8 @@ class RMBTIntroViewController: UIViewController {
         guard let connectivity = self.connectivityInfo else {
             currentView.ipV4TintColor = .ipNotAvailable
             currentView.ipV6TintColor = .ipNotAvailable
-            currentView.locationTintColor = .ipNotAvailable
+            updateLocationTint()
+            updateCoverageTint()
             return
         }
 
@@ -491,7 +493,7 @@ class RMBTIntroViewController: UIViewController {
             }
         }
 
-        currentView.locationTintColor = !RMBTLocationTracker.shared.isLocationDenied ? .ipAvailable : .ipNotAvailable
+        updateLocationTint()
 
         if let type = self.connectivity?.networkTypeDescription,
            let technology = RMBTNetworkTypeConstants.cellularCodeDescriptionDictionary[type] {
@@ -518,15 +520,46 @@ class RMBTIntroViewController: UIViewController {
     }
 
     private var coverageCanStart: Bool {
-        CoverageButtonGate.canStart(
-            accuracy: RMBTLocationTracker.shared.location?.horizontalAccuracy,
+        // A stale fix must not green-light a start (same freshness rule as during the measurement).
+        guard let location = RMBTLocationTracker.shared.location, isLocationFreshEnough(location) else {
+            return false
+        }
+        return CoverageButtonGate.canStart(
+            accuracy: location.horizontalAccuracy,
             networkType: connectivity?.networkType,
             minAccuracy: NetworkCoverageFactory.minimumLocationAccuracy
         )
     }
 
+    /// Colours the location (GPS) button, matching Android's four-state scheme adapted for iOS (which
+    /// cannot distinguish a GNSS fix from a network fix, so we use accuracy instead of the provider):
+    ///  - RED    : the location permission is missing (denied)
+    ///  - GREY   : permission granted but no location fix at all
+    ///  - ORANGE : a fix exists but its accuracy is worse than the signal-measurement limit
+    ///  - GREEN  : a fix within the signal-measurement accuracy limit (the GPS start criterion is met)
+    private func updateLocationTint() {
+        let tracker = RMBTLocationTracker.shared
+        let color: UIColor
+        if tracker.isLocationDenied {
+            color = .locationRed
+        } else if let location = tracker.location, location.horizontalAccuracy >= 0, isLocationFreshEnough(location) {
+            color = location.horizontalAccuracy <= NetworkCoverageFactory.minimumLocationAccuracy ? .locationGreen : .locationOrange
+        } else {
+            // No fix, or the fix is too old to be trusted (stale) — treat as no usable GPS.
+            color = .locationGrey
+        }
+        currentView.locationTintColor = color
+    }
+
+    /// A fix is only trusted if it is recent enough. Matches Android's
+    /// `maxAgeOfLocationInformationForSignalMeasurementMillis` (and the readiness-screen freshness check),
+    /// so a stale-but-accurate fix is not treated as valid GPS.
+    private func isLocationFreshEnough(_ location: CLLocation) -> Bool {
+        -location.timestamp.timeIntervalSinceNow <= NetworkCoverageFactory.maxLocationFixAge
+    }
+
     private func updateCoverageTint() {
-        currentView.coverageTintColor = coverageCanStart ? .ipAvailable : .coverageUnavailable
+        currentView.coverageTintColor = coverageCanStart ? .locationGreen : .locationGrey
         // Always tappable: when coverage is unavailable the tap surfaces feedback
         // explaining why (see coverageTapHandler) instead of doing nothing.
         currentView.isCoverageEnabled = true
@@ -725,4 +758,11 @@ private extension UIColor {
     static let ipSemiAvailable = UIColor(red: 255.0 / 255.0, green: 186.0 / 255.0, blue: 0, alpha: 1.0)
     static let ipAvailable = UIColor(red: 89.0 / 255.0, green: 178.0 / 255.0, blue: 0, alpha: 1.0)
     static let coverageUnavailable = UIColor.systemGray
+
+    // Location / signal-measurement button states — colours matched to open-rmbt-android
+    // (location_button_* in colors.xml) so both apps look the same.
+    static let locationGreen = UIColor(red: 0x45 / 255.0, green: 0xC3 / 255.0, blue: 0x17 / 255.0, alpha: 1.0)  // #45C317
+    static let locationOrange = UIColor(red: 0xFF / 255.0, green: 0xBE / 255.0, blue: 0x0D / 255.0, alpha: 1.0) // #FFBE0D
+    static let locationGrey = UIColor(red: 0xAE / 255.0, green: 0xAC / 255.0, blue: 0xAC / 255.0, alpha: 1.0)   // #AEACAC
+    static let locationRed = UIColor(red: 0xCF / 255.0, green: 0x0C / 255.0, blue: 0x0C / 255.0, alpha: 1.0)    // #CF0C0C
 }

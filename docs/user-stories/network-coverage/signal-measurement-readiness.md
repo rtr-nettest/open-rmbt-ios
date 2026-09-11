@@ -15,7 +15,7 @@ Feature: Signal-measurement readiness (preparing) phase
   Background:
     Given I have committed to starting a signal measurement
     And the minimum acceptable location accuracy is 15 meters
-    And a location fix is considered fresh only if it is at most 5 seconds old
+    And a location fix is considered fresh only if it is at most 60 seconds old
 
   Scenario: Entering the preparing phase
     When the measurement starts
@@ -37,7 +37,7 @@ Feature: Signal-measurement readiness (preparing) phase
     And the GPS readiness row is not OK and reads "GPS: accuracy <n> m (limit 15 m)"
 
   Scenario: No GPS signal or a stale fix
-    When there is no location fix, or the latest fix is older than 5 seconds
+    When there is no location fix, or the latest fix is older than 60 seconds
     Then the measurement stays in the preparing phase
     And the GPS readiness row is not OK and reads "GPS: no signal"
 

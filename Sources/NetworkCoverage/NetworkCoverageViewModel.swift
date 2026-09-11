@@ -264,7 +264,7 @@ struct SessionInitializedUpdate: Hashable {
         minimumLocationAccuracy: CLLocationDistance,
         locationInaccuracyWarningInitialDelay: TimeInterval,
         insufficientAccuracyAutoStopInterval: TimeInterval,
-        maxLocationFixAge: TimeInterval = 5,
+        maxLocationFixAge: TimeInterval = 60,
         updates: @escaping @Sendable () -> some AsynchronousSequence<Update>,
         currentRadioTechnology: some CurrentRadioTechnologyService,
         sendResultsService: some SendCoverageResultsService,

@@ -16,10 +16,12 @@ struct NetworkCoverageFactory {
     static let locationInaccuracyWarningInitialDelay: TimeInterval = 3
     static let insufficientAccuracyAutoStopInterval: TimeInterval = 30 * 60
     static let minimumFenceRadius: CLLocationDistance = 15
-    static let minimumLocationAccuracy: CLLocationAccuracy = 15
+    // Aligned with Android's MIN_LOCATION_ACCURACY_METERS_SIGNAL_MEASUREMENT (14 m).
+    static let minimumLocationAccuracy: CLLocationAccuracy = 14
     /// Max age of a GPS fix accepted when deciding the measurement is ready to begin (freshness).
-    /// iOS analogue of Android's `maxAgeOfLocationInformationForSignalMeasurementMillis`.
-    static let maxLocationFixAge: TimeInterval = 5
+    /// iOS analogue of Android's `maxAgeOfLocationInformationForSignalMeasurementMillis`, whose default
+    /// is 60000 ms — matched here so a stale fix is rejected identically on both platforms.
+    static let maxLocationFixAge: TimeInterval = 60
 
     private let database: UserDatabase
     private let maxResendAge: TimeInterval
