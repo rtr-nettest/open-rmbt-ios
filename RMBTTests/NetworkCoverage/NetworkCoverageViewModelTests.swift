@@ -83,7 +83,7 @@ import Clocks
         let sut = makeSUT(updates: [makeLocationUpdate(at: 0, lat: 1.0, lon: 2.0, speed: 10)])
         await sut.startTest()
 
-        #expect(sut.speed == "36 km/h")
+        #expect(sut.speed == "36.0 km/h")
     }
 
     @Test func whenReceivingLocationWithInvalidSpeed_thenSpeedIsNotAvailable() async throws {

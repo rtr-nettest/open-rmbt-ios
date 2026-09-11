@@ -463,7 +463,7 @@ struct SessionInitializedUpdate: Hashable {
                 lastLoggedRadioTech = radioTechnologyCode
             }
             locations.append(location)
-            locationAccuracy = String(format: "%.2fm", location.horizontalAccuracy)
+            locationAccuracy = String(format: "%.1f m", location.horizontalAccuracy)
             speed = Self.speedDisplayValue(for: location)
             latestTechnology = displayValue(forRadioTechnology: radioTechnologyCode ?? "N/A")
 
@@ -589,7 +589,7 @@ struct SessionInitializedUpdate: Hashable {
             // Track for readiness only — do not append to the recording trail yet (that happens when
             // this update is re-processed in `.recording` below), otherwise the fix is double-counted.
             lastReadinessLocation = location
-            locationAccuracy = String(format: "%.2fm", location.horizontalAccuracy)
+            locationAccuracy = String(format: "%.1f m", location.horizontalAccuracy)
             speed = Self.speedDisplayValue(for: location)
             latestTechnology = displayValue(forRadioTechnology: radioTechnologyCode ?? "N/A")
             refreshReadiness()
@@ -817,7 +817,7 @@ struct SessionInitializedUpdate: Hashable {
     private static func speedDisplayValue(for location: CLLocation) -> String {
         guard location.speed >= 0 else { return "N/A" }
         let kmh = location.speed * 3.6
-        return "\(Int(kmh.rounded())) km/h"
+        return String(format: "%.1f km/h", kmh)
     }
 }
 
