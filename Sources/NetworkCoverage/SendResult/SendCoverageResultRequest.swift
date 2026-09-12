@@ -18,14 +18,16 @@ public class SendCoverageResultRequest: BasicRequest {
             private(set) var altitude: Decimal?
             private(set) var bearing: Decimal?
             private(set) var speed: Decimal?
+            private(set) var provider: String?
 
-            init(latitude: Decimal, longitude: Decimal, accuracy: Decimal?, altitude: Decimal?, bearing: Decimal?, speed: Decimal?) {
+            init(latitude: Decimal, longitude: Decimal, accuracy: Decimal?, altitude: Decimal?, bearing: Decimal?, speed: Decimal?, provider: String?) {
                 self.latitude = latitude
                 self.longitude = longitude
                 self.accuracy = accuracy
                 self.altitude = altitude
                 self.bearing = bearing
                 self.speed = speed
+                self.provider = provider
             }
 
             required init?(map: Map) {
@@ -39,6 +41,7 @@ public class SendCoverageResultRequest: BasicRequest {
                 altitude        <- map["altitude"]
                 bearing         <- map["bearing"]
                 speed           <- map["speed"]
+                provider        <- map["provider"]
             }
         }
 
@@ -63,7 +66,11 @@ public class SendCoverageResultRequest: BasicRequest {
                 accuracy: loc.horizontalAccuracy > 0 ? Decimal(loc.horizontalAccuracy).roundedToDecimalPlaces(1) : nil,
                 altitude: loc.verticalAccuracy >= 0 ? Decimal(loc.altitude).roundedToDecimalPlaces(1) : nil,
                 bearing: loc.course >= 0 ? Decimal(loc.course).roundedToDecimalPlaces(0) : nil,
-                speed: loc.speed >= 0 ? Decimal(loc.speed).roundedToDecimalPlaces(2) : nil
+                speed: loc.speed >= 0 ? Decimal(loc.speed).roundedToDecimalPlaces(2) : nil,
+                // Signal measurement only records genuine GNSS fixes (enforced by the readiness gate),
+                // so the source is always "gps". Hardcoded rather than inferred from the fix because the
+                // persistence/resend path drops vertical accuracy and would misclassify a resent fence.
+                provider: RMBTLocationSource.gps.rawValue
             )
             avgPingMilliseconds = fence.averagePingMilliseconds.map { Decimal($0).roundedToDecimalPlaces(2) }
 

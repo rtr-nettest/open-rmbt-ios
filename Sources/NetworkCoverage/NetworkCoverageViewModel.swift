@@ -749,7 +749,8 @@ struct SessionInitializedUpdate: Hashable {
         guard let location, location.horizontalAccuracy >= 0 else { return false }
         let age = timeNow().timeIntervalSince(location.timestamp)
         let isFresh = age <= maxLocationFixAge
-        return isFresh && CoverageButtonGate.canStart(
+        // Signal measurement must use a genuine GNSS fix, never a Wi‑Fi/cell-derived one.
+        return isFresh && location.isGenuineGPSFix && CoverageButtonGate.canStart(
             accuracy: location.horizontalAccuracy,
             networkType: networkType,
             minAccuracy: minimumLocationAccuracy
@@ -769,7 +770,9 @@ struct SessionInitializedUpdate: Hashable {
         guard
             let location = lastReadinessLocation ?? currentUserLocation,
             location.horizontalAccuracy >= 0,
-            timeNow().timeIntervalSince(location.timestamp) <= maxLocationFixAge
+            timeNow().timeIntervalSince(location.timestamp) <= maxLocationFixAge,
+            // A fresh Wi‑Fi/cell fix is not genuine GPS — treat it as "no signal", not a bad-accuracy GPS.
+            location.isGenuineGPSFix
         else {
             return .init(isOK: false, text: NSLocalizedString("signal_readiness_gps_stale", comment: ""))
         }

@@ -36,7 +36,10 @@ public extension Notification.Name {
     override init() {
         locationManager = CLLocationManager()
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        locationManager.distanceFilter = 3.0
+        // Deliver every recomputed fix (not only after 3 m of movement) so the displayed location and
+        // its age stay current while the device is stationary on the start screen, without periodically
+        // stopping/restarting updates (which replays a stale cached fix and makes the age flicker).
+        locationManager.distanceFilter = kCLDistanceFilterNone
 
         super.init()
 

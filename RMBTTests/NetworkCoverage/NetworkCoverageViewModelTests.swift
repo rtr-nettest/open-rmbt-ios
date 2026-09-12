@@ -2397,6 +2397,31 @@ struct CoveragePreparingReadinessTests {
         #expect(sut.gpsReadiness.text == "GPS: no signal")
     }
 
+    @Test func whenHorizontallyAccurateFixIsNetworkSource_thenStaysPreparingAndGpsReadinessIsNoSignal() async {
+        // A fresh fix with good horizontal accuracy but network-grade vertical accuracy (Wi‑Fi/cell,
+        // not GNSS) must not begin recording: signal measurement requires a genuine GPS fix.
+        let sut = makeSUT(
+            minimumLocationAccuracy: 100,
+            updates: [makeLocationUpdate(at: 0, lat: 1.0, lon: 2.0, accuracy: 5, verticalAccuracy: 900)]
+        )
+        await sut.startTest()
+
+        #expect(sut.phase == .preparing)
+        #expect(sut.gpsReadiness.isOK == false)
+        #expect(sut.gpsReadiness.text == "GPS: no signal")
+    }
+
+    @Test func whenGenuineGpsFixOnMobile_thenBeginsRecording() async {
+        // Same fix as above but with GNSS-grade vertical accuracy → recording starts.
+        let sut = makeSUT(
+            minimumLocationAccuracy: 100,
+            updates: [makeLocationUpdate(at: 0, lat: 1.0, lon: 2.0, accuracy: 5, verticalAccuracy: 8)]
+        )
+        await sut.startTest()
+
+        #expect(sut.phase == .recording)
+    }
+
     @Test func whenAccurateFixButOnWiFi_thenGpsReadyButNetworkNotReady() async {
         let sut = makeSUT(
             minimumLocationAccuracy: 10,
@@ -2512,12 +2537,58 @@ private func expectFenceItems(
     }
 }
 
+@Suite("Location Source Classification")
+struct LocationSourceClassificationTests {
+    private func location(horizontal: CLLocationAccuracy, vertical: CLLocationAccuracy) -> CLLocation {
+        CLLocation(
+            coordinate: .init(latitude: 1, longitude: 2),
+            altitude: 0,
+            horizontalAccuracy: horizontal,
+            verticalAccuracy: vertical,
+            course: 0,
+            speed: 0,
+            timestamp: Date()
+        )
+    }
+
+    @Test func whenVerticalAccuracyIsSmall_thenSourceIsGPS() {
+        let loc = location(horizontal: 5, vertical: 8)
+        #expect(loc.rmbtSource == .gps)
+        #expect(loc.isGenuineGPSFix)
+    }
+
+    @Test func whenVerticalAccuracyIsLarge_thenSourceIsNetwork() {
+        // Network fixes measured on device report ~840–920 m vertical accuracy.
+        let loc = location(horizontal: 5, vertical: 900)
+        #expect(loc.rmbtSource == .network)
+        #expect(loc.isGenuineGPSFix == false)
+    }
+
+    @Test func whenVerticalAccuracyIsInvalid_thenSourceIsNetwork() {
+        let loc = location(horizontal: 5, vertical: -1)
+        #expect(loc.rmbtSource == .network)
+    }
+
+    @Test func whenAtThreshold_thenSourceIsGPS() {
+        let loc = location(horizontal: 5, vertical: CLLocation.maxVerticalAccuracyForGPSFix)
+        #expect(loc.rmbtSource == .gps)
+    }
+
+    @Test func whenParamsDictionaryBuilt_thenIncludesInferredProvider() {
+        #expect(location(horizontal: 5, vertical: 8).paramsDictionary()["provider"] as? String == "gps")
+        #expect(location(horizontal: 5, vertical: 900).paramsDictionary()["provider"] as? String == "network")
+    }
+}
+
 func makeLocationUpdate(
     at timestampOffset: TimeInterval,
     lat: CLLocationDegrees,
     lon: CLLocationDegrees,
     accuracy: CLLocationAccuracy = 1,
-    speed: CLLocationSpeed = 0
+    speed: CLLocationSpeed = 0,
+    // Defaults to a genuine GNSS fix (small vertical accuracy). Pass a large value (or a negative
+    // one) to simulate a Wi‑Fi/cell network fix that signal measurement must reject.
+    verticalAccuracy: CLLocationAccuracy = 1
 ) -> NetworkCoverageViewModel.Update {
     let timestamp = makeDate(offset: timestampOffset)
     return .location(
@@ -2526,7 +2597,7 @@ func makeLocationUpdate(
                 coordinate: .init(latitude: lat, longitude: lon),
                 altitude: 0,
                 horizontalAccuracy: accuracy,
-                verticalAccuracy: 1,
+                verticalAccuracy: verticalAccuracy,
                 course: 0,
                 speed: speed,
                 timestamp: timestamp

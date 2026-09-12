@@ -277,17 +277,25 @@ import CoreLocation
         
         for l in locations {
             let t = max(0, l.timestamp.timeIntervalSince(testStartDate ?? Date()))
-            
+
             let ts_nanos: UInt64 = UInt64(t) * NSEC_PER_SEC
-            result.append([
+            var entry: [String: Any] = [
                "geo_long": l.coordinate.longitude,
                "geo_lat":  l.coordinate.latitude,
                "tstamp":   UInt64(l.timestamp.timeIntervalSince1970 * 1000),
                "time_ns":  ts_nanos,
                "accuracy": l.horizontalAccuracy,
                "altitude": l.altitude,
-               "speed": l.speed > 0.0 ? l.speed : 0.0
-             ])
+               // Speed in m/s (raw CLLocation.speed), matching Android; 0 when the fix has no speed.
+               "speed": l.speed > 0.0 ? l.speed : 0.0,
+               // Inferred fix source ("gps"/"network"); the backend maps `provider` to loc_src.
+               "provider": l.rmbtSource.rawValue
+             ]
+            // Heading (bearing) in degrees; only when the fix carries a valid course (course >= 0).
+            if l.course >= 0 {
+                entry["heading"] = l.course
+            }
+            result.append(entry)
         }
         return ["geoLocations": result]
     }

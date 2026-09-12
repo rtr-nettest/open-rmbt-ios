@@ -67,6 +67,8 @@ struct SendCoverageResultRequestTests {
         #expect((location["altitude"] as? NSNumber)?.doubleValue == 123)
         #expect((location["bearing"] as? NSNumber)?.doubleValue == 42)
         #expect((location["speed"] as? NSNumber)?.doubleValue == 1.5)
+        // Coverage records only genuine GNSS fixes, so the submitted source is always "gps".
+        #expect(location["provider"] as? String == "gps")
     }
 
     @Test("WHEN coordinates have full GPS precision THEN encodes them losslessly without a floating-point tail")

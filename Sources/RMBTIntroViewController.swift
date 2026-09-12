@@ -316,6 +316,7 @@ class RMBTIntroViewController: UIViewController {
         let popupInfo = RMBTPopupInfo(with: .locationIcon, tintColor: tintColor, style: .list, values: [
             RMBTPopupInfo.Value(title: .locationPosition, value: locationString),
             RMBTPopupInfo.Value(title: .locationAccuracy, value: horizontalAccuracy),
+            RMBTPopupInfo.Value(title: "Source", value: location.rmbtSource.rawValue),
             RMBTPopupInfo.Value(title: .locationAge, value: age),
             RMBTPopupInfo.Value(title: .locationAltitude, value: altitude),
             RMBTPopupInfo.Value(title: .locationSpeed, value: speed),
@@ -328,7 +329,10 @@ class RMBTIntroViewController: UIViewController {
 
         let popupInfo = self.locationPopupInfo(with: location, tintColor: tintColor)
         RMBTLocationPopupViewController.presentLocation(with: popupInfo, in: self) { [weak self] vc in
-            vc.info = self?.locationPopupInfo(with: location, tintColor: tintColor)
+            // Re-read the latest fix on every tick instead of reusing the one captured when the
+            // overlay opened; otherwise the age just counts up against a frozen timestamp.
+            guard let self, let current = RMBTLocationTracker.shared.location else { return }
+            vc.info = self.locationPopupInfo(with: current, tintColor: tintColor)
         }
     }
 
@@ -520,8 +524,13 @@ class RMBTIntroViewController: UIViewController {
     }
 
     private var coverageCanStart: Bool {
-        // A stale fix must not green-light a start (same freshness rule as during the measurement).
-        guard let location = RMBTLocationTracker.shared.location, isLocationFreshEnough(location) else {
+        // A stale fix must not green-light a start (same freshness rule as during the measurement),
+        // and signal measurement requires a genuine GNSS fix, never a Wi‑Fi/cell one.
+        guard
+            let location = RMBTLocationTracker.shared.location,
+            isLocationFreshEnough(location),
+            location.isGenuineGPSFix
+        else {
             return false
         }
         return CoverageButtonGate.canStart(
@@ -531,21 +540,22 @@ class RMBTIntroViewController: UIViewController {
         )
     }
 
-    /// Colours the location (GPS) button, matching Android's four-state scheme adapted for iOS (which
-    /// cannot distinguish a GNSS fix from a network fix, so we use accuracy instead of the provider):
+    /// Colours the location (GPS) button, matching Android's four-state scheme. iOS exposes no provider,
+    /// so a fix is classified as genuine GNSS vs Wi‑Fi/cell via `isGenuineGPSFix` (vertical accuracy):
     ///  - RED    : the location permission is missing (denied)
-    ///  - GREY   : permission granted but no location fix at all
-    ///  - ORANGE : a fix exists but its accuracy is worse than the signal-measurement limit
-    ///  - GREEN  : a fix within the signal-measurement accuracy limit (the GPS start criterion is met)
+    ///  - GREY   : no genuine, fresh GPS fix (no fix, a stale fix, or a network-only fix)
+    ///  - ORANGE : a fresh GPS fix whose accuracy is worse than the signal-measurement limit
+    ///  - GREEN  : a fresh GPS fix within the signal-measurement accuracy limit (start criterion met)
     private func updateLocationTint() {
         let tracker = RMBTLocationTracker.shared
         let color: UIColor
         if tracker.isLocationDenied {
             color = .locationRed
-        } else if let location = tracker.location, location.horizontalAccuracy >= 0, isLocationFreshEnough(location) {
+        } else if let location = tracker.location, location.horizontalAccuracy >= 0,
+                  isLocationFreshEnough(location), location.isGenuineGPSFix {
             color = location.horizontalAccuracy <= NetworkCoverageFactory.minimumLocationAccuracy ? .locationGreen : .locationOrange
         } else {
-            // No fix, or the fix is too old to be trusted (stale) — treat as no usable GPS.
+            // No fix, a stale fix, or a Wi‑Fi/cell (network) fix — no usable GPS for signal measurement.
             color = .locationGrey
         }
         currentView.locationTintColor = color
