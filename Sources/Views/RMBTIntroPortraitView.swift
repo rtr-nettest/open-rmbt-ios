@@ -186,6 +186,22 @@ class RMBTIntroPortraitView: UIView, XibLoadable {
     /// Here we drop the opaque slab and float the icon cluster inside a single Liquid Glass capsule, so
     /// the strip belongs to the same design language as the tab bar. Works for both orientations (a wide
     /// pill in portrait, a tall pill in landscape). Pre-26 keeps the original opaque bar untouched.
+    /// Measured metrics of the iOS 26 floating Liquid Glass tab bar pill (iPhone, portrait): the visible
+    /// pill is inset ~21pt from each screen edge and is ~62pt tall. The status capsule matches these so the
+    /// two rows share the same width/height, and the icons are re-centred onto the tab items (layoutSubviews).
+    private static let tabBarPillSideInset: CGFloat = 21
+    private static let tabBarPillHeight: CGFloat = 62
+
+    // The icon stack's leading/trailing constraints (from the XIB); layoutSubviews slides the icon columns
+    // onto the tab-item centres by updating their constants. Non-nil only for the portrait icon bar.
+    private var iconStackLeadingConstraint: NSLayoutConstraint?
+    private var iconStackTrailingConstraint: NSLayoutConstraint?
+
+    // The X centres of the tab-bar items, in this view's coordinates, fed by the controller once the tab bar
+    // is laid out. Used to place the status icons exactly under their tab items (the items are not on even
+    // pill-quarters). Nil until known / off iOS 26 → layoutSubviews falls back to an even-quarter estimate.
+    private var tabItemCentersX: [CGFloat]?
+
     private func installLiquidGlassIconBar() {
         guard #available(iOS 26.0, *) else { return }
 
@@ -209,16 +225,25 @@ class RMBTIntroPortraitView: UIView, XibLoadable {
         // Behind the icons so their status tint colours stay at full strength (not blurred by the glass).
         container.insertSubview(glassView, belowSubview: iconStack)
 
-        // Hug the icon cluster: a little padding along the stack's axis, a fixed thickness across it.
-        let alongAxisPadding: CGFloat = 16
-        let crossAxisThickness: CGFloat = 64
         if iconStack.axis == .horizontal {
+            // Match the tab bar pill exactly: same side margins and height, so the two rows are identical
+            // in width and height. (The icons are re-centred onto the tab items in layoutSubviews.)
             NSLayoutConstraint.activate([
-                glassView.leadingAnchor.constraint(equalTo: iconStack.leadingAnchor, constant: -alongAxisPadding),
-                glassView.trailingAnchor.constraint(equalTo: iconStack.trailingAnchor, constant: alongAxisPadding),
+                glassView.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: Self.tabBarPillSideInset),
+                glassView.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -Self.tabBarPillSideInset),
                 glassView.centerYAnchor.constraint(equalTo: iconStack.centerYAnchor),
-                glassView.heightAnchor.constraint(equalToConstant: crossAxisThickness),
+                glassView.heightAnchor.constraint(equalToConstant: Self.tabBarPillHeight),
             ])
+
+            // Capture the stack's own leading/trailing constraints (from the XIB) so layoutSubviews can
+            // slide the icon columns inward until each icon sits on its tab item's centre.
+            for c in container.constraints {
+                if c.firstItem === iconStack, c.firstAttribute == .leading, c.secondAttribute == .leading {
+                    iconStackLeadingConstraint = c
+                } else if c.secondItem === iconStack, c.secondAttribute == .trailing, c.firstAttribute == .trailing {
+                    iconStackTrailingConstraint = c
+                }
+            }
 
             // Portrait only: the status capsule and the system tab bar both float over the bottom of the
             // screen. Extend the page all the way down — from the wave's bottom edge to the very bottom of
@@ -241,12 +266,44 @@ class RMBTIntroPortraitView: UIView, XibLoadable {
                 backdrop.trailingAnchor.constraint(equalTo: trailingAnchor),
             ])
         } else {
+            // Landscape: a tall pill hugging the side icon column (a little padding top/bottom, fixed width).
+            let alongAxisPadding: CGFloat = 16
+            let crossAxisThickness: CGFloat = 64
             NSLayoutConstraint.activate([
                 glassView.topAnchor.constraint(equalTo: iconStack.topAnchor, constant: -alongAxisPadding),
                 glassView.bottomAnchor.constraint(equalTo: iconStack.bottomAnchor, constant: alongAxisPadding),
                 glassView.centerXAnchor.constraint(equalTo: iconStack.centerXAnchor),
                 glassView.widthAnchor.constraint(equalToConstant: crossAxisThickness),
             ])
+        }
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        alignIconRowToTabBarItems()
+    }
+
+    /// Slides the four status icons so each sits on the centre of its corresponding tab-bar item below.
+    /// The tab bar lays four items out on even quarters of its pill (inset `tabBarPillSideInset` from the
+    /// edges); with the stack's `equalSpacing` distribution, insetting the columns by `quarter/2 - iconWidth/2`
+    /// from the pill edge puts every icon centre exactly on a tab-item centre. No-op unless the portrait icon
+    /// bar was installed (iOS 26). Recomputed on every layout so it stays correct across screen widths.
+    private func alignIconRowToTabBarItems() {
+        guard let leading = iconStackLeadingConstraint,
+              let trailing = iconStackTrailingConstraint,
+              let iconStack = locationImageView.superview as? UIStackView,
+              !iconStack.arrangedSubviews.isEmpty else { return }
+
+        let width = bounds.width
+        guard width > 0 else { return }
+
+        let iconWidth = locationImageView.bounds.width > 0 ? locationImageView.bounds.width : 45
+        let quarter = (width - 2 * Self.tabBarPillSideInset) / CGFloat(iconStack.arrangedSubviews.count)
+        let inset = Self.tabBarPillSideInset + quarter / 2 - iconWidth / 2
+
+        if abs(leading.constant - inset) > 0.5 {
+            leading.constant = inset
+            trailing.constant = inset
         }
     }
 
