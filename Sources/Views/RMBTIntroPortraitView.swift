@@ -189,13 +189,18 @@ class RMBTIntroPortraitView: UIView, XibLoadable {
     private func installLiquidGlassIconBar() {
         guard #available(iOS 26.0, *) else { return }
 
-        // The four status icons live in a stack view; its superview is the opaque container slab.
+        // The four status icons live in a stack view; its superview is the opaque container slab,
+        // itself sitting at the bottom of the wave band (`waveView.superview`).
         guard let iconStack = locationImageView.superview as? UIStackView,
-              let container = iconStack.superview else { return }
+              let container = iconStack.superview,
+              let waveBand = waveView.superview else { return }
 
-        // Remove the opaque slab so the animated waves show through behind the floating glass.
+        // Remove the opaque slab so the backdrop (below) shows through behind the floating glass.
         container.backgroundColor = .clear
 
+        // Untinted glass so the capsule reads white, matching the white tab bar below it. The contrast
+        // that a white-on-white pill previously lacked now comes from the pale-blue page behind it (the
+        // wave / backdrop, tinted below), against which both white button rows stand out.
         let glassView = UIVisualEffectView(effect: UIGlassEffect(style: .regular))
         glassView.translatesAutoresizingMaskIntoConstraints = false
         glassView.cornerConfiguration = .capsule()
@@ -213,6 +218,27 @@ class RMBTIntroPortraitView: UIView, XibLoadable {
                 glassView.trailingAnchor.constraint(equalTo: iconStack.trailingAnchor, constant: alongAxisPadding),
                 glassView.centerYAnchor.constraint(equalTo: iconStack.centerYAnchor),
                 glassView.heightAnchor.constraint(equalToConstant: crossAxisThickness),
+            ])
+
+            // Portrait only: the status capsule and the system tab bar both float over the bottom of the
+            // screen. Extend the page all the way down — from the wave's bottom edge to the very bottom of
+            // the view, behind the tab bar. Tint the wave fill and this backdrop the same pale blue so the
+            // white glass capsule and white tab bar read as distinct button rows floating on it (a plain
+            // white page made them blend). The wave and backdrop share one colour to avoid a visible seam
+            // where they meet. Inserted beneath the wave band so the waves / icons / glass stay on top.
+            // (Landscape's icon strip is a side column, not a bottom band, so this backdrop is portrait-only.)
+            waveView.color = .introBottomPage
+            wave2View.color = .introBottomPage
+            let backdrop = UIView()
+            backdrop.translatesAutoresizingMaskIntoConstraints = false
+            backdrop.backgroundColor = .introBottomPage
+            insertSubview(backdrop, belowSubview: waveBand)
+            NSLayoutConstraint.activate([
+                // `container.topAnchor` == the wave band's bottom edge, where the wave fill is solid.
+                backdrop.topAnchor.constraint(equalTo: container.topAnchor),
+                backdrop.bottomAnchor.constraint(equalTo: bottomAnchor),
+                backdrop.leadingAnchor.constraint(equalTo: leadingAnchor),
+                backdrop.trailingAnchor.constraint(equalTo: trailingAnchor),
             ])
         } else {
             NSLayoutConstraint.activate([
@@ -360,6 +386,13 @@ private extension UIImage {
 
     static let loopModeOn = UIImage(named: "loop_mode_switcher_on")
     static let loopModeOff = UIImage(named: "loop_mode_switcher_off")
+}
+
+extension UIColor {
+    /// The pale-blue "page" colour for the intro screen's bottom area on iOS 26 (Liquid Glass): the wave
+    /// fill, the backdrop below it, and the strip behind the tab bar (see RMBTIntroViewController) all use
+    /// it. A little blue so the white status capsule and white tab bar read as distinct rows floating on it.
+    static let introBottomPage = UIColor(red: 0.82, green: 0.89, blue: 0.97, alpha: 1.0)
 }
 
 private extension UIColor {
