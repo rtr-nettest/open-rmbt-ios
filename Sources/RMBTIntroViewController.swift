@@ -158,7 +158,15 @@ class RMBTIntroViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        self.navigationController?.view.backgroundColor = UIColor.networkAvailable
+        // From iOS 26 the floating Liquid Glass tab bar no longer hides this view. The intro screen's
+        // bottom area is a pale-blue "page" (the wave / backdrop) on which the white tab bar reads as a
+        // distinct button row, so the strip revealed behind the tab bar uses that same page colour to
+        // continue it seamlessly. Pre-26 keeps the original blue network background.
+        if #available(iOS 26.0, *) {
+            self.navigationController?.view.backgroundColor = .introBottomPage
+        } else {
+            self.navigationController?.view.backgroundColor = UIColor.networkAvailable
+        }
 
         self.modalPresentationCapturesStatusBarAppearance = true
 

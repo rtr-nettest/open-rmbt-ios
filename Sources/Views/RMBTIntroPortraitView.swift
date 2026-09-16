@@ -171,11 +171,140 @@ class RMBTIntroPortraitView: UIView, XibLoadable {
         // Hidden feature: Network Coverage entry point visibility
         updateCoverageUI()
 
+        installLiquidGlassIconBar()
+
         waveView.startAnimation()
         waveView.direction = .backwards
         wave2View.alpha = 0.2
         wave2View.direction = .forwards
         wave2View.startAnimation()
+    }
+
+    /// From iOS 26 the system tab bar renders as a floating Liquid Glass element. The intro screen's
+    /// own status-icon strip (IPv4 / IPv6 / Location / Coverage) used to be an opaque `systemBackground`
+    /// slab sitting directly above it, so two stacked bars — one opaque, one glass — looked disjointed.
+    /// Here we drop the opaque slab and float the icon cluster inside a single Liquid Glass capsule, so
+    /// the strip belongs to the same design language as the tab bar. Works for both orientations (a wide
+    /// pill in portrait, a tall pill in landscape). Pre-26 keeps the original opaque bar untouched.
+    /// Measured metrics of the iOS 26 floating Liquid Glass tab bar pill (iPhone, portrait): the visible
+    /// pill is inset ~21pt from each screen edge and is ~62pt tall. The status capsule matches these so the
+    /// two rows share the same width/height, and the icons are re-centred onto the tab items (layoutSubviews).
+    private static let tabBarPillSideInset: CGFloat = 21
+    private static let tabBarPillHeight: CGFloat = 62
+
+    // The icon stack's leading/trailing constraints (from the XIB); layoutSubviews slides the icon columns
+    // onto the tab-item centres by updating their constants. Non-nil only for the portrait icon bar.
+    private var iconStackLeadingConstraint: NSLayoutConstraint?
+    private var iconStackTrailingConstraint: NSLayoutConstraint?
+
+    // The X centres of the tab-bar items, in this view's coordinates, fed by the controller once the tab bar
+    // is laid out. Used to place the status icons exactly under their tab items (the items are not on even
+    // pill-quarters). Nil until known / off iOS 26 → layoutSubviews falls back to an even-quarter estimate.
+    private var tabItemCentersX: [CGFloat]?
+
+    private func installLiquidGlassIconBar() {
+        guard #available(iOS 26.0, *) else { return }
+
+        // The four status icons live in a stack view; its superview is the opaque container slab,
+        // itself sitting at the bottom of the wave band (`waveView.superview`).
+        guard let iconStack = locationImageView.superview as? UIStackView,
+              let container = iconStack.superview,
+              let waveBand = waveView.superview else { return }
+
+        // Remove the opaque slab so the backdrop (below) shows through behind the floating glass.
+        container.backgroundColor = .clear
+
+        // Untinted glass so the capsule reads white, matching the white tab bar below it. The contrast
+        // that a white-on-white pill previously lacked now comes from the pale-blue page behind it (the
+        // wave / backdrop, tinted below), against which both white button rows stand out.
+        let glassView = UIVisualEffectView(effect: UIGlassEffect(style: .regular))
+        glassView.translatesAutoresizingMaskIntoConstraints = false
+        glassView.cornerConfiguration = .capsule()
+        // Decorative background only — the icons above keep handling their own taps.
+        glassView.isUserInteractionEnabled = false
+        // Behind the icons so their status tint colours stay at full strength (not blurred by the glass).
+        container.insertSubview(glassView, belowSubview: iconStack)
+
+        if iconStack.axis == .horizontal {
+            // Match the tab bar pill exactly: same side margins and height, so the two rows are identical
+            // in width and height. (The icons are re-centred onto the tab items in layoutSubviews.)
+            NSLayoutConstraint.activate([
+                glassView.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: Self.tabBarPillSideInset),
+                glassView.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -Self.tabBarPillSideInset),
+                glassView.centerYAnchor.constraint(equalTo: iconStack.centerYAnchor),
+                glassView.heightAnchor.constraint(equalToConstant: Self.tabBarPillHeight),
+            ])
+
+            // Capture the stack's own leading/trailing constraints (from the XIB) so layoutSubviews can
+            // slide the icon columns inward until each icon sits on its tab item's centre.
+            for c in container.constraints {
+                if c.firstItem === iconStack, c.firstAttribute == .leading, c.secondAttribute == .leading {
+                    iconStackLeadingConstraint = c
+                } else if c.secondItem === iconStack, c.secondAttribute == .trailing, c.firstAttribute == .trailing {
+                    iconStackTrailingConstraint = c
+                }
+            }
+
+            // Portrait only: the status capsule and the system tab bar both float over the bottom of the
+            // screen. Extend the page all the way down — from the wave's bottom edge to the very bottom of
+            // the view, behind the tab bar. Tint the wave fill and this backdrop the same pale blue so the
+            // white glass capsule and white tab bar read as distinct button rows floating on it (a plain
+            // white page made them blend). The wave and backdrop share one colour to avoid a visible seam
+            // where they meet. Inserted beneath the wave band so the waves / icons / glass stay on top.
+            // (Landscape's icon strip is a side column, not a bottom band, so this backdrop is portrait-only.)
+            waveView.color = .introBottomPage
+            wave2View.color = .introBottomPage
+            let backdrop = UIView()
+            backdrop.translatesAutoresizingMaskIntoConstraints = false
+            backdrop.backgroundColor = .introBottomPage
+            insertSubview(backdrop, belowSubview: waveBand)
+            NSLayoutConstraint.activate([
+                // `container.topAnchor` == the wave band's bottom edge, where the wave fill is solid.
+                backdrop.topAnchor.constraint(equalTo: container.topAnchor),
+                backdrop.bottomAnchor.constraint(equalTo: bottomAnchor),
+                backdrop.leadingAnchor.constraint(equalTo: leadingAnchor),
+                backdrop.trailingAnchor.constraint(equalTo: trailingAnchor),
+            ])
+        } else {
+            // Landscape: a tall pill hugging the side icon column (a little padding top/bottom, fixed width).
+            let alongAxisPadding: CGFloat = 16
+            let crossAxisThickness: CGFloat = 64
+            NSLayoutConstraint.activate([
+                glassView.topAnchor.constraint(equalTo: iconStack.topAnchor, constant: -alongAxisPadding),
+                glassView.bottomAnchor.constraint(equalTo: iconStack.bottomAnchor, constant: alongAxisPadding),
+                glassView.centerXAnchor.constraint(equalTo: iconStack.centerXAnchor),
+                glassView.widthAnchor.constraint(equalToConstant: crossAxisThickness),
+            ])
+        }
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        alignIconRowToTabBarItems()
+    }
+
+    /// Slides the four status icons so each sits on the centre of its corresponding tab-bar item below.
+    /// The tab bar lays four items out on even quarters of its pill (inset `tabBarPillSideInset` from the
+    /// edges); with the stack's `equalSpacing` distribution, insetting the columns by `quarter/2 - iconWidth/2`
+    /// from the pill edge puts every icon centre exactly on a tab-item centre. No-op unless the portrait icon
+    /// bar was installed (iOS 26). Recomputed on every layout so it stays correct across screen widths.
+    private func alignIconRowToTabBarItems() {
+        guard let leading = iconStackLeadingConstraint,
+              let trailing = iconStackTrailingConstraint,
+              let iconStack = locationImageView.superview as? UIStackView,
+              !iconStack.arrangedSubviews.isEmpty else { return }
+
+        let width = bounds.width
+        guard width > 0 else { return }
+
+        let iconWidth = locationImageView.bounds.width > 0 ? locationImageView.bounds.width : 45
+        let quarter = (width - 2 * Self.tabBarPillSideInset) / CGFloat(iconStack.arrangedSubviews.count)
+        let inset = Self.tabBarPillSideInset + quarter / 2 - iconWidth / 2
+
+        if abs(leading.constant - inset) > 0.5 {
+            leading.constant = inset
+            trailing.constant = inset
+        }
     }
 
     func startAnimation() {
@@ -314,6 +443,13 @@ private extension UIImage {
 
     static let loopModeOn = UIImage(named: "loop_mode_switcher_on")
     static let loopModeOff = UIImage(named: "loop_mode_switcher_off")
+}
+
+extension UIColor {
+    /// The pale-blue "page" colour for the intro screen's bottom area on iOS 26 (Liquid Glass): the wave
+    /// fill, the backdrop below it, and the strip behind the tab bar (see RMBTIntroViewController) all use
+    /// it. A little blue so the white status capsule and white tab bar read as distinct rows floating on it.
+    static let introBottomPage = UIColor(red: 0.82, green: 0.89, blue: 0.97, alpha: 1.0)
 }
 
 private extension UIColor {
