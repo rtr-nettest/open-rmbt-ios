@@ -171,11 +171,57 @@ class RMBTIntroPortraitView: UIView, XibLoadable {
         // Hidden feature: Network Coverage entry point visibility
         updateCoverageUI()
 
+        installLiquidGlassIconBar()
+
         waveView.startAnimation()
         waveView.direction = .backwards
         wave2View.alpha = 0.2
         wave2View.direction = .forwards
         wave2View.startAnimation()
+    }
+
+    /// From iOS 26 the system tab bar renders as a floating Liquid Glass element. The intro screen's
+    /// own status-icon strip (IPv4 / IPv6 / Location / Coverage) used to be an opaque `systemBackground`
+    /// slab sitting directly above it, so two stacked bars — one opaque, one glass — looked disjointed.
+    /// Here we drop the opaque slab and float the icon cluster inside a single Liquid Glass capsule, so
+    /// the strip belongs to the same design language as the tab bar. Works for both orientations (a wide
+    /// pill in portrait, a tall pill in landscape). Pre-26 keeps the original opaque bar untouched.
+    private func installLiquidGlassIconBar() {
+        guard #available(iOS 26.0, *) else { return }
+
+        // The four status icons live in a stack view; its superview is the opaque container slab.
+        guard let iconStack = locationImageView.superview as? UIStackView,
+              let container = iconStack.superview else { return }
+
+        // Remove the opaque slab so the animated waves show through behind the floating glass.
+        container.backgroundColor = .clear
+
+        let glassView = UIVisualEffectView(effect: UIGlassEffect(style: .regular))
+        glassView.translatesAutoresizingMaskIntoConstraints = false
+        glassView.cornerConfiguration = .capsule()
+        // Decorative background only — the icons above keep handling their own taps.
+        glassView.isUserInteractionEnabled = false
+        // Behind the icons so their status tint colours stay at full strength (not blurred by the glass).
+        container.insertSubview(glassView, belowSubview: iconStack)
+
+        // Hug the icon cluster: a little padding along the stack's axis, a fixed thickness across it.
+        let alongAxisPadding: CGFloat = 16
+        let crossAxisThickness: CGFloat = 64
+        if iconStack.axis == .horizontal {
+            NSLayoutConstraint.activate([
+                glassView.leadingAnchor.constraint(equalTo: iconStack.leadingAnchor, constant: -alongAxisPadding),
+                glassView.trailingAnchor.constraint(equalTo: iconStack.trailingAnchor, constant: alongAxisPadding),
+                glassView.centerYAnchor.constraint(equalTo: iconStack.centerYAnchor),
+                glassView.heightAnchor.constraint(equalToConstant: crossAxisThickness),
+            ])
+        } else {
+            NSLayoutConstraint.activate([
+                glassView.topAnchor.constraint(equalTo: iconStack.topAnchor, constant: -alongAxisPadding),
+                glassView.bottomAnchor.constraint(equalTo: iconStack.bottomAnchor, constant: alongAxisPadding),
+                glassView.centerXAnchor.constraint(equalTo: iconStack.centerXAnchor),
+                glassView.widthAnchor.constraint(equalToConstant: crossAxisThickness),
+            ])
+        }
     }
 
     func startAnimation() {
