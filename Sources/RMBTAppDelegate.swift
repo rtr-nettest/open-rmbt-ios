@@ -137,7 +137,7 @@ final class RMBTAppDelegate: UIResponder, UIApplicationDelegate {
         RMBTNavigationBar.appearance().isTranslucent = false
 
         UITabBar.appearance().barTintColor = .white
-        UITabBar.appearance().tintColor = UIColor(named: "tintTabbarColor")
+        UITabBar.appearance().tintColor = .brand
         UITabBar.appearance().unselectedItemTintColor = UIColor(named: "tintUnselectedTabbarColor")
 
         // Text color

@@ -23,9 +23,9 @@ final class RMBTHistoryQoSGroupResultCell: UITableViewCell {
                 return
             }
             statusLabel.text = NSLocalizedString(result.isSuccessful ? "Succeeded" : "Failed", comment: "").uppercased()
-            statusLabel.textColor = result.isSuccessful ? UIColor(named: "greenButtonBackground") : .red
+            statusLabel.textColor = result.isSuccessful ? UIColor(hex: "59B200") : .red
             statusDescriptionLabel.text = result.statusDetails
-            statusDescriptionLabel.textColor = result.isSuccessful ? UIColor(named: "greenButtonBackground") : .red
+            statusDescriptionLabel.textColor = result.isSuccessful ? UIColor(hex: "59B200") : .red
         }
     }
 }

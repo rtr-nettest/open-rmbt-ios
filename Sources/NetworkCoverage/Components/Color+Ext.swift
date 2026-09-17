@@ -7,7 +7,15 @@
 //
 
 import SwiftUI
+import UIKit
 
 extension Color {
-    static let brand = Color("greenButtonBackground")
+    /// App brand color. Forks rebrand by changing `brand.colorset` only — never override at call sites.
+    static let brand = Color(.brand)
+}
+
+extension UIColor {
+    static let brand = UIColor(resource: .brand)
+    /// Speed and ping graph line/fill color; rebranded together with `brand.colorset`.
+    static let graphAccent = UIColor(resource: .graphAccent)
 }

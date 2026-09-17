@@ -63,6 +63,7 @@ final class RMBTLoopModeSettingsViewController: UIViewController {
         distanceTextField.text = String(loopModeInfo.waitMeters)
         startTestButton.setTitle(.startButtonTitle, for: .normal)
         subtitleLabel.text = .subtitle
+        [countTestsTextField, minutesTextField, distanceTextField].forEach { $0.tintColor = .brand.withAlphaComponent(0.4) }
     }
     
     @objc func keyboardDidChange(_ notification: Notification) {

@@ -62,6 +62,18 @@ Explain clearly your reasoning behind your decisions and pros/cons of chosen sol
 - Avoid force unwraps except in guarded test helpers; prefer `guard let` with logged failures.
 - Keep public/private configs mirrored; add comments when temporary divergence is intentional.
 - Update localization strings for any user-facing copy changes.
+- **Brand colors**: use `Color.brand` / `UIColor.brand` / IB named color `brand` for any branded UI (buttons, tints,
+  switches, highlights), and `UIColor.graphAccent` for speed/ping graph lines. Never hard-code their RGB or create a
+  new green asset — forks rebrand by changing `brand.colorset` and `graphAccent.colorset` in
+  `Resources/Images.xcassets/Colors/` only. Accessors in `Color+Ext.swift` use Xcode's generated asset symbols
+  (`UIColor(resource:)`), so a missing asset fails the build instead of crashing. Status/traffic-light colors (result
+  classes, availability, readiness) are semantic and stay separate, even where they share the brand RGB. Check: all
+  commands below must print nothing.
+  ```sh
+  grep -rnE 'greenButtonBackground|tintTabbarColor|78ED03' Sources Resources
+  grep -rnE 'key="[^"]+" red="0\.3490196[0-9]*" green="0\.6980392[0-9]*" blue="0\.0"' Sources --include='*.storyboard' --include='*.xib'
+  grep -rnE '89(\.0*)? ?/ ?255' Sources --include='*.swift' | grep -v 'ipAvailable'
+  ```
 
 ## Localization workflow
 Translations are maintained by humans and are intentionally behind. When you add or change user-facing copy, follow this workflow so nothing ships as a raw key and translators have a clear backlog.

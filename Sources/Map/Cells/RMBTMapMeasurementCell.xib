@@ -275,7 +275,7 @@
                                 </constraints>
                                 <fontDescription key="fontDescription" name="Roboto-Medium" family="Roboto" pointSize="14"/>
                                 <state key="normal" title="MEHR DETAILS ANZEIGEN">
-                                    <color key="titleColor" name="greenButtonBackground"/>
+                                    <color key="titleColor" name="brand"/>
                                 </state>
                                 <connections>
                                     <action selector="detailsButtonClick:" destination="gTV-IL-0wX" eventType="touchUpInside" id="085-PE-A0f"/>
@@ -344,7 +344,7 @@
         <image name="down-0" width="33" height="33"/>
         <image name="ping-0" width="33" height="33"/>
         <image name="up-0" width="33" height="33"/>
-        <namedColor name="greenButtonBackground">
+        <namedColor name="brand">
             <color red="0.34901960784313724" green="0.69803921568627447" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
     </resources>

@@ -28,7 +28,7 @@ class RMBTHistoryFiltersOptionsViewController: UIViewController {
         
         self.tableView.register(UINib(nibName: RMBTMapOptionsTypeCell.ID, bundle: nil), forCellReuseIdentifier: RMBTMapOptionsTypeCell.ID)
         
-        self.tableView.tintColor = UIColor(red: 89.0/255.0, green: 178.0/255.0, blue: 0.0, alpha: 1.0)
+        self.tableView.tintColor = .brand
         
         // Add long tap gesture recognizer to table view. On long tap, select tapped filter, while deselecting
         // all other filters from that group.

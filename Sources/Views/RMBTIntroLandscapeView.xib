@@ -121,7 +121,7 @@
                                         </imageView>
                                         <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="center" image="tab_coverage" translatesAutoresizingMaskIntoConstraints="NO" id="cvg-qB-scu-landscape">
                                             <rect key="frame" x="0.0" y="282" width="45" height="44"/>
-                                            <color key="tintColor" name="greenButtonBackground"/>
+                                            <color key="tintColor" name="brand"/>
                                             <constraints>
                                                 <constraint firstAttribute="width" constant="45" id="cvg-width-const"/>
                                                 <constraint firstAttribute="height" constant="44" id="cvg-height-const"/>
@@ -366,7 +366,7 @@
         <image name="tab_coverage" width="24" height="24"/>
         <image name="test_button" width="307" height="307"/>
         <image name="wifi_icon" width="102" height="74"/>
-        <namedColor name="greenButtonBackground">
+        <namedColor name="brand">
             <color red="0.34901960784313724" green="0.69803921568627447" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <systemColor name="systemBackgroundColor">

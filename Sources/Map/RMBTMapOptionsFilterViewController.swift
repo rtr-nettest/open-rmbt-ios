@@ -22,7 +22,7 @@ class RMBTMapOptionsFilterViewController: UIViewController {
         self.tableView.register(UINib(nibName: RMBTMapOptionsFilterCell.ID, bundle: nil), forCellReuseIdentifier: RMBTMapOptionsFilterCell.ID)
         self.titleLabel.text = self.filter?.title
         
-        self.tableView.tintColor = UIColor(red: 89.0/255.0, green: 178.0/255.0, blue: 0.0, alpha: 1.0)
+        self.tableView.tintColor = .brand
         
         self.confirmButton.setTitle(.accept, for: .normal)
     }

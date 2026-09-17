@@ -33,7 +33,7 @@ class RMBTMaterialTextFieldState {
 
 class RMBTMaterialTextFieldStateFocus: RMBTMaterialTextFieldState {
     override var placeholderColor: UIColor {
-        return .focusColor ?? super.placeholderColor
+        return .focusColor
     }
     
     override var placeholderLabelFrame: CGRect {
@@ -61,6 +61,6 @@ class RMBTMaterialTextFieldStateError: RMBTMaterialTextFieldState {
 
 private extension UIColor {
     static let defaultColor = UIColor(red: 0.75, green: 0.75, blue: 0.79, alpha: 1)
-    static let focusColor = UIColor(named: "greenButtonBackground")
+    static let focusColor = UIColor.brand
     static let errorColor = UIColor.red
 }

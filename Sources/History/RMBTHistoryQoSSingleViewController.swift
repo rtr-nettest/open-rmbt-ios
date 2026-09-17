@@ -27,7 +27,7 @@ final class RMBTHistoryQoSSingleViewController: UIViewController {
             mdcTabBarView.selectedItem = mdcTabBarView.items[Int(seqNumber) - 1]
             mdcTabBarView.preferredLayoutStyle = .scrollable // or .fixed
             mdcTabBarView.tabBarDelegate = self
-            mdcTabBarView.selectionIndicatorStrokeColor = UIColor(named: "greenButtonBackground")
+            mdcTabBarView.selectionIndicatorStrokeColor = .brand
             mdcTabBarView.rippleColor = mdcTabBarView.selectionIndicatorStrokeColor?.withAlphaComponent(0.1) ?? .clear
             mdcTabBarView.setTitleFont(UIFont.roboto(size: 14, weight: .regular), for: .normal)
             return mdcTabBarView

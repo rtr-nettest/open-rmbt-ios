@@ -26,7 +26,7 @@ class RMBTMapOptionsTypesViewController: UIViewController {
         
         self.tableView.register(UINib(nibName: RMBTMapOptionsTypeCell.ID, bundle: nil), forCellReuseIdentifier: RMBTMapOptionsTypeCell.ID)
         
-        self.tableView.tintColor = UIColor(red: 89.0/255.0, green: 178.0/255.0, blue: 0.0, alpha: 1.0)
+        self.tableView.tintColor = .brand
     }
     
     @IBAction func confirmButtonClick(_ sender: Any) {

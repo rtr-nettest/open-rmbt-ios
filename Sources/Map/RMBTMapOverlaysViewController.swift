@@ -161,10 +161,10 @@ extension RMBTMapOverlaysViewController: RMBTBottomCardProtocol {
 }
 
 private extension UIColor {
-    static let mapTypeSelectedBackground = UIColor(red: 89.0/255.0, green: 178.0/255.0, blue: 0, alpha: 1.0)
+    static let mapTypeSelectedBackground = UIColor.brand
     static let mapTypeUnSelectedBackground = UIColor.clear
     
-    static let mapTypeSelectedTitle = UIColor(red: 89.0/255.0, green: 178.0/255.0, blue: 0, alpha: 1.0)
+    static let mapTypeSelectedTitle = UIColor.brand
     static let mapTypeUnSelectedTitle = UIColor(red: 95.0/255.0, green: 99.0/255.0, blue: 104.0/255.0, alpha: 1.0)
     
     static let mapTypeSelectedTintImage = UIColor.white

@@ -193,7 +193,7 @@ extension View {
                 subtitleAlignment: .leading,
                 scrollableBody: true,
                 primaryButtonTitle: NSLocalizedString("coverage_intro_start_button", comment: ""),
-                primaryButtonColor: Color("greenButtonBackground"),
+                primaryButtonColor: .brand,
                 secondaryButtonTitle: NSLocalizedString("Cancel", comment: ""),
                 onPrimaryAction: onStartTest,
                 onSecondaryAction: onCancel,
@@ -214,7 +214,7 @@ extension View {
                 title: title,
                 subtitle: subtitle,
                 primaryButtonTitle: NSLocalizedString("Stop test", comment: ""),
-                primaryButtonColor: Color("greenButtonBackground"),
+                primaryButtonColor: .brand,
                 secondaryButtonTitle: NSLocalizedString("Continue test", comment: ""),
                 onPrimaryAction: onStopTest,
                 onSecondaryAction: {}, // Continue just dismisses
@@ -231,7 +231,7 @@ extension View {
             title: "Start Signal Measurement",
             subtitle: "This will begin the Signal Measurement with your current settings.",
             primaryButtonTitle: "Start test",
-            primaryButtonColor: Color("greenButtonBackground"),
+            primaryButtonColor: .brand,
             secondaryButtonTitle: "Cancel",
             onPrimaryAction: {},
             onSecondaryAction: {}

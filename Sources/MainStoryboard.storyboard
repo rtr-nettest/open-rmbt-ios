@@ -224,7 +224,7 @@
                                             <subviews>
                                                 <switch opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="sxX-hM-d7r">
                                                     <rect key="frame" x="321" y="12.666666666666664" width="51" height="31"/>
-                                                    <color key="onTintColor" red="0.34901960780000002" green="0.69803921570000005" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    <color key="onTintColor" name="brand"/>
                                                 </switch>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="Skip QoS" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="yIC-WF-9OC">
                                                     <rect key="frame" x="20" y="18.666666666666668" width="64.333333333333329" height="19.000000000000004"/>
@@ -265,7 +265,7 @@
                                             <subviews>
                                                 <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="252" horizontalCompressionResistancePriority="752" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="sKA-gU-nx9">
                                                     <rect key="frame" x="321" y="12.666666666666664" width="51" height="31"/>
-                                                    <color key="onTintColor" red="0.34901960780000002" green="0.69803921570000005" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    <color key="onTintColor" name="brand"/>
                                                 </switch>
                                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="XSk-W2-vyy">
                                                     <rect key="frame" x="20" y="9.3333333333333321" width="281" height="37.333333333333343"/>
@@ -393,7 +393,7 @@
                                             <subviews>
                                                 <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="252" horizontalCompressionResistancePriority="752" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="r1o-4C-mD4">
                                                     <rect key="frame" x="321" y="12.666666666666664" width="51" height="31"/>
-                                                    <color key="onTintColor" red="0.34901960780000002" green="0.69803921570000005" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    <color key="onTintColor" name="brand"/>
                                                 </switch>
                                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="PNR-82-ZkF">
                                                     <rect key="frame" x="20" y="2.3333333333333321" width="281" height="51.333333333333343"/>
@@ -468,7 +468,7 @@
                                                 </label>
                                                 <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" textAlignment="right" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="tEY-9P-PAu">
                                                     <rect key="frame" x="169" y="17.666666666666668" width="201" height="21.000000000000004"/>
-                                                    <color key="textColor" red="0.34901960784313724" green="0.69803921568627447" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    <color key="textColor" name="brand"/>
                                                     <fontDescription key="fontDescription" name="Roboto-Regular" family="Roboto" pointSize="16"/>
                                                     <textInputTraits key="textInputTraits" keyboardType="numberPad" returnKeyType="done" enablesReturnKeyAutomatically="YES"/>
                                                     <connections>
@@ -515,7 +515,7 @@
                                                 </label>
                                                 <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" textAlignment="right" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="4mQ-38-Pj5">
                                                     <rect key="frame" x="157.33333333333337" y="17.666666666666668" width="212.66666666666663" height="21.000000000000004"/>
-                                                    <color key="textColor" red="0.34901960784313724" green="0.69803921568627447" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    <color key="textColor" name="brand"/>
                                                     <fontDescription key="fontDescription" name="Roboto-Regular" family="Roboto" pointSize="16"/>
                                                     <textInputTraits key="textInputTraits" keyboardType="numberPad" returnKeyType="done" enablesReturnKeyAutomatically="YES"/>
                                                     <connections>
@@ -553,7 +553,7 @@
                                             <subviews>
                                                 <switch opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="NCH-ny-506">
                                                     <rect key="frame" x="321" y="12.666666666666664" width="51" height="31"/>
-                                                    <color key="onTintColor" red="0.34901960780000002" green="0.69803921570000005" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    <color key="onTintColor" name="brand"/>
                                                 </switch>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="Expert Mode" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="j6s-mR-MOW">
                                                     <rect key="frame" x="19.999999999999993" y="18.666666666666668" width="90.333333333333314" height="19.000000000000004"/>
@@ -594,7 +594,7 @@
                                             <subviews>
                                                 <switch opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="euJ-U0-xKW">
                                                     <rect key="frame" x="321" y="12.666666666666664" width="51" height="31"/>
-                                                    <color key="onTintColor" red="0.34901960780000002" green="0.69803921570000005" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    <color key="onTintColor" name="brand"/>
                                                 </switch>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="IPv4 Only" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="04b-al-rBB">
                                                     <rect key="frame" x="20" y="18.666666666666668" width="66.666666666666671" height="19.000000000000004"/>
@@ -669,7 +669,7 @@
                                             <subviews>
                                                 <switch opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="iP6-U0-swt">
                                                     <rect key="frame" x="321" y="12.666666666666664" width="51" height="31"/>
-                                                    <color key="onTintColor" red="0.34901960780000002" green="0.69803921570000005" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    <color key="onTintColor" name="brand"/>
                                                 </switch>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="IPv6 Only" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="iP6-al-lbl">
                                                     <rect key="frame" x="20" y="18.666666666666668" width="66.666666666666671" height="19.000000000000004"/>
@@ -1092,7 +1092,7 @@
                                             <subviews>
                                                 <switch opaque="NO" contentMode="scaleToFill" ambiguous="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2Ft-qQ-CiT">
                                                     <rect key="frame" x="775" y="12.666666666666664" width="51" height="31"/>
-                                                    <color key="onTintColor" red="0.34901960780000002" green="0.69803921570000005" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    <color key="onTintColor" name="brand"/>
                                                 </switch>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" ambiguous="YES" text="Enabled" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lN6-FT-bcj">
                                                     <rect key="frame" x="20" y="18.666666666666668" width="57" height="19.000000000000004"/>
@@ -1142,7 +1142,7 @@
                                                 </label>
                                                 <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" ambiguous="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="hostname.example.org" textAlignment="right" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="deH-kU-Bd7">
                                                     <rect key="frame" x="75.666666666666686" y="17.666666666666668" width="748.33333333333326" height="21.000000000000004"/>
-                                                    <color key="textColor" red="0.34901960780000002" green="0.69803921570000005" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    <color key="textColor" name="brand"/>
                                                     <fontDescription key="fontDescription" name="Roboto-Regular" family="Roboto" pointSize="16"/>
                                                     <textInputTraits key="textInputTraits" keyboardType="URL" returnKeyType="done" enablesReturnKeyAutomatically="YES"/>
                                                     <connections>
@@ -1189,7 +1189,7 @@
                                                 </label>
                                                 <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" ambiguous="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="80" textAlignment="right" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="olo-CY-5Dd">
                                                     <rect key="frame" x="60" y="17.666666666666668" width="764" height="21.000000000000004"/>
-                                                    <color key="textColor" red="0.34901960780000002" green="0.69803921570000005" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    <color key="textColor" name="brand"/>
                                                     <fontDescription key="fontDescription" name="Roboto-Regular" family="Roboto" pointSize="16"/>
                                                     <textInputTraits key="textInputTraits" keyboardType="numberPad" returnKeyType="done" enablesReturnKeyAutomatically="YES"/>
                                                     <connections>
@@ -1227,7 +1227,7 @@
                                             <subviews>
                                                 <switch opaque="NO" contentMode="scaleToFill" ambiguous="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="NtR-7V-P2J">
                                                     <rect key="frame" x="775" y="12.666666666666664" width="51" height="31"/>
-                                                    <color key="onTintColor" red="0.34901960780000002" green="0.69803921570000005" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    <color key="onTintColor" name="brand"/>
                                                 </switch>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="751" verticalCompressionResistancePriority="751" ambiguous="YES" text="Use SSL" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1UU-LR-TqC">
                                                     <rect key="frame" x="19.999999999999996" y="18.666666666666668" width="58.666666666666657" height="19.000000000000004"/>
@@ -1272,7 +1272,7 @@
                                             <subviews>
                                                 <switch opaque="NO" contentMode="scaleToFill" ambiguous="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Lq3-9T-1Le">
                                                     <rect key="frame" x="775" y="12.666666666666664" width="51" height="31"/>
-                                                    <color key="onTintColor" red="0.34901960780000002" green="0.69803921570000005" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    <color key="onTintColor" name="brand"/>
                                                 </switch>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="751" verticalCompressionResistancePriority="751" ambiguous="YES" text="Enabled" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="GnU-rY-H1M">
                                                     <rect key="frame" x="20" y="18.666666666666668" width="57" height="19.000000000000004"/>
@@ -1322,7 +1322,7 @@
                                                 </label>
                                                 <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" ambiguous="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="255.255.255.255" textAlignment="right" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="l4T-hu-ebd">
                                                     <rect key="frame" x="75.666666666666686" y="17.666666666666668" width="748.33333333333326" height="21.000000000000004"/>
-                                                    <color key="textColor" red="0.34901960780000002" green="0.69803921570000005" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    <color key="textColor" name="brand"/>
                                                     <fontDescription key="fontDescription" name="Roboto-Regular" family="Roboto" pointSize="16"/>
                                                     <textInputTraits key="textInputTraits" keyboardType="URL" returnKeyType="done" enablesReturnKeyAutomatically="YES"/>
                                                     <connections>
@@ -1369,7 +1369,7 @@
                                                 </label>
                                                 <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" ambiguous="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="9000" textAlignment="right" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="ilL-IN-kyB">
                                                     <rect key="frame" x="60" y="17.666666666666668" width="764" height="21.000000000000004"/>
-                                                    <color key="textColor" red="0.34901960780000002" green="0.69803921570000005" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    <color key="textColor" name="brand"/>
                                                     <fontDescription key="fontDescription" name="Roboto-Regular" family="Roboto" pointSize="16"/>
                                                     <textInputTraits key="textInputTraits" keyboardType="numberPad" returnKeyType="done" enablesReturnKeyAutomatically="YES"/>
                                                     <connections>
@@ -1832,7 +1832,7 @@
                                         <subviews>
                                             <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" animating="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="l0R-ba-ayg">
                                                 <rect key="frame" x="168.66666666666666" y="191.66666666666669" width="37" height="37"/>
-                                                <color key="color" name="greenButtonBackground"/>
+                                                <color key="color" name="brand"/>
                                             </activityIndicatorView>
                                         </subviews>
                                         <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.59588501780000003" colorSpace="custom" customColorSpace="displayP3"/>
@@ -1877,7 +1877,7 @@
                                         <subviews>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="TMD-r5-jYh">
                                                 <rect key="frame" x="0.0" y="0.0" width="350" height="48"/>
-                                                <color key="backgroundColor" name="greenButtonBackground"/>
+                                                <color key="backgroundColor" name="brand"/>
                                                 <constraints>
                                                     <constraint firstAttribute="height" constant="48" id="hbN-Ew-hiP"/>
                                                 </constraints>
@@ -1898,7 +1898,7 @@
                                                 <fontDescription key="fontDescription" name="Roboto-Regular" family="Roboto" pointSize="18"/>
                                                 <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                                                 <state key="normal" title="Enter Code">
-                                                    <color key="titleColor" name="greenButtonBackground"/>
+                                                    <color key="titleColor" name="brand"/>
                                                 </state>
                                                 <userDefinedRuntimeAttributes>
                                                     <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
@@ -1922,7 +1922,7 @@
                                                 <fontDescription key="fontDescription" name="Roboto-Regular" family="Roboto" pointSize="18"/>
                                                 <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                                                 <state key="normal" title="Close">
-                                                    <color key="titleColor" name="greenButtonBackground"/>
+                                                    <color key="titleColor" name="brand"/>
                                                 </state>
                                                 <userDefinedRuntimeAttributes>
                                                     <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
@@ -1952,7 +1952,7 @@
                                                 <fontDescription key="fontDescription" name="Roboto-Regular" family="Roboto" pointSize="18"/>
                                                 <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                                                 <state key="normal" title="Close">
-                                                    <color key="titleColor" name="greenButtonBackground"/>
+                                                    <color key="titleColor" name="brand"/>
                                                 </state>
                                                 <userDefinedRuntimeAttributes>
                                                     <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
@@ -1961,7 +1961,7 @@
                                                 </userDefinedRuntimeAttributes>
                                             </button>
                                         </subviews>
-                                        <color key="tintColor" name="greenButtonBackground"/>
+                                        <color key="tintColor" name="brand"/>
                                         <constraints>
                                             <constraint firstAttribute="height" relation="lessThanOrEqual" constant="108" id="2aG-Bc-M9W"/>
                                         </constraints>
@@ -1975,7 +1975,7 @@
                                                     <textField opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="251" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Code" textAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="rZh-fO-nCj" customClass="RMBTMaterialTextField" customModule="RMBT" customModuleProvider="target">
                                                         <rect key="frame" x="0.0" y="0.0" width="310" height="48"/>
                                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                                        <color key="tintColor" name="greenButtonBackground"/>
+                                                        <color key="tintColor" name="brand"/>
                                                         <fontDescription key="fontDescription" name="Roboto-Regular" family="Roboto" pointSize="25"/>
                                                         <textInputTraits key="textInputTraits"/>
                                                     </textField>
@@ -1988,7 +1988,7 @@
                                                         <fontDescription key="fontDescription" name="Roboto-Regular" family="Roboto" pointSize="18"/>
                                                         <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                                                         <state key="normal" title="Enter Code">
-                                                            <color key="titleColor" name="greenButtonBackground"/>
+                                                            <color key="titleColor" name="brand"/>
                                                         </state>
                                                         <userDefinedRuntimeAttributes>
                                                             <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
@@ -2010,7 +2010,7 @@
                                                 <fontDescription key="fontDescription" name="Roboto-Regular" family="Roboto" pointSize="18"/>
                                                 <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                                                 <state key="normal" title="Enter Code">
-                                                    <color key="titleColor" name="greenButtonBackground"/>
+                                                    <color key="titleColor" name="brand"/>
                                                 </state>
                                                 <userDefinedRuntimeAttributes>
                                                     <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
@@ -2512,7 +2512,7 @@
                                     </label>
                                     <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="address or city" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Us1-jm-qDg">
                                         <rect key="frame" x="16" y="84" width="326" height="30"/>
-                                        <color key="tintColor" red="0.34901960780000002" green="0.69803921570000005" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <color key="tintColor" name="brand"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="30" id="G3m-gI-xuh"/>
                                         </constraints>
@@ -2524,7 +2524,7 @@
                                     </textField>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Rob-CT-NuS">
                                         <rect key="frame" x="16" y="116" width="326" height="1"/>
-                                        <color key="backgroundColor" red="0.34901960780000002" green="0.69803921570000005" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <color key="backgroundColor" name="brand"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="1" id="2S4-Ww-24j"/>
                                         </constraints>
@@ -2534,7 +2534,7 @@
                                         <fontDescription key="fontDescription" name="Roboto-Medium" family="Roboto" pointSize="16"/>
                                         <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                                         <state key="normal" title="Cancel">
-                                            <color key="titleColor" red="0.34901960780000002" green="0.69803921570000005" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                            <color key="titleColor" name="brand"/>
                                         </state>
                                         <connections>
                                             <action selector="cancelButtonClick:" destination="VoZ-iG-vdH" eventType="touchUpInside" id="Vtf-gg-eMg"/>
@@ -2545,7 +2545,7 @@
                                         <fontDescription key="fontDescription" name="Roboto-Medium" family="Roboto" pointSize="16"/>
                                         <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                                         <state key="normal" title="Search">
-                                            <color key="titleColor" red="0.34901960780000002" green="0.69803921570000005" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                            <color key="titleColor" name="brand"/>
                                         </state>
                                         <connections>
                                             <action selector="searchButtonClick:" destination="VoZ-iG-vdH" eventType="touchUpInside" id="HUm-oD-fgj"/>
@@ -3112,7 +3112,7 @@
                             </tableView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="xmk-t2-ylF">
                                 <rect key="frame" x="20" y="720" width="350" height="48"/>
-                                <color key="backgroundColor" red="0.34901960784313724" green="0.69803921568627447" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                <color key="backgroundColor" name="brand"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="48" id="644-pF-a6r"/>
                                 </constraints>
@@ -3195,7 +3195,7 @@
                             </tableView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="N4h-Xo-EGa">
                                 <rect key="frame" x="20" y="744" width="350" height="48"/>
-                                <color key="backgroundColor" red="0.34901960780000002" green="0.69803921570000005" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                <color key="backgroundColor" name="brand"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="48" id="wKu-Tl-1PA"/>
                                 </constraints>
@@ -3296,7 +3296,7 @@
                             </view>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="xCa-jZ-IIk">
                                 <rect key="frame" x="20" y="720" width="350" height="48"/>
-                                <color key="backgroundColor" red="0.34901960780000002" green="0.69803921570000005" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                <color key="backgroundColor" name="brand"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="48" id="50z-sf-vmN"/>
                                 </constraints>
@@ -3468,7 +3468,7 @@
                                     </label>
                                     <button opaque="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="0dG-7n-qLR">
                                         <rect key="frame" x="20" y="80" width="350" height="48"/>
-                                        <color key="backgroundColor" name="greenButtonBackground"/>
+                                        <color key="backgroundColor" name="brand"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="48" id="MVU-9D-wku"/>
                                         </constraints>
@@ -3485,7 +3485,7 @@
                                         <color key="backgroundColor" name="greenButtonTitle"/>
                                         <fontDescription key="fontDescription" name="Roboto-Medium" family="Roboto" pointSize="14"/>
                                         <state key="normal" title="ABBRECHEN">
-                                            <color key="titleColor" name="greenButtonBackground"/>
+                                            <color key="titleColor" name="brand"/>
                                         </state>
                                         <connections>
                                             <action selector="decline:" destination="Xk9-kH-2en" eventType="touchUpInside" id="TXE-Lv-1rf"/>
@@ -3560,7 +3560,7 @@
                                     </view>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="EjO-Ec-DuD">
                                         <rect key="frame" x="20" y="16" width="350" height="48"/>
-                                        <color key="backgroundColor" name="greenButtonBackground"/>
+                                        <color key="backgroundColor" name="brand"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="48" id="NlK-By-Ga0"/>
                                         </constraints>
@@ -3577,7 +3577,7 @@
                                         <color key="backgroundColor" name="greenButtonTitle"/>
                                         <fontDescription key="fontDescription" name="Roboto-Medium" family="Roboto" pointSize="14"/>
                                         <state key="normal" title="ABBRECHEN">
-                                            <color key="titleColor" name="greenButtonBackground"/>
+                                            <color key="titleColor" name="brand"/>
                                         </state>
                                         <connections>
                                             <segue destination="h1F-ET-lmz" kind="unwind" unwindAction="declineLoopModeConfirmation:" id="QfA-NE-EIC"/>
@@ -3655,11 +3655,11 @@
                                     </label>
                                     <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="7" textAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Cos-h4-2O1">
                                         <rect key="frame" x="0.0" y="57.666666666666657" width="390" height="64"/>
-                                        <color key="tintColor" red="0.34901960784313724" green="0.69803921568627447" blue="0.0" alpha="0.40000000000000002" colorSpace="custom" customColorSpace="calibratedRGB"/>
+                                        <color key="tintColor" name="brand"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="64" id="mpy-BV-hbH"/>
                                         </constraints>
-                                        <color key="textColor" red="0.34901960784313724" green="0.69803921568627447" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                        <color key="textColor" name="brand"/>
                                         <fontDescription key="fontDescription" name="Roboto-Medium" family="Roboto" pointSize="64"/>
                                         <textInputTraits key="textInputTraits" keyboardType="numberPad"/>
                                     </textField>
@@ -3688,8 +3688,8 @@
                                             </label>
                                             <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="10" textAlignment="right" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="TX2-4U-gWI">
                                                 <rect key="frame" x="177.33333333333337" y="18" width="192.66666666666663" height="20.333333333333329"/>
-                                                <color key="tintColor" red="0.34901960780000002" green="0.69803921570000005" blue="0.0" alpha="0.40000000000000002" colorSpace="custom" customColorSpace="calibratedRGB"/>
-                                                <color key="textColor" red="0.34901960780000002" green="0.69803921570000005" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                                <color key="tintColor" name="brand"/>
+                                                <color key="textColor" name="brand"/>
                                                 <fontDescription key="fontDescription" name="Roboto-Regular" family="Roboto" pointSize="16"/>
                                                 <textInputTraits key="textInputTraits" keyboardType="numberPad"/>
                                                 <connections>
@@ -3728,8 +3728,8 @@
                                             </label>
                                             <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="250" textAlignment="right" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Xw9-yc-XlG">
                                                 <rect key="frame" x="155.66666666666663" y="18" width="214.33333333333337" height="20.333333333333329"/>
-                                                <color key="tintColor" red="0.34901960780000002" green="0.69803921570000005" blue="0.0" alpha="0.40000000000000002" colorSpace="custom" customColorSpace="calibratedRGB"/>
-                                                <color key="textColor" red="0.34901960780000002" green="0.69803921570000005" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                                <color key="tintColor" name="brand"/>
+                                                <color key="textColor" name="brand"/>
                                                 <fontDescription key="fontDescription" name="Roboto-Regular" family="Roboto" pointSize="16"/>
                                                 <textInputTraits key="textInputTraits" keyboardType="numberPad"/>
                                                 <connections>
@@ -3801,7 +3801,7 @@
                             </label>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="xRu-bo-L4d">
                                 <rect key="frame" x="20" y="762" width="350" height="48"/>
-                                <color key="backgroundColor" red="0.34901960784313724" green="0.69803921568627447" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                <color key="backgroundColor" name="brand"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="48" id="q0f-Qm-d8b"/>
                                 </constraints>
@@ -4100,11 +4100,11 @@
         <image name="tab_map" width="24" height="24"/>
         <image name="tab_stats" width="24" height="24"/>
         <image name="tab_test" width="24" height="24"/>
+        <namedColor name="brand">
+            <color red="0.34901960784313724" green="0.69803921568627447" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
         <namedColor name="graySeparator">
             <color red="0.93333333333333335" green="0.93333333333333335" blue="0.93333333333333335" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="greenButtonBackground">
-            <color red="0.34901960784313724" green="0.69803921568627447" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="greenButtonTitle">
             <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>

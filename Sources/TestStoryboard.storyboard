@@ -312,7 +312,7 @@
                                     </label>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="P3S-yd-Zpf">
                                         <rect key="frame" x="28" y="172" width="334" height="48"/>
-                                        <color key="backgroundColor" red="0.34901960784313724" green="0.69803921568627447" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                        <color key="backgroundColor" name="brand"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="48" id="502-zI-Ysm"/>
                                         </constraints>
@@ -391,5 +391,8 @@
     <resources>
         <image name="loop_mode_completed_icon" width="84" height="90"/>
         <image name="warning_icon" width="16" height="16"/>
+        <namedColor name="brand">
+            <color red="0.34901960784313724" green="0.69803921568627447" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
     </resources>
 </document>
