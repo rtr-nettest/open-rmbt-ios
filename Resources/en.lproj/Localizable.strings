@@ -285,7 +285,7 @@
 "public_ip_address" = "Public address";
 "private_ip_address" = "Private address";
 
-"title_coverage_series" = "Coverage series";
+"title_coverage_series" = "Signal measurement series";
 "coverage_label" = "Signal Measurement";
 
 /* Location Dialog */
