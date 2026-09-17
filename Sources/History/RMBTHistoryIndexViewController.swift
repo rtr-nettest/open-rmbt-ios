@@ -104,10 +104,7 @@ final class RMBTHistoryIndexViewController: UIViewController {
 
         firstAppearance = true
 
-        // Add footer padding to compensate for tab bar
-        let footerView = UIView(frame: CGRect(x: 0,y: 0,width: 0,height: self.tabBarController?.tabBar.frame.height ?? 0))
-        footerView.backgroundColor = UIColor.clear
-        self.tableView.tableFooterView = footerView
+        pinTableBottomToSafeArea()
         self.tableView.register(UINib(nibName: RMBTHistoryIndexCell.ID, bundle: nil), forCellReuseIdentifier: RMBTHistoryIndexCell.ID)
         self.tableView.register(UINib(nibName: RMBTHistoryLoadingCell.ID, bundle: nil), forCellReuseIdentifier: RMBTHistoryLoadingCell.ID)
         self.tableView.register(UINib(nibName: RMBTHistoryLoopCell.ID, bundle: nil), forHeaderFooterViewReuseIdentifier: RMBTHistoryLoopCell.ID)
@@ -118,7 +115,7 @@ final class RMBTHistoryIndexViewController: UIViewController {
         }
         
         self.filterContainer.addSubview(self.filterView)
-        
+
         NSLayoutConstraint.activate([
             self.filterContainer.leftAnchor.constraint(equalTo: self.filterView.leftAnchor),
             self.filterContainer.topAnchor.constraint(equalTo: self.filterView.topAnchor),
@@ -126,10 +123,28 @@ final class RMBTHistoryIndexViewController: UIViewController {
             self.filterContainer.rightAnchor.constraint(equalTo: self.filterView.rightAnchor)
         ])
     }
+
+    /// The storyboard pins the table's bottom to the view's bottom, so the table extends the full height of
+    /// the screen. Before iOS 26 the opaque tab bar covered that overhang; with the floating Liquid Glass
+    /// tab bar there is nothing opaque there, so the last rows showed through and below the translucent bar
+    /// (and the bar itself, being white over white content, looked like a block masking the table). Re-pin
+    /// the bottom to the safe area — which already excludes the floating tab bar — so the table ends cleanly
+    /// just above the bar, every row stays visible, and the view's plain background fills behind the bar.
+    private func pinTableBottomToSafeArea() {
+        // Deactivate the storyboard's "table bottom == view bottom" constraint.
+        if let bottomToView = view.constraints.first(where: {
+            $0.firstAttribute == .bottom && $0.secondAttribute == .bottom &&
+            (($0.firstItem as? UIView === view && $0.secondItem as? UIView === tableView) ||
+             ($0.firstItem as? UIView === tableView && $0.secondItem as? UIView === view))
+        }) {
+            bottomToView.isActive = false
+        }
+        tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor).isActive = true
+    }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
+
         if let selectedIndexPath = tableView.indexPathForSelectedRow {
             tableView.deselectRow(at: selectedIndexPath, animated: true)
         } else {

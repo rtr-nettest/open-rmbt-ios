@@ -226,6 +226,29 @@ class RMBTIntroViewController: UIViewController {
         }
     }
 
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        updateStatusIconTabAlignment()
+    }
+
+    /// Reports the tab-bar items' X centres to the intro view so its status-icon row (IPv4 / IPv6 / Location /
+    /// Coverage) can be aligned exactly under the tab items. The floating Liquid Glass items are not on even
+    /// pill-quarters, so we read their real centres from the (private) item button views — defensively, by
+    /// class name, read-only; if none are found the intro view keeps its own even-quarter estimate.
+    private func updateStatusIconTabAlignment() {
+        guard #available(iOS 26.0, *),
+              let introView = self.view as? RMBTIntroPortraitView,
+              let tabBar = tabBarController?.tabBar else { return }
+        // The item buttons appear in several internal container views, so the same centre shows up more than
+        // once — dedup (to 0.5pt buckets) and sort to get one X per tab item.
+        var seen = Set<Int>()
+        let centers = tabBar.rmbtItemButtonViews()
+            .compactMap { $0.superview?.convert($0.center, to: introView).x }
+            .sorted()
+            .filter { seen.insert(Int(($0 * 2).rounded())).inserted }
+        introView.setTabItemCentersX(centers.isEmpty ? nil : centers)
+    }
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         currentView.updateLoopModeUI()
@@ -733,6 +756,23 @@ extension RMBTIntroViewController: RMBTTestViewControllerDelegate {
               let historyVC = navController.viewControllers.first as? RMBTHistoryIndexViewController else { return }
 
         historyVC.displayTestResult(result)
+    }
+}
+
+private extension UITabBar {
+    /// The private tab-item button views (`_UITabButton` on iOS 26), located by class-name so we do not
+    /// hard-depend on the private type. Used read-only (for their frames); returns [] if the hierarchy differs.
+    /// The same buttons appear in several internal container views, so callers must dedup by position.
+    func rmbtItemButtonViews() -> [UIView] {
+        func collect(_ view: UIView) -> [UIView] {
+            view.subviews.reduce(into: [UIView]()) { result, subview in
+                if String(describing: type(of: subview)).contains("TabButton") {
+                    result.append(subview)
+                }
+                result.append(contentsOf: collect(subview))
+            }
+        }
+        return collect(self)
     }
 }
 

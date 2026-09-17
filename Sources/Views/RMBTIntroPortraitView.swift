@@ -180,12 +180,6 @@ class RMBTIntroPortraitView: UIView, XibLoadable {
         wave2View.startAnimation()
     }
 
-    /// From iOS 26 the system tab bar renders as a floating Liquid Glass element. The intro screen's
-    /// own status-icon strip (IPv4 / IPv6 / Location / Coverage) used to be an opaque `systemBackground`
-    /// slab sitting directly above it, so two stacked bars — one opaque, one glass — looked disjointed.
-    /// Here we drop the opaque slab and float the icon cluster inside a single Liquid Glass capsule, so
-    /// the strip belongs to the same design language as the tab bar. Works for both orientations (a wide
-    /// pill in portrait, a tall pill in landscape). Pre-26 keeps the original opaque bar untouched.
     /// Measured metrics of the iOS 26 floating Liquid Glass tab bar pill (iPhone, portrait): the visible
     /// pill is inset ~21pt from each screen edge and is ~62pt tall. The status capsule matches these so the
     /// two rows share the same width/height, and the icons are re-centred onto the tab items (layoutSubviews).
@@ -202,6 +196,12 @@ class RMBTIntroPortraitView: UIView, XibLoadable {
     // pill-quarters). Nil until known / off iOS 26 → layoutSubviews falls back to an even-quarter estimate.
     private var tabItemCentersX: [CGFloat]?
 
+    /// From iOS 26 the system tab bar renders as a floating Liquid Glass element. The intro screen's
+    /// own status-icon strip (IPv4 / IPv6 / Location / Coverage) used to be an opaque `systemBackground`
+    /// slab sitting directly above it, so two stacked bars — one opaque, one glass — looked disjointed.
+    /// Here we drop the opaque slab and float the icon cluster inside a single Liquid Glass capsule, so
+    /// the strip belongs to the same design language as the tab bar. Works for both orientations (a wide
+    /// pill in portrait, a tall pill in landscape). Pre-26 keeps the original opaque bar untouched.
     private func installLiquidGlassIconBar() {
         guard #available(iOS 26.0, *) else { return }
 
@@ -283,11 +283,22 @@ class RMBTIntroPortraitView: UIView, XibLoadable {
         alignIconRowToTabBarItems()
     }
 
-    /// Slides the four status icons so each sits on the centre of its corresponding tab-bar item below.
-    /// The tab bar lays four items out on even quarters of its pill (inset `tabBarPillSideInset` from the
-    /// edges); with the stack's `equalSpacing` distribution, insetting the columns by `quarter/2 - iconWidth/2`
-    /// from the pill edge puts every icon centre exactly on a tab-item centre. No-op unless the portrait icon
-    /// bar was installed (iOS 26). Recomputed on every layout so it stays correct across screen widths.
+    /// The controller reports the tab-bar items' X centres here (in this view's coordinates) once the tab
+    /// bar is laid out, so the status icons can be placed exactly beneath them. Triggers a re-layout only
+    /// when the values actually change, to avoid a layout loop.
+    func setTabItemCentersX(_ centers: [CGFloat]?) {
+        guard tabItemCentersX != centers else { return }
+        tabItemCentersX = centers
+        // Apply right away with the current bounds; the constraint change schedules the visual update. (A
+        // plain setNeedsLayout() would not re-run the alignment reliably within the same layout cycle.)
+        alignIconRowToTabBarItems()
+    }
+
+    /// Slides the status icons so each sits on the centre of its corresponding tab-bar item below. With the
+    /// stack's `equalSpacing` distribution, pinning the outer columns to the outer tab-item centres makes the
+    /// evenly-spaced items in between line up too. Uses the real item centres reported by the controller when
+    /// available; otherwise falls back to an even-quarter estimate of the tab bar pill. No-op unless the
+    /// portrait icon bar was installed (iOS 26). Recomputed on every layout so it stays correct across widths.
     private func alignIconRowToTabBarItems() {
         guard let leading = iconStackLeadingConstraint,
               let trailing = iconStackTrailingConstraint,
@@ -298,13 +309,31 @@ class RMBTIntroPortraitView: UIView, XibLoadable {
         guard width > 0 else { return }
 
         let iconWidth = locationImageView.bounds.width > 0 ? locationImageView.bounds.width : 45
-        let quarter = (width - 2 * Self.tabBarPillSideInset) / CGFloat(iconStack.arrangedSubviews.count)
-        let inset = Self.tabBarPillSideInset + quarter / 2 - iconWidth / 2
+        // Number of icons the stack actually lays out (UIStackView ignores hidden arranged subviews).
+        let visibleIconCount = iconStack.arrangedSubviews.filter { !$0.isHidden }.count
 
-        if abs(leading.constant - inset) > 0.5 {
-            leading.constant = inset
-            trailing.constant = inset
+        let leadingInset: CGFloat
+        let trailingInset: CGFloat
+        if let centers = tabItemCentersX,
+           centers.count == visibleIconCount,
+           let first = centers.first, let last = centers.last,
+           isStrictlyIncreasing(centers), first >= 0, last <= width {
+            // Exact: outer icons onto the outer tab-item centres; equalSpacing handles the ones between.
+            leadingInset = first - iconWidth / 2
+            trailingInset = width - last - iconWidth / 2
+        } else {
+            // Fallback estimate: centre the icons on even segments of the tab bar pill.
+            let segment = (width - 2 * Self.tabBarPillSideInset) / CGFloat(max(visibleIconCount, 1))
+            leadingInset = Self.tabBarPillSideInset + segment / 2 - iconWidth / 2
+            trailingInset = leadingInset
         }
+
+        if abs(leading.constant - leadingInset) > 0.5 { leading.constant = leadingInset }
+        if abs(trailing.constant - trailingInset) > 0.5 { trailing.constant = trailingInset }
+    }
+
+    private func isStrictlyIncreasing(_ values: [CGFloat]) -> Bool {
+        zip(values, values.dropFirst()).allSatisfy { $0 < $1 }
     }
 
     func startAnimation() {
