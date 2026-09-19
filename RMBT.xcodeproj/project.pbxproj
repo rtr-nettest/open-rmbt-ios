@@ -106,6 +106,7 @@
 		9BBE11FB131ED439EC173841 /* CellularSnapshotProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7D3BBEDF12B98A0F0759EA6 /* CellularSnapshotProvider.swift */; };
 		A5EC6220FC2679D6070121B6 /* SIMInfoViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 243AF8E44A4D00F1B9A6B503 /* SIMInfoViewModel.swift */; };
 		AA000001303A000000000001 /* Localizable.stringsdict in Resources */ = {isa = PBXBuildFile; fileRef = AA000001303A000000000004 /* Localizable.stringsdict */; };
+		AFD6DCC71B5BFAF008C72295 /* RMBTSceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EBA77D0E5CCA5187CA3ADD3 /* RMBTSceneDelegate.swift */; };
 		C03F8268CF6845028CBEDA4C /* FenceFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94ACDE3F34869D6346ADEA9F /* FenceFactory.swift */; };
 		C573F2A5175281D300C728FC /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C573F2A4175281D300C728FC /* MapKit.framework */; };
 		C573F2B1175294A500C728FC /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C573F2B0175294A500C728FC /* CoreLocation.framework */; };
@@ -469,6 +470,7 @@
 		49FBC0002F00A0000009D9A6 /* AsyncSocketUDPConnectionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncSocketUDPConnectionTests.swift; sourceTree = "<group>"; };
 		4A0000002EAA35630009D9A6 /* NWPathMonitorNetworkConnectionTypeUpdatesService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NWPathMonitorNetworkConnectionTypeUpdatesService.swift; sourceTree = "<group>"; };
 		4A0000022EAA35630009D9A6 /* CurrentNetworkTypeProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentNetworkTypeProvider.swift; sourceTree = "<group>"; };
+		5EBA77D0E5CCA5187CA3ADD3 /* RMBTSceneDelegate.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RMBTSceneDelegate.swift; sourceTree = "<group>"; };
 		64A52344AA25543676788609 /* SIMInfoSnapshotBuilderTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SIMInfoSnapshotBuilderTests.swift; sourceTree = "<group>"; };
 		66A000012F10000000000002 /* FenceRadiusCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FenceRadiusCalculator.swift; sourceTree = "<group>"; };
 		66A000022F20000000000002 /* CoverageButtonGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverageButtonGate.swift; sourceTree = "<group>"; };
@@ -1400,6 +1402,7 @@
 				C774EE7C1793674200D623A3 /* History */,
 				C7B15A35180AA99B0097676F /* Stats */,
 				C73E792417673EA40009855E /* Settings */,
+				5EBA77D0E5CCA5187CA3ADD3 /* RMBTSceneDelegate.swift */,
 			);
 			name = App;
 			sourceTree = "<group>";
@@ -2342,6 +2345,7 @@
 				DBD96290853D2166E13105FF /* CoverageReadinessView.swift in Sources */,
 				5FE3731666D25C685CD8C312 /* CoverageTermsView.swift in Sources */,
 				3299F5FCE7F2BD48D329929F /* CoverageActionButtons.swift in Sources */,
+				AFD6DCC71B5BFAF008C72295 /* RMBTSceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

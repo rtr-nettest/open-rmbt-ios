@@ -36,5 +36,5 @@ Feature: Resend policy for warm foreground vs. cold start (crash/quit recovery)
     Then the client resends all fences for test_uuid T (subject to normal success/failure handling)
 
   Notes:
-  - Cold vs. warm is distinguished by AppDelegate: onStart(true) for didFinishLaunching, onStart(false) for willEnterForeground.
+  - Cold vs. warm is distinguished by RMBTSceneDelegate: onStart(true) from scene(_:willConnectTo:options:), onStart(false) from sceneWillEnterForeground (only when returning from background; the cold-launch call is skipped).
   - Finished vs. unfinished is determined solely by the presence of session.finalizedAt.

@@ -11,97 +11,20 @@ import SwiftUI
 
 @UIApplicationMain
 final class RMBTAppDelegate: UIResponder, UIApplicationDelegate {
-    var window: UIWindow?
-
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         applyAppearance()
-        onStart(true)
         return true
     }
 
-    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
-        if url.host == "debug" || url.host == "undebug" {
-            let unlock = url.host == "debug"
-            RMBTSettings.shared.debugUnlocked = unlock
-            let stateString = unlock ? "Unlocked" : "Locked"
-            UIAlertController.presentAlert(title: "Debug Mode \(stateString)",
-                                           text: "The app will now quit to apply the new settings.",
-                                           cancelTitle: "OK", otherTitle: nil) { _ in
-                exit(0)
-            } otherAction: { _ in }
-            return true
-        } else {
-            return false
-        }
-    }
-
-    func applicationDidEnterBackground(_ application: UIApplication) {
-        RMBTLocationTracker.shared.stop()
-        NetworkReachability.shared.stopMonitoring()
-        // Log writes are queued off the calling thread, so drain them while we still have a chance to run.
-        LogConfig.flushLog()
+    func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
+        UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
     }
 
     func applicationWillTerminate(_ application: UIApplication) {
         LogConfig.flushLog()
     }
 
-    func applicationWillEnterForeground(_ application: UIApplication) {
-        onStart(false)
-    }
-
-    // This method is called from both applicationWillEnterForeground and application:didFinishLaunchingWithOptions:
-    private func onStart(_ isLaunched: Bool) {
-        Log.logger.debug("App started")
-        NetworkReachability.shared.startMonitoring()
-        RMBTControlServer.shared.updateWithCurrentSettings { [weak self] in
-            let tos = RMBTTOS.shared
-
-            if tos.isCurrentVersionAccepted(with: RMBTControlServer.shared.termsAndConditions) {
-                self?.checkNews(isLaunched: isLaunched)
-            } else {
-                // TODO: Remake it
-                tos.bk_addObserver(forKeyPath: "lastAcceptedVersion") { [weak self] sender in
-                    Log.logger.debug("TOS accepted, checking news...")
-                    self?.checkNews(isLaunched: isLaunched)
-                }
-            }
-        } error: {  _ in
-
-        }
-
-        // If user has authorized location services, we should start tracking location now, so that when test starts,
-        // we already have a more accurate location
-        _ = RMBTLocationTracker.shared.startIfAuthorized()
-    }
-
-    private func checkNews(isLaunched: Bool) {
-        RMBTControlServer.shared.getSettings {
-            Task {
-                try? await NetworkCoverageFactory().persistedFencesSender.resendPersistentAreas(isLaunched: isLaunched)
-            }
-        } error: { _ in }
-        RMBTControlServer.shared.getNews { [weak self] response in
-            self?.showNews(response.news)
-        } error: { _ in }
-    }
-
-    private func showNews(_ news: [RMBTNews]) {
-        guard news.count > 0 else { return }
-
-        var currentNews = news
-        let n = currentNews.removeLast()
-        UIAlertController.presentAlert(title: n.title,
-                                                   text: n.text, cancelTitle: NSLocalizedString("Dismiss", comment: "News alert view button"), otherTitle: nil) { [weak self] _ in
-            self?.showNews(currentNews)
-        } otherAction: { _ in }
-    }
-
     private func applyAppearance() {
-        //Disable dark mode
-        if #available(iOS 13.0, *) {
-            window?.overrideUserInterfaceStyle = .light
-        }
         // Background color
         if #available(iOS 13.0, *) {
             let navigationBarAppearance = UINavigationBarAppearance()
@@ -142,13 +65,6 @@ final class RMBTAppDelegate: UIResponder, UIApplicationDelegate {
 
         // Text color
         RMBTNavigationBar.appearance().titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor(red: 66.0/255.0, green: 66.0/255.0, blue: 66.0/255.0, alpha: 1.0)]
-
-        let tabBarController = window?.rootViewController as? UITabBarController
-        let tabBar = tabBarController?.tabBar
-        tabBar?.items?[0].title = NSLocalizedString("Home", comment: "")
-        tabBar?.items?[1].title = NSLocalizedString("History", comment: "")
-        tabBar?.items?[2].title = NSLocalizedString("Statistics", comment: "")
-        tabBar?.items?[3].title = NSLocalizedString("Map", comment: "")
     }
 }
 
