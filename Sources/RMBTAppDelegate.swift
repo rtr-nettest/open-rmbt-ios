@@ -19,38 +19,36 @@ final class RMBTAppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
 
-    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
-        if url.host == "debug" || url.host == "undebug" {
-            let unlock = url.host == "debug"
-            RMBTSettings.shared.debugUnlocked = unlock
-            let stateString = unlock ? "Unlocked" : "Locked"
-            UIAlertController.presentAlert(title: "Debug Mode \(stateString)",
-                                           text: "The app will now quit to apply the new settings.",
-                                           cancelTitle: "OK", otherTitle: nil) { _ in
-                exit(0)
-            } otherAction: { _ in }
-            return true
-        } else {
-            return false
-        }
+    func applicationWillTerminate(_ application: UIApplication) {
+        LogConfig.flushLog()
     }
 
-    func applicationDidEnterBackground(_ application: UIApplication) {
+    // MARK: - Scene lifecycle
+    // The app uses the UIScene life cycle (required by the iOS 26+ SDK). `RMBTSceneDelegate` owns the window
+    // and forwards the app-level foreground / background work here, so the app delegate stays the single place
+    // that knows what "the app went to background / came back" means. Under the scene lifecycle the
+    // `applicationDidEnterBackground` / `applicationWillEnterForeground` delegate methods are never called.
+
+    func localizeTabBarTitles(in window: UIWindow?) {
+        let tabBar = (window?.rootViewController as? UITabBarController)?.tabBar
+        tabBar?.items?[0].title = NSLocalizedString("Home", comment: "")
+        tabBar?.items?[1].title = NSLocalizedString("History", comment: "")
+        tabBar?.items?[2].title = NSLocalizedString("Statistics", comment: "")
+        tabBar?.items?[3].title = NSLocalizedString("Map", comment: "")
+    }
+
+    func didEnterBackground() {
         RMBTLocationTracker.shared.stop()
         NetworkReachability.shared.stopMonitoring()
         // Log writes are queued off the calling thread, so drain them while we still have a chance to run.
         LogConfig.flushLog()
     }
 
-    func applicationWillTerminate(_ application: UIApplication) {
-        LogConfig.flushLog()
-    }
-
-    func applicationWillEnterForeground(_ application: UIApplication) {
+    func willEnterForeground() {
         onStart(false)
     }
 
-    // This method is called from both applicationWillEnterForeground and application:didFinishLaunchingWithOptions:
+    // Called on launch (from didFinishLaunchingWithOptions) and on every foreground return (via the scene).
     private func onStart(_ isLaunched: Bool) {
         Log.logger.debug("App started")
         NetworkReachability.shared.startMonitoring()
@@ -98,10 +96,8 @@ final class RMBTAppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     private func applyAppearance() {
-        //Disable dark mode
-        if #available(iOS 13.0, *) {
-            window?.overrideUserInterfaceStyle = .light
-        }
+        // Dark mode is disabled app-wide via Info.plist (UIUserInterfaceStyle = Light) and, defensively, on
+        // the scene's window in RMBTSceneDelegate — the app delegate has no window under the scene lifecycle.
         // Background color
         if #available(iOS 13.0, *) {
             let navigationBarAppearance = UINavigationBarAppearance()
@@ -143,12 +139,8 @@ final class RMBTAppDelegate: UIResponder, UIApplicationDelegate {
         // Text color
         RMBTNavigationBar.appearance().titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor(red: 66.0/255.0, green: 66.0/255.0, blue: 66.0/255.0, alpha: 1.0)]
 
-        let tabBarController = window?.rootViewController as? UITabBarController
-        let tabBar = tabBarController?.tabBar
-        tabBar?.items?[0].title = NSLocalizedString("Home", comment: "")
-        tabBar?.items?[1].title = NSLocalizedString("History", comment: "")
-        tabBar?.items?[2].title = NSLocalizedString("Statistics", comment: "")
-        tabBar?.items?[3].title = NSLocalizedString("Map", comment: "")
+        // Tab bar item titles are localized in `localizeTabBarTitles(in:)`, called from the scene delegate
+        // once the window (and its tab bar controller) exists.
     }
 }
 

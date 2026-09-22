@@ -128,6 +128,7 @@
 		C7F08F6A1769F37700741844 /* CoreTelephony.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7F08F691769F37600741844 /* CoreTelephony.framework */; };
 		C7F3FB33179CC86900E336CF /* terms_conditions_long.html in Resources */ = {isa = PBXBuildFile; fileRef = C7F3FB35179CC86900E336CF /* terms_conditions_long.html */; };
 		C7F599A71A2A81940020ADC4 /* RMBTHistoryIndexCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = C7F599A61A2A81940020ADC4 /* RMBTHistoryIndexCell.xib */; };
+		DA44FC487A500188D1B8EEF9 /* RMBTSceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A90D5EAE18C42823F466FB51 /* RMBTSceneDelegate.swift */; };
 		DBD96290853D2166E13105FF /* CoverageReadinessView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90C19D1EDC52AD081E106F82 /* CoverageReadinessView.swift */; };
 		E0B12E597C005AE52379D499 /* AsyncSocketUDPConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08375CB881FC7003A0FCBF87 /* AsyncSocketUDPConnection.swift */; };
 		E91316AE26AD72F200368DCD /* RMBTTOSViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E91316AD26AD72F200368DCD /* RMBTTOSViewController.swift */; };
@@ -482,6 +483,7 @@
 		9E95B2179B357FF985E9D9D7 /* CoverageHistoryDetailServiceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CoverageHistoryDetailServiceTests.swift; sourceTree = "<group>"; };
 		A0C545CF605E364BCA4F45EA /* Pods-RMBTTest.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RMBTTest.debug.xcconfig"; path = "Pods/Target Support Files/Pods-RMBTTest/Pods-RMBTTest.debug.xcconfig"; sourceTree = "<group>"; };
 		A7D3BBEDF12B98A0F0759EA6 /* CellularSnapshotProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CellularSnapshotProvider.swift; sourceTree = "<group>"; };
+		A90D5EAE18C42823F466FB51 /* RMBTSceneDelegate.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RMBTSceneDelegate.swift; sourceTree = "<group>"; };
 		AA000001303A000000000002 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = en; path = en.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
 		AA000001303A000000000003 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = Base; path = Base.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
 		AA000001303A000000000005 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = de; path = de.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
@@ -1400,6 +1402,7 @@
 				C774EE7C1793674200D623A3 /* History */,
 				C7B15A35180AA99B0097676F /* Stats */,
 				C73E792417673EA40009855E /* Settings */,
+				A90D5EAE18C42823F466FB51 /* RMBTSceneDelegate.swift */,
 			);
 			name = App;
 			sourceTree = "<group>";
@@ -2342,6 +2345,7 @@
 				DBD96290853D2166E13105FF /* CoverageReadinessView.swift in Sources */,
 				5FE3731666D25C685CD8C312 /* CoverageTermsView.swift in Sources */,
 				3299F5FCE7F2BD48D329929F /* CoverageActionButtons.swift in Sources */,
+				DA44FC487A500188D1B8EEF9 /* RMBTSceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

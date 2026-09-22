@@ -42,6 +42,7 @@ Explain clearly your reasoning behind your decisions and pros/cons of chosen sol
 - Reset pods only if needed: `bundle exec pod deintegrate && bundle exec pod install`
 
 ## Architecture & Patterns
+- **App lifecycle**: UIScene-based (required by the iOS 26+ SDK — a non-scene app fails to launch). The app opts in via the `UIApplicationSceneManifest` (Info.plist), which names `RMBTSceneDelegate` as the scene delegate. `RMBTSceneDelegate.scene(_:willConnectTo:)` builds the window explicitly from `MainStoryboard`'s initial view controller and makes it key & visible (do NOT rely on `UISceneStoryboardFile` auto-setup — it does not reliably show the window once a scene delegate implements `willConnectTo`, giving a black screen). It forwards foreground/background to `RMBTAppDelegate` (`didEnterBackground()` / `willEnterForeground()` / `localizeTabBarTitles(in:)`). The app delegate's `didFinishLaunchingWithOptions` still runs one-time setup (`applyAppearance`, `onStart(true)`). There is no app-delegate URL handler.
 - **Legacy UIKit surface**: MVC controllers with delegate callbacks; stateful singletons (`RMBTConfig`, `RMBTSettings`) coordinate shared data.
 - **SwiftUI Network Coverage**: Modern view-model layering, heavy reliance on dependency injection and async sequences.
 - **Measurement engine**: `RMBTTestRunner` orchestrates parallel `RMBTTestWorker`s for ping/download/upload; QoS suite covers TCP, UDP, DNS, HTTP checks.
@@ -107,7 +108,7 @@ The script is an unconditional `cp` on every build — there is no "write once" 
 Generated destinations — never edit these, edit `private/` or `public/` instead:
 - `Configs/RMBTConfig.swift` — untracked (`.gitignore`).
 - `Resources/Images.xcassets/AppIcon.appiconset/` — untracked (`.gitignore`).
-- `Resources/RMBT-Info.plist` — **tracked**. Regenerated every build, so it appears as a local modification whenever the active config differs from the committed content. The private version sets the `RTR-NetTest` display name, `rmbtat` URL scheme, `NSLocalNetworkUsageDescription` (DNS QoS test) and `UIBackgroundModes: location` (coverage measurements). **Do not commit it from a public-config build** — that silently strips RTR branding and background location. Revert with `git checkout -- Resources/RMBT-Info.plist`.
+- `Resources/RMBT-Info.plist` — **tracked**. Regenerated every build, so it appears as a local modification whenever the active config differs from the committed content. The private version sets the `RTR-NetTest` display name, `NSLocalNetworkUsageDescription` (DNS QoS test) and `UIBackgroundModes: location` (coverage measurements). **Do not commit it from a public-config build** — that silently strips RTR branding and background location. Revert with `git checkout -- Resources/RMBT-Info.plist`.
 
 Order matters, and both steps have failure modes that look unrelated to their real cause:
 1. `bundle install` — **must** run on Ruby `>= 3.1, < 5.0`. On macOS system Ruby 2.6 it fails with `Could not find 'bundler' (2.7.2) required by your Gemfile.lock`, because `Gemfile.lock` pins `BUNDLED WITH 2.7.2`. The error names bundler, not Ruby, and following its `gem install bundler:2.7.2` advice also fails. Fix the Ruby, not the bundler. (`Gemfile.lock` still records `RUBY VERSION 3.4.6p54` for reference; it is informational and does not gate the install.)
