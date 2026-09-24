@@ -55,7 +55,11 @@ public class RMBTConfig {
     static let RMBT_TEST_LOOPMODE_MIN_MOVEMENT_M = 25
     static let RMBT_TEST_LOOPMODE_DEFAULT_MOVEMENT_M = 250
     static let RMBT_TEST_LOOPMODE_MAX_MOVEMENT_M = 10000
-    
+
+    // Network Coverage / signal measurement: minimum acceptable GPS horizontal accuracy (metres) for the
+    // measurement to be considered ready and to start. Keep public and private aligned.
+    static let RMBT_SIGNAL_MEASUREMENT_MIN_LOCATION_ACCURACY_M: Double = 15
+
     // Note: $lang will be replaced by "de" is device language is german, or "en" in any other case:
     static let RMBT_PROJECT_URL = "https://example.com/"
     static let RMBT_PROJECT_EMAIL = "mail@example.com"

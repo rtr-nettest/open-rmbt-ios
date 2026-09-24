@@ -776,14 +776,19 @@ struct SessionInitializedUpdate: Hashable {
         else {
             return .init(isOK: false, text: NSLocalizedString("signal_readiness_gps_stale", comment: ""))
         }
-        let accuracy = Int(location.horizontalAccuracy.rounded())
-        let limit = Int(minimumLocationAccuracy)
-        return accuracy <= limit
-            ? .init(isOK: true, text: NSLocalizedString("signal_readiness_gps_ok", comment: ""))
-            : .init(
+        // Same accuracy gate-keeper the start decision uses (isReadyToBegin → CoverageButtonGate), so a
+        // green row always means the measurement can actually begin — no rounded-vs-raw mismatch.
+        guard CoverageButtonGate.isAccuracyAcceptable(location.horizontalAccuracy, minAccuracy: minimumLocationAccuracy) else {
+            // Round the shown value up so a red row never displays a number that reads as ≤ the limit
+            // (e.g. a raw 15.4 m over a 15 m limit shows "16 m", not a confusing "15 m").
+            let accuracy = Int(location.horizontalAccuracy.rounded(.up))
+            let limit = Int(minimumLocationAccuracy)
+            return .init(
                 isOK: false,
                 text: String(format: NSLocalizedString("signal_readiness_gps_accuracy", comment: ""), accuracy, limit)
             )
+        }
+        return .init(isOK: true, text: NSLocalizedString("signal_readiness_gps_ok", comment: ""))
     }
 
     /// Network readiness, derived only from the connection type. Mobile → OK with the technology name;
