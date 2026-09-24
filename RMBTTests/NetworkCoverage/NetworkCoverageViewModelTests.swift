@@ -1530,6 +1530,47 @@ import Clocks
             #expect(sut.gpsReadiness.isOK == false)
         }
 
+        @Test func whenAccuracyIsAFractionOverTheLimit_thenGpsReadinessIsNotOKAndDoesNotStart() async throws {
+            // Regression: the readiness row and the start gate share one accuracy gate-keeper. A fix a
+            // fraction over the limit (10.4 m against a 10 m limit) previously rounded to "10 m" and showed
+            // the row green, while the raw start gate refused to begin — green but never starting. They must
+            // agree now: not OK, and no recording.
+            let minAccuracy: CLLocationDistance = 10
+            let clock = TestClock()
+            let sut = makeSUT(
+                minimumLocationAccuracy: minAccuracy,
+                updates: [
+                    makeLocationUpdate(at: 0, lat: 1.0, lon: 1.0, accuracy: minAccuracy + 0.4)
+                ],
+                overlayDelay: 3.0,
+                clock: clock
+            )
+
+            await sut.startTest()
+
+            #expect(sut.gpsReadiness.isOK == false)
+            #expect(!sut.isStarted)
+            #expect(sut.phase == .preparing)
+        }
+
+        @Test func whenAccuracyIsExactlyAtTheLimit_thenGpsReadinessIsOK() async throws {
+            // Boundary: exactly at the limit is acceptable (raw `<=`); the green row agrees with the gate.
+            let minAccuracy: CLLocationDistance = 10
+            let clock = TestClock()
+            let sut = makeSUT(
+                minimumLocationAccuracy: minAccuracy,
+                updates: [
+                    makeLocationUpdate(at: 0, lat: 1.0, lon: 1.0, accuracy: minAccuracy)
+                ],
+                overlayDelay: 3.0,
+                clock: clock
+            )
+
+            await sut.startTest()
+
+            #expect(sut.gpsReadiness.isOK == true)
+        }
+
         @Test func whenDelayElapsedAndLocationAccuracyIsGood_thenInaccurateLocationWarningIsHidden() async throws {
             let minAccuracy: CLLocationDistance = 10
             let clock = TestClock()
