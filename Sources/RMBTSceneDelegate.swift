@@ -14,19 +14,6 @@ final class RMBTSceneDelegate: UIResponder, UIWindowSceneDelegate {
         window?.overrideUserInterfaceStyle = .light
         localizeTabBarTitles()
         onStart(true)
-
-        // Cold launch via URL is delivered here, not through scene(_:openURLContexts:).
-        // Deferred so the alert can be presented once the window is on screen.
-        if let url = connectionOptions.urlContexts.first?.url {
-            DispatchQueue.main.async { [weak self] in
-                self?.handle(url)
-            }
-        }
-    }
-
-    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
-        guard let url = URLContexts.first?.url else { return }
-        handle(url)
     }
 
     func sceneDidEnterBackground(_ scene: UIScene) {
@@ -50,21 +37,6 @@ final class RMBTSceneDelegate: UIResponder, UIWindowSceneDelegate {
         tabBar?.items?[1].title = NSLocalizedString("History", comment: "")
         tabBar?.items?[2].title = NSLocalizedString("Statistics", comment: "")
         tabBar?.items?[3].title = NSLocalizedString("Map", comment: "")
-    }
-
-    private func handle(_ url: URL) {
-        guard url.host == "debug" || url.host == "undebug" else { return }
-        let unlock = url.host == "debug"
-        RMBTSettings.shared.debugUnlocked = unlock
-        let stateString = unlock ? "Unlocked" : "Locked"
-        UIAlertController.presentAlert(
-            title: "Debug Mode \(stateString)",
-            text: "The app will now quit to apply the new settings.",
-            cancelTitle: "OK",
-            otherTitle: nil
-        ) { _ in
-            exit(0)
-        } otherAction: { _ in }
     }
 
     private func onStart(_ isLaunched: Bool) {

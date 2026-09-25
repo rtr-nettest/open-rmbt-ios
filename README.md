@@ -83,9 +83,9 @@ Always make configuration changes in `private/` or `public/`, never in the gener
 | `Resources/Images.xcassets/AppIcon.appiconset/` | no (`.gitignore`) |
 | `Resources/RMBT-Info.plist` | **yes** |
 
-Because `Resources/RMBT-Info.plist` is tracked *and* regenerated on every build, it shows up as a local modification whenever your configuration source differs from whatever was last committed. The two versions are not equivalent — the private one sets the `RTR-NetTest` display name, the `rmbtat` URL scheme, `NSLocalNetworkUsageDescription` (needed for the DNS QoS test) and `UIBackgroundModes: location` (needed for coverage measurements).
+Because `Resources/RMBT-Info.plist` is tracked *and* regenerated on every build, it shows up as a local modification whenever your configuration source differs from whatever was last committed. The private configuration sets the `RTR-NetTest` display name. Both configurations include `NSLocalNetworkUsageDescription` (needed for the DNS QoS test) and `UIBackgroundModes: location` (needed for coverage measurements).
 
-**Do not commit `Resources/RMBT-Info.plist` unless you intend to change it for everyone.** If you build with the public configuration, `git checkout -- Resources/RMBT-Info.plist` before committing; otherwise you will strip RTR's branding and the background-location capability from the repository.
+**Do not commit `Resources/RMBT-Info.plist` unless you intend to change it for everyone.** If you build with the public configuration, restore the generated plist before committing; otherwise you will strip RTR's branding from the repository.
 
 Third-party Libraries
 ---------------------
