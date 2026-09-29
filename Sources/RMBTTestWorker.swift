@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import CocoaAsyncSocket
 
 enum RMBTTestWorkerState: Int {
     case initialized
@@ -107,9 +106,9 @@ class RMBTTestWorker: NSObject {
     /// Current state of the worker
     private var state: RMBTTestWorkerState = .initialized
 
-    ///
-    private lazy var socket: GCDAsyncSocket = {
-        return GCDAsyncSocket(delegate: self, delegateQueue: delegateQueue)
+    /// TLS-capable byte-stream connection to the measurement server (Network.framework, TLS 1.2 **and** 1.3).
+    private lazy var connection: RMBTTestConnection = {
+        return RMBTTestConnection(delegate: self, delegateQueue: delegateQueue)
     }()
 
     /// version of server that we send in request with result later
@@ -169,8 +168,6 @@ class RMBTTestWorker: NSObject {
     /// Server reports total number of bytes received. We need to track last amount reported so we can calculate relative amounts.
     private var testUploadLastUploadLength: UInt64 = 0
     
-    private var hostLookupRetries: UInt = 0
-    
     var index: UInt
     
     open var totalBytesUploaded: UInt64 = 0
@@ -190,8 +187,6 @@ class RMBTTestWorker: NSObject {
         self.delegateQueue = delegateQueue
 
         super.init()
-
-        socket.setupSocket()
     }
     
     @objc func startDownlinkPretest() {
@@ -203,7 +198,7 @@ class RMBTTestWorker: NSObject {
     func stop() {
         assert(state == .downlinkPretestFinished, "Invalid state")
         state = .stopping
-        socket.disconnect()
+        connection.disconnect()
     }
     
     @objc func startLatencyTest() {
@@ -240,27 +235,23 @@ class RMBTTestWorker: NSObject {
     }
     
     func connect() {
-        do {
-            let sAddr = params.serverAddress ?? ""
-            let port = params.serverPort 
-            
-            Log.logger.debug("Connecting to host \(sAddr):\(port)")
-            try socket.connect(toHost: sAddr, onPort: UInt16(port) /*TODO*/, withTimeout: RMBTConfig.RMBT_TEST_SOCKET_TIMEOUT_S)
-        } catch {
-            fail()
-        }
+        let sAddr = params.serverAddress ?? ""
+        let port = params.serverPort
+
+        Log.logger.info("Test worker \(index): connecting to \(sAddr):\(port) (encryption=\(params.serverEncryption), rmbtHTTP=\(params.serverIsRmbtHTTP))")
+        connection.connect(host: sAddr,
+                           port: UInt16(port),
+                           encryption: params.serverEncryption,
+                           timeout: RMBTConfig.RMBT_TEST_SOCKET_TIMEOUT_S)
     }
-    
+
     func abort() {
         if state == .aborted { return }
 
         state = .aborted
-
-        if socket.isConnected {
-            socket.disconnect()
-        }
+        connection.disconnect()
     }
-    
+
     func fail() {
         if state == .failed { return }
 
@@ -268,9 +259,7 @@ class RMBTTestWorker: NSObject {
 
         delegate?.testWorkerDidFail(self)
 
-        if socket.isConnected {
-            socket.disconnect()
-        }
+        connection.disconnect()
     }
     
     func start() {
@@ -292,19 +281,19 @@ class RMBTTestWorker: NSObject {
     func succeed() {
         state = .uplinkTestFinished
 
-        socket.disconnect()
+        connection.disconnect()
         delegate?.testWorkerDidFinishUplinkTest(self)
     }
-    
+
     private func readLineWithTag(_ tag: RMBTTestTag) {
         if let data = "\n".data(using: String.Encoding.ascii) {
-            socket.readData(to: data, withTimeout: RMBTConfig.RMBT_TEST_SOCKET_TIMEOUT_S, tag: tag.rawValue)
+            connection.read(toDelimiter: data, tag: tag.rawValue, timeout: RMBTConfig.RMBT_TEST_SOCKET_TIMEOUT_S)
         }
     }
 
     private func readLine(_ line: String, tag: RMBTTestTag) {
         if let data = line.data(using: String.Encoding.ascii) {
-            socket.readData(to: data, withTimeout: RMBTConfig.RMBT_TEST_SOCKET_TIMEOUT_S, tag: tag.rawValue)
+            connection.read(toDelimiter: data, tag: tag.rawValue, timeout: RMBTConfig.RMBT_TEST_SOCKET_TIMEOUT_S)
         }
     }
 
@@ -315,7 +304,7 @@ class RMBTTestWorker: NSObject {
 
     private func writeData(_ data: Data, withTag tag: RMBTTestTag) {
         totalBytesUploaded += UInt64(data.count)
-        socket.write(data, withTimeout: RMBTConfig.RMBT_TEST_SOCKET_TIMEOUT_S, tag: tag.rawValue)
+        connection.write(data, tag: tag.rawValue, timeout: RMBTConfig.RMBT_TEST_SOCKET_TIMEOUT_S)
     }
 
     private func logData(_ data: Data) {
@@ -337,55 +326,33 @@ class RMBTTestWorker: NSObject {
     }
 }
 
-extension RMBTTestWorker: GCDAsyncSocketDelegate {
-    func socket(_ sock: GCDAsyncSocket, didConnectToHost host: String, port: UInt16) {
+extension RMBTTestWorker: RMBTTestConnectionDelegate {
+    func testConnectionDidBecomeReady(_ connection: RMBTTestConnection, localIp: String?, serverIp: String?, negotiatedEncryption: String?) {
         if state == .aborted {
-            sock.disconnect()
+            connection.disconnect()
             return
         }
 
         assert(state == .downlinkPretestStarted || state == .uplinkPretestStarted, "Invalid state")
 
-        localIp = sock.localHost
-        serverIp = sock.connectedHost
-
-        if params.serverEncryption {
-            sock.startTLS([
-                GCDAsyncSocketManuallyEvaluateTrust: true as NSObject
-            ])
-        } else {
-            self.start()
+        self.localIp = localIp
+        self.serverIp = serverIp
+        if let negotiatedEncryption = negotiatedEncryption {
+            self.negotiatedEncryptionString = negotiatedEncryption
         }
-    }
-    
-    func socket(_ sock: GCDAsyncSocket, didReceive trust: SecTrust, completionHandler: @escaping ((Bool) -> Void)) {
-        completionHandler(true)
-    }
-    
-    func socketDidSecure(_ sock: GCDAsyncSocket) {
-        assert(state == .downlinkPretestStarted || state == .uplinkPretestStarted, "Invalid state")
 
-        socket.perform {
-            if let sslContext = sock.sslContext() {
-                self.negotiatedEncryptionString = RMBTSSLHelper.encryptionString(for: sslContext.takeUnretainedValue())
-            }
-        }
+        Log.logger.info("Test worker \(index): connection ready to \(serverIp ?? "?") (local \(localIp ?? "?"), encryption=\(params.serverEncryption)\(negotiatedEncryption.map { ", \($0)" } ?? "")); starting RMBT protocol")
 
         self.start()
     }
-    
-    func socketDidDisconnect(_ sock: GCDAsyncSocket, withError err: Error?) {
-        if let error = err as NSError? {
-            Log.logger.debug("Socket disconnected with error \(String(describing: err))")
-            // See https://github.com/robbiehanson/CocoaAsyncSocket/issues/382
-            if (error.domain == "kCFStreamErrorDomainNetDB" && hostLookupRetries < RMBTConfig.RMBT_TEST_HOST_LOOKUP_RETRIES) {
-                hostLookupRetries += 1
-                Log.logger.debug("Thread \(index) retrying lookup (\(hostLookupRetries)/\(RMBTConfig.RMBT_TEST_HOST_LOOKUP_RETRIES)")
-                usleep(useconds_t(UInt64(RMBTConfig.RMBT_TEST_HOST_LOOKUP_WAIT_S) * USEC_PER_SEC))
-                self.connect()
-            } else {
-                fail()
-            }
+
+    func testConnection(_ connection: RMBTTestConnection, didDisconnectWithError error: Error?) {
+        if let error = error {
+            // Detailed logging so a connection-setup failure is diagnosable instead of surfacing only as a
+            // downstream "Invalid state". NWConnection now negotiates TLS 1.2 and 1.3, so the previous
+            // SecureTransport TLS-1.2 ceiling (errSSLPeerProtocolVersion / -9836) no longer applies.
+            Log.logger.error("Test worker \(index): connection disconnected in state \(state) with error: \(error.localizedDescription)")
+            fail()
         } else {
             if state == .downlinkTestStarted {
                 state = .downlinkTestFinished
@@ -394,21 +361,21 @@ extension RMBTTestWorker: GCDAsyncSocketDelegate {
                 state = .stopped
                 delegate?.testWorkerDidStop(self)
             } else if state == .failed || state == .aborted || state == .uplinkTestFinished {
-                // We've finished/aborted/failed and socket has disconnected. Nothing to do!
+                // We've finished/aborted/failed and the connection has closed. Nothing to do!
             } else {
                 assert(false, "Disconnection in an unexpected state")
             }
         }
     }
-    
-    func socket(_ sock: GCDAsyncSocket, didWriteDataWithTag tag: Int) {
+
+    func testConnection(_ connection: RMBTTestConnection, didWriteTag tag: Int) {
         if state == .aborted {
             return
         }
         socketDidReadOrWriteData(nil, withTag: tag, read: false)
     }
-    
-    func socket(_ sock: GCDAsyncSocket, didRead data: Data, withTag tag: Int) {
+
+    func testConnection(_ connection: RMBTTestConnection, didRead data: Data, tag: Int) {
         if state == .aborted {
             return
         }
@@ -416,7 +383,7 @@ extension RMBTTestWorker: GCDAsyncSocketDelegate {
         totalBytesDownloaded += UInt64(data.count)
         socketDidReadOrWriteData(data, withTag: tag, read: true)
     }
-    
+
     /// We unify read and write callbacks for better state documentation
     public func socketDidReadOrWriteData(_ data: Data!, withTag tagRaw: Int, read: Bool) {
         let tag = RMBTTestTag(rawValue: tagRaw)!
@@ -424,10 +391,32 @@ extension RMBTTestWorker: GCDAsyncSocketDelegate {
         // Pretest
         if tag == .txUpgrade {
             // -> ...Upgrade..
-            self.readLine("Upgrade: RMBT\r\n\r\n", tag: .rxUpgradeResponse)
+            // Read the whole HTTP 101 header block up to the RFC 7230 end-of-headers marker (a blank line). We must
+            // NOT key on a specific header (e.g. "Upgrade: RMBT") being last: header fields may appear in any order
+            // and intermediaries can inject conforming headers such as `Strict-Transport-Security` (HSTS) after the
+            // Upgrade field, in which case a header-specific delimiter never matches and the read hangs until the
+            // socket times out and disconnects in an unexpected state.
+            self.readLine(RMBTUpgradeResponseParser.headerTerminator, tag: .rxUpgradeResponse)
         } else if (tag == .rxUpgradeResponse) {
-            // <- HTTP/1.1 101 Switching Protocols\r\nConnection: Upgrade\r\nUpgrade: RMBT\r\n\r\n
-            // Upgraded. Proceed to read banner:
+            // <- HTTP/1.1 101 Switching Protocols\r\n...headers (any order, may include HSTS)...\r\n\r\n
+            // Parse the handshake per the HTTP RFCs. We are deliberately tolerant: any `101 Switching Protocols`
+            // means the server has switched to the RMBT protocol, so we proceed to read the banner even if the
+            // Upgrade/Connection echo is unusual or extra headers (HSTS, Date, Server, …) are present in any order.
+            // We only abort on a genuinely failed handshake — a non-101 status or an unparseable status line —
+            // which previously manifested as a hang (the old fixed-string delimiter never matched) followed by an
+            // "Invalid state" on timeout/disconnect.
+            let headerBlock = data.flatMap { String(data: $0, encoding: .ascii) } ?? ""
+            do {
+                try RMBTUpgradeResponseParser.validateSwitchingProtocols(headerBlock)
+            } catch RMBTUpgradeResponseParser.ParseError.notUpgraded {
+                // Non-fatal: switched protocols, but the upgrade echo was not as expected. Proceed and let the
+                // RMBT banner/CHUNKSIZE steps decide whether the server actually speaks the protocol.
+                Log.logger.error("RMBT upgrade handshake: 101 without a clear RMBT upgrade echo; response: \(headerBlock)")
+            } catch {
+                Log.logger.error("RMBT upgrade handshake failed (\(error)); response: \(headerBlock)")
+                fail()
+                return
+            }
             self.readLineWithTag(.rxBanner)
         } else if tag == .rxBanner {
             // <- RMBTv0.3
@@ -494,7 +483,7 @@ extension RMBTTestWorker: GCDAsyncSocketDelegate {
 
             pretestLengthReceived = 0
 
-            socket.readData(withTimeout: RMBTConfig.RMBT_TEST_SOCKET_TIMEOUT_S, tag: RMBTTestTag.rxPretestPart.rawValue)
+            connection.readAvailable(tag: RMBTTestTag.rxPretestPart.rawValue, timeout: RMBTConfig.RMBT_TEST_SOCKET_TIMEOUT_S)
         } else if tag == .rxPretestPart {
             pretestLengthReceived += UInt64(data.count)
 
@@ -504,7 +493,7 @@ extension RMBTTestWorker: GCDAsyncSocketDelegate {
                 writeLine("OK", withTag: .txChunkOK)
             } else {
                 // Read more
-                socket.readData(withTimeout: RMBTConfig.RMBT_TEST_SOCKET_TIMEOUT_S, tag: RMBTTestTag.rxPretestPart.rawValue)
+                connection.readAvailable(tag: RMBTTestTag.rxPretestPart.rawValue, timeout: RMBTConfig.RMBT_TEST_SOCKET_TIMEOUT_S)
             }
         } else if tag == .txChunkOK {
             // -> OK
@@ -583,7 +572,7 @@ extension RMBTTestWorker: GCDAsyncSocketDelegate {
             // -> GETTIME (duration)
             testDownloadedData = Data() //NSMutableData(capacity: Int(chunksize))!
 
-            socket.readData(withTimeout: RMBTConfig.RMBT_TEST_SOCKET_TIMEOUT_S, tag: RMBTTestTag.rxDownlinkPart.rawValue)
+            connection.readAvailable(tag: RMBTTestTag.rxDownlinkPart.rawValue, timeout: RMBTConfig.RMBT_TEST_SOCKET_TIMEOUT_S)
 
             // We want to align starting times of all threads, so allow delegate to supply us a start timestamp
             // (usually from the first thread that reached this point)
@@ -603,10 +592,10 @@ extension RMBTTestWorker: GCDAsyncSocketDelegate {
             delegate?.testWorker(self, didDownloadLength: UInt64(data.count), atNanos: elapsedNanos)
 
             if finished {
-                socket.disconnect()
+                connection.disconnect()
             } else {
                 // Request more
-                socket.readData(withTimeout: RMBTConfig.RMBT_TEST_SOCKET_TIMEOUT_S, tag: RMBTTestTag.rxDownlinkPart.rawValue)
+                connection.readAvailable(tag: RMBTTestTag.rxDownlinkPart.rawValue, timeout: RMBTConfig.RMBT_TEST_SOCKET_TIMEOUT_S)
             }
         }
 
