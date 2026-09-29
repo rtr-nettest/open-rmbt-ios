@@ -56,7 +56,14 @@ class RMBTSettingsViewController: UITableViewController {
     weak var delegate: RMBTSettingsViewControllerDelegate?
 
     private let settings = RMBTSettings.shared
-    
+
+    /// Index of the developer-mode "Server selection" section. It is a real (static) storyboard section that sits
+    /// right after `logging`, but is only revealed while developer mode is on (see `numberOfSections`); -1 (never a
+    /// valid section) when hidden. The single row it contains pushes `RMBTServerSelectionViewController`.
+    private var serverSelectionSectionIndex: Int {
+        settings.debugUnlocked ? RMBTSettingsSection.logging.rawValue + 1 : -1
+    }
+
     private var uuid: String?
     
     private var generalSettings: [IndexPath] = []
@@ -227,6 +234,8 @@ class RMBTSettingsViewController: UITableViewController {
         if let uuid = RMBTControlServer.shared.uuid {
             self.uuidLabel.text = "U\(uuid)"
         }
+        // Refresh the "Server selection" subtitle after returning from the selection screen.
+        self.tableView.reloadData()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -390,10 +399,15 @@ class RMBTSettingsViewController: UITableViewController {
     
     override func numberOfSections(in tableView: UITableView) -> Int {
         let lastSectionIndex = settings.debugUnlocked ? RMBTSettingsSection.logging : RMBTSettingsSection.support
-        return lastSectionIndex.rawValue + 1
+        // In developer mode reveal the "Server selection" section, which follows `logging` in the storyboard.
+        let extraSections = settings.debugUnlocked ? 1 : 0
+        return lastSectionIndex.rawValue + 1 + extraSections
     }
-    
+
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        if indexPath.section == serverSelectionSectionIndex {
+            return serverSelectionEntryCell()
+        }
         if (indexPath.section == RMBTSettingsSection.general.rawValue) {
             let itemIndexPath = self.generalSettings[indexPath.row]
             return super.tableView(tableView, cellForRowAt: itemIndexPath)
@@ -406,6 +420,9 @@ class RMBTSettingsViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        if section == serverSelectionSectionIndex {
+            return 1 // single entry row that pushes the server-selection screen
+        }
         if (section == RMBTSettingsSection.general.rawValue) {
             return self.generalSettings.count
         }
@@ -446,6 +463,9 @@ class RMBTSettingsViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        if section == serverSelectionSectionIndex {
+            return NSLocalizedString("preferences_server_selection", comment: "")
+        }
         guard let sectionEnum = RMBTSettingsSection(rawValue: section) else {
             return super.tableView(tableView, titleForHeaderInSection: section)
         }
@@ -469,14 +489,35 @@ class RMBTSettingsViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, titleForFooterInSection section: Int) -> String? {
+        if section == serverSelectionSectionIndex {
+            return nil
+        }
         if (section == RMBTSettingsSection.logging.rawValue) {
             return NSLocalizedString("preferences_developer_logging_summary", comment: "")
         }
         return super.tableView(tableView, titleForFooterInSection: section)
-        
+
     }
-    
+
+    /// Builds the developer-mode "Server selection" entry row: title on the left, the current choice on the right
+    /// ("Default" when none is selected), and a disclosure indicator. Tapping it pushes the radio-list screen.
+    private func serverSelectionEntryCell() -> UITableViewCell {
+        let cell = UITableViewCell(style: .value1, reuseIdentifier: "serverSelectionEntryCell")
+        var content = cell.defaultContentConfiguration()
+        content.text = NSLocalizedString("preferences_server_selection", comment: "")
+        content.secondaryText = settings.selectedTestServer?.name
+            ?? NSLocalizedString("preferences_default_server_selection", comment: "")
+        cell.contentConfiguration = content
+        cell.accessoryType = .disclosureIndicator
+        return cell
+    }
+
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        if indexPath.section == serverSelectionSectionIndex {
+            tableView.deselectRow(at: indexPath, animated: true)
+            navigationController?.pushViewController(RMBTServerSelectionViewController(), animated: true)
+            return
+        }
         if (indexPath.section == RMBTSettingsSection.general.rawValue) {
             var index = 1
             if (settings.qosEnabled) {

@@ -152,6 +152,17 @@ class RMBTIntroViewController: UIViewController {
         } completion: { _ in
             self.updateStates()
             self.currentView.updateLoopModeUI()
+            self.updateServerSelectionLabel()
+        }
+    }
+
+    /// Shows "Server: <name>" on the start screen when developer mode is on and a non-default measurement
+    /// server is selected; hides it otherwise. Mirrors Android's `HomeViewState`.
+    private func updateServerSelectionLabel() {
+        if RMBTSettings.shared.debugUnlocked, let server = RMBTSettings.shared.selectedTestServer {
+            currentView.serverName = server.name
+        } else {
+            currentView.serverName = nil
         }
     }
 
@@ -253,6 +264,7 @@ class RMBTIntroViewController: UIViewController {
         super.viewWillAppear(animated)
         currentView.updateLoopModeUI()
         currentView.updateCoverageUI()
+        updateServerSelectionLabel()
         self.connectivityTracker.start()
         RMBTLocationTracker.shared.startAfterDeterminingAuthorizationStatus({
             self.connectivityTracker.forceUpdate()
@@ -700,6 +712,7 @@ extension RMBTIntroViewController: RMBTSettingsViewControllerDelegate {
     func settingsDidChanged(in viewController: RMBTSettingsViewController) {
         currentView.updateLoopModeUI()
         currentView.updateCoverageUI()
+        updateServerSelectionLabel()
     }
 }
 

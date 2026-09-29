@@ -432,6 +432,10 @@ public class SettingsResponse: BasicResponse {
         /// → leave the persisted setting unchanged.
         var signalMeasurementAvailable: Bool?
 
+        /// Selectable measurement servers (`servers` array in /settings, each `{ name, uuid }`). Offered as a
+        /// developer-mode server selection; nil/absent means only the control server default is available.
+        var servers: [MeasurementServerItem]?
+
         ///
         init() {
 
@@ -462,6 +466,21 @@ public class SettingsResponse: BasicResponse {
             surveySettings <- map["survey_settings"]
 
             signalMeasurementAvailable <- (map["signal_measurement_available"], BoolFromAnyTransform())
+            servers <- map["servers"]
+        }
+
+        /// One entry of the /settings `servers` list.
+        open class MeasurementServerItem: Mappable {
+            var name: String?
+            var uuid: String?
+
+            init() {}
+            required public init?(map: Map) {}
+
+            public func mapping(map: Map) {
+                name <- map["name"]
+                uuid <- map["uuid"]
+            }
         }
         
         ///

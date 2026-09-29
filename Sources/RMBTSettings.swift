@@ -144,6 +144,11 @@ import Foundation
     // Feature flags
     @objc public dynamic var coverageFeatureEnabled: Bool = false
 
+    // MARK: Test server selection (developer mode)
+    /// UUID of the user-selected measurement server, or nil for the control server's default. Only offered /
+    /// honoured while developer mode (`debugUnlocked`) is on. The available list comes from /settings.
+    @objc public dynamic var selectedTestServerUUID: String?
+
     ///
     private override init() {
         mapOptionsSelection = RMBTMapOptionsSelection()
@@ -239,7 +244,10 @@ import Foundation
             "expertMode",
 
             // Feature flags
-            "coverageFeatureEnabled"
+            "coverageFeatureEnabled",
+
+            // Test server selection (developer mode)
+            "selectedTestServerUUID"
         ])
     }
 
@@ -266,5 +274,48 @@ import Foundation
 
             UserDefaults.storeDataFor(key: kp, obj: newValue)
         }
+    }
+}
+
+// MARK: - Test server selection
+
+extension RMBTSettings {
+    private static let availableTestServersKey = "availableTestServers"
+
+    /// Measurement servers offered by the control server (from the /settings response). Persisted so the
+    /// selection UI has values even before a fresh fetch. Stored as a property-list array of dictionaries.
+    var availableTestServers: [RMBTMeasurementServer] {
+        get {
+            let raw = UserDefaults.appDefaults.array(forKey: Self.availableTestServersKey) as? [[String: String]] ?? []
+            return raw.compactMap(RMBTMeasurementServer.init(dictionary:))
+        }
+        set {
+            UserDefaults.appDefaults.set(newValue.map(\.dictionaryValue), forKey: Self.availableTestServersKey)
+        }
+    }
+
+    /// The currently selected server, or nil when the default is in use (or the selection is no longer offered).
+    var selectedTestServer: RMBTMeasurementServer? {
+        guard let uuid = selectedTestServerUUID else { return nil }
+        return availableTestServers.first { $0.uuid == uuid }
+    }
+}
+
+/// A selectable measurement (test) server from the control server's `/settings` response (`servers` array,
+/// each `{ name, uuid }`). Used for the developer-mode server selection and the start-screen server label.
+struct RMBTMeasurementServer: Equatable {
+    let uuid: String
+    let name: String
+
+    var dictionaryValue: [String: String] { ["uuid": uuid, "name": name] }
+
+    init(uuid: String, name: String) {
+        self.uuid = uuid
+        self.name = name
+    }
+
+    init?(dictionary: [String: String]) {
+        guard let uuid = dictionary["uuid"], let name = dictionary["name"] else { return nil }
+        self.init(uuid: uuid, name: name)
     }
 }

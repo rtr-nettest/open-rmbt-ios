@@ -184,7 +184,14 @@ class RMBTTestRunner: NSObject {
                 request.loopModeEnabled = true;
                 request.loopModeInfo = params["loopmode_info"] as? [String : Any]
             }
-            
+
+            // Developer-mode server selection: tell the control server the user is choosing a server, and
+            // which one (a specific UUID, or omitted for the default). Only in developer mode, matching Android.
+            if RMBTSettings.shared.debugUnlocked {
+                request.userServerSelection = true
+                request.preferServer = RMBTSettings.shared.selectedTestServerUUID
+            }
+
             RMBTControlServer.shared.getTestParams(with: request) { [weak self] testParams in
                 self?.workerQueue.async {
                     guard let self = self else { return }

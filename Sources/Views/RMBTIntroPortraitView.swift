@@ -46,6 +46,38 @@ class RMBTIntroPortraitView: UIView, XibLoadable {
     var startButtonHandler: () -> Void = { }
     var settingsButtonHandler: () -> Void = { }
 
+    /// Top-right "Server: <name>" indicator, shown only when a non-default measurement server is selected
+    /// (developer mode). Created programmatically and pinned under the settings button.
+    private let serverSelectionLabel = UILabel()
+
+    /// Selected non-default server name, or nil for the default (which hides the label). Set by the controller.
+    var serverName: String? {
+        didSet {
+            serverSelectionLabel.text = serverName.map { String(format: .serverLabelFormat, $0) }
+            serverSelectionLabel.isHidden = (serverName == nil)
+        }
+    }
+
+    private func setupServerSelectionLabel() {
+        serverSelectionLabel.translatesAutoresizingMaskIntoConstraints = false
+        serverSelectionLabel.font = .roboto(size: 13, weight: .medium)
+        serverSelectionLabel.textColor = .networkLogoAvailable
+        serverSelectionLabel.textAlignment = .right
+        serverSelectionLabel.numberOfLines = 1
+        serverSelectionLabel.lineBreakMode = .byTruncatingTail
+        serverSelectionLabel.isHidden = true
+        addSubview(serverSelectionLabel)
+
+        // Pinned under the settings button, right-aligned; grows leftwards but never past the safe area.
+        let leading = serverSelectionLabel.leadingAnchor.constraint(greaterThanOrEqualTo: safeAreaLayoutGuide.leadingAnchor, constant: 16)
+        leading.priority = .defaultHigh
+        NSLayoutConstraint.activate([
+            serverSelectionLabel.trailingAnchor.constraint(equalTo: settingsButton.trailingAnchor),
+            serverSelectionLabel.topAnchor.constraint(equalTo: settingsButton.bottomAnchor, constant: 6),
+            leading
+        ])
+    }
+
     var networkName: String? {
         didSet {
             self.networkNameLabel.text = networkName
@@ -123,6 +155,8 @@ class RMBTIntroPortraitView: UIView, XibLoadable {
         self.settingsButton.setImage(image, for: .normal)
         self.settingsButton.tintColor = .networkLogoAvailable
         self.settingsButton.accessibilityLabel = .settingsButtonA11Label
+
+        setupServerSelectionLabel()
 
         self.locationImageView.image = self.locationImageView.image?.withRenderingMode(.alwaysTemplate)
         self.ipV6ImageView.image = self.ipV6ImageView.image?.withRenderingMode(.alwaysTemplate)
@@ -390,6 +424,7 @@ class RMBTIntroPortraitView: UIView, XibLoadable {
                 self.networkTypeLabel.textColor = .networkTypeAvailable
                 self.logoLabel.textColor = .networkLogoAvailable
                 self.settingsButton.tintColor = .networkLogoAvailable
+                self.serverSelectionLabel.textColor = .networkLogoAvailable
             }
             self.waveView.startAnimation()
             self.wave2View.startAnimation()
@@ -431,6 +466,7 @@ class RMBTIntroPortraitView: UIView, XibLoadable {
             self.networkTypeLabel.textColor = .noNetworkTypeAvailable
             self.logoLabel.textColor = .noNetworkLogoAvailable
             self.settingsButton.tintColor = .noNetworkLogoAvailable
+            self.serverSelectionLabel.textColor = .noNetworkLogoAvailable
         }
         self.waveView.stopAnimation()
         self.wave2View.stopAnimation()
@@ -460,6 +496,7 @@ private extension String {
     static let loopModeSwitchOnA11Label = NSLocalizedString("Disable loop mode", comment: "")
     static let loopModeSwitchOffA11Label = NSLocalizedString("Enable loop mode", comment: "")
     static let settingsButtonA11Label = NSLocalizedString("Settings", comment: "")
+    static let serverLabelFormat = NSLocalizedString("server_label", comment: "Start screen top-right label; %@ is the selected measurement server name")
     static let ipv4ImageViewA11Label = NSLocalizedString("Show IPv4 address", comment: "")
     static let ipv6ImageViewA11Label = NSLocalizedString("Show IPv6 address", comment: "")
     static let locationImageViewA11Label = NSLocalizedString("Show location", comment: "")

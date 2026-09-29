@@ -169,6 +169,19 @@ extension RMBTControlServer {
                     } else {
                         Log.logger.info("settings: signal_measurement_available absent/null — leaving coverageFeatureEnabled=\(RMBTSettings.shared.coverageFeatureEnabled) unchanged")
                     }
+
+                    // Selectable measurement servers (developer-mode server selection). Persist the list so the
+                    // settings screen has values immediately, and drop a previously-selected server that the
+                    // control server no longer offers (falls back to the default).
+                    let servers = (set.servers ?? []).compactMap { item -> RMBTMeasurementServer? in
+                        guard let uuid = item.uuid, let name = item.name else { return nil }
+                        return RMBTMeasurementServer(uuid: uuid, name: name)
+                    }
+                    RMBTSettings.shared.availableTestServers = servers
+                    if let selected = RMBTSettings.shared.selectedTestServerUUID,
+                       !servers.contains(where: { $0.uuid == selected }) {
+                        RMBTSettings.shared.selectedTestServerUUID = nil
+                    }
                 }
 
                 self.completeSettingsRequest(with: .success(()))

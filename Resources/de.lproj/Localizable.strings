@@ -517,3 +517,6 @@
 "signal_readiness_gps_stale" = "GPS: no signal";
 "signal_readiness_network" = "Network: %@";
 "Abort" = "Abort";
+"preferences_server_selection" = "Server selection";
+"preferences_default_server_selection" = "Default";
+"server_label" = "Server: %@";

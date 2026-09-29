@@ -516,3 +516,7 @@
 "Abort" = "Abort";
 "coverage_terms_accept" = "Accept";
 "coverage_terms_decline" = "Decline";
+
+"preferences_server_selection" = "Server selection";
+"preferences_default_server_selection" = "Default";
+"server_label" = "Server: %@";

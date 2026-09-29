@@ -130,6 +130,14 @@ public class IPRequest_Old: BasicRequest {
     /// server decide. Set from the expert IPv4-only / IPv6-only restriction.
     var protocolVersion: String?
 
+    /// True when developer-mode server selection is active (sent only in developer mode). Mirrors Android's
+    /// `user_server_selection`.
+    var userServerSelection: Bool?
+
+    /// UUID of the user-selected measurement server (developer mode). Nil/omitted → control server default.
+    /// Mirrors Android's `prefer_server`.
+    var preferServer: String?
+
     ///
     public override func mapping(map: Map) {
         super.mapping(map: map)
@@ -153,6 +161,9 @@ public class IPRequest_Old: BasicRequest {
         loopModeInfo        <- map["loopmode_info"]
 
         protocolVersion     <- map["protocol_version"]
+
+        userServerSelection <- map["user_server_selection"]
+        preferServer        <- map["prefer_server"]
     }
 }
 
