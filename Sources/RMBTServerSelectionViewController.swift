@@ -21,23 +21,36 @@ final class RMBTServerSelectionViewController: UITableViewController {
 
     private let settings = RMBTSettings.shared
 
-    /// Snapshotted once so the list stays stable while the screen is open.
-    private let servers: [RMBTMeasurementServer]
+    /// The offered servers, re-read from settings whenever the list changes (e.g. a fresh /settings fetch after the
+    /// control server was changed), so an open screen reflects the new control server's servers.
+    private var servers: [RMBTMeasurementServer] = []
 
     init() {
-        self.servers = RMBTSettings.shared.availableTestServers
         super.init(style: .grouped)
     }
 
     required init?(coder: NSCoder) {
-        self.servers = RMBTSettings.shared.availableTestServers
         super.init(coder: coder)
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
         self.title = NSLocalizedString("preferences_server_selection", comment: "")
         self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: Self.cellReuseIdentifier)
+        self.servers = settings.availableTestServers
+        NotificationCenter.default.addObserver(self, selector: #selector(serverListChanged(_:)), name: .RMBTTestServerSelectionChanged, object: nil)
+    }
+
+    @objc private func serverListChanged(_ sender: Any) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.servers = self.settings.availableTestServers
+            self.tableView.reloadData()
+        }
     }
 
     // MARK: - Table View

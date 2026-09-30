@@ -19,6 +19,12 @@ public extension Notification.Name {
     /// Posted when the control server's settings response changes the Signal Measurement
     /// (coverage) availability flag, so the Intro screen can refresh its coverage button.
     static let RMBTCoverageAvailabilityChanged = Notification.Name("RMBTCoverageAvailabilityChanged")
+
+    /// Posted when the selectable measurement-server list or the selected server changes (a fresh /settings
+    /// fetch, or a reset because the control server changed). Lets the Intro "Server:" label and an open server
+    /// selection screen refresh, since a control-server change dismisses Settings as a sheet without firing the
+    /// presenter's viewWillAppear.
+    static let RMBTTestServerSelectionChanged = Notification.Name("RMBTTestServerSelectionChanged")
 }
 
 @objc final class RMBTControlServer: NSObject {
@@ -184,6 +190,10 @@ extension RMBTControlServer {
                        !servers.contains(where: { $0.uuid == selected }) {
                         RMBTSettings.shared.selectedTestServerUUID = nil
                     }
+                    // Let the Intro label and an open server-selection screen pick up the refreshed list/selection.
+                    DispatchQueue.main.async {
+                        NotificationCenter.default.post(name: .RMBTTestServerSelectionChanged, object: nil)
+                    }
                 }
 
                 self.completeSettingsRequest(with: .success(()))
@@ -237,6 +247,10 @@ extension RMBTControlServer {
         // launches is not mistaken for a change.)
         if RMBTSettings.shared.resetTestServerSelectionIfControlServerChanged(to: baseUrl) {
             Log.logger.info("Control server changed to \(baseUrl); reloading measurement server list and resetting selection to default")
+            // Refresh the Intro label now (the selection is already default); the list is replaced by getSettings below.
+            DispatchQueue.main.async {
+                NotificationCenter.default.post(name: .RMBTTestServerSelectionChanged, object: nil)
+            }
         }
 
         guard let url = URL(string: baseUrl),

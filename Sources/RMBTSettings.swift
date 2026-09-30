@@ -323,15 +323,16 @@ extension RMBTSettings {
         return availableTestServers.first { $0.uuid == uuid }
     }
 
-    /// Resets the measurement-server list and selection to default when the active control server differs from the
-    /// one the current list belongs to (server UUIDs are only valid for the control server that issued them). The
-    /// list is expected to be refetched from the new control server afterwards. Idempotent for an unchanged server.
+    /// Resets the selected server to default when the active control server differs from the one the current list
+    /// belongs to (server UUIDs are only valid for the control server that issued them). The list itself is left in
+    /// place and gets atomically replaced by the refetch from the new control server, so the UI never shows an empty
+    /// list (and a failed refetch keeps the previous list rather than blanking it). Idempotent for an unchanged
+    /// server.
     /// - Returns: true when a reset happened.
     @discardableResult
     func resetTestServerSelectionIfControlServerChanged(to controlUrl: String) -> Bool {
         guard serverListControlUrl != controlUrl else { return false }
         selectedTestServerUUID = nil
-        availableTestServers = []
         serverListControlUrl = controlUrl
         return true
     }

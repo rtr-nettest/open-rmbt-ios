@@ -81,8 +81,8 @@ struct ServerSelectionTests {
 
     // MARK: - Resetting the selection when the control server changes
 
-    @Test("WHEN the control server changes THEN the server list and selection reset to default")
-    func whenControlServerChanges_thenListAndSelectionReset() {
+    @Test("WHEN the control server changes THEN the selection resets to default and ownership moves")
+    func whenControlServerChanges_thenSelectionResetsAndOwnershipMoves() {
         let settings = RMBTSettings.shared
         let savedUrl = settings.serverListControlUrl
         let savedServers = settings.availableTestServers
@@ -101,7 +101,9 @@ struct ServerSelectionTests {
 
         #expect(didReset)
         #expect(settings.selectedTestServerUUID == nil)
-        #expect(settings.availableTestServers.isEmpty)
+        // The list is intentionally left in place; the fresh /settings fetch for the new control server replaces it
+        // atomically, so the UI never shows an empty list (a failed fetch keeps the previous list rather than blanking).
+        #expect(settings.availableTestServers.count == 1)
         #expect(settings.serverListControlUrl == "https://control-b.example/RMBTControlServer")
     }
 
