@@ -60,6 +60,24 @@ struct ServerSelectionTests {
         #expect(RMBTMeasurementServer(dictionary: ["uuid": "u1"]) == nil)
     }
 
+    // MARK: - Persisting the selection (KVO -> UserDefaults)
+
+    // Regression: choosing the default server clears `selectedTestServerUUID` to nil; KVO reports the change as
+    // NSNull, and storing NSNull in UserDefaults used to abort the app (SIGABRT in _CFPrefsValidateValueForKey).
+    @Test("WHEN a selected server is chosen then cleared to default THEN it persists without crashing")
+    func whenSelectionSetThenCleared_thenPersistsSafely() {
+        let settings = RMBTSettings.shared
+        let original = settings.selectedTestServerUUID
+        defer { settings.selectedTestServerUUID = original }
+
+        settings.selectedTestServerUUID = "uuid-xyz"
+        #expect(UserDefaults.appDefaults.string(forKey: "selectedTestServerUUID") == "uuid-xyz")
+
+        // Selecting "Default" clears the selection — must not crash and must remove the key.
+        settings.selectedTestServerUUID = nil
+        #expect(UserDefaults.appDefaults.object(forKey: "selectedTestServerUUID") == nil)
+    }
+
     // MARK: - Test request server-selection fields (mirrors Android's user_server_selection / prefer_server)
 
     @Test("WHEN a specific server is selected THEN the request carries user_server_selection and prefer_server")

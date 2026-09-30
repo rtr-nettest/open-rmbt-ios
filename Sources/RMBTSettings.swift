@@ -272,7 +272,14 @@ import Foundation
                 Log.logger.debug("Settings changed for keyPath '\(String(describing: keyPath))' from '\(String(describing: oldValue))' to '\(newValue)'")
             }
 
-            UserDefaults.storeDataFor(key: kp, obj: newValue)
+            // For nil-able settings (e.g. `selectedTestServerUUID` cleared when the default server is chosen), KVO
+            // reports the new value as `NSNull`. Storing that in UserDefaults aborts the app (CFPrefs rejects it), so
+            // clear the key instead.
+            if newValue is NSNull {
+                UserDefaults.removeDataFor(key: kp)
+            } else {
+                UserDefaults.storeDataFor(key: kp, obj: newValue)
+            }
         }
     }
 }
