@@ -196,6 +196,42 @@ import Clocks
         #expect(sut.selectedFenceDetail?.color == Color(technology: CTRadioAccessTechnologyLTE.radioTechnologyDisplayValue))
     }
 
+    // MARK: - Map legend (technologies used)
+
+    @Test func whenFencesUseSeveralTechnologies_thenLegendListsThemOnceInRankOrderWithTechColors() async throws {
+        let fences = [
+            makeFence(lat: 0.000, lon: 0, technology: CTRadioAccessTechnologyNR, pings: [PingResult(result: .interval(.milliseconds(20)), timestamp: makeDate(offset: 1))]),
+            makeFence(lat: 0.001, lon: 0, technology: CTRadioAccessTechnologyLTE, pings: [PingResult(result: .interval(.milliseconds(30)), timestamp: makeDate(offset: 2))]),
+            makeFence(lat: 0.002, lon: 0, technology: CTRadioAccessTechnologyWCDMA, pings: [PingResult(result: .interval(.milliseconds(40)), timestamp: makeDate(offset: 3))]),
+            makeFence(lat: 0.003, lon: 0, technology: CTRadioAccessTechnologyLTE, pings: [PingResult(result: .interval(.milliseconds(50)), timestamp: makeDate(offset: 4))])
+        ]
+        let sut = makeSUT(fences: fences)
+
+        #expect(sut.legendEntries.map(\.label) == ["3G", "4G", "5G SA"])
+        #expect(sut.legendEntries.allSatisfy { $0.color == Color(technology: $0.label) })
+    }
+
+    @Test func whenFenceHasNoTechnology_thenLegendExcludesIt() async throws {
+        // No connectivity (grey / "no service") must not add a legend entry.
+        let fence = makeFence(technology: nil, pings: [PingResult(result: .interval(.milliseconds(50)), timestamp: makeDate(offset: 1))])
+        let sut = makeSUT(fences: [fence])
+
+        #expect(sut.legendEntries.isEmpty)
+    }
+
+    @Test func whenFenceHasTechnologyButNoCoverage_thenLegendStillListsTheTechnology() async throws {
+        // A fence on a real technology but with only failed pings is grey on the map, yet the technology WAS used,
+        // so the legend lists it with the technology's base color (mirrors Android).
+        let fence = makeFence(
+            technology: CTRadioAccessTechnologyLTE,
+            pings: [PingResult(result: .error, timestamp: makeDate(offset: 1))]
+        )
+        let sut = makeSUT(fences: [fence])
+
+        #expect(sut.legendEntries.map(\.label) == ["4G"])
+        #expect(sut.legendEntries.first?.color == Color(technology: "4G"))
+    }
+
     @Test func whenReceivedPingsWithTimeBeforeFenceChanged_thenTheyAreAssignedToPreviousFence() async throws {
         let sut = makeSUT(updates: [
             makeLocationUpdate  (at: 0, lat: 1, lon: 1),

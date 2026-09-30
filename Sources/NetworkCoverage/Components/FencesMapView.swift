@@ -82,7 +82,9 @@ struct FencesMapView: View {
     let onSettingsToggle: () -> Void
     let trackUserLocation: Bool
     let onVisibleRegionChange: (MKCoordinateRegion?) -> Void
-    
+    /// Technologies used in this measurement, shown as a bottom-left legend (empty = hidden).
+    let legendEntries: [CoverageLegendEntry]
+
     @State private var position: MapCameraPosition
     @State private var regionCoordinator: FencesMapRegionCoordinator
     
@@ -98,7 +100,8 @@ struct FencesMapView: View {
         showsSettings: Bool,
         onSettingsToggle: @escaping () -> Void,
         trackUserLocation: Bool,
-        onVisibleRegionChange: @escaping (MKCoordinateRegion?) -> Void
+        onVisibleRegionChange: @escaping (MKCoordinateRegion?) -> Void,
+        legendEntries: [CoverageLegendEntry] = []
     ) {
         self.visibleFenceItems = visibleFenceItems
         self.fencePolylineSegments = fencePolylineSegments
@@ -112,7 +115,8 @@ struct FencesMapView: View {
         self.onSettingsToggle = onSettingsToggle
         self.trackUserLocation = trackUserLocation
         self.onVisibleRegionChange = onVisibleRegionChange
-        
+        self.legendEntries = legendEntries
+
         // Calculate initial position to show all fences
         if trackUserLocation {
             _position = State(initialValue: .userLocation(fallback: .automatic))
@@ -216,7 +220,7 @@ struct FencesMapView: View {
             MapUserLocationButton()
         }
         .overlay() {
-            VStack {
+            VStack(spacing: 8) {
                 Spacer()
 
                 HStack(alignment: .bottom, spacing: 8) {
@@ -235,9 +239,36 @@ struct FencesMapView: View {
                         .mapOverlay()
                     }
                 }
-                .padding()
+
+                if !legendEntries.isEmpty {
+                    HStack {
+                        legendView
+                        Spacer()
+                    }
+                    // Lift the legend clear of the Apple Maps attribution in the bottom-left corner.
+                    .padding(.bottom, 18)
+                }
+            }
+            .padding()
+        }
+    }
+
+    /// Bottom-left legend: a colored dot + short generation label for each technology used in the measurement.
+    private var legendView: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            ForEach(legendEntries) { entry in
+                HStack(spacing: 6) {
+                    Circle()
+                        .fill(entry.color)
+                        .frame(width: 12, height: 12)
+                    Text(entry.label)
+                        .font(.caption)
+                        .foregroundStyle(.black)
+                }
             }
         }
+        .padding(8)
+        .mapOverlay()
     }
     
     func fencePolyline(for segment: FencePolylineSegment) -> some MapContent {
@@ -343,6 +374,7 @@ private extension View {
         showsSettings: true,
         onSettingsToggle: {},
         trackUserLocation: false,
-        onVisibleRegionChange: viewModel.updateVisibleRegion(_:)
+        onVisibleRegionChange: viewModel.updateVisibleRegion(_:),
+        legendEntries: viewModel.legendEntries
     )
 }

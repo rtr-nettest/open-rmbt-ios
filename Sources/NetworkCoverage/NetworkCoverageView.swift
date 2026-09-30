@@ -74,7 +74,8 @@ struct NetworkCoverageView: View {
                     showsSettings: showsSettings,
                     onSettingsToggle: { showsSettings.toggle() },
                     trackUserLocation: true,
-                    onVisibleRegionChange: viewModel.updateVisibleRegion(_:)
+                    onVisibleRegionChange: viewModel.updateVisibleRegion(_:),
+                    legendEntries: viewModel.legendEntries
                 )
                 .contentShape(Rectangle())
                 .onTapGesture {

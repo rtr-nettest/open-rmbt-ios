@@ -27,7 +27,8 @@ struct CoverageResultView: View {
             showsSettings: false,
             onSettingsToggle: {},
             trackUserLocation: false,
-            onVisibleRegionChange: viewModel.updateVisibleRegion(_:)
+            onVisibleRegionChange: viewModel.updateVisibleRegion(_:),
+            legendEntries: viewModel.legendEntries
         )
         .ignoresSafeArea()
         .safeAreaInset(edge: .top, spacing: 0) {
