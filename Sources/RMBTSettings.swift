@@ -288,6 +288,7 @@ import Foundation
 
 extension RMBTSettings {
     private static let availableTestServersKey = "availableTestServers"
+    private static let serverListControlUrlKey = "serverListControlUrl"
 
     /// Measurement servers offered by the control server (from the /settings response). Persisted so the
     /// selection UI has values even before a fresh fetch. Stored as a property-list array of dictionaries.
@@ -301,10 +302,38 @@ extension RMBTSettings {
         }
     }
 
+    /// The control-server base URL that the current `availableTestServers` / `selectedTestServerUUID` belong to.
+    /// Server UUIDs are only meaningful for the control server that issued them, so when the active control server
+    /// differs from this the list is reloaded and the selection is reset to default. Persisted so a debug control
+    /// server that stays configured across launches is not mistaken for a change.
+    var serverListControlUrl: String? {
+        get { UserDefaults.appDefaults.string(forKey: Self.serverListControlUrlKey) }
+        set {
+            if let newValue = newValue {
+                UserDefaults.appDefaults.set(newValue, forKey: Self.serverListControlUrlKey)
+            } else {
+                UserDefaults.appDefaults.removeObject(forKey: Self.serverListControlUrlKey)
+            }
+        }
+    }
+
     /// The currently selected server, or nil when the default is in use (or the selection is no longer offered).
     var selectedTestServer: RMBTMeasurementServer? {
         guard let uuid = selectedTestServerUUID else { return nil }
         return availableTestServers.first { $0.uuid == uuid }
+    }
+
+    /// Resets the measurement-server list and selection to default when the active control server differs from the
+    /// one the current list belongs to (server UUIDs are only valid for the control server that issued them). The
+    /// list is expected to be refetched from the new control server afterwards. Idempotent for an unchanged server.
+    /// - Returns: true when a reset happened.
+    @discardableResult
+    func resetTestServerSelectionIfControlServerChanged(to controlUrl: String) -> Bool {
+        guard serverListControlUrl != controlUrl else { return false }
+        selectedTestServerUUID = nil
+        availableTestServers = []
+        serverListControlUrl = controlUrl
+        return true
     }
 }
 

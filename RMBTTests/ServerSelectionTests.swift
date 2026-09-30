@@ -3,7 +3,8 @@ import ObjectMapper
 @testable import RMBT
 
 // Developer-mode measurement server selection (server list from /settings, selection sent as prefer_server).
-@Suite("Test server selection")
+// Serialized: several tests mutate the shared `RMBTSettings.shared` singleton, so they must not run concurrently.
+@Suite("Test server selection", .serialized)
 struct ServerSelectionTests {
 
     // MARK: - /settings servers parsing
@@ -76,6 +77,55 @@ struct ServerSelectionTests {
         // Selecting "Default" clears the selection — must not crash and must remove the key.
         settings.selectedTestServerUUID = nil
         #expect(UserDefaults.appDefaults.object(forKey: "selectedTestServerUUID") == nil)
+    }
+
+    // MARK: - Resetting the selection when the control server changes
+
+    @Test("WHEN the control server changes THEN the server list and selection reset to default")
+    func whenControlServerChanges_thenListAndSelectionReset() {
+        let settings = RMBTSettings.shared
+        let savedUrl = settings.serverListControlUrl
+        let savedServers = settings.availableTestServers
+        let savedSelection = settings.selectedTestServerUUID
+        defer {
+            settings.serverListControlUrl = savedUrl
+            settings.availableTestServers = savedServers
+            settings.selectedTestServerUUID = savedSelection
+        }
+
+        settings.serverListControlUrl = "https://control-a.example/RMBTControlServer"
+        settings.availableTestServers = [RMBTMeasurementServer(uuid: "u1", name: "A")]
+        settings.selectedTestServerUUID = "u1"
+
+        let didReset = settings.resetTestServerSelectionIfControlServerChanged(to: "https://control-b.example/RMBTControlServer")
+
+        #expect(didReset)
+        #expect(settings.selectedTestServerUUID == nil)
+        #expect(settings.availableTestServers.isEmpty)
+        #expect(settings.serverListControlUrl == "https://control-b.example/RMBTControlServer")
+    }
+
+    @Test("WHEN the control server is unchanged THEN the selection is left intact")
+    func whenControlServerUnchanged_thenSelectionKept() {
+        let settings = RMBTSettings.shared
+        let savedUrl = settings.serverListControlUrl
+        let savedServers = settings.availableTestServers
+        let savedSelection = settings.selectedTestServerUUID
+        defer {
+            settings.serverListControlUrl = savedUrl
+            settings.availableTestServers = savedServers
+            settings.selectedTestServerUUID = savedSelection
+        }
+
+        settings.serverListControlUrl = "https://control-a.example/RMBTControlServer"
+        settings.availableTestServers = [RMBTMeasurementServer(uuid: "u1", name: "A")]
+        settings.selectedTestServerUUID = "u1"
+
+        let didReset = settings.resetTestServerSelectionIfControlServerChanged(to: "https://control-a.example/RMBTControlServer")
+
+        #expect(!didReset)
+        #expect(settings.selectedTestServerUUID == "u1")
+        #expect(settings.availableTestServers.count == 1)
     }
 
     // MARK: - Test request server-selection fields (mirrors Android's user_server_selection / prefer_server)
