@@ -23,6 +23,25 @@ struct CoverageHistoryDetail {
         self.controlServer = controlServer
     }
     
+    /// Loads and aggregates the fences of all segments (open_test_uuids) of a coverage loop into a single list,
+    /// sorted by time. Segments that fail to load are skipped; only when none load does it throw the last error.
+    /// Used for the "whole loop" map that shows the entire signal measurement as one map.
+    func loadAggregatedFences(for testUUIDs: [String]) async throws -> [Fence] {
+        var aggregated: [Fence] = []
+        var lastError: Error?
+        for testUUID in testUUIDs {
+            do {
+                aggregated.append(contentsOf: try await loadCoverageDetails(for: testUUID).fences)
+            } catch {
+                lastError = error
+            }
+        }
+        if aggregated.isEmpty, let lastError {
+            throw lastError
+        }
+        return aggregated.sorted { $0.dateEntered < $1.dateEntered }
+    }
+
     func loadCoverageDetails(for testUUID: String) async throws -> CoverageHistoryDetail {
         return try await withCheckedThrowingContinuation { continuation in
             // Some statistic servers may return 404 with a valid JSON body for opentests.

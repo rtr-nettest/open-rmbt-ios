@@ -520,3 +520,7 @@
 "preferences_server_selection" = "Server selection";
 "preferences_default_server_selection" = "Default";
 "server_label" = "Server: %@";
+
+"coverage_details_button" = "Details";
+"coverage_segments_title" = "Measurement segments";
+"segment_result_title" = "Segment result";

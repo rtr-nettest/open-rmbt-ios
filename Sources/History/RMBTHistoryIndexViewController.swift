@@ -362,13 +362,57 @@ final class RMBTHistoryIndexViewController: UIViewController {
     }
     
     // TODO: Implement full SwiftUI coverage detail view
-     private func presentCoverageDetail(_ coverageResult: RMBTHistoryCoverageResult) {
+     private func presentCoverageDetail(_ coverageResult: RMBTHistoryCoverageResult, title: String? = nil) {
          let coverageDetailView = CoverageHistoryDetailView(coverageResult: coverageResult)
          let hostingController = UIHostingController(rootView: coverageDetailView)
          hostingController.modalPresentationStyle = .fullScreen
+         hostingController.title = title
          navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
          navigationController?.pushViewController(hostingController, animated: true)
      }
+
+    /// Whole-loop signal measurement: aggregated map of every segment, with a "Details" button opening the
+    /// segment list. Back navigation returns segment → list → whole-loop map → history overview.
+    private func presentCoverageWholeLoop(_ loopResult: RMBTHistoryLoopResult) {
+        let segments = loopResult.loopResults.compactMap { $0 as? RMBTHistoryCoverageResult }
+        // Defensive: a single-segment loop behaves as today (straight to its result).
+        if segments.count <= 1, let only = segments.first {
+            presentCoverageDetail(only)
+            return
+        }
+
+        let mapView = CoverageWholeLoopMapView(openTestUUIDs: loopResult.openTestUUIDs) { [weak self] in
+            self?.presentCoverageSegmentList(segments)
+        }
+        let hostingController = UIHostingController(rootView: mapView)
+        hostingController.modalPresentationStyle = .fullScreen
+        hostingController.title = loopResult.timeStringIn24hFormat
+        navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
+        navigationController?.pushViewController(hostingController, animated: true)
+    }
+
+    private func presentCoverageSegmentList(_ segments: [RMBTHistoryCoverageResult]) {
+        let rows = segments
+            .sorted { $0.timestamp > $1.timestamp } // latest first
+            .map { segment -> CoverageLoopSegmentsListView.SegmentRow in
+                let pointsText = (segment.historyItem.fencesCount).flatMap { $0 > 0 ? Self.formatPointsCount($0) : nil }
+                return .init(
+                    id: segment.openTestUuid ?? segment.historyItem.testUuid ?? UUID().uuidString,
+                    title: segment.historyItem.timeString ?? segment.timeStringIn24hFormat ?? "",
+                    pointsText: pointsText,
+                    result: segment
+                )
+            }
+
+        let listView = CoverageLoopSegmentsListView(segments: rows) { [weak self] segment in
+            self?.presentCoverageDetail(segment, title: NSLocalizedString("segment_result_title", comment: ""))
+        }
+        let hostingController = UIHostingController(rootView: listView)
+        hostingController.modalPresentationStyle = .fullScreen
+        hostingController.title = NSLocalizedString("coverage_segments_title", comment: "")
+        navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
+        navigationController?.pushViewController(hostingController, animated: true)
+    }
 }
 
 // MARK: UITableViewDataSource
@@ -421,7 +465,13 @@ extension RMBTHistoryIndexViewController: UITableViewDataSource, UITableViewDele
         }
 
         header.onExpand = { [unowned self] in
-            self.expandLoopSection(loopResult.loopUuid ?? "")
+            // A coverage (signal measurement) series opens the whole-loop map (all segments aggregated) instead of
+            // expanding inline; a regular speed-test loop still expands to its individual results.
+            if loopResult.isCoverageSeries {
+                self.presentCoverageWholeLoop(loopResult)
+            } else {
+                self.expandLoopSection(loopResult.loopUuid ?? "")
+            }
         }
         // header.bottomBorder is hidden by default to avoid border overlapping
         if section < testResults.count - 1 {
