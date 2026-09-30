@@ -185,15 +185,24 @@ class RMBTSettingsViewController: UITableViewController {
         self.bindSwitch(self.debugControlServerCustomizationEnabledSwitch,
                         to: #keyPath(RMBTSettings.debugControlServerCustomizationEnabled)) { value in
             self.refreshSection(.debugCustomControlServer)
+            self.controlServerSettingsDidChange()
         }
 
         self.bindTextField(self.debugControlServerHostnameTextField,
-                           to: #keyPath(RMBTSettings.debugControlServerHostname), isNumeric: false)
-        
-        self.bindTextField(self.debugControlServerPortTextField, to: #keyPath(RMBTSettings.debugControlServerPort), isNumeric: true)
+                           to: #keyPath(RMBTSettings.debugControlServerHostname), isNumeric: false) { _ in
+            self.controlServerSettingsDidChange()
+        }
+
+        self.bindTextField(self.debugControlServerPortTextField, to: #keyPath(RMBTSettings.debugControlServerPort), isNumeric: true) { _ in
+            self.controlServerSettingsDidChange()
+        }
 
         self.bindSwitch(self.debugControlServerUseSSLSwitch,
-                        to: #keyPath(RMBTSettings.debugControlServerUseSSL), onToggle: nil)
+                        to: #keyPath(RMBTSettings.debugControlServerUseSSL)) { _ in
+            self.controlServerSettingsDidChange()
+        }
+
+        NotificationCenter.default.addObserver(self, selector: #selector(testServerSelectionChanged(_:)), name: .RMBTTestServerSelectionChanged, object: nil)
 
         self.bindSwitch(self.debugLoggingEnabledSwitch,
                         to: #keyPath(RMBTSettings.debugLoggingEnabled)) { value in
@@ -302,7 +311,23 @@ class RMBTSettingsViewController: UITableViewController {
         self.tableView.reloadData()
         self.tableView.endUpdates()
     }
-    
+
+    /// The developer control-server configuration changed (enabled / hostname / port / SSL). Re-point the control
+    /// server now so the measurement server list is reloaded and the selection reset to default immediately, instead
+    /// of only when Settings is closed. The resulting `.RMBTTestServerSelectionChanged` notification refreshes the
+    /// "Server selection" row (see `testServerSelectionChanged`).
+    private func controlServerSettingsDidChange() {
+        RMBTControlServer.shared.updateWithCurrentSettings(success: {}, error: { _ in })
+    }
+
+    /// The selected measurement server changed (e.g. reset to default because the control server changed). Refresh
+    /// the table so the "Server selection" row shows the current value without needing to reopen Settings.
+    @objc private func testServerSelectionChanged(_ sender: Any) {
+        DispatchQueue.main.async { [weak self] in
+            self?.tableView.reloadData()
+        }
+    }
+
     // MARK: - Two-way binding helpers
     
     func bindSwitch(_ aSwitch: UISwitch, to settingsKeyPath: String, onToggle: ((_ value: Bool) -> Void)?) {

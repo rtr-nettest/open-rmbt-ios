@@ -241,18 +241,6 @@ extension RMBTControlServer {
             baseUrl = RMBTConfig.shared.RMBT_CONTROL_SERVER_URL
         }
         
-        // If the active control server changed, the persisted measurement-server list and any selected server
-        // belong to the previous control server and are meaningless here. Reset the selection to default; the list
-        // is reloaded by the getSettings call below. (Persisted comparison so a debug control server kept across
-        // launches is not mistaken for a change.)
-        if RMBTSettings.shared.resetTestServerSelectionIfControlServerChanged(to: baseUrl) {
-            Log.logger.info("Control server changed to \(baseUrl); reloading measurement server list and resetting selection to default")
-            // Refresh the Intro label now (the selection is already default); the list is replaced by getSettings below.
-            DispatchQueue.main.async {
-                NotificationCenter.default.post(name: .RMBTTestServerSelectionChanged, object: nil)
-            }
-        }
-
         guard let url = URL(string: baseUrl),
            let host = url.host else { failure(nil); return }
 
@@ -262,7 +250,21 @@ extension RMBTControlServer {
             let key = uuidKey {
             uuid = KeychainHelper.checkStoredUUID(uuidKey: key)
         }
-        
+
+        // If the active control server changed, the persisted measurement-server list and any selected server
+        // belong to the previous control server and are meaningless here. Reset the selection to default; the list
+        // is reloaded by the getSettings call below. (Persisted comparison so a debug control server kept across
+        // launches is not mistaken for a change; placed after the URL guard so a malformed intermediate URL does
+        // not reset.)
+        if RMBTSettings.shared.resetTestServerSelectionIfControlServerChanged(to: baseUrl) {
+            Log.logger.info("Control server changed to \(baseUrl); reloading measurement server list and resetting selection to default")
+            // Refresh the Intro label / Settings entry now (the selection is already default); the list is replaced
+            // by getSettings below.
+            DispatchQueue.main.async {
+                NotificationCenter.default.post(name: .RMBTTestServerSelectionChanged, object: nil)
+            }
+        }
+
         Log.logger.info("Control Server base url = \(self.baseUrl)")
         
         // get settings of control server
