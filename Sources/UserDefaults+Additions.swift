@@ -39,8 +39,15 @@ extension UserDefaults {
     
     /// Generic function
     public class func storeDataFor(key: String, obj: Any) {
-    
+
         UserDefaults.appDefaults.set(obj, forKey: key)
+        UserDefaults.appDefaults.synchronize()
+    }
+
+    /// Removes a stored value. Used for nil-able settings: `NSUserDefaults.set(_:forKey:)` cannot store `nil`/`NSNull`
+    /// (CFPrefs rejects non-property-list values and aborts), so clearing a setting means removing its key.
+    public class func removeDataFor(key: String) {
+        UserDefaults.appDefaults.removeObject(forKey: key)
         UserDefaults.appDefaults.synchronize()
     }
     
