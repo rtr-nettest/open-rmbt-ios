@@ -15,7 +15,7 @@ enum TestExportFormat {
 extension TestExportFormat {
     var urlPath: String {
         switch self {
-        case .pdf: "/export/pdf/de"
+        case .pdf: "/export/pdf/$lang"
         case .xlsx, .csv: "/opentests/search"
         }
     }
@@ -48,7 +48,8 @@ extension TestExportFormat {
     }
 
     func downloadRequest(baseURL: URL, openTestUUIDs: [String], maxResults: Int? = nil) -> URLRequest {
-        var request = URLRequest(url: baseURL.appending(path: urlPath))
+        let localizedPath = RMBTHelpers.RMBTLocalize(urlString: urlPath)
+        var request = URLRequest(url: baseURL.appending(path: localizedPath))
         request.httpMethod = "POST"
         request.httpBody = httpBody(openTestUUIDs: openTestUUIDs, maxResults: maxResults)
         
