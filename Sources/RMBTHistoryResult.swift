@@ -265,12 +265,15 @@ class RMBTHistoryResult: NSObject {
                 }
 
                 if let measurementResult = response["measurement_result"] as? [String: Any] {
+                    // Expert mode shows the full (three-decimal) value on the result detail, matching the
+                    // measurement screen's final result.
+                    let expertFullValue = RMBTSettings.shared.expertMode
                     if let download = measurementResult["download_kbit"] as? Int {
-                        self.downloadSpeedMbpsString = RMBTSpeedMbpsString(Double(download), withMbps: false)
+                        self.downloadSpeedMbpsString = RMBTSpeedMbpsString(Double(download), withMbps: false, expertFullValue: expertFullValue)
                     }
-                    
+
                     if let upload = measurementResult["upload_kbit"] as? Int {
-                        self.uploadSpeedMbpsString = RMBTSpeedMbpsString(Double(upload), withMbps: false)
+                        self.uploadSpeedMbpsString = RMBTSpeedMbpsString(Double(upload), withMbps: false, expertFullValue: expertFullValue)
                     }
                     
                     if let ping = measurementResult["ping_ms"] as? Double {

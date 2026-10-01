@@ -479,12 +479,14 @@ final class RMBTTestViewController: RMBTBaseTestViewController {
     
     func updateSpeedLabel(for phase: RMBTTestRunnerPhase, withSpeed kbps: UInt32, isFinal: Bool) {
         self.isShowSpeedSuffix = false
+        // Expert mode shows the full (three-decimal) value on the final result, not the rounded display.
+        let expertFullValue = isFinal && RMBTSettings.shared.expertMode
         if phase == .down {
             self.downIcon = .downloadIconByResultClass(RMBTHelpers.RMBTDownClassification(with: Double(kbps)))
-            self.down = RMBTSpeedMbpsString(Double(kbps), withMbps: true)
+            self.down = RMBTSpeedMbpsString(Double(kbps), withMbps: true, expertFullValue: expertFullValue)
         } else {
             self.upIcon = .uploadIconByResultClass(RMBTHelpers.RMBTUpClassification(with: Double(kbps)))
-            self.up = RMBTSpeedMbpsString(Double(kbps), withMbps: true)
+            self.up = RMBTSpeedMbpsString(Double(kbps), withMbps: true, expertFullValue: expertFullValue)
         }
         self.speed = kbps
     }

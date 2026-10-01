@@ -65,8 +65,36 @@ public func RMBTSpeedLogValue(_ kbps: Double, gaugeParts: Double, log10Max: Doub
 }
 
 ///
-public func RMBTSpeedMbpsString(_ kbps: Double, withMbps: Bool = true) -> String {
-    guard let speedValue = RMBTHelpers.RMBTFormatNumber(NSNumber(value: kbps / 1000.0)) else { return "-" }
+/// Full-value formatter for expert mode: three decimals, no grouping, locale decimal separator
+/// (e.g. "1297.987" / "1297,987"). Mirrors Android's `expertFormat()` = `DecimalFormat("####0.000")`.
+private let RMBTSpeedExpertFormatter: NumberFormatter = {
+    let formatter = NumberFormatter()
+    formatter.usesGroupingSeparator = false
+    formatter.minimumFractionDigits = 3
+    formatter.maximumFractionDigits = 3
+    return formatter
+}()
+
+/// Formats a speed given in kbit/s as a Mbit/s string.
+///
+/// Rounding mirrors the Android client:
+/// - `expertFullValue` (expert mode, final result only): the full value with three decimals.
+/// - above 10 Mbit/s: the full number as an integer (e.g. 1298, not "1300" at two significant digits).
+/// - up to 10 Mbit/s: two significant digits (e.g. "5.2").
+public func RMBTSpeedMbpsString(_ kbps: Double, withMbps: Bool = true, expertFullValue: Bool = false) -> String {
+    let mbps = kbps / 1000.0
+
+    let speedValue: String
+    if expertFullValue {
+        guard let formatted = RMBTSpeedExpertFormatter.string(from: NSNumber(value: mbps)) else { return "-" }
+        speedValue = formatted
+    } else if mbps > 10 {
+        speedValue = String(Int(mbps.rounded()))
+    } else if let formatted = RMBTHelpers.RMBTFormatNumber(NSNumber(value: mbps)) {
+        speedValue = formatted
+    } else {
+        return "-"
+    }
 
     if withMbps {
         let localizedMps = NSLocalizedString("test.speed.unit", value: "Mbps", comment: "Speed suffix")

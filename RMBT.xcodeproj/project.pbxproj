@@ -139,6 +139,7 @@
 		C7F599A71A2A81940020ADC4 /* RMBTHistoryIndexCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = C7F599A61A2A81940020ADC4 /* RMBTHistoryIndexCell.xib */; };
 		DBD96290853D2166E13105FF /* CoverageReadinessView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90C19D1EDC52AD081E106F82 /* CoverageReadinessView.swift */; };
 		DFA09F3A7793F33E3FFB9641 /* RMBTUpgradeResponseParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DB86CF3B38C1D1004F10C92 /* RMBTUpgradeResponseParserTests.swift */; };
+		E0039E83B418A2BCE9C5CFDF /* RMBTSpeedFormatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98B665BCF169C2C95D1BA18E /* RMBTSpeedFormatTests.swift */; };
 		E0B12E597C005AE52379D499 /* AsyncSocketUDPConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08375CB881FC7003A0FCBF87 /* AsyncSocketUDPConnection.swift */; };
 		E91316AE26AD72F200368DCD /* RMBTTOSViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E91316AD26AD72F200368DCD /* RMBTTOSViewController.swift */; };
 		E91316B026AD95B300368DCD /* RMBTTOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = E91316AF26AD95B300368DCD /* RMBTTOS.swift */; };
@@ -496,6 +497,7 @@
 		8E9492E88A7428985BBD0742 /* RMBTIPVersionAvailability.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RMBTIPVersionAvailability.swift; sourceTree = "<group>"; };
 		90C19D1EDC52AD081E106F82 /* CoverageReadinessView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CoverageReadinessView.swift; sourceTree = "<group>"; };
 		94ACDE3F34869D6346ADEA9F /* FenceFactory.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FenceFactory.swift; sourceTree = "<group>"; };
+		98B665BCF169C2C95D1BA18E /* RMBTSpeedFormatTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RMBTSpeedFormatTests.swift; sourceTree = "<group>"; };
 		9CFAF2F5765136A0651060E2 /* CoverageActionButtons.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CoverageActionButtons.swift; sourceTree = "<group>"; };
 		9E95B2179B357FF985E9D9D7 /* CoverageHistoryDetailServiceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CoverageHistoryDetailServiceTests.swift; sourceTree = "<group>"; };
 		A0C545CF605E364BCA4F45EA /* Pods-RMBTTest.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RMBTTest.debug.xcconfig"; path = "Pods/Target Support Files/Pods-RMBTTest/Pods-RMBTTest.debug.xcconfig"; sourceTree = "<group>"; };
@@ -1389,6 +1391,7 @@
 				6DB86CF3B38C1D1004F10C92 /* RMBTUpgradeResponseParserTests.swift */,
 				63EEE5A1E8389C78929FA2F5 /* MapServerHostnameValidationTests.swift */,
 				11EBBC42414A7B89BE2AEDC3 /* RMBTMapServerQueryStringTests.swift */,
+				98B665BCF169C2C95D1BA18E /* RMBTSpeedFormatTests.swift */,
 			);
 			name = "Unit Tests";
 			path = RMBTTests;
@@ -2117,6 +2120,7 @@
 				DFA09F3A7793F33E3FFB9641 /* RMBTUpgradeResponseParserTests.swift in Sources */,
 				489C8DFAD366366CF434A710 /* MapServerHostnameValidationTests.swift in Sources */,
 				2E12A4A7E6EE2A28AF661F87 /* RMBTMapServerQueryStringTests.swift in Sources */,
+				E0039E83B418A2BCE9C5CFDF /* RMBTSpeedFormatTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
