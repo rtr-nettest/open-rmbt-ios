@@ -31,6 +31,9 @@ class RMBTMapViewController: UIViewController {
     private var tileParamsDictionary: [String: Any] = [:]
     
     private var mapOptions: RMBTMapOptions?
+    /// Effective map server base URL the current `mapOptions`/tiles were loaded from; used to detect a map-server
+    /// change (developer override) and reload. nil until the first successful load.
+    private var loadedMapServerBaseURL: String?
     
     private var tileRenderer: MKTileOverlayRenderer?
     
@@ -95,8 +98,15 @@ class RMBTMapViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
+
         setupInitLocation()
+
+        // The developer map-server override can be toggled/changed while this (persistent) screen is off-screen.
+        // If the effective map server differs from the one the current options/tiles were loaded from, reload so
+        // stale data from the previous server isn't shown.
+        if let loaded = loadedMapServerBaseURL, loaded != RMBTMapServer.shared.currentBaseURL {
+            reloadMapOptions()
+        }
     }
 
     
@@ -180,18 +190,21 @@ class RMBTMapViewController: UIViewController {
         RMBTControlServer.shared.updateWithCurrentSettings {
             RMBTMapServer.shared.getMapOptions { [weak self] response in
                 self?.mapOptions = RMBTMapOptions(response: response)
+                self?.loadedMapServerBaseURL = RMBTMapServer.shared.currentBaseURL
                 self?.layerOptionsButton.isEnabled = true
                 self?.mapOptionsButton.isEnabled = true
                 self?.setupMapLayer()
                 self?.refresh()
             } error: { [weak self] error in
                 Log.logger.error(error)
+                self?.loadedMapServerBaseURL = RMBTMapServer.shared.currentBaseURL
                 self?.setupMapLayer()
                 self?.refresh()
             }
-        } error: { error in
+        } error: { [weak self] error in
             Log.logger.error(error)
-        }        
+            self?.loadedMapServerBaseURL = RMBTMapServer.shared.currentBaseURL
+        }
     }
     
     private func refresh() {

@@ -525,3 +525,6 @@
 "coverage_details_button" = "Details";
 "coverage_segments_title" = "Measurement segments";
 "segment_result_title" = "Segment result";
+
+"preferences_developer_map_server" = "Map server";
+"preferences_override_map_enabled" = "Override map server";

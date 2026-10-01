@@ -13,6 +13,7 @@
 		2765A4C6A1F93478576DF5E9 /* CoverageLoopSegmentsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DE8AA2A408E6098F056E876 /* CoverageLoopSegmentsListView.swift */; };
 		2A1C22D71D03B25286561EF6 /* RMBTTestConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67B5D74D919A5051275BF971 /* RMBTTestConnection.swift */; };
 		2E0DBD6777F3D843561DD322 /* RMBTUpgradeResponseParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8F6F22A22912261CF90D0B6 /* RMBTUpgradeResponseParser.swift */; };
+		2E12A4A7E6EE2A28AF661F87 /* RMBTMapServerQueryStringTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11EBBC42414A7B89BE2AEDC3 /* RMBTMapServerQueryStringTests.swift */; };
 		2F5A8C4958A5EC9724752D6A /* SIMInfoModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD5A35E71C9764DC5843686A /* SIMInfoModels.swift */; };
 		3299F5FCE7F2BD48D329929F /* CoverageActionButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CFAF2F5765136A0651060E2 /* CoverageActionButtons.swift */; };
 		361443482732793E00D0FC26 /* RMBTHistorySyncModalViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 361443472732793D00D0FC26 /* RMBTHistorySyncModalViewController.swift */; };
@@ -32,6 +33,7 @@
 		36B75A212739692C006F4CB3 /* RMBTMaterialTextFieldState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36B75A202739692C006F4CB3 /* RMBTMaterialTextFieldState.swift */; };
 		36B75A27273EA096006F4CB3 /* RMBTHistoryLoopCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 36B75A26273EA096006F4CB3 /* RMBTHistoryLoopCell.xib */; };
 		36B75A29273EA73C006F4CB3 /* RMBTHistoryLoopCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36B75A28273EA73C006F4CB3 /* RMBTHistoryLoopCell.swift */; };
+		489C8DFAD366366CF434A710 /* MapServerHostnameValidationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63EEE5A1E8389C78929FA2F5 /* MapServerHostnameValidationTests.swift */; };
 		492851BC2ED66688005811D0 /* NetworkCoverageIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 492851BB2ED66688005811D0 /* NetworkCoverageIntegrationTests.swift */; };
 		49312C752BE91CC2001AA226 /* RMBTHistoryDownloadViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49312C742BE91CC2001AA226 /* RMBTHistoryDownloadViewController.swift */; };
 		493D514C2DD7526200CC3473 /* libresolv.9.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 49C5E41A2DD74C3E00C537D9 /* libresolv.9.tbd */; };
@@ -389,6 +391,7 @@
 		008286A33D9AC4D0BF3936B3 /* NWUDPConnection.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NWUDPConnection.swift; sourceTree = "<group>"; };
 		08375CB881FC7003A0FCBF87 /* AsyncSocketUDPConnection.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AsyncSocketUDPConnection.swift; sourceTree = "<group>"; };
 		09BF4B6D48151BE0513DA599 /* Pods-RMBTTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RMBTTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-RMBTTests/Pods-RMBTTests.debug.xcconfig"; sourceTree = "<group>"; };
+		11EBBC42414A7B89BE2AEDC3 /* RMBTMapServerQueryStringTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RMBTMapServerQueryStringTests.swift; sourceTree = "<group>"; };
 		1C605E59889E3DF77EFDC8CF /* Pods-RMBTTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RMBTTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-RMBTTests/Pods-RMBTTests.release.xcconfig"; sourceTree = "<group>"; };
 		1F9C078F216F751C00F1FC10 /* RMBT.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RMBT.entitlements; sourceTree = "<group>"; };
 		243AF8E44A4D00F1B9A6B503 /* SIMInfoViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SIMInfoViewModel.swift; sourceTree = "<group>"; };
@@ -480,6 +483,7 @@
 		4A0000022EAA35630009D9A6 /* CurrentNetworkTypeProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentNetworkTypeProvider.swift; sourceTree = "<group>"; };
 		592D3AD687AF15CB514535B2 /* CoverageWholeLoopMapView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CoverageWholeLoopMapView.swift; sourceTree = "<group>"; };
 		5EBA77D0E5CCA5187CA3ADD3 /* RMBTSceneDelegate.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RMBTSceneDelegate.swift; sourceTree = "<group>"; };
+		63EEE5A1E8389C78929FA2F5 /* MapServerHostnameValidationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MapServerHostnameValidationTests.swift; sourceTree = "<group>"; };
 		64A52344AA25543676788609 /* SIMInfoSnapshotBuilderTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SIMInfoSnapshotBuilderTests.swift; sourceTree = "<group>"; };
 		66A000012F10000000000002 /* FenceRadiusCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FenceRadiusCalculator.swift; sourceTree = "<group>"; };
 		66A000022F20000000000002 /* CoverageButtonGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverageButtonGate.swift; sourceTree = "<group>"; };
@@ -1383,6 +1387,8 @@
 				3648AFAC3A8D49621E24D430 /* SettingsResponseSignalMeasurementTests.swift */,
 				F2E61ADF7F1C3EBF7BEFE079 /* ServerSelectionTests.swift */,
 				6DB86CF3B38C1D1004F10C92 /* RMBTUpgradeResponseParserTests.swift */,
+				63EEE5A1E8389C78929FA2F5 /* MapServerHostnameValidationTests.swift */,
+				11EBBC42414A7B89BE2AEDC3 /* RMBTMapServerQueryStringTests.swift */,
 			);
 			name = "Unit Tests";
 			path = RMBTTests;
@@ -2109,6 +2115,8 @@
 				EC5CC8F5D854A271E7B6DB2E /* SettingsResponseSignalMeasurementTests.swift in Sources */,
 				186AA8920E94D04053D8FD67 /* ServerSelectionTests.swift in Sources */,
 				DFA09F3A7793F33E3FFB9641 /* RMBTUpgradeResponseParserTests.swift in Sources */,
+				489C8DFAD366366CF434A710 /* MapServerHostnameValidationTests.swift in Sources */,
+				2E12A4A7E6EE2A28AF661F87 /* RMBTMapServerQueryStringTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2920,7 +2928,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 37;
+				CURRENT_PROJECT_VERSION = 38;
 				DEVELOPMENT_TEAM = T7Y947AEPK;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -2961,7 +2969,7 @@
 				CODE_SIGN_ENTITLEMENTS = RMBT.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 37;
+				CURRENT_PROJECT_VERSION = 38;
 				DEVELOPMENT_TEAM = T7Y947AEPK;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (

@@ -34,8 +34,31 @@ import ObjectMapper
 
     ///
     private var baseUrl: String? {
-        return RMBTControlServer.shared.mapServerURL?.absoluteString // don't store in variable, could be changed in settings
+        // don't store in variable, could be changed in settings
+        // Developer override: swap the map server host (keeping the resolved scheme/path), when enabled with a
+        // valid hostname. The hostname is validated before it is stored (see RMBTSettingsViewController), so here
+        // we only need the enabled flag + a non-empty value.
+        if settings.debugUnlocked,
+           settings.debugMapServerCustomizationEnabled,
+           let host = settings.debugMapServerHostname, !host.isEmpty {
+            if let resolved = RMBTControlServer.shared.mapServerURL,
+               var components = URLComponents(url: resolved, resolvingAgainstBaseURL: false) {
+                components.scheme = "https"
+                components.host = host
+                components.port = nil
+                if let overridden = components.url?.absoluteString {
+                    return overridden
+                }
+            }
+            // No resolved map URL yet (settings not fetched): fall back to the standard map server path.
+            return "https://\(host)/RMBTMapServer"
+        }
+        return RMBTControlServer.shared.mapServerURL?.absoluteString
     }
+
+    /// The map server base URL currently in effect (honouring the developer override). Exposed so the map screen
+    /// can detect when the server changed between appearances and reload its options/tiles.
+    var currentBaseURL: String? { baseUrl }
 
     ///
     private override init() {
@@ -109,27 +132,36 @@ import ObjectMapper
         
         // add params
         if let p = params, p.count > 0 {
-            let paramString = p.map({ (key, value) in
-                let escapedKey = key.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
-
-                var escapedValue: String?
-                if let v = value as? String {
-                    escapedValue = v.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) // TODO: does this need a cast to string?
-                } else if let numValue = value as? NSNumber {
-                    escapedValue = String(describing: numValue)
-                }
-
-                return "\(escapedKey ?? key)=\(escapedValue ?? value as! String)"
-            }).joined(separator: "&")
-
-            urlString += "&" + paramString
+            let paramString = Self.queryString(from: p)
+            if !paramString.isEmpty {
+                urlString += "&" + paramString
+            }
         }
 
         Log.logger.debug("Generated tile url: \(urlString)")
 
         print(urlString)
-        
+
         return urlString
+    }
+
+    /// Builds a `key=value&…` query string from map filter params. Values that are not strings or numbers
+    /// (notably `NSNull`, emitted for "all" filters like technology/operator) are skipped — previously these were
+    /// force-cast to String and crashed (`Could not cast value of type 'NSNull' to 'NSString'`).
+    static func queryString(from params: [String: Any]) -> String {
+        params.compactMap { (key, value) -> String? in
+            let escapedKey = key.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? key
+            let escapedValue: String
+            if let stringValue = value as? String {
+                escapedValue = stringValue.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? stringValue
+            } else if let numberValue = value as? NSNumber {
+                escapedValue = String(describing: numberValue)
+            } else {
+                return nil // skip NSNull / unsupported values (e.g. an "all" filter → no constraint)
+            }
+            return "\(escapedKey)=\(escapedValue)"
+        }
+        .joined(separator: "&")
     }
     
     @objc public func getTileUrlForMapOverlayType(_ overlayType: String, x: UInt, y: UInt, zoom: UInt, params: [String: Any]?) -> URL? {
@@ -139,20 +171,10 @@ import ObjectMapper
 
             // add params
             if let p = params, p.count > 0 {
-                let paramString = p.map({ (key, value) in
-                    let escapedKey = key.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
-
-                    var escapedValue: String?
-                    if let v = value as? String {
-                        escapedValue = v.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) // TODO: does this need a cast to string?
-                    } else if let numValue = value as? NSNumber {
-                        escapedValue = String(describing: numValue)
-                    }
-
-                    return "\(escapedKey ?? key)=\(escapedValue ?? value as! String)"
-                }).joined(separator: "&")
-
-                urlString += "&" + paramString
+                let paramString = Self.queryString(from: p)
+                if !paramString.isEmpty {
+                    urlString += "&" + paramString
+                }
             }
 
             Log.logger.debug("Generated tile url: \(urlString)")

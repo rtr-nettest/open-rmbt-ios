@@ -64,6 +64,13 @@ class RMBTSettingsViewController: UITableViewController {
         settings.debugUnlocked ? RMBTSettingsSection.logging.rawValue + 1 : -1
     }
 
+    /// Index of the developer-mode "Custom Map Server" section — a real (static) storyboard section following the
+    /// server-selection section, revealed only while developer mode is on; -1 when hidden. Row 0 is the override
+    /// toggle; row 1 (only when the toggle is on) is the map-server hostname field.
+    private var mapServerSectionIndex: Int {
+        settings.debugUnlocked ? RMBTSettingsSection.logging.rawValue + 2 : -1
+    }
+
     private var uuid: String?
     
     private var generalSettings: [IndexPath] = []
@@ -424,14 +431,18 @@ class RMBTSettingsViewController: UITableViewController {
     
     override func numberOfSections(in tableView: UITableView) -> Int {
         let lastSectionIndex = settings.debugUnlocked ? RMBTSettingsSection.logging : RMBTSettingsSection.support
-        // In developer mode reveal the "Server selection" section, which follows `logging` in the storyboard.
-        let extraSections = settings.debugUnlocked ? 1 : 0
+        // In developer mode reveal the two extra storyboard sections that follow `logging`:
+        // "Server selection" and "Custom Map Server".
+        let extraSections = settings.debugUnlocked ? 2 : 0
         return lastSectionIndex.rawValue + 1 + extraSections
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         if indexPath.section == serverSelectionSectionIndex {
             return serverSelectionEntryCell()
+        }
+        if indexPath.section == mapServerSectionIndex {
+            return indexPath.row == 0 ? mapServerToggleCell() : mapServerHostnameCell()
         }
         if (indexPath.section == RMBTSettingsSection.general.rawValue) {
             let itemIndexPath = self.generalSettings[indexPath.row]
@@ -447,6 +458,9 @@ class RMBTSettingsViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if section == serverSelectionSectionIndex {
             return 1 // single entry row that pushes the server-selection screen
+        }
+        if section == mapServerSectionIndex {
+            return 1 + (settings.debugMapServerCustomizationEnabled ? 1 : 0) // toggle (+ hostname when enabled)
         }
         if (section == RMBTSettingsSection.general.rawValue) {
             return self.generalSettings.count
@@ -491,6 +505,9 @@ class RMBTSettingsViewController: UITableViewController {
         if section == serverSelectionSectionIndex {
             return NSLocalizedString("preferences_server_selection", comment: "")
         }
+        if section == mapServerSectionIndex {
+            return NSLocalizedString("preferences_developer_map_server", comment: "")
+        }
         guard let sectionEnum = RMBTSettingsSection(rawValue: section) else {
             return super.tableView(tableView, titleForHeaderInSection: section)
         }
@@ -514,7 +531,7 @@ class RMBTSettingsViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, titleForFooterInSection section: Int) -> String? {
-        if section == serverSelectionSectionIndex {
+        if section == serverSelectionSectionIndex || section == mapServerSectionIndex {
             return nil
         }
         if (section == RMBTSettingsSection.logging.rawValue) {
@@ -535,6 +552,82 @@ class RMBTSettingsViewController: UITableViewController {
         cell.contentConfiguration = content
         cell.accessoryType = .disclosureIndicator
         return cell
+    }
+
+    // MARK: - Developer map-server override
+
+    /// Row 0 of the "Custom Map Server" section: the override on/off switch.
+    private func mapServerToggleCell() -> UITableViewCell {
+        let cell = UITableViewCell(style: .default, reuseIdentifier: "mapServerToggleCell")
+        cell.selectionStyle = .none
+        var content = cell.defaultContentConfiguration()
+        content.text = NSLocalizedString("preferences_override_map_enabled", comment: "")
+        cell.contentConfiguration = content
+
+        let toggle = UISwitch()
+        toggle.onTintColor = UIColor(named: "brand")
+        toggle.isOn = settings.debugMapServerCustomizationEnabled
+        toggle.addAction(UIAction { [weak self] action in
+            guard let self, let sw = action.sender as? UISwitch else { return }
+            self.settings.debugMapServerCustomizationEnabled = sw.isOn
+            self.refreshMapServerSection()
+        }, for: .valueChanged)
+        cell.accessoryView = toggle
+        return cell
+    }
+
+    /// Row 1 of the "Custom Map Server" section (only when the override is on): the map-server hostname field.
+    private func mapServerHostnameCell() -> UITableViewCell {
+        let cell = UITableViewCell(style: .default, reuseIdentifier: "mapServerHostnameCell")
+        cell.selectionStyle = .none
+
+        let textField = UITextField()
+        textField.translatesAutoresizingMaskIntoConstraints = false
+        textField.placeholder = "map.example.org"
+        textField.text = settings.debugMapServerHostname
+        textField.autocapitalizationType = .none
+        textField.autocorrectionType = .no
+        textField.keyboardType = .URL
+        textField.clearButtonMode = .whileEditing
+        textField.returnKeyType = .done
+        textField.delegate = self
+        textField.addAction(UIAction { [weak self] action in
+            guard let self, let tf = action.sender as? UITextField else { return }
+            self.commitMapServerHostname(tf.text)
+        }, for: .editingDidEnd)
+
+        cell.contentView.addSubview(textField)
+        let margins = cell.contentView.layoutMarginsGuide
+        NSLayoutConstraint.activate([
+            textField.leadingAnchor.constraint(equalTo: margins.leadingAnchor),
+            textField.trailingAnchor.constraint(equalTo: margins.trailingAnchor),
+            textField.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor)
+        ])
+        return cell
+    }
+
+    /// Validates the entered map-server hostname. A valid value is stored; an invalid one is discarded and the
+    /// override is switched off (per the developer-option requirement).
+    private func commitMapServerHostname(_ text: String?) {
+        let trimmed = (text ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        if Self.isValidServerHostname(trimmed) {
+            settings.debugMapServerHostname = trimmed
+        } else {
+            settings.debugMapServerHostname = nil
+            settings.debugMapServerCustomizationEnabled = false
+            refreshMapServerSection()
+        }
+    }
+
+    /// A string "looks like a hostname": not empty, contains a dot, and has no whitespace or commas.
+    static func isValidServerHostname(_ host: String) -> Bool {
+        guard !host.isEmpty, host.contains(".") else { return false }
+        guard host.rangeOfCharacter(from: .whitespacesAndNewlines) == nil else { return false }
+        return !host.contains(",")
+    }
+
+    private func refreshMapServerSection() {
+        tableView.reloadData()
     }
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
