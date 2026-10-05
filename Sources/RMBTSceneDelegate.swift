@@ -11,7 +11,16 @@ final class RMBTSceneDelegate: UIResponder, UIWindowSceneDelegate {
     private var hasEnteredBackground = false
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-        window?.overrideUserInterfaceStyle = .light
+        // Build and show the window explicitly from the main storyboard's initial view controller.
+        // Relying on the `UISceneStoryboardFile` auto-setup does not reliably show the window once this scene
+        // delegate implements `willConnectTo` (SDK 26+), which results in a black screen on launch.
+        if let windowScene = scene as? UIWindowScene {
+            let window = UIWindow(windowScene: windowScene)
+            window.rootViewController = UIStoryboard(name: "MainStoryboard", bundle: nil).instantiateInitialViewController()
+            window.overrideUserInterfaceStyle = .light
+            self.window = window
+            window.makeKeyAndVisible()
+        }
         localizeTabBarTitles()
         onStart(true)
     }
