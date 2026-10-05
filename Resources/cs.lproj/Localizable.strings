@@ -523,7 +523,7 @@
 "server_label" = "Server: %@";
 
 "coverage_details_button" = "Details";
-"coverage_segments_title" = "Measurement segments";
+"coverage_segments_title" = "Segmenty měření";
 "segment_result_title" = "Segment result";
 
 "preferences_developer_map_server" = "Map server";
