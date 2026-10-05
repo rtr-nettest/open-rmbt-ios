@@ -338,7 +338,7 @@ public class SpeedMeasurementResponse_Old: BasicResponse {
         testUuid            <- map["test_uuid"]
         
         clientRemoteIp      <- map["client_remote_ip"]
-        duration            <- map["test_duration"]
+        duration            <- (map["test_duration"], NumberOrNumericStringTransform())
 
         numThreads          <- map["test_numthreads"]
         numPings            <- map["test_numpings"]

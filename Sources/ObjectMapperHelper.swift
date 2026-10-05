@@ -17,6 +17,17 @@
 import Foundation
 import ObjectMapper
 
+/// Reads a JSON number, or a numeric string (the control server sends e.g. `"10"`), as `Double`.
+struct NumberOrNumericStringTransform: TransformType {
+    func transformFromJSON(_ value: Any?) -> Double? {
+        if let number = value as? NSNumber { return number.doubleValue }
+        if let string = value as? String { return Double(string) }
+        return nil
+    }
+
+    func transformToJSON(_ value: Double?) -> Double? { value }
+}
+
 ///
 let UInt64NSNumberTransformOf = TransformOf<UInt64, NSNumber>(fromJSON: { $0?.uint64Value }, toJSON: { $0.map { NSNumber(value: $0) } })
 
