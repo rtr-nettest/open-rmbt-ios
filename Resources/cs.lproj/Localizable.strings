@@ -508,14 +508,14 @@
 "ip_version_restriction_unavailable_message" = "%@ není v aktuálním připojení dostupné.";
 
 /* ===== TODO: NEEDS TRANSLATION (English placeholder) — wording aligned with open-rmbt-android ===== */
-"coverage_readiness_title" = "Waiting for start of signal measurement";
-"coverage_readiness_subtitle" = "The signal measurement requires WiFi turned off and good GPS reception. It will start automatically once these conditions are met.";
-"signal_readiness_status_heading" = "Status";
-"signal_readiness_gps_ok" = "GPS: OK";
-"signal_readiness_gps_accuracy" = "GPS: accuracy %d m (limit %d m)";
-"signal_readiness_gps_stale" = "GPS: no signal";
-"signal_readiness_network" = "Network: %@";
-"Abort" = "Abort";
+"coverage_readiness_title" = "Čekání na spuštění měření signálu";
+"coverage_readiness_subtitle" = "Měření signálu vyžaduje vypnuté Wi-Fi a dobré pokrytí GPS. Spustí se automaticky, jakmile budou tyto podmínky splněny.";
+"signal_readiness_status_heading" = "Stav";
+"signal_readiness_gps_ok" = "GPS: v pořádku";
+"signal_readiness_gps_accuracy" = "GPS: přesnost %d m (limit %d m)";
+"signal_readiness_gps_stale" = "GPS: žádný signál";
+"signal_readiness_network" = "Síť: %@";
+"Abort" = "Zrušit";
 "coverage_terms_accept" = "Accept";
 "coverage_terms_decline" = "Decline";
 "preferences_server_selection" = "Server selection";

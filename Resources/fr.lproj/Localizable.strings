@@ -508,14 +508,14 @@
 "ip_version_restriction_unavailable_message" = "%@ n’est pas disponible sur la connexion actuelle.";
 
 /* ===== TODO: NEEDS TRANSLATION (English placeholder) — wording aligned with open-rmbt-android ===== */
-"coverage_readiness_title" = "Waiting for start of signal measurement";
-"coverage_readiness_subtitle" = "The signal measurement requires WiFi turned off and good GPS reception. It will start automatically once these conditions are met.";
-"signal_readiness_status_heading" = "Status";
-"signal_readiness_gps_ok" = "GPS: OK";
-"signal_readiness_gps_accuracy" = "GPS: accuracy %d m (limit %d m)";
-"signal_readiness_gps_stale" = "GPS: no signal";
-"signal_readiness_network" = "Network: %@";
-"Abort" = "Abort";
+"coverage_readiness_title" = "En attente du démarrage de la mesure du signal";
+"coverage_readiness_subtitle" = "La mesure du signal nécessite que le Wi-Fi soit désactivé et une bonne couverture GPS. Elle démarrera automatiquement dès que ces conditions seront remplies.";
+"signal_readiness_status_heading" = "État";
+"signal_readiness_gps_ok" = "GPS : ok";
+"signal_readiness_gps_accuracy" = "GPS : précision %d m (limite %d m)";
+"signal_readiness_gps_stale" = "GPS : aucun signal";
+"signal_readiness_network" = "Réseau : %@";
+"Abort" = "Annuler";
 "coverage_terms_accept" = "Accept";
 "coverage_terms_decline" = "Decline";
 "preferences_server_selection" = "Server selection";
