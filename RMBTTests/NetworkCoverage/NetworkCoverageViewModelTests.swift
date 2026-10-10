@@ -219,17 +219,25 @@ import Clocks
         #expect(sut.legendEntries.isEmpty)
     }
 
-    @Test func whenFenceHasTechnologyButNoCoverage_thenLegendStillListsTheTechnology() async throws {
-        // A fence on a real technology but with only failed pings is grey on the map, yet the technology WAS used,
-        // so the legend lists it with the technology's base color (mirrors Android).
+    @Test func whenFenceHasTechnologyButNoCoverage_thenLegendExcludesIt() async throws {
+        // A fence on a real technology but with only failed pings is drawn grey on the map, so its technology is
+        // NOT drawn in its color — it must not add a legend entry (avoids e.g. a yellow "2G" with no yellow point).
         let fence = makeFence(
-            technology: CTRadioAccessTechnologyLTE,
+            technology: CTRadioAccessTechnologyGPRS, // 2G
             pings: [PingResult(result: .error, timestamp: makeDate(offset: 1))]
         )
         let sut = makeSUT(fences: [fence])
 
+        #expect(sut.legendEntries.isEmpty)
+    }
+
+    @Test func whenSameTechnologyHasCoveredAndGreyFences_thenLegendListsItOnce() async throws {
+        // 4G appears both covered (drawn in colour) and grey; it should be listed because at least one point is coloured.
+        let covered = makeFence(lat: 0.0, lon: 0, technology: CTRadioAccessTechnologyLTE, pings: [PingResult(result: .interval(.milliseconds(30)), timestamp: makeDate(offset: 1))])
+        let grey = makeFence(lat: 0.001, lon: 0, technology: CTRadioAccessTechnologyLTE, pings: [PingResult(result: .error, timestamp: makeDate(offset: 2))])
+        let sut = makeSUT(fences: [covered, grey])
+
         #expect(sut.legendEntries.map(\.label) == ["4G"])
-        #expect(sut.legendEntries.first?.color == Color(technology: "4G"))
     }
 
     @Test func whenReceivedPingsWithTimeBeforeFenceChanged_thenTheyAreAssignedToPreviousFence() async throws {

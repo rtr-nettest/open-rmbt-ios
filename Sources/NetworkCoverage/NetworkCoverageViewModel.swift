@@ -942,13 +942,17 @@ fileprivate extension NetworkCoverageViewModel {
     /// Fixed order so the legend always reads 2G → 5G SA regardless of when each technology first appeared.
     private static let legendRank = ["2G", "3G", "4G", "5G NSA", "5G SA"]
 
-    /// Rebuilds the legend from the technologies actually present in the fences (base technology colors only, no
-    /// grey "no service" bucket). Only reassigns `legendEntries` when the set changed, so SwiftUI redraws the
-    /// legend when a new technology arrives rather than on every fence.
+    /// Rebuilds the legend from the technologies actually drawn in their color on the map. Fences drawn grey
+    /// because they have no coverage (no successful ping — see `Fence.isNoCoverage`) are skipped, so a technology
+    /// is listed only when at least one of its points is shown in its color. This avoids e.g. a yellow "2G" entry
+    /// when every 2G point on the map is actually grey. Only reassigns `legendEntries` when the set changed, so
+    /// SwiftUI redraws the legend when a new technology arrives rather than on every fence.
     func updateLegendIfNeeded() {
         var seen = Set<String>()
         var labels: [String] = []
         for fence in fences {
+            // Skip grey (no-coverage) fences: their technology isn't drawn in its color on the map.
+            guard !fence.isNoCoverage else { continue }
             guard let label = fence.significantTechnology?.radioTechnologyDisplayValue,
                   label != "--", label != "N/A" else { continue }
             if seen.insert(label).inserted { labels.append(label) }

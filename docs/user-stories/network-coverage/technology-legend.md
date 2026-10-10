@@ -23,9 +23,14 @@ Feature: Map legend of the technologies used in a signal measurement
     Given some fences had no connectivity (no technology)
     Then those fences add no legend entry
 
-  Scenario: A technology used but without coverage is still listed
-    Given a fence used 4G but every ping failed (drawn grey on the map)
-    Then the legend still lists "4G" with the 4G colour
+  Scenario: A technology whose points are all grey (no coverage) is not listed
+    Given every 2G fence had only failed pings (drawn grey on the map)
+    Then the legend does not list "2G"
+    # avoids a yellow "2G" entry when there is no yellow point on the map
+
+  Scenario: A technology with at least one covered point is listed
+    Given 4G appears both as a covered (coloured) point and a grey (no-coverage) point
+    Then the legend lists "4G" once, with the 4G colour
 
   # --- Live updates -------------------------------------------------------
 
@@ -44,9 +49,11 @@ Feature: Map legend of the technologies used in a signal measurement
 ## Notes
 
 - Built in `NetworkCoverageViewModel.updateLegendIfNeeded()` from the fences'
-  `significantTechnology.radioTechnologyDisplayValue`, excluding nil / "N/A" / "--".
-  Colours come from `Color(technology:)` (the base technology colour, not the
-  grey no-coverage colour). Fixed order via `legendRank`.
+  `significantTechnology.radioTechnologyDisplayValue`, excluding nil / "N/A" / "--"
+  and skipping grey no-coverage fences (`Fence.isNoCoverage`) so a technology is listed
+  only when at least one of its points is drawn in its colour. Colours come from
+  `Color(technology:)` (the base technology colour, not the grey no-coverage colour).
+  Fixed order via `legendRank`.
 - `legendEntries` is only reassigned when the set changes, so SwiftUI redraws the
   legend when a new technology arrives, not on every fence.
 - Rendered bottom-left in `FencesMapView` (lifted above the Apple Maps attribution),
