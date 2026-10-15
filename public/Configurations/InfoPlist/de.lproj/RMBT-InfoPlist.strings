@@ -1,0 +1,7 @@
+/* 
+  RMBT-InfoPlist.strings
+  RMBT
+*/
+NSLocalNetworkUsageDescription = "Diese Berechtigung wird für den DNS QoS-Test benötigt.";
+"CFBundleDisplayName" = "Open-RMBT";
+"CFBundleName" = "Open-RMBT";
