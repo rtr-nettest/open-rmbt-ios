@@ -119,22 +119,31 @@ class RMBTMapViewController: UIViewController {
             measurementsListViewContainer.topAnchor.constraint(equalTo: vc.view.topAnchor),
             measurementsListViewContainer.bottomAnchor.constraint(equalTo: vc.view.bottomAnchor)
         ])
-//        self.hideResults()
+        // Start fully hidden. Sliding it off-screen via the bottom constraint alone is not reliable
+        // enough on every device, and with the translucent (liquid glass) tab bar a panel left just
+        // below it shimmers through; `isHidden` removes it from the render tree entirely.
+        self.measurementsListViewContainer.isHidden = true
     }
-    
+
     private func hideResults() {
         UIView.animate(withDuration: 0.3) {
             self.measurementsListBottomConstraint.constant = -(self.measurementsListViewContainer.bounds.height + self.view.safeAreaInsets.bottom)
             self.view.layoutIfNeeded()
+        } completion: { finished in
+            // Only hide once the slide-down actually finished; if it was interrupted by a new
+            // `showResults()` the panel must stay visible.
+            if finished {
+                self.measurementsListViewContainer.isHidden = true
+            }
         }
     }
-    
+
     private func showResults() {
+        self.measurementsListViewContainer.isHidden = false
         UIView.animate(withDuration: 0.3) {
             self.measurementsListBottomConstraint.constant = 5
             self.view.layoutIfNeeded()
         }
-        
     }
     
     private func setupMapView() {
