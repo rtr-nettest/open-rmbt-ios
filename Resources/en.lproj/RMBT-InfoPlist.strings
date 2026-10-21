@@ -1,8 +1,7 @@
 /* 
   RMBT-InfoPlist.strings
   RMBT
-
-  Created by Polina Gurina on 11.11.22.
-  Copyright © 2022 appscape gmbh. All rights reserved.
 */
 NSLocalNetworkUsageDescription = "This permission is required for the DNS QoS test.";
+"CFBundleDisplayName" = "RTR-NetTest";
+"CFBundleName" = "RTR-NetTest";
