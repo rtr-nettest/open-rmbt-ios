@@ -54,6 +54,12 @@ public class FenceData: ImmutableMappable {
     let radius: Double
     let avgPingMs: Double?
     let fenceTime: Int64?
+    /// Signal strength in dBm. Only recorded by the Android client, so present only for
+    /// coverage tests measured on Android and synced into this device's history; `nil` for
+    /// iOS-recorded fences.
+    let signal: Int?
+    /// Travel velocity within the fence, in metres per second.
+    let speedMetersPerSecond: Double?
 
     required public init(map: Map) throws {
         fenceId = try? map.value("fence_id")
@@ -65,5 +71,7 @@ public class FenceData: ImmutableMappable {
         radius = try map.value("radius")
         avgPingMs = try? map.value("avg_ping_ms")
         fenceTime = try? map.value("fence_time")
+        signal = try? map.value("signal")
+        speedMetersPerSecond = try? map.value("speed")
     }
 }

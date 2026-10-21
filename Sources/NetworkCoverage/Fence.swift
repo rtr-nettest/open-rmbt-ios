@@ -17,6 +17,11 @@ struct Fence: Identifiable, Hashable {
     private(set) var radiusMeters: CLLocationDistance
     var sessionUUID: String?
 
+    /// Signal strength in dBm. Only the Android client records signal, so this is populated only
+    /// for coverage tests measured on Android and synced into this device's history; it stays `nil`
+    /// for fences measured on iOS.
+    var signal: Int?
+
     let startingLocation: CLLocation
     let id: UUID = UUID()
     let dateEntered: Date
@@ -131,6 +136,15 @@ extension Fence {
     
     var coordinate: CLLocationCoordinate2D {
         startingLocation.coordinate
+    }
+
+    /// Travel velocity through the fence in metres per second, or `nil` when no valid speed is
+    /// available. For a live measurement this is the most recent GPS fix's speed; for a history
+    /// fence it is the speed carried in from the server (stored on `startingLocation`).
+    /// `CLLocation.speed` is negative when the fix has no valid speed.
+    var velocityMetersPerSecond: CLLocationSpeed? {
+        guard let speed = locations.last?.speed, speed >= 0 else { return nil }
+        return speed
     }
 }
 

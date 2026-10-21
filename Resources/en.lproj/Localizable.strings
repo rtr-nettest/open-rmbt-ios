@@ -465,6 +465,8 @@
 "Date:" = "Date:";
 "Technology:" = "Technology:";
 "Ping:" = "Ping:";
+"Signal:" = "Signal:";
+"Velocity:" = "Velocity:";
 "SIM Information" = "SIM Information";
 "Refresh" = "Refresh";
 "Generation" = "Generation";

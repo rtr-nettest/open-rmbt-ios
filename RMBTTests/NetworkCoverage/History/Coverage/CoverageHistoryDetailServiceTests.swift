@@ -114,6 +114,101 @@ struct CoverageHistoryDetailServiceTests {
         #expect(!fence.isNoCoverage)
         #expect(Color(fence: fence) != Color(technology: nil))
     }
+
+    // MARK: - signal (Android-only; synced history)
+
+    @Test func whenSignalPresent_thenFenceCarriesSignal() throws {
+        let fences = makeSUT().convertFenceData([
+            try makeFenceData(signal: -87)
+        ])
+
+        let fence = try #require(fences.first)
+        #expect(fence.signal == -87)
+    }
+
+    @Test func whenSignalMissing_thenFenceHasNoSignal() throws {
+        let fences = makeSUT().convertFenceData([
+            try makeFenceData(signal: nil)
+        ])
+
+        let fence = try #require(fences.first)
+        #expect(fence.signal == nil)
+    }
+
+    // MARK: - speed / velocity
+
+    @Test func whenSpeedPresent_thenFenceCarriesVelocity() throws {
+        let fences = makeSUT().convertFenceData([
+            try makeFenceData(speed: 11.5)
+        ])
+
+        let fence = try #require(fences.first)
+        #expect(fence.velocityMetersPerSecond == 11.5)
+    }
+
+    @Test func whenSpeedMissing_thenFenceHasNoVelocity() throws {
+        let fences = makeSUT().convertFenceData([
+            try makeFenceData(speed: nil)
+        ])
+
+        let fence = try #require(fences.first)
+        #expect(fence.velocityMetersPerSecond == nil)
+    }
+
+    @Test func whenSpeedNegative_thenFenceHasNoVelocity() throws {
+        // CLLocation.speed is negative when the fix carries no valid speed.
+        let fences = makeSUT().convertFenceData([
+            try makeFenceData(speed: -1)
+        ])
+
+        let fence = try #require(fences.first)
+        #expect(fence.velocityMetersPerSecond == nil)
+    }
+}
+
+@Suite("FenceDetail – signal & velocity display")
+struct FenceDetailDisplayTests {
+    private let formatter = DateFormatter()
+
+    private func fenceDetail(signal: Int? = nil, speed: Double? = nil) throws -> FenceDetail {
+        let fence = try #require(
+            CoverageHistoryDetailService().convertFenceData([
+                try makeFenceData(signal: signal, speed: speed)
+            ]).first
+        )
+        return FenceDetail(fence: fence, selectedItemDateFormatter: formatter)
+    }
+
+    // MARK: - signal
+
+    @Test func whenSignalPresent_thenSignalShownInDbm() throws {
+        #expect(try fenceDetail(signal: -87).signal == "-87 dBm")
+    }
+
+    @Test func whenNoSignal_thenSignalRowIsEmpty() throws {
+        #expect(try fenceDetail(signal: nil).signal.isEmpty)
+    }
+
+    // MARK: - velocity
+
+    @Test func whenVelocityAboveThreshold_thenShownInRoundedKmh() throws {
+        // 11.5 m/s * 3.6 = 41.4 km/h -> rounds to 41
+        #expect(try fenceDetail(speed: 11.5).velocity == "41 km/h")
+    }
+
+    @Test func whenVelocityNull_thenVelocityRowIsEmpty() throws {
+        #expect(try fenceDetail(speed: nil).velocity.isEmpty)
+    }
+
+    @Test func whenVelocityBelowThreshold_thenVelocityRowIsEmpty() throws {
+        // 0.8 m/s is below the 0.9 m/s walking-noise threshold.
+        #expect(try fenceDetail(speed: 0.8).velocity.isEmpty)
+    }
+
+    @Test func whenVelocityAtThreshold_thenVelocityShown() throws {
+        // 0.9 m/s * 3.6 = 3.24 km/h -> rounds to 3
+        #expect(try fenceDetail(speed: 0.9).velocity == "3 km/h")
+    }
 }
 
 // MARK: - makeSUT & Factories
@@ -130,7 +225,9 @@ private func makeFenceData(
     durationMs: Int? = nil,
     radius: Double = 42,
     avgPingMs: Double? = 4.2,
-    fenceTime: Int64? = 1_768_141_426_991
+    fenceTime: Int64? = 1_768_141_426_991,
+    signal: Int? = nil,
+    speed: Double? = nil
 ) throws -> FenceData {
     var json: [String: Any] = [
         "technology_id": technologyId,
@@ -142,6 +239,8 @@ private func makeFenceData(
     if let durationMs { json["duration_ms"] = durationMs }
     if let avgPingMs { json["avg_ping_ms"] = avgPingMs }
     if let fenceTime { json["fence_time"] = fenceTime }
+    if let signal { json["signal"] = signal }
+    if let speed { json["speed"] = speed }
 
     return try Mapper<FenceData>().map(JSON: json)
 }

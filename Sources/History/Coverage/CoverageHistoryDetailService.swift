@@ -63,12 +63,29 @@ struct CoverageHistoryDetail {
     
     internal func convertFenceData(_ fenceData: [FenceData]) -> [Fence] {
         fenceData.compactMap { data in
-            let location = CLLocation(latitude: data.latitude, longitude: data.longitude)
-
             // fence_time should always be present for new data; fallback to now for legacy entries
             let dateEntered = data.fenceTime
                 .map { Date(timeIntervalSince1970: Double($0) / 1000.0) } ?? Date()
             let technologyString = data.technologyId.radioAccessTechnology
+
+            // Carry the server-provided travel velocity (m/s) on the location so the tooltip can
+            // derive km/h the same way live measurements do. When absent, build a plain location
+            // whose `speed` is -1 (no valid speed).
+            let coordinate = CLLocationCoordinate2D(latitude: data.latitude, longitude: data.longitude)
+            let location: CLLocation
+            if let speed = data.speedMetersPerSecond, speed >= 0 {
+                location = CLLocation(
+                    coordinate: coordinate,
+                    altitude: 0,
+                    horizontalAccuracy: 0,
+                    verticalAccuracy: -1,
+                    course: -1,
+                    speed: speed,
+                    timestamp: dateEntered
+                )
+            } else {
+                location = CLLocation(latitude: data.latitude, longitude: data.longitude)
+            }
 
             // Represent average ping using a single PingResult sample so that
             // existing UI that computes averages over pings works as expected.
@@ -95,6 +112,9 @@ struct CoverageHistoryDetail {
                 let exitDate = dateEntered.addingTimeInterval(TimeInterval(durationMs) / 1000.0)
                 fence.exit(at: exitDate)
             }
+
+            // Signal is recorded only by the Android client; `nil` for iOS-measured fences.
+            fence.signal = data.signal
 
             return fence
         }

@@ -527,3 +527,7 @@
 
 "preferences_developer_map_server" = "Map server";
 "preferences_override_map_enabled" = "Override map server";
+
+/* fence tooltip — signal/velocity rows */
+"Signal:" = "Signal:";
+"Velocity:" = "Velocity:";

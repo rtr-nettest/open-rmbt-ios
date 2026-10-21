@@ -340,6 +340,20 @@ struct FencesMapView: View {
                     Text(detail.averagePing)
                 }
             }
+            if !detail.signal.isEmpty {
+                HStack(alignment: .bottom) {
+                    Text("Signal:")
+                        .font(.headline)
+                    Text(detail.signal)
+                }
+            }
+            if !detail.velocity.isEmpty {
+                HStack(alignment: .bottom) {
+                    Text("Velocity:")
+                        .font(.headline)
+                    Text(detail.velocity)
+                }
+            }
         }
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)

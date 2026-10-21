@@ -120,6 +120,12 @@ struct FenceDetail: Equatable, Identifiable {
     let date: String
     let technology: String
     let averagePing: String
+    /// Signal strength, e.g. "-87 dBm". Empty when no signal was recorded (always empty for
+    /// iOS-measured fences; set only for Android-synced history). An empty value hides the row.
+    let signal: String
+    /// Travel velocity, e.g. "42 km/h". Empty when the velocity is unknown or below the
+    /// 0.9 m/s walking-noise threshold, which hides the row.
+    let velocity: String
     let color: Color
 }
 
@@ -1301,12 +1307,28 @@ extension CLLocationCoordinate2D: @retroactive Equatable, @retroactive Hashable 
 }
 
 extension FenceDetail {
+    /// Minimum speed (m/s) at which velocity is shown. Below this the GPS reading is dominated by
+    /// standing/walking noise, so the velocity row is hidden.
+    static let minVelocityMetersPerSecond: CLLocationSpeed = 0.9
+
     init(fence: Fence, selectedItemDateFormatter: DateFormatter) {
         id = fence.id
         date = selectedItemDateFormatter.string(from: fence.dateEntered)
         technology = fence.significantTechnology?.radioTechnologyDisplayValue ?? "N/A"
         averagePing = fence.averagePing.map { "\($0) ms" } ?? ""
+        signal = fence.signal.map { "\($0) dBm" } ?? ""
+        velocity = Self.velocityDisplayValue(for: fence)
         color = Color(fence: fence)
+    }
+
+    /// Velocity in km/h (rounded integer, matching Android's `Math.round(speedMps * 3.6)`), or an
+    /// empty string when the speed is unknown or below `minVelocityMetersPerSecond`.
+    private static func velocityDisplayValue(for fence: Fence) -> String {
+        guard let speed = fence.velocityMetersPerSecond, speed >= minVelocityMetersPerSecond else {
+            return ""
+        }
+        let kmh = Int((speed * 3.6).rounded())
+        return "\(kmh) km/h"
     }
 }
 
